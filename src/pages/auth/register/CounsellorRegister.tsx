@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Users, ArrowLeft } from "lucide-react";
+import { Users, ArrowLeft, User, Mail, Lock, Phone, Briefcase, FileText } from "lucide-react";
+import { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useCounselorStore } from "@/store/counsellorStore";
 
@@ -57,242 +58,272 @@ const CounsellorRegister = () => {
     });
   };
 
+  useEffect(() => {
+    window.scroll(0, 0);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/get-started")}
-          className="mb-6"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back
-        </Button>
+    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-gradient-to-br from-emerald-600 via-sky-600 to-indigo-600 relative overflow-hidden">
 
-        <div className="max-w-2xl mx-auto">
-          <Card className="shadow-card">
-            <CardHeader className="text-center pb-8">
-              <div className="bg-gradient-secondary w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Users className="w-8 h-8 text-white" />
-              </div>
-              <CardTitle className="text-3xl font-bold text-foreground">
-                Counsellor Registration
-              </CardTitle>
-              <p className="text-muted-foreground mt-2">
-                Join our network of professional counsellors
-              </p>
-            </CardHeader>
+      <div className="hidden lg:block absolute -left-24 -top-24 w-96 h-96 rounded-full bg-white/10 blur-3xl pointer-events-none" />
+      <div className="hidden lg:block absolute -right-24 -bottom-24 w-96 h-96 rounded-full bg-white/5 blur-2xl pointer-events-none" />
 
-            <CardContent>
-              {/* Google Sign In Button */}
-              <div className="mb-6">
-                <div className="flex">
+      <div className="hidden lg:flex flex-col justify-start px-16 py-28 text-white z-10">
+        <h1 className="text-5xl font-extrabold mb-4 leading-tight drop-shadow-lg">Grow Your Practice</h1>
+        <p className="text-lg text-white/85 max-w-lg mb-6">Join our network to reach more students and provide impactful guidance using our assessment tools and analytics.</p>
 
+        <div className="mt-8 flex items-center gap-4 text-sm text-white/80">
+          <div className="h-px w-12 bg-white/30" />
+          Trusted • Secure • Verified
+        </div>
+
+        <div className="mt-10 flex items-center gap-6">
+          <div className="bg-white/10 p-4 rounded-2xl flex items-center gap-3">
+            <Briefcase className="w-6 h-6 text-white/90" />
+            <div>
+              <div className="text-sm font-semibold">Professional Network</div>
+              <div className="text-xs text-white/75">Connect with students</div>
+            </div>
+          </div>
+
+          <div className="bg-white/10 p-4 rounded-2xl flex items-center gap-3">
+            <div className="w-6 h-6 rounded-md bg-gradient-to-r from-emerald-400 to-sky-500 flex items-center justify-center text-white">✓</div>
+            <div>
+              <div className="text-sm font-semibold">Verified Profiles</div>
+              <div className="text-xs text-white/75">Build trust fast</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-center px-6 py-12 z-20">
+        <div className="w-full max-w-xl">
+          <Card className="bg-white/95 shadow-2xl border-0 rounded-3xl overflow-hidden">
+            <div className="relative">
+              <div className="absolute -top-10 right-6 w-40 h-40 rounded-full bg-gradient-to-tr from-emerald-400 to-sky-400 opacity-20 transform rotate-45" />
+              <CardHeader className="text-center space-y-2 pt-8 pb-4">
+                <div className="bg-gradient-to-r from-emerald-500 to-sky-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-2 shadow-lg">
+                  <Users className="w-8 h-8 text-white" />
                 </div>
-                {/* <Button
-                  type="button"
-                  variant="outline"
-                  className="w-half py-3 border-2 flex text-center items-center justify-center gap-3"
-                  onClick={handleGoogleSignIn}
-                >
-                  <svg className="w-5 h-5" viewBox="0 0 24 24">
-                    <path
-                      fill="#4285F4"
-                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                    />
-                    <path
-                      fill="#34A853"
-                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                    />
-                    <path
-                      fill="#FBBC05"
-                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                    />
-                    <path
-                      fill="#EA4335"
-                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                    />
-                  </svg>
-                  <span className="font-medium">Sign up with Google</span>
-                </Button> */}
-                {/* <div className="relative my-6">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">
-                      Or continue with email
-                    </span>
-                  </div>
-                </div> */}
-              </div>
+                <CardTitle className="text-2xl sm:text-3xl font-bold">Counsellor Registration</CardTitle>
+                <p className="text-sm text-slate-600">Create your counsellor account to start helping students.</p>
+              </CardHeader>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name</Label>
-                    <Input
-                      id="firstName"
-                      value={formData.firstName}
-                      onChange={(e) => handleInputChange("firstName", e.target.value)}
-                      placeholder="Enter your first name"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name</Label>
-                    <Input
-                      id="lastName"
-                      value={formData.lastName}
-                      onChange={(e) => handleInputChange("lastName", e.target.value)}
-                      placeholder="Enter your last name"
-                      required
-                    />
-                  </div>
-                </div>
+              <CardContent className="px-8 pb-10">
+                <form onSubmit={handleSubmit} className="space-y-6">
 
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => handleInputChange("email", e.target.value)}
-                    placeholder="Enter your professional email"
-                    required
-                  />
-                </div>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>First Name</Label>
+                      <div className="relative">
+                        <Input
+                          value={formData.firstName}
+                          onChange={(e) => handleInputChange("firstName", e.target.value)}
+                          placeholder="First name"
+                          required
+                          className="h-11 rounded-xl pl-11 focus:ring-2 focus:ring-emerald-300"
+                        />
+                        <User className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+                      </div>
+                    </div>
 
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={formData.password}
-                      onChange={(e) => handleInputChange("password", e.target.value)}
-                      placeholder="Create a password"
-                      required
-                    />
+                    <div className="space-y-2">
+                      <Label>Last Name</Label>
+                      <div className="relative">
+                        <Input
+                          value={formData.lastName}
+                          onChange={(e) => handleInputChange("lastName", e.target.value)}
+                          placeholder="Last name"
+                          required
+                          className="h-11 rounded-xl pl-11 focus:ring-2 focus:ring-emerald-300"
+                        />
+                        <User className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+                      </div>
+                    </div>
                   </div>
+
                   <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Confirm Password</Label>
-                    <Input
-                      id="confirmPassword"
-                      type="password"
-                      value={formData.confirmPassword}
-                      onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
-                      placeholder="Confirm your password"
-                      required
-                    />
+                    <Label>Email Address</Label>
+                    <div className="relative">
+                      <Input
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => handleInputChange("email", e.target.value)}
+                        placeholder="you@organization.com"
+                        required
+                        className="h-11 rounded-xl pl-11 focus:ring-2 focus:ring-emerald-300"
+                      />
+                      <Mail className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+                    </div>
                   </div>
-                </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => handleInputChange("phone", e.target.value)}
-                    placeholder="Enter your contact number"
-                    required
-                  />
-                </div>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Password</Label>
+                      <div className="relative">
+                        <Input
+                          type="password"
+                          value={formData.password}
+                          onChange={(e) => handleInputChange("password", e.target.value)}
+                          placeholder="Create password"
+                          required
+                          className="h-11 rounded-xl pl-11 focus:ring-2 focus:ring-emerald-300"
+                        />
+                        <Lock className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+                      </div>
+                    </div>
 
-                <div className="grid md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Confirm Password</Label>
+                      <div className="relative">
+                        <Input
+                          type="password"
+                          value={formData.confirmPassword}
+                          onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
+                          placeholder="Confirm password"
+                          required
+                          className="h-11 rounded-xl pl-11 focus:ring-2 focus:ring-emerald-300"
+                        />
+                        <Lock className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="space-y-2">
-                    <Label htmlFor="qualification">Highest Qualification</Label>
-                    <Select onValueChange={(value) => handleInputChange("qualification", value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select qualification" />
+                    <Label>Phone Number</Label>
+                    <div className="relative">
+                      <Input
+                        type="tel"
+                        value={formData.phone}
+                        onChange={(e) => handleInputChange("phone", e.target.value)}
+                        placeholder="e.g. +91 99999 99999"
+                        required
+                        className="h-11 rounded-xl pl-11 focus:ring-2 focus:ring-emerald-300"
+                      />
+                      <Phone className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Highest Qualification</Label>
+                      <Select onValueChange={(value) => handleInputChange("qualification", value)}>
+                        <SelectTrigger className="h-11 rounded-xl">
+                          <SelectValue placeholder="Select qualification" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="bachelor">Bachelor's Degree</SelectItem>
+                          <SelectItem value="master">Master's Degree</SelectItem>
+                          <SelectItem value="phd">PhD</SelectItem>
+                          <SelectItem value="diploma">Professional Diploma</SelectItem>
+                          <SelectItem value="certificate">Professional Certificate</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Years of Experience</Label>
+                      <Select onValueChange={(value) => handleInputChange("experience", value)}>
+                        <SelectTrigger className="h-11 rounded-xl">
+                          <SelectValue placeholder="Select experience" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="0-1">0-1 years</SelectItem>
+                          <SelectItem value="2-5">2-5 years</SelectItem>
+                          <SelectItem value="6-10">6-10 years</SelectItem>
+                          <SelectItem value="10+">10+ years</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Area of Specialization</Label>
+                    <Select onValueChange={(value) => handleInputChange("specialization", value)}>
+                      <SelectTrigger className="h-11 rounded-xl">
+                        <SelectValue placeholder="Select specialization" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="bachelor">Bachelor's Degree</SelectItem>
-                        <SelectItem value="master">Master's Degree</SelectItem>
-                        <SelectItem value="phd">PhD</SelectItem>
-                        <SelectItem value="diploma">Professional Diploma</SelectItem>
-                        <SelectItem value="certificate">Professional Certificate</SelectItem>
+                        <SelectItem value="academic">Academic Counselling</SelectItem>
+                        <SelectItem value="career">Career Guidance</SelectItem>
+                        <SelectItem value="mental-health">Mental Health</SelectItem>
+                        <SelectItem value="college-admission">College Admission</SelectItem>
+                        <SelectItem value="personal-development">Personal Development</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
+
                   <div className="space-y-2">
-                    <Label htmlFor="experience">Years of Experience</Label>
-                    <Select onValueChange={(value) => handleInputChange("experience", value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select experience" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="0-1">0-1 years</SelectItem>
-                        <SelectItem value="2-5">2-5 years</SelectItem>
-                        <SelectItem value="6-10">6-10 years</SelectItem>
-                        <SelectItem value="10+">10+ years</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Label>Current Organization</Label>
+                    <div className="relative">
+                      <Input
+                        value={formData.organization}
+                        onChange={(e) => handleInputChange("organization", e.target.value)}
+                        placeholder="Your workplace"
+                        required
+                        className="h-11 rounded-xl pl-11 focus:ring-2 focus:ring-emerald-300"
+                      />
+                      <Briefcase className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+                    </div>
                   </div>
-                </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="specialization">Area of Specialization</Label>
-                  <Select onValueChange={(value) => handleInputChange("specialization", value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select your specialization" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="academic">Academic Counselling</SelectItem>
-                      <SelectItem value="career">Career Guidance</SelectItem>
-                      <SelectItem value="mental-health">Mental Health</SelectItem>
-                      <SelectItem value="college-admission">College Admission</SelectItem>
-                      <SelectItem value="personal-development">Personal Development</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                  <div className="space-y-2">
+                    <Label>License Number (if applicable)</Label>
+                    <div className="relative">
+                      <Input
+                        value={formData.licenseNumber}
+                        onChange={(e) => handleInputChange("licenseNumber", e.target.value)}
+                        placeholder="License or registration id"
+                        className="h-11 rounded-xl pl-11 focus:ring-2 focus:ring-emerald-300"
+                      />
+                      <FileText className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+                    </div>
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="organization">Current Organization</Label>
-                  <Input
-                    id="organization"
-                    value={formData.organization}
-                    onChange={(e) => handleInputChange("organization", e.target.value)}
-                    placeholder="Enter your current workplace"
-                    required
-                  />
-                </div>
+                  <div className="space-y-2">
+                    <Label>Professional Bio</Label>
+                    <Textarea
+                      value={formData.bio}
+                      onChange={(e) => handleInputChange("bio", e.target.value)}
+                      placeholder="Briefly describe your background and approach"
+                      rows={4}
+                      className="rounded-xl focus:ring-2 focus:ring-emerald-300"
+                    />
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="licenseNumber">License Number (if applicable)</Label>
-                  <Input
-                    id="licenseNumber"
-                    value={formData.licenseNumber}
-                    onChange={(e) => handleInputChange("licenseNumber", e.target.value)}
-                    placeholder="Enter professional license number"
-                  />
-                </div>
+                  <div className="flex flex-col items-center pt-2">
+                    <Button
+                      type="submit"
+                      size="lg"
+                      className="w-2/3 rounded-xl shadow-lg hover:shadow-xl transition-all bg-gradient-to-r from-emerald-500 to-sky-500 text-white"
+                    >
+                      Create Account
+                    </Button>
 
-                <div className="space-y-2">
-                  <Label htmlFor="bio">Professional Bio</Label>
-                  <Textarea
-                    id="bio"
-                    value={formData.bio}
-                    onChange={(e) => handleInputChange("bio", e.target.value)}
-                    placeholder="Tell us about your background and approach to counselling..."
-                    rows={4}
-                  />
-                </div>
+                    <Button
+                      variant="ghost"
+                      onClick={() => navigate("/get-started")}
+                      className="mb-6 text-slate-600 hover:text-slate-700"
+                    >
+                      <ArrowLeft className="w-4 h-4 mr-2" />
+                      Back
+                    </Button>
 
-                <div className="flex justify-center items-center text-center">
-                  <Button
-                    type="submit"
-                    variant="secondary"
-                    className="w-1/2 shadow-soft"
-                    size="lg"
-                  >
-                    Create Account
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
+                    <div className="mt-4 text-sm text-slate-600">
+                      Already have an account?{' '}
+                      <button
+                        type="button"
+                        className="text-emerald-600 font-medium hover:underline"
+                        onClick={() => navigate('/login')}
+                      >
+                        Sign in
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </CardContent>
+            </div>
           </Card>
         </div>
       </div>

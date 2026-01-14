@@ -32,6 +32,7 @@ export const TestDetail = () => {
     getCurrentAnswer,
     setAnswerLocally,
     resetTestState,
+    currentSession,
   } = useTestStore();
   const { user } = useAuthStore();
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
@@ -241,12 +242,19 @@ export const TestDetail = () => {
     setShowInstructions(true);
   };
 
+
+
+
+  
+
   const handleStartTest = async () => {
     if (!testId) return;
     try {
-      const limit = currentTest?.totalQuestionsPerPage;
+      const limit = currentTest?.totalQuestionsPerPage ?? questionPagination?.limit ?? 5;
+      // reset to first page when starting
+      useTestStore.setState({ currentPage: 1 });
       setTestStarted(true);
-      await fetchQuestions(currentPage, limit);
+      await fetchQuestions(1, limit, currentSession?.id ?? null, currentTest?.testId ?? testId, currentTest?.grade ?? undefined);
 
       if (currentTest?.timeDuration) {
         setTimeRemaining(currentTest?.timeDuration * 60);
@@ -278,7 +286,7 @@ export const TestDetail = () => {
     const limit = currentTest?.totalQuestionsPerPage || 5;
 
     if (questionPagination.hasNext) {
-      await fetchQuestions(nextPage, limit);
+      await fetchQuestions(nextPage, limit, currentSession?.id ?? null, currentTest?.testId ?? testId, currentTest?.grade ?? undefined);
       useTestStore.setState({ currentPage: nextPage });
 
       if (questionsContainerRef.current) {
@@ -294,7 +302,7 @@ export const TestDetail = () => {
     const limit = currentTest?.totalQuestionsPerPage || 5;
 
     if (questionPagination.hasPrevious && prevPage >= 1) {
-      await fetchQuestions(prevPage, limit);
+      await fetchQuestions(prevPage, limit, currentSession?.id ?? null, currentTest?.testId ?? testId, currentTest?.grade ?? undefined);
       useTestStore.setState({ currentPage: prevPage });
 
       if (questionsContainerRef.current) {
@@ -307,7 +315,7 @@ export const TestDetail = () => {
     if (!testId || pageNumber === currentPage) return;
 
     const limit = currentTest?.totalQuestionsPerPage || 5;
-    await fetchQuestions(pageNumber, limit);
+    await fetchQuestions(pageNumber, limit, currentSession?.id ?? null, currentTest?.testId ?? testId, currentTest?.grade ?? undefined);
     useTestStore.setState({ currentPage: pageNumber });
 
     if (questionsContainerRef.current) {
@@ -823,7 +831,7 @@ export const TestDetail = () => {
                             className="flex items-center space-x-2 p-2 rounded-lg border border-gray-200 bg-white hover:bg-blue-50/50 hover:border-blue-200 transition-all duration-200 cursor-pointer group"
                           >
                             <RadioGroupItem
-                              value={option.optionId}
+                              value={String(option.optionId)}
                               id={`option-${question.questionId}-${i}`}
                               className="text-blue-400 border-2 border-gray-300 group-hover:border-blue-400"
                             />

@@ -149,8 +149,13 @@ export interface ResponseData {
 
 // ---------- User Stats Type ----------
 export interface UserStats {
-  totalUsers: number;
-  activeUsers: number;
+  totalUsers?: number;
+  activeUsers?: number;
+  // Additional dashboard totals returned by /Admin/dashboard-summary
+  totalCounsellors?: number;
+  totalStudents?: number;
+  totalTests?: number;
+  totalCategories?: number;
 }
 
 export interface UserStatsResponse extends GenericResponse<UserStats> { }

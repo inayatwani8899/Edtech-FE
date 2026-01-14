@@ -91,33 +91,7 @@ const UserForm: React.FC = () => {
         }
     }, [user, roles, id, setFormData]);
 
-    // const handleSubmit = async (e: React.FormEvent) => {
-    //     e.preventDefault();
-
-    //     // Validate passwords for new users
-    //     if (!id && formData.password !== formData.confirmPassword) {
-    //         alert("Passwords do not match!");
-    //         return;
-    //     }
-
-    //     const payload = {
-    //         ...formData,
-    //         role: formData.role,
-    //         roleId: formData.roleId,
-    //     };
-
-    //     // Cleanup for update
-    //     if (id) {
-    //         delete (payload as any).confirmPassword;
-    //         if (!payload.password) delete (payload as any).password;
-    //         await updateUser(id, payload);
-    //     } else {
-    //         delete (payload as any).confirmPassword;
-    //         await createUser(payload);
-    //     }
-
-    //     navigate("/manage/users");
-    // };
+  
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -162,19 +136,7 @@ const UserForm: React.FC = () => {
     return (
         <div className="min-h-screen w-full bg-gray-50 py-2 px-4">
             <div className="max-w-4xl mx-auto">
-                {/* Header */}
-                {/* <div className="mb-6">
-                    <Button
-                        variant="ghost"
-                        onClick={() => navigate("/manage/users")}
-                        className="mb-4 flex items-center gap-2"
-                    >
-                        <ArrowLeft className="h-4 w-4" />
-                        Back to Users
-                    </Button>
-
-                </div> */}
-
+         
                 <Card className="shadow-lg">
                     <CardHeader>
                         <CardTitle>

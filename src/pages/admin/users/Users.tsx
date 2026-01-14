@@ -41,23 +41,7 @@ const Users: React.FC = () => {
         fetchUsers();
     }, [currentPage, limit, searchTerm, fetchUsers]);
 
-    // Add error display
-    // if (error) {
-    //     return (
-    //         <div className="p-6 bg-gray-50 min-h-screen flex items-center justify-center">
-    //             <Card className="max-w-md w-full">
-    //                 <CardContent className="pt-6">
-    //                     <div className="text-center text-red-500">
-    //                         <AlertCircle className="h-12 w-12 mx-auto mb-4" />
-    //                         <h3 className="text-lg font-semibold mb-2">Error Loading Users</h3>
-    //                         <p className="mb-4">{error}</p>
-    //                         <Button onClick={fetchUsers}>Try Again</Button>
-    //                     </div>
-    //                 </CardContent>
-    //             </Card>
-    //         </div>
-    //     );
-    // }
+ 
 
     return (
         <div className="p-6 bg-gray-50 min-h-screen">

@@ -24,7 +24,7 @@ export interface Question {
 }
 
 export interface Option {
-    optionId: OptionID;
+    optionId: number | string;
     optionText: string;
 }
 
@@ -52,6 +52,7 @@ export interface Test {
     title: string;
     description: string;
     category?: string;
+    grade?: string;
     timeDuration: number;
     status?: 'active' | 'draft' | 'archived';
     isPublished?: boolean;
@@ -156,12 +157,6 @@ export interface TestProgress {
         answered: boolean;
     }>;
 }
-interface QuestionPagination {
-    currentPage: number;
-    totalPages: number;
-    hasNext: boolean;
-    hasPrevious: boolean;
-}
 // Add these interfaces to your existing types
 export interface UserTestSubmission {
     testAttempts: any;
@@ -240,6 +235,9 @@ interface TestState {
     userSubmissionsError: string | null;
     searchTerm: string | null;
     deleteId: string | null;
+
+
+
     // Actions
     setPage: (page: number) => void;
     setLimit: (limit: number) => void;
@@ -259,11 +257,15 @@ interface TestState {
     openDeleteDialog: (id: string) => void;
     closeDeleteDialog: () => void;
 
+
+
+
+
     // Test Taking
     getPublishedTests: () => Promise<void>;
     getPublicPublishedTests: () => Promise<void>;
     // startTest: (testId: string) => Promise<void>;
-    fetchQuestions: (page?: number, limit?: number) => Promise<void>;
+    fetchQuestions: (page?: number, limit?: number, sessionId?: string | null, testId?: string | number | null, gradeId?: string | number | null) => Promise<void>;
     submitAnswer: (testId: string, questionId: string, answer: string) => Promise<void>;
     submitTest: (testId: string, userId: string) => Promise<void>;
     fetchTestProgress: (testId: string, sessionId: string) => Promise<void>;
@@ -345,10 +347,11 @@ export const useTestStore = create<TestState>((set, get) => ({
     testTakingError: null,
     currentConfiguration: null,
     searchTerm: "",
-    configurations: null,
+    configurations: [],
     deleteId: null,
     totalConfigurationPages: null,
     totalConfigurationsCount: null,
+
     // Test Management Actions 
     setPage: (page) => { set({ currentPage: page }); get().fetchTests(); },
     setLimit: (limit) => { set({ limit, currentPage: 1 }); get().fetchTests(); },
@@ -363,7 +366,7 @@ export const useTestStore = create<TestState>((set, get) => ({
             const response = await api.get('/Test', {
                 params: {
                     page: currentPage,
-                    limit:100,
+                    limit: 100,
                     search: filters.search || undefined,
                     status: filters.status !== 'all' ? filters.status : undefined,
                     category: filters.category !== 'all' ? filters.category : undefined
@@ -382,6 +385,10 @@ export const useTestStore = create<TestState>((set, get) => ({
             set({ error: err.response?.data?.message || 'Failed to fetch tests', loading: false, tests: [], totalPages: 1, totalCount: 0 });
         }
     },
+
+
+
+
     fetchTestById: async (id) => {
         set({ loading: true, error: null });
         try {
@@ -392,6 +399,9 @@ export const useTestStore = create<TestState>((set, get) => ({
             throw err;
         }
     },
+
+
+
     createConfigurableTest: async (payload) => {
         set({ loading: true, error: null });
         try {
@@ -402,6 +412,9 @@ export const useTestStore = create<TestState>((set, get) => ({
             throw err;
         }
     },
+
+
+
     createTest: async (payload) => {
         set({ loading: true, error: null });
         try {
@@ -412,6 +425,8 @@ export const useTestStore = create<TestState>((set, get) => ({
             throw err;
         }
     },
+
+
     createAITest: async (payload) => {
         set({ loading: true, error: null });
         try {
@@ -422,6 +437,8 @@ export const useTestStore = create<TestState>((set, get) => ({
             throw err;
         }
     },
+
+
     updateTest: async (id, testData) => {
         set({ loading: true, error: null });
         testData.id = id;
@@ -433,6 +450,8 @@ export const useTestStore = create<TestState>((set, get) => ({
             throw err;
         }
     },
+
+
     deleteTest: async () => {
         const { selectedTestId, fetchTests, currentPage, tests } = get();
         if (!selectedTestId) return;
@@ -447,6 +466,8 @@ export const useTestStore = create<TestState>((set, get) => ({
             throw err;
         }
     },
+
+
     publishTest: async (id, publish) => {
         set({ loading: true, error: null });
         try {
@@ -462,6 +483,8 @@ export const useTestStore = create<TestState>((set, get) => ({
             throw err;
         }
     },
+
+
     unpublishTest: async (id) => { set({ loading: true, error: null }); try { await api.patch(`/Test/${id}/unpublish`); await get().fetchTests(); } catch (err: any) { set({ error: err.response?.data?.message || 'Failed to unpublish test', loading: false }); throw err; } },
     duplicateTest: async (id) => { set({ loading: true, error: null }); try { await api.post(`/Test/duplicate/${id}`); await get().fetchTests(); } catch (err: any) { set({ error: err.response?.data?.message || 'Failed to duplicate test', loading: false }); throw err; } },
     clearCurrentTest: () => set({ currentTest: null }),
@@ -491,54 +514,75 @@ export const useTestStore = create<TestState>((set, get) => ({
             throw err;
         }
     },
-    fetchQuestions: async (page, limit, sessionId = null) => {
+
+
+
+
+    fetchQuestions: async (page = 1, limit = 1, sessionId: string | null = null, testIdParam: string | number | null = null, gradeIdParam: string | number | null = null) => {
         set({ testTakingLoading: true, testTakingError: null });
         try {
             const currentSessionId = sessionId || get().currentSession?.id;
 
-            // Remove pagination params since API returns all questions
-            const response = await api.get(`/Question/start`, {
+            // Call the GetQuestions endpoint which returns the shape shown in the example
+            const response = await api.get(`/QuestionBank/GetQuestions`, {
                 params: {
-                    limit,
+                    // Prefer explicit params passed in; fall back to currentTest values
+                    testId: testIdParam ?? get().currentTest?.testId ?? undefined,
+                    gradeId: gradeIdParam ?? get().currentTest?.grade ?? undefined,
                     page,
+                    limit,
+                    sessionId: currentSessionId || undefined
                 }
             });
-            // Handle the response - it might return all questions at once
-            let questions: Question[] = [];
 
-            if (Array.isArray(response.data.data.items)) {
-                // If response is directly the questions array
-                questions = response.data.data.items;
-            } else if (response.data.data.items && Array.isArray(response.data.data.items)) {
-                // If response has questions property
-                questions = response.data.questions;
-            } else if (response.data.data.items && Array.isArray(response.data.data.items)) {
-                // If response has data property with questions
-                questions = response.data.data.items;
-            } else {
-                // Default case
-                questions = response.data.data.items || [];
-            }
+            const data = response.data || {};
 
+            // Support a few possible shapes but prefer the documented shape which contains `questions` and `pagination`
+            const rawQuestions = Array.isArray(data.questions)
+                ? data.questions
+                : Array.isArray(data.data?.questions)
+                    ? data.data.questions
+                    : Array.isArray(data.data?.items)
+                        ? data.data.items
+                        : [];
 
-            // Calculate pagination based on all questions
+            // Map upstream question shape to local `Question` shape
+            const questions: Question[] = rawQuestions.map((q: any) => ({
+                questionId: q.question_Id ?? q.questionId ?? q.id,
+                questionText: q.question_Text ?? q.questionText ?? q.text ?? '',
+                grade: data.grade ?? q.grade ?? '',
+                options: Array.isArray(q.options)
+                    ? q.options.map((o: any) => ({
+                        optionId: o.option_Id ?? o.optionId ?? o.id,
+                        optionText: o.option_Text ?? o.optionText ?? o.text ?? ''
+                    }))
+                    : []
+            }));
+
+            // Build pagination from response (fall back to simple values if missing)
+            const pagination = data.pagination ?? data.data?.pagination ?? {
+                currentPage: page,
+                pageSize: limit,
+                totalItems: questions.length,
+                totalPages: Math.max(1, Math.ceil(questions.length / (limit || 1)))
+            };
+
             const questionPagination = {
-                currentPage: response.data.data.pageNumber,
-                totalPages: response.data.data.totalPages, // One question per page
-                totalQuestions: response.data.data.totalCount,
-                hasNext: response.data.data.hasNextPage,
-                hasPrevious: response.data.data.hasPreviousPage,
-                limit: 1
+                currentPage: pagination.currentPage ?? page,
+                totalPages: pagination.totalPages ?? Math.max(1, Math.ceil((data.totalQuestions ?? pagination.totalItems ?? questions.length) / ((pagination.pageSize ?? limit) || 1))),
+                totalQuestions: data.totalQuestions ?? pagination.totalItems ?? questions.length,
+                hasNext: (pagination.currentPage ?? page) < (pagination.totalPages ?? 1),
+                hasPrevious: (pagination.currentPage ?? page) > 1,
+                limit: pagination.pageSize ?? limit ?? 1
             };
 
             set({
-                testQuestions: questions, // Store ALL questions
+                testQuestions: questions,
                 questionPagination,
-                currentSession: response.data.session || get().currentSession,
+                currentSession: data.session ?? get().currentSession,
                 testTakingLoading: false
             });
 
-            // if (response.data.session?.id) await get().fetchTestProgress(testId, response.data.session.id);
         } catch (err: any) {
             set({
                 testTakingError: err.response?.data?.message || 'Failed to fetch questions',
@@ -547,6 +591,11 @@ export const useTestStore = create<TestState>((set, get) => ({
             throw err;
         }
     },
+
+
+
+
+
     submitAnswer: async (testId, questionId, answer) => {
         const { currentSession, userAnswers } = get();
         if (!currentSession) throw new Error('No active test session');
@@ -609,22 +658,28 @@ export const useTestStore = create<TestState>((set, get) => ({
     },
 
     goToNextQuestion: async () => {
-        const { questionPagination, currentTest, currentSession, currentPage } = get();
+        const { questionPagination, currentTest, currentSession } = get();
 
         if (questionPagination.hasNext) {
             await get().fetchQuestions(
-                currentPage + 1,
-                currentTest.totalQuestionsPerPage
+                questionPagination.currentPage + 1,
+                questionPagination.limit ?? currentTest?.totalQuestionsPerPage ?? 1,
+                currentSession?.id ?? null,
+                currentTest?.testId ?? undefined,
+                currentTest?.grade ?? undefined
             );
         }
     },
 
     goToPreviousQuestion: async () => {
-        const { questionPagination, currentSession, currentTest, currentPage } = get();
+        const { questionPagination, currentTest, currentSession } = get();
         if (questionPagination.hasPrevious) {
             await get().fetchQuestions(
-                currentPage - 1,
-                currentTest.totalQuestionsPerPage
+                Math.max(1, questionPagination.currentPage - 1),
+                questionPagination.limit ?? currentTest?.totalQuestionsPerPage ?? 1,
+                currentSession?.id ?? null,
+                currentTest?.testId ?? undefined,
+                currentTest?.grade ?? undefined
             );
         }
     },

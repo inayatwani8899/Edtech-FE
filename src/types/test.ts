@@ -17,6 +17,7 @@ export interface Test {
   id: string;
   title: string;
   description: string;
+  gradeLevel?: string;
   type: TestType;
   questions: Question[];
   timeLimit?: number;

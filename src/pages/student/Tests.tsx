@@ -908,11 +908,11 @@ export const Tests = () => {
                               size="sm"
                               onClick={async () => {
                                 setProcessingTestId(test.id);
-                                const result = await handlePayment(test);
-                                if (result.success && user?.id) {
-                                  setPaidStatus((prev) => ({ ...prev, [test.id]: true }));
-                                }
-                                setProcessingTestId(null);
+                                // const result = await handlePayment(test);
+                                // if (result.success && user?.id) {
+                                //   setPaidStatus((prev) => ({ ...prev, [test.id]: true }));
+                                // }
+                                // setProcessingTestId(null);
                               }}
                               disabled={processingTestId === test.id}
                             >

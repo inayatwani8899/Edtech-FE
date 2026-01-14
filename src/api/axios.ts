@@ -1,8 +1,8 @@
 import axios from "axios";
 import Swal from 'sweetalert2';
 const api = axios.create({
-    // baseURL: "https://charming-bohr.180-179-213-167.plesk.page/api/",
-    baseURL: "https://n2j84dpm-5001.inc1.devtunnels.ms/api/",
+    baseURL: "https://charming-bohr.180-179-213-167.plesk.page/api/",
+    // baseURL: "https://18lh764q-5001.inc1.devtunnels.ms/api/",
     // timeout: 50000,
     headers: {
         "Content-Type": "application/json",
