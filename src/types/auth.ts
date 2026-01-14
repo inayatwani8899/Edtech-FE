@@ -1,22 +1,25 @@
 export type UserRole = 'Student' | 'Professional' | 'Counselor' | 'Admin';
 
 export interface User {
-  roleId: string;
-  phoneNumber: string;
-  phone: string;
-  id: string;
+  id: number; // Changed from string to number
   firstName: string;
   lastName: string;
-  name?:string;
   email: string;
+  dateOfBirth: string; // Changed from Date to string
+  grade?: string; // Added
+  phone: string; // Added
   role: UserRole;
+  roleId: number; // Changed from string to number
+
+  // Optional fields not in login response but maybe used elsewhere
+  phoneNumber?: string;
+  name?: string;
   avatar?: string;
-  createdAt: Date;
+  createdAt?: Date; // Made optional
   lastLogin?: Date;
-  dateOfBirth?: Date;
-  status: 'active' | 'inactive';
-  lastActive: Date;
-  testsCompleted: number;
+  status?: 'active' | 'inactive'; // Made optional
+  lastActive?: Date; // Made optional
+  testsCompleted?: number; // Made optional
   profile?: StudentProfile | ProfessionalProfile | CounselorProfile;
 }
 export interface LoginResponse {

@@ -108,7 +108,7 @@ export const TestDetail = () => {
 
     setIsSubmitting(true);
     try {
-      await submitTest(testId, user.id);
+      await submitTest(testId, String(user.id));
       toast({
         title: "Test Auto-Submitted",
         description: "Time's up! Your test has been automatically submitted.",
@@ -130,7 +130,7 @@ export const TestDetail = () => {
     if (!testId || !user?.id) return false;
 
     try {
-      await submitTest(testId, user.id);
+      await submitTest(testId, String(user.id));
       return true;
     } catch (err) {
       console.error("Exit submission error:", err);
@@ -245,7 +245,7 @@ export const TestDetail = () => {
 
 
 
-  
+
 
   const handleStartTest = async () => {
     if (!testId) return;
@@ -338,7 +338,7 @@ export const TestDetail = () => {
 
     try {
       await exitFullScreen();
-      await submitTest(testId, user.id);
+      await submitTest(testId, String(user.id));
 
       toast({
         title: "Test Submitted Successfully",

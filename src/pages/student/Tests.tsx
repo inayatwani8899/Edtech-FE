@@ -504,7 +504,7 @@
 //   );
 // };
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -649,14 +649,15 @@ export const Tests = () => {
   const [selectedDifficulty, setSelectedDifficulty] = useState("All");
   const [activeTab, setActiveTab] = useState("all");
   const [paidStatus, setPaidStatus] = useState<Record<string, boolean>>({});
-  const { getPublishedTests, publishedTests } = useTestStore();
+  const { getPublishedTests, publishedTests, fetchQuestions } = useTestStore();
+  const navigate = useNavigate();
   useEffect(() => {
     const fetchPaidStatus = async () => {
       if (!user?.id || !publishedTests?.length) return;
 
       const statuses: Record<string, boolean> = {};
       for (const test of publishedTests) {
-        const result = await isTestPaid(user.id, test.id);
+        const result = await isTestPaid(String(user.id), test.id);
         statuses[test.id] = result;
       }
       setPaidStatus(statuses);
@@ -908,17 +909,20 @@ export const Tests = () => {
                               size="sm"
                               onClick={async () => {
                                 setProcessingTestId(test.id);
-                                // const result = await handlePayment(test);
-                                // if (result.success && user?.id) {
-                                //   setPaidStatus((prev) => ({ ...prev, [test.id]: true }));
-                                // }
-                                // setProcessingTestId(null);
+                                if (user?.grade) {
+                                  await fetchQuestions(1, 10, null, test.id, user.grade);
+                                  navigate(`/test/${test.id}`);
+                                } else {
+                                  // Fallback if grade is missing, though unlikely for a logged in student
+                                  console.error("User grade not found");
+                                }
+                                setProcessingTestId(null);
                               }}
                               disabled={processingTestId === test.id}
                             >
                               {processingTestId === test.id
                                 ? "Processing..."
-                                : `Buy Now - ₹${test.price}`}
+                                : "Start Now"}
                             </Button>
                           )}
                         </div>

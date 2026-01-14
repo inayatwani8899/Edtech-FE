@@ -530,7 +530,7 @@ export const useTestStore = create<TestState>((set, get) => ({
                     testId: testIdParam ?? get().currentTest?.testId ?? undefined,
                     gradeId: gradeIdParam ?? get().currentTest?.grade ?? undefined,
                     page,
-                    limit,
+                    pageSize: limit,
                     sessionId: currentSessionId || undefined
                 }
             });
