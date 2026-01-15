@@ -37,6 +37,12 @@ import { TestConfigurationsList } from "./pages/admin/test-configuration/TestCon
 import { TestConfigurationForm } from "./pages/admin/test-configuration/TestConfigurationForm";
 import { CategoryForm } from "./pages/admin/categories/CategoryForm";
 import { CategoriesList } from "./pages/admin/categories/CategoriesList";
+import { LearningPath } from "./pages/student/LearningPath";
+import { CareerGuidance } from "./pages/student/CareerGuidance";
+import { ProgressTracking } from "./pages/student/ProgressTracking";
+import { Scholarships } from "./pages/student/Scholarships";
+import { Schedule } from "./pages/student/Schedule";
+import { Messages } from "./pages/student/Messages";
 // 🔒 Protected Route
 interface ProtectedRouteProps {
     children: React.ReactNode;
@@ -150,6 +156,12 @@ const AppRoutes = () => {
                 <Route path="/tests" element={<Tests />} />
                 <Route path="/test/:id" element={<TestDetail />} />
                 <Route path="/results" element={<Results />} />
+                <Route path="/learning" element={<LearningPath />} />
+                <Route path="/career" element={<CareerGuidance />} />
+                <Route path="/progress" element={<ProgressTracking />} />
+                <Route path="/scholarships" element={<Scholarships />} />
+                <Route path="/schedule" element={<Schedule />} />
+                <Route path="/messages" element={<Messages />} />
                 <Route path="/profile" element={<StudentProfile />} />
                 <Route path="/settings" element={<Settings />} />
                 {/* <Route path="/manage" element={<Manage />} /> */}
