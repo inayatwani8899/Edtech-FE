@@ -19,6 +19,9 @@ export interface QuestionOption {
 export interface Question {
     questionId: number;
     questionText: string;
+    category?: string;
+    theory?: string;
+    tag?: string;
     grade: string;
     options: Option[];
 }
@@ -552,6 +555,9 @@ export const useTestStore = create<TestState>((set, get) => ({
             const questions: Question[] = rawQuestions.map((q: any) => ({
                 questionId: q.question_Id ?? q.questionId ?? q.id,
                 questionText: q.question_Text ?? q.questionText ?? q.text ?? '',
+                category: q.category ?? '',
+                theory: q.theory ?? '',
+                tag: q.tag ?? '',
                 grade: data.grade ?? q.grade ?? '',
                 options: Array.isArray(q.options)
                     ? q.options.map((o: any) => ({

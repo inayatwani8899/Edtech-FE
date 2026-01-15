@@ -10,7 +10,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Clock, ChevronLeft, ChevronRight, CheckCircle, AlertCircle, Timer, BookOpen, ArrowLeft, Minimize, Info, CheckSquare } from "lucide-react";
+import { Clock, ChevronLeft, ChevronRight, CheckCircle, AlertCircle, Timer, BookOpen, ArrowLeft, Minimize, Maximize, Info, CheckSquare } from "lucide-react";
 import { useTestStore } from "@/store/testStore";
 import { useAuthStore } from "@/store/useAuthStore";
 
@@ -34,13 +34,18 @@ export const TestDetail = () => {
     resetTestState,
     currentSession,
   } = useTestStore();
+
+  const {
+    totalPages = 1,
+    hasNext = false,
+    hasPrevious = false,
+  } = questionPagination || {};
   const { user } = useAuthStore();
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [testStarted, setTestStarted] = useState(false);
-  const [showInstructions, setShowInstructions] = useState(true);
-  const testContainerRef = useRef<HTMLDivElement>(null);
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0); // 0: Instructions, 1: Ready, 2: Test
+  const testContainerRef = useRef<HTMLDivElement>(null);
   const questionsContainerRef = useRef<HTMLDivElement>(null);
 
   // Fetch test details on mount
@@ -50,14 +55,14 @@ export const TestDetail = () => {
 
   // Timer logic
   useEffect(() => {
-    if (!testStarted || timeRemaining === null) return;
+    if (currentStep !== 2 || timeRemaining === null) return;
     if (timeRemaining <= 0) {
       handleAutoSubmit();
       return;
     }
     const timer = setTimeout(() => setTimeRemaining(prev => (prev !== null ? prev - 1 : 0)), 1000);
     return () => clearTimeout(timer);
-  }, [timeRemaining, testStarted]);
+  }, [timeRemaining, currentStep]);
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -148,7 +153,7 @@ export const TestDetail = () => {
 
       setIsFullScreen(!!fullscreenElement);
 
-      if (!fullscreenElement && testStarted && timeRemaining !== null && timeRemaining > 0) {
+      if (!fullscreenElement && currentStep === 2 && timeRemaining !== null && timeRemaining > 0) {
         Swal.fire({
           title: 'Fullscreen Exited',
           text: "You have exited fullscreen mode. It's recommended to stay in fullscreen for better test experience.",
@@ -193,7 +198,7 @@ export const TestDetail = () => {
       document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
       document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
     };
-  }, [testStarted, timeRemaining]);
+  }, [currentStep, timeRemaining]);
 
   const handleExitTest = async () => {
     Swal.fire({
@@ -211,7 +216,7 @@ export const TestDetail = () => {
       preConfirm: async () => {
         const success = await submitTestOnExit();
         if (success) {
-          setTestStarted(false);
+          setCurrentStep(0);
           await exitFullScreen();
           resetTestState();
         }
@@ -234,12 +239,12 @@ export const TestDetail = () => {
     });
   };
 
-  const handleContinueToStart = () => {
-    setShowInstructions(false);
+  const handleContinueToNextStep = () => {
+    setCurrentStep((prev) => prev + 1);
   };
 
-  const handleBackToInstructions = () => {
-    setShowInstructions(true);
+  const handleBackToPrevStep = () => {
+    setCurrentStep((prev) => Math.max(0, prev - 1));
   };
 
 
@@ -250,10 +255,10 @@ export const TestDetail = () => {
   const handleStartTest = async () => {
     if (!testId) return;
     try {
-      const limit = currentTest?.totalQuestionsPerPage ?? questionPagination?.limit ?? 5;
+      const limit = currentTest?.totalQuestionsPerPage ?? 10;
       // reset to first page when starting
       useTestStore.setState({ currentPage: 1 });
-      setTestStarted(true);
+      setCurrentStep(2);
       await fetchQuestions(1, limit, currentSession?.id ?? null, currentTest?.testId ?? testId, currentTest?.grade ?? undefined);
 
       if (currentTest?.timeDuration) {
@@ -265,15 +270,14 @@ export const TestDetail = () => {
         description: "Good luck! Read each question carefully.",
       });
 
-      await enterFullScreen();
-
+      // Removed auto-fullscreen per user request
     } catch (err: any) {
       toast({
         variant: "destructive",
         title: "Error",
         description: err.message || "Failed to start test",
       });
-      setTestStarted(false);
+      setCurrentStep(1);
     }
   };
 
@@ -283,7 +287,7 @@ export const TestDetail = () => {
   const handleNextQuestion = async () => {
     if (!testId || !questionPagination) return;
     const nextPage = currentPage + 1;
-    const limit = currentTest?.totalQuestionsPerPage || 5;
+    const limit = currentTest?.totalQuestionsPerPage || 10;
 
     if (questionPagination.hasNext) {
       await fetchQuestions(nextPage, limit, currentSession?.id ?? null, currentTest?.testId ?? testId, currentTest?.grade ?? undefined);
@@ -299,7 +303,7 @@ export const TestDetail = () => {
     if (!testId || !questionPagination) return;
 
     const prevPage = currentPage - 1;
-    const limit = currentTest?.totalQuestionsPerPage || 5;
+    const limit = currentTest?.totalQuestionsPerPage || 10;
 
     if (questionPagination.hasPrevious && prevPage >= 1) {
       await fetchQuestions(prevPage, limit, currentSession?.id ?? null, currentTest?.testId ?? testId, currentTest?.grade ?? undefined);
@@ -314,7 +318,7 @@ export const TestDetail = () => {
   const handlePageNavigation = async (pageNumber: number) => {
     if (!testId || pageNumber === currentPage) return;
 
-    const limit = currentTest?.totalQuestionsPerPage || 5;
+    const limit = currentTest?.totalQuestionsPerPage || 10;
     await fetchQuestions(pageNumber, limit, currentSession?.id ?? null, currentTest?.testId ?? testId, currentTest?.grade ?? undefined);
     useTestStore.setState({ currentPage: pageNumber });
 
@@ -334,7 +338,7 @@ export const TestDetail = () => {
     }
 
     setIsSubmitting(true);
-    setTestStarted(false);
+    setCurrentStep(0);
 
     try {
       await exitFullScreen();
@@ -358,14 +362,14 @@ export const TestDetail = () => {
       });
 
       setIsSubmitting(false);
-      setTestStarted(true);
+      setCurrentStep(2);
       await enterFullScreen();
     }
   };
 
   // Navigation guard function
   const navigationGuard = useCallback((targetUrl: string) => {
-    if (testStarted && timeRemaining !== null && timeRemaining > 0) {
+    if (currentStep === 2 && timeRemaining !== null && timeRemaining > 0) {
       Swal.fire({
         title: 'Leave Test?',
         text: "Your test will be automatically submitted. You won't be able to resume and will need to purchase again.",
@@ -381,7 +385,7 @@ export const TestDetail = () => {
         preConfirm: async () => {
           const success = await submitTestOnExit();
           if (success) {
-            setTestStarted(false);
+            setCurrentStep(0);
             await exitFullScreen();
             resetTestState();
           }
@@ -395,12 +399,12 @@ export const TestDetail = () => {
       return false;
     }
     return true;
-  }, [testStarted, timeRemaining]);
+  }, [currentStep, timeRemaining]);
 
   // Enhanced navigation prevention logic
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
-      if (testStarted && timeRemaining !== null && timeRemaining > 0) {
+      if (currentStep === 2 && timeRemaining !== null && timeRemaining > 0) {
         event.preventDefault();
         event.stopPropagation();
         navigationGuard(window.location.href);
@@ -408,7 +412,7 @@ export const TestDetail = () => {
     };
 
     const handleBeforeUnload = async (event: BeforeUnloadEvent) => {
-      if (testStarted && timeRemaining !== null && timeRemaining > 0) {
+      if (currentStep === 2 && timeRemaining !== null && timeRemaining > 0) {
         event.preventDefault();
         // Attempt to submit test before unloading
         await submitTestOnExit();
@@ -421,7 +425,7 @@ export const TestDetail = () => {
       const target = event.target as HTMLElement;
       const link = target.closest('a');
 
-      if (link && testStarted && timeRemaining !== null && timeRemaining > 0) {
+      if (link && currentStep === 2 && timeRemaining !== null && timeRemaining > 0) {
         event.preventDefault();
         event.stopPropagation();
         navigationGuard(link.href);
@@ -437,14 +441,7 @@ export const TestDetail = () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener('popstate', handlePopState);
     };
-  }, [testStarted, timeRemaining, navigationGuard]);
-
-  // Calculate progress and answers
-  const totalQuestions = questionPagination.totalQuestions || 0;
-  const questionsPerPage = currentTest?.totalQuestionsPerPage || 5;
-  const hasPrevious = questionPagination?.hasPrevious || false;
-  const hasNext = questionPagination?.hasNext || false;
-  const totalPages = questionPagination?.totalPages || 1;
+  }, [currentStep, timeRemaining, navigationGuard]);
 
   // Generate page numbers for navigation
   const getPageNumbers = () => {
@@ -482,12 +479,12 @@ export const TestDetail = () => {
   };
 
   // Loading state
-  if (testTakingLoading && !testStarted && !isSubmitting) {
+  if (testTakingLoading && currentStep !== 2 && !isSubmitting) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-lg text-gray-700">Loading test...</p>
+          <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-slate-600 font-medium">Loading your assessment...</p>
         </div>
       </div>
     );
@@ -496,120 +493,121 @@ export const TestDetail = () => {
   // Submitting state
   if (isSubmitting) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <Card className="max-w-md w-full mx-4 border-0 shadow-2xl bg-white/90 backdrop-blur-sm">
-          <CardContent className="p-12 text-center space-y-6">
-            <div className="relative">
-              <CheckCircle className="h-20 w-20 text-green-500 mx-auto mb-4" />
-              <div className="absolute inset-0 animate-ping opacity-20">
-                <CheckCircle className="h-20 w-20 text-green-500 mx-auto mb-4" />
-              </div>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <Card className="max-w-md w-full mx-4 border-0 shadow-xl bg-white">
+          <CardContent className="p-8 text-center space-y-6">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+              <CheckCircle className="h-8 w-8 text-green-600" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">Submitting Your Test</h2>
-              <p className="text-gray-600">Please wait while we process your responses...</p>
+              <h2 className="text-xl font-bold text-slate-900 mb-1">Submitting Assessment</h2>
+              <p className="text-slate-500">Securely processing your responses...</p>
             </div>
-            <Progress value={75} className="w-full bg-gray-200 [&>div]:bg-gradient-to-r [&>div]:from-green-500 [&>div]:to-blue-500" />
+            <Progress value={66} className="h-2 bg-slate-100" />
           </CardContent>
         </Card>
       </div>
     );
   }
 
+  // Visual Stepper Component
+  const TestStepper = ({ step }: { step: number }) => (
+    <div className="flex items-center justify-center mb-10">
+      {[0, 1, 2].map((i) => (
+        <div key={i} className="flex items-center">
+          <div className={`
+            flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-300
+            ${step >= i ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-400'}
+            ${step === i ? 'ring-4 ring-indigo-50 shadow-md scale-110' : ''}
+          `}>
+            {step > i ? <CheckCircle className="h-6 w-6" /> : <span className="text-sm font-bold">{i + 1}</span>}
+          </div>
+          {i < 2 && (
+            <div className={`w-16 h-1 transition-all duration-300 mx-2 rounded-full ${step > i ? 'bg-indigo-600' : 'bg-slate-200'}`} />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+
   // STEP 1: Instructions Page
-  if (showInstructions && !testStarted && !isSubmitting) {
+  if (currentStep === 0 && !isSubmitting) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8">
-            <Button
-              variant="ghost"
-              onClick={() => navigate("/tests")}
-              className="mb-6 group hover:bg-white/50"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2 transition-transform group-hover:-translate-x-1" />
-              Back to Tests
-            </Button>
-            {/* Test Details */}
-            {currentTest && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-6 rounded-xl shadow-lg">
-                  <div className="flex items-center mb-3">
-                    <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mr-3">
-                      <BookOpen className="h-5 w-5" />
-                    </div>
-                    <h3 className="font-semibold">Test Details</h3>
-                  </div>
-                  <p className="text-2xl font-bold">{currentTest.title}</p>
-                  <p className="text-blue-100 text-sm mt-2">{currentTest.description}</p>
-                </div>
-
-                <div className="bg-gradient-to-br from-green-500 to-green-600 text-white p-6 rounded-xl shadow-lg">
-                  <div className="flex items-center mb-3">
-                    <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mr-3">
-                      <Clock className="h-5 w-5" />
-                    </div>
-                    <h3 className="font-semibold">Time Limit</h3>
-                  </div>
-                  <p className="text-2xl font-bold">{currentTest.timeDuration || 30} minutes</p>
-                  <p className="text-green-100 text-sm mt-2">Complete within the allocated time</p>
-                </div>
-              </div>
-            )}
-
-            {/* Instructions Header */}
-            <div className="text-center mb-8">
-              <div className="w-20 h-20 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Info className="h-10 w-10 text-white" />
-              </div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-3">
-                Test Instructions
-              </h1>
-              <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-                Please read the following instructions carefully before proceeding to the test.
-              </p>
-            </div>
-
-
-            {/* Enhanced Instructions Section */}
-            <div className="bg-gradient-to-br from-purple-500 to-purple-600 text-white p-6 rounded-xl shadow-lg mb-8">
-              <div className="flex items-center mb-4">
-                <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mr-3">
-                  <AlertCircle className="h-5 w-5" />
-                </div>
-                <h3 className="font-semibold text-lg">Important Instructions</h3>
-              </div>
-              <div className="space-y-4">
-                <p className="text-purple-100 font-medium">Please read these instructions carefully:</p>
-                <ul className="list-disc list-inside space-y-3 text-purple-100 text-sm">
-                  <li><strong>Stable Internet Required:</strong> Ensure you have a stable internet connection throughout the test</li>
-                  <li><strong>No Resumption:</strong> If you exit the test, you cannot resume and will need to purchase again for a new assessment</li>
-                  <li><strong>Auto-Submission:</strong> Test will automatically submit when time ends or if you exit</li>
-                  <li><strong>Single Session:</strong> Complete the test in one sitting - no pausing allowed</li>
-                  <li><strong>Honest Responses:</strong> Answer all questions honestly based on your first instinct</li>
-                  <li><strong>No Right/Wrong:</strong> There are no correct answers - respond naturally</li>
-                  <li><strong>Fullscreen Mode:</strong> Test will open in fullscreen for better experience</li>
-                  <li><strong>No Going Back:</strong> You cannot return to previous pages once navigated</li>
-                </ul>
-                <div className="bg-purple-400/20 border border-purple-300/30 rounded-lg p-3 mt-4">
-                  <p className="text-purple-100 text-sm font-semibold">
-                    ⚠️ Warning: Exiting the test will automatically submit your current responses and you won't be able to retake without purchasing again.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Continue Button */}
-            <div className="text-center">
+      <div className="min-h-screen bg-slate-50/50 py-12 px-4 sm:px-6">
+        <div className="max-w-3xl mx-auto">
+          <TestStepper step={0} />
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div className="p-8">
               <Button
-                size="lg"
-                className="px-12 py-6 text-lg bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl rounded-xl"
-                onClick={handleContinueToStart}
-                disabled={testTakingLoading}
+                variant="ghost"
+                onClick={() => navigate("/tests")}
+                className="mb-6 -ml-2 text-slate-500 hover:text-slate-900 transition-colors"
               >
-                <CheckSquare className="h-5 w-5 mr-2" />
-                I Understand, Continue to Test
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Back to Dashboard
               </Button>
+
+              <div className="flex items-center gap-4 mb-8">
+                <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center">
+                  <BookOpen className="h-6 w-6 text-indigo-600" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-slate-900">{currentTest?.title || "Test Details"}</h1>
+                  <p className="text-slate-500 text-sm">Review these instructions before you begin</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                  <div className="flex items-center text-slate-600 mb-1">
+                    <Clock className="h-4 w-4 mr-2 text-indigo-500" />
+                    <span className="text-xs font-semibold uppercase tracking-wider">Duration</span>
+                  </div>
+                  <p className="text-lg font-bold text-slate-900">{currentTest?.timeDuration || 30} Minutes</p>
+                </div>
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                  <div className="flex items-center text-slate-600 mb-1">
+                    <Timer className="h-4 w-4 mr-2 text-indigo-500" />
+                    <span className="text-xs font-semibold uppercase tracking-wider">Format</span>
+                  </div>
+                  <p className="text-lg font-bold text-slate-900">Multiple Choice Questions</p>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <h3 className="text-lg font-semibold text-slate-900 flex items-center">
+                  <AlertCircle className="h-5 w-5 mr-2 text-indigo-500" />
+                  Guidelines
+                </h3>
+                <div className="grid gap-3">
+                  {[
+                    "Ensure a stable internet connection for the entire duration.",
+                    "Once you start, you cannot pause or resume later.",
+                    "The assessment will automatically submit when the timer ends.",
+                    "Exiting fullscreen or the browser tab will trigger auto-submission.",
+                    "Answer all questions based on your first instinct.",
+                    "Calculators or external aids are not permitted unless specified."
+                  ].map((text, i) => (
+                    <div key={i} className="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors group">
+                      <div className="mt-1 w-5 h-5 rounded-full bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-100 shrink-0">
+                        <div className="w-1.5 h-1.5 rounded-full bg-indigo-600" />
+                      </div>
+                      <p className="text-slate-600 text-sm leading-relaxed">{text}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-12 flex items-center justify-end pt-6 border-t border-slate-100">
+                <Button
+                  size="lg"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 h-12 rounded-xl shadow-lg shadow-indigo-200 transition-all hover:scale-[1.02]"
+                  onClick={handleContinueToNextStep}
+                >
+                  Continue to Confirmation
+                  <ChevronRight className="h-4 w-4 ml-2" />
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -618,86 +616,71 @@ export const TestDetail = () => {
   }
 
   // STEP 2: Ready to Begin Page
-  if (!testStarted && !isSubmitting && !showInstructions) {
+  if (currentStep === 1 && !isSubmitting) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8">
-            <Button
-              variant="ghost"
-              onClick={handleBackToInstructions}
-              className="mb-6 group hover:bg-white/50"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2 transition-transform group-hover:-translate-x-1" />
-              Back to Instructions
-            </Button>
+      <div className="min-h-screen bg-slate-50/50 py-12 px-4 sm:px-6">
+        <div className="max-w-3xl mx-auto">
+          <TestStepper step={1} />
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div className="p-8">
+              <Button
+                variant="ghost"
+                onClick={handleBackToPrevStep}
+                className="mb-8 -ml-2 text-slate-500 hover:text-slate-900"
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Back to Instructions
+              </Button>
 
-            {/* Ready to Begin Section */}
-            <div className="text-center mb-8">
-              <div className="w-20 h-20 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <BookOpen className="h-10 w-10 text-white" />
+              <div className="text-center mb-10">
+                <div className="w-20 h-20 bg-indigo-50 rounded-3xl flex items-center justify-center mx-auto mb-6 transform rotate-3">
+                  <Timer className="h-10 w-10 text-indigo-600" />
+                </div>
+                <h1 className="text-3xl font-bold text-slate-900 mb-2">Final Confirmation</h1>
+                <p className="text-slate-500 max-w-sm mx-auto">
+                  You are ready to begin the {currentTest?.title || "assessment"}. Please ensure you're in a quiet place.
+                </p>
               </div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent mb-3">
-                Ready to Begin?
-              </h1>
-              <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-                You're about to start your assessment. Make sure you're in a quiet environment and have allocated enough time to complete the test.
-              </p>
-            </div>
 
-            {/* Final Check Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <Card className="border-2 border-green-200 bg-green-50/50">
-                <CardContent className="p-6 text-center">
-                  <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-3" />
-                  <h3 className="font-semibold text-green-800 mb-2">Instructions Read</h3>
-                  <p className="text-green-600 text-sm">You have read and understood all test instructions</p>
-                </CardContent>
-              </Card>
-
-              <Card className="border-2 border-blue-200 bg-blue-50/50">
-                <CardContent className="p-6 text-center">
-                  <Clock className="h-12 w-12 text-blue-500 mx-auto mb-3" />
-                  <h3 className="font-semibold text-blue-800 mb-2">Time Allocated</h3>
-                  <p className="text-blue-600 text-sm">You have {currentTest?.timeDuration || 30} minutes allocated</p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Quick Reminder */}
-            <div className="bg-yellow-50/50 border border-yellow-200 rounded-xl p-6 mb-8">
-              <div className="flex items-start space-x-3">
-                <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
-                <div>
-                  <h4 className="font-semibold text-yellow-800 mb-2">Final Reminder</h4>
-                  <p className="text-yellow-700 text-sm">
-                    Once you start, the timer will begin and you cannot pause or exit without submitting the test.
-                    Ensure you're ready before clicking "Start Assessment".
-                  </p>
+              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 mb-10">
+                <div className="flex gap-4">
+                  <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shrink-0 shadow-sm">
+                    <AlertCircle className="h-5 w-5 text-amber-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-amber-900 mb-1">Important Reminder</h4>
+                    <p className="text-amber-700 text-sm leading-relaxed">
+                      By clicking "Start Assessment", you agree to the terms. The timer will begin immediately and you will enter fullscreen mode.
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Start Assessment Button */}
-            <div className="text-center">
-              <Button
-                size="lg"
-                className="px-12 py-6 text-lg bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl rounded-xl"
-                onClick={handleStartTest}
-                disabled={testTakingLoading}
-              >
-                {testTakingLoading ? (
-                  <div className="flex items-center">
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-3"></div>
-                    Starting Assessment...
-                  </div>
-                ) : (
-                  <>
-                    <Timer className="h-5 w-5 mr-2" />
-                    Start Assessment Now
-                  </>
-                )}
-              </Button>
+              <div className="flex items-center justify-between pt-8 border-t border-slate-100">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={handleBackToPrevStep}
+                  className="px-8 h-12 rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50"
+                >
+                  Go Back
+                </Button>
+                <Button
+                  size="lg"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-10 h-12 rounded-xl shadow-lg shadow-indigo-200 transition-all hover:scale-[1.02]"
+                  onClick={handleStartTest}
+                  disabled={testTakingLoading}
+                >
+                  {testTakingLoading ? (
+                    <span className="flex items-center">
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                      Initializing...
+                    </span>
+                  ) : (
+                    "Start Assessment Now"
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -706,36 +689,26 @@ export const TestDetail = () => {
   }
 
   // No questions available - Full page error
-  if (!currentQuestion && !testTakingLoading) {
+  if (!currentQuestion && !testTakingLoading && currentStep === 2) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <Card className="max-w-2xl w-full mx-auto border-0 shadow-2xl bg-white/90 backdrop-blur-sm">
-          <CardContent className="p-16 text-center space-y-8">
-            <div className="space-y-4">
-              <AlertCircle className="h-24 w-24 text-red-500 mx-auto" />
-              <div>
-                <h2 className="text-3xl font-bold text-gray-800 mb-4">No Questions Found</h2>
-                <p className="text-gray-600 text-lg mb-2">
-                  We couldn't find any questions for this test.
-                </p>
-                <p className="text-gray-500">
-                  Please contact your administrator for assistance.
-                </p>
-              </div>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        <Card className="max-w-md w-full border-0 shadow-lg bg-white">
+          <CardContent className="p-12 text-center space-y-6">
+            <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <AlertCircle className="h-8 w-8 text-red-600" />
             </div>
-            <div className="space-y-4">
-              <Button
-                onClick={() => { setTestStarted(false); resetTestState(); }}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-3 text-lg"
-              >
-                Back to Test Info
-              </Button>
-              <div>
-                <p className="text-sm text-gray-500">
-                  If this issue persists, please reach out to support.
-                </p>
-              </div>
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900 mb-2">No Questions Found</h2>
+              <p className="text-slate-500">
+                We couldn't retrieve questions for this assessment. Please contact support.
+              </p>
             </div>
+            <Button
+              onClick={() => { setCurrentStep(0); resetTestState(); }}
+              className="w-full bg-slate-900 hover:bg-slate-800 text-white"
+            >
+              Back to Overview
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -743,243 +716,180 @@ export const TestDetail = () => {
   }
 
   // Main test interface
+  const currentCategory = testQuestions[0]?.category || currentTest?.title || "Assessment";
+
   return (
-    <div ref={testContainerRef} className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-2 px-2">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-5 mb-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div className="flex-1">
-              <h1 className="text-2xl font-bold text-gray-800 mb-1">{currentTest?.title}</h1>
-              {/* <p className="text-gray-600 text-sm">{currentTest?.description}</p> */}
+    <div ref={testContainerRef} className="min-h-screen bg-white">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        {/* Category Header Section */}
+        <div className="mb-6 text-center lg:text-left text-ellipsis overflow-hidden">
+          <h1 className="text-3xl font-extrabold text-[#1a1a1a] tracking-tight mb-2 border-b-4 border-[#1a1a1a] inline-block pb-1">
+            {currentCategory}
+          </h1>
+          <p className="text-[#4a4a4a] text-sm leading-relaxed max-w-4xl">
+            The activities mentioned here don't have to be connected to the actual career that you might be interested in. These are things that you may like or dislike doing and not necessarily have experience in. Please <a href="#" className="text-blue-600 underline font-medium">watch this video</a> if you need help answering these questions.
+          </p>
+        </div>
+
+        {/* Assessment Container */}
+        <div className="flex flex-col gap-6">
+          <div className="overflow-hidden rounded-xl shadow-[0_15px_40px_-15px_rgba(0,0,0,0.1)] border border-gray-200">
+            <div className="w-full overflow-x-auto">
+              <div className="min-w-[800px]">
+
+                {/* Question Goal Title */}
+                <div className="bg-slate-50 py-4 px-8 text-center border-b border-gray-200">
+                  <h2 className="text-xl font-bold text-[#1a1a1a]">
+                    Indicate your preference for pursuing these activities in your leisure
+                  </h2>
+                </div>
+
+                {/* Table Structure */}
+                <div className="w-full">
+                  {/* Headers */}
+                  <div className="grid grid-cols-[1fr_repeat(5,110px)] bg-[#007b82] text-white">
+                    <div className="p-3"></div>
+                    <div className="p-3 text-center font-bold text-[10px] uppercase tracking-wider border-l border-[#006b72]">Strongly Dislike</div>
+                    <div className="p-3 text-center font-bold text-[10px] uppercase tracking-wider border-l border-[#006b72]">Dislike</div>
+                    <div className="p-3 text-center font-bold text-[10px] uppercase tracking-wider border-l border-[#006b72]">Unsure</div>
+                    <div className="p-3 text-center font-bold text-[10px] uppercase tracking-wider border-l border-[#006b72]">Like</div>
+                    <div className="p-3 text-center font-bold text-[10px] uppercase tracking-wider border-l border-[#006b72]">Strongly Like</div>
+                  </div>
+
+                  {/* Scrolled Question Area */}
+                  <div
+                    ref={questionsContainerRef}
+                    className="bg-white overflow-y-auto max-h-[500px] scroll-smooth"
+                  >
+                    <style>{`
+                      .scroll-smooth::-webkit-scrollbar {
+                        width: 6px;
+                      }
+                      .scroll-smooth::-webkit-scrollbar-track {
+                        background: #f1f1f1;
+                      }
+                      .scroll-smooth::-webkit-scrollbar-thumb {
+                        background: #007b82;
+                        border-radius: 10px;
+                      }
+                    `}</style>
+                    {testQuestions.map((question, qIdx) => (
+                      <div
+                        key={question.questionId}
+                        className={`grid grid-cols-[1fr_repeat(5,110px)] items-center border-b border-gray-100 transition-colors hover:bg-slate-50 ${qIdx % 2 === 1 ? 'bg-[#f9f9f9]' : 'bg-white'}`}
+                      >
+                        <div className="p-4 text-sm font-semibold text-[#2d2d2d] pl-8">
+                          {question.questionText}
+                        </div>
+
+                        {/* Preference Cells */}
+                        {[1, 2, 3, 4, 5].map((idx) => {
+                          const option = question.options?.[idx - 1];
+                          const optionValue = option ? String(option.optionId) : String(idx);
+                          const isSelected = getCurrentAnswer(question.questionId.toString()) === optionValue;
+
+                          return (
+                            <div key={idx} className="p-2 flex justify-center border-l border-gray-100">
+                              <button
+                                className="relative h-6 w-6 rounded-full border-2 flex items-center justify-center transition-all duration-200 hover:border-[#007b82]"
+                                onClick={() => setAnswerLocally(question.questionId.toString(), optionValue)}
+                              >
+                                <div className={`
+                                  w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200
+                                  ${isSelected
+                                    ? 'border-[#007b82] bg-white'
+                                    : 'border-gray-300 bg-white'}
+                                `}>
+                                  {isSelected && (
+                                    <div className="w-2.5 h-2.5 rounded-full bg-[#3b82f6] shadow-inner animate-in fade-in zoom-in duration-200" />
+                                  )}
+                                </div>
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Controls Hook Section */}
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 pb-16">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePreviousQuestion}
+                disabled={!hasPrevious}
+                className="h-12 px-8 rounded-lg border-gray-300 text-gray-700 hover:bg-slate-50 font-bold transition-all disabled:opacity-20"
+              >
+                <ChevronLeft className="h-5 w-5 mr-1" />
+                Previous Set
+              </Button>
             </div>
 
-            <div className="flex items-center space-x-6">
-              <div className="flex items-center space-x-4">
-                {/* <Badge variant="secondary" className="px-3 py-1 text-sm bg-blue-100 text-blue-700 border-0">
-                  Page {currentPage} of {totalPages}
-                </Badge> */}
-                <div className={`flex items-center text-lg font-semibold px-4 py-2 rounded-lg ${timeRemaining && timeRemaining < 300 ? "bg-red-100 text-red-700 animate-pulse" : "bg-gray-100 text-gray-700"
-                  }`}>
-                  <Timer className="h-5 w-5 mr-2" />
-                  <span>{formatTime(timeRemaining || 0)}</span>
-                </div>
+            <div className="flex items-center gap-4">
+              {/* Pagination Info Badge */}
+              <div className="bg-slate-100 px-6 py-2 rounded-full text-slate-700 font-bold text-xs tracking-widest uppercase border border-slate-200 shadow-sm">
+                Set {currentPage} of {totalPages}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4">
+              {hasNext ? (
                 <Button
-                  variant="outline"
+                  size="sm"
+                  onClick={handleNextQuestion}
+                  className="h-12 px-10 rounded-lg bg-[#007b82] hover:bg-[#006b72] text-white font-bold shadow-lg shadow-teal-50 transition-all transform active:scale-95 flex items-center"
+                >
+                  <span className="mr-1">Next Set</span>
+                  <ChevronRight className="h-5 w-5" />
+                </Button>
+              ) : (
+                <Button
                   size="sm"
                   onClick={handleSubmitTest}
-                  className="text-red-600 border-red-200 hover:bg-red-50"
+                  disabled={isSubmitting}
+                  className="h-12 px-12 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-lg shadow-indigo-50 transition-all transform active:scale-95"
                 >
-                  Exit
+                  {isSubmitting ? "Submitting..." : "Submit Assessment"}
                 </Button>
-                {isFullScreen && (
-                  <Button variant="ghost" size="icon" onClick={handleSubmitTest} title="Exit Fullscreen">
-                    <Minimize className="h-5 w-5" />
-                  </Button>
-                )}
-              </div>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Main Content - Split Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Questions Section - Left Side (2/3 width) */}
-          <div className="lg:col-span-2 space-y-2">
-            <Card className="border-0 bg-white/90 backdrop-blur-sm rounded-2xl overflow-hidden">
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center justify-between">
-                  <span className="text-lg">Questions</span>
-                  <span className="text-blue-500 text-sm font-normal">
-                    Showing {(currentPage - 1) * questionsPerPage + 1}-{Math.min(currentPage * questionsPerPage, totalQuestions)} of {totalQuestions}
-                  </span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 pt-0">
-                {/* Scrollable questions container */}
-                <div
-                  ref={questionsContainerRef}
-                  className="space-y-6 overflow-y-auto pr-2"
-                  style={{
-                    maxHeight: '70vh',
-                    scrollbarWidth: 'thin',
-                    scrollbarColor: '#cbd5e1 #f1f5f9'
-                  }}
-                >
-                  {testQuestions.map((question, index) => (
-                    <div
-                      key={question.questionId}
-                      className="p-6 bg-gray-50/50 rounded-xl border border-gray-200/50 hover:border-blue-200/50 transition-all duration-200"
-                    >
-                      <div className="flex items-start space-x-3 mb-2">
-                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-medium flex-shrink-0">
-                          {(currentPage - 1) * questionsPerPage + index + 1}
-                        </div>
-                        <h3 className="text-sm font-medium text-gray-800 text-base leading-relaxed">
-                          {question.questionText}
-                        </h3>
-                      </div>
-
-                      <RadioGroup
-                        value={getCurrentAnswer(question.questionId.toString()) || ""}
-                        onValueChange={(value) => setAnswerLocally(question.questionId.toString(), value)}
-                        className="grid grid-cols-5 gap-1"
-                      >
-                        {question.options?.map((option, i) => (
-                          <div
-                            key={`${question.questionId}-${i}`}
-                            className="flex items-center space-x-2 p-2 rounded-lg border border-gray-200 bg-white hover:bg-blue-50/50 hover:border-blue-200 transition-all duration-200 cursor-pointer group"
-                          >
-                            <RadioGroupItem
-                              value={String(option.optionId)}
-                              id={`option-${question.questionId}-${i}`}
-                              className="text-blue-400 border-2 border-gray-300 group-hover:border-blue-400"
-                            />
-                            <Label
-                              htmlFor={`option-${question.questionId}-${i}`}
-                              className="flex-1 cursor-pointer text-gray-900 group-hover:text-gray-500 text-xs font-medium leading-relaxed"
-                            >
-                              {option.optionText}
-                            </Label>
-                          </div>
-                        ))}
-                      </RadioGroup>
-
-                    </div>
-                  ))}
-
-                  <div className="flex justify-between items-center space-x-3 bg-white/90 backdrop-blur-sm rounded-2xl mt-5 mb-5">
-                    <Button
-                      variant="outline"
-                      onClick={handlePreviousQuestion}
-                      disabled={!hasPrevious}
-                      className="flex items-center justify-center rounded-lg px-6 py-1 border-2 text-sm font-medium"
-                    >
-                      <ChevronLeft className="h-5 w-5 mr-2" />
-                      Previous Page
-                    </Button>
-
-                    {hasNext ? (
-                      <Button
-                        onClick={handleNextQuestion}
-                        className="flex items-center justify-center rounded-lg px-8 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-sm font-medium"
-                      >
-                        Next Page
-                        <ChevronRight className="h-5 w-5 ml-2" />
-                      </Button>
-                    ) : (
-                      <Button
-                        onClick={handleSubmitTest}
-                        className="flex items-center justify-center rounded-lg px-8 py-2 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 shadow-lg text-sm font-medium"
-                      >
-                        Submit Test
-                      </Button>
-                    )}
-                  </div>
-                </div>
-                {/* Navigation Buttons */}
-
-              </CardContent>
-            </Card>
+        {/* Global Floating Footer Info */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 px-6 py-3 z-50 flex justify-between items-center text-xs text-gray-500 font-bold shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
+          <div className="flex items-center gap-8">
+            <span className="flex items-center gap-2 text-green-600">
+              <CheckCircle className="h-4 w-4" />
+              Auto-saved
+            </span>
+            <span className={`flex items-center gap-2 ${timeRemaining && timeRemaining < 300 ? 'text-red-500 animate-pulse' : 'text-slate-700'}`}>
+              <Timer className="h-4 w-4" />
+              {timeRemaining ? formatTime(timeRemaining) : '--:--'}
+            </span>
           </div>
 
-          {/* Navigation Section - Right Side (1/3 width) */}
-          <div className="space-y-6">
-            {/* Quick Navigation Card */}
-            <Card className="border-0 bg-white/90 backdrop-blur-sm rounded-2xl">
-              <CardHeader>
-                <CardTitle className="flex items-center text-lg">
-                  <BookOpen className="h-5 w-5 mr-2 text-blue-600" />
-                  Quick Navigation
-                </CardTitle>
-                <CardDescription>
-                  Jump to any page quickly
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Page Numbers Grid */}
-                <div className="grid grid-cols-5 gap-2">
-                  {getPageNumbers().map((page, index) => (
-                    page === '...' ? (
-                      <div key={`ellipsis-${index}`} className="flex items-center justify-center h-10 text-gray-500">
-                        ...
-                      </div>
-                    ) : (
-                      <Button
-                        key={page}
-                        variant={currentPage === page ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => handlePageNavigation(page as number)}
-                        className={`h-10 min-w-[44px] ${currentPage === page
-                          ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 shadow-lg"
-                          : "hover:border-blue-300"
-                          }`}
-                      >
-                        {page}
-                      </Button>
-                    )
-                  ))}
-                </div>
-
-                {/* First/Last Buttons */}
-                <div className="flex space-x-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => handlePageNavigation(1)}
-                    disabled={currentPage === 1}
-                    className="flex-1"
-                  >
-                    First Page
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => handlePageNavigation(totalPages)}
-                    disabled={currentPage === totalPages}
-                    className="flex-1"
-                  >
-                    Last Page
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Progress & Actions Card */}
-            <Card className="border-0 bg-white/90 backdrop-blur-sm rounded-2xl">
-              <CardHeader>
-                <CardTitle className="text-lg">Test Progress</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Progress Stats */}
-                <div className="space-y-3">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Current Page</span>
-                    <span className="font-semibold">{currentPage} of {totalPages}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Questions on this page</span>
-                    <span className="font-semibold">{testQuestions.length}</span>
-                  </div>
-                  {/* <div className="flex justify-between text-sm">
-                    <span className="text-gray-800">Time Remaining</span>
-                    <span className={`font-bold ${timeRemaining && timeRemaining < 300 ? "text-red-600 animate-pulse" : ""
-                      }`}>
-                      {formatTime(timeRemaining || 0)}
-                    </span>
-                  </div> */}
-                </div>
-
-                {/* Quick Tips */}
-                <div className="bg-blue-50/50 border border-blue-200 rounded-lg p-4">
-                  <h4 className="font-semibold text-blue-800 text-sm mb-2 flex items-center">
-                    <AlertCircle className="h-4 w-4 mr-2" />
-                    Quick Tip
-                  </h4>
-                  <p className="text-blue-700 text-xs">
-                    All answers are saved automatically. Test will auto-submit when time ends.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={isFullScreen ? exitFullScreen : enterFullScreen}
+              className="h-8 w-8 p-0 rounded-full hover:bg-slate-100 text-slate-600 transition-all active:scale-90"
+              title={isFullScreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+            >
+              {isFullScreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+            </Button>
+            <div className="w-px h-4 bg-slate-200" />
+            <span className="text-slate-400">Code: {testId}</span>
+            <div className="w-px h-4 bg-slate-200" />
+            <button onClick={handleExitTest} className="text-red-500 hover:underline">Exit</button>
           </div>
         </div>
       </div>
