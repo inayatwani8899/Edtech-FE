@@ -719,178 +719,172 @@ export const TestDetail = () => {
   const currentCategory = testQuestions[0]?.category || currentTest?.title || "Assessment";
 
   return (
-    <div ref={testContainerRef} className="min-h-screen bg-white">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-
-        {/* Category Header Section */}
-        <div className="mb-6 text-center lg:text-left text-ellipsis overflow-hidden">
-          <h1 className="text-3xl font-extrabold text-[#1a1a1a] tracking-tight mb-2 border-b-4 border-[#1a1a1a] inline-block pb-1">
-            {currentCategory}
-          </h1>
-          <p className="text-[#4a4a4a] text-sm leading-relaxed max-w-4xl">
-            The activities mentioned here don't have to be connected to the actual career that you might be interested in. These are things that you may like or dislike doing and not necessarily have experience in. Please <a href="#" className="text-blue-600 underline font-medium">watch this video</a> if you need help answering these questions.
-          </p>
+    <div ref={testContainerRef} className="h-screen overflow-hidden flex flex-col bg-slate-50">
+      <div className="flex-none bg-white border-b border-gray-100 shadow-sm z-20">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          {/* Category Header Section */}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2 overflow-hidden">
+            <h1 className="text-2xl font-extrabold text-[#1a1a1a] tracking-tight border-b-2 border-[#1a1a1a] inline-block pb-1 whitespace-nowrap overflow-hidden text-ellipsis mr-4">
+              {currentCategory}
+            </h1>
+            <p className="text-[#4a4a4a] text-xs leading-tight max-w-2xl opacity-80">
+              Activities mentioned here don't have to be connected to the actual career interest. <a href="#" className="text-blue-600 underline font-medium">Watch video</a> for help.
+            </p>
+          </div>
         </div>
+      </div>
 
-        {/* Assessment Container */}
-        <div className="flex flex-col gap-6">
-          <div className="overflow-hidden rounded-xl shadow-[0_15px_40px_-15px_rgba(0,0,0,0.1)] border border-gray-200">
+      {/* Main Content Area - Scrollable Question Table */}
+      <main className="flex-1 overflow-hidden flex flex-col max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-4">
+        <div className="flex-1 min-h-0 bg-white rounded-xl shadow-[0_10px_30px_-15px_rgba(0,0,0,0.05)] border border-gray-200 overflow-hidden flex flex-col">
+          <div className="flex-none bg-slate-50 py-3 px-8 text-center border-b border-gray-100">
+            <h2 className="text-base font-bold text-[#1a1a1a]">
+              Indicate your preference for pursuing these activities in your leisure
+            </h2>
+          </div>
+
+          <div className="flex-1 overflow-hidden flex flex-col">
             <div className="w-full overflow-x-auto">
               <div className="min-w-[800px]">
-
-                {/* Question Goal Title */}
-                <div className="bg-slate-50 py-4 px-8 text-center border-b border-gray-200">
-                  <h2 className="text-xl font-bold text-[#1a1a1a]">
-                    Indicate your preference for pursuing these activities in your leisure
-                  </h2>
+                {/* Headers */}
+                <div className="grid grid-cols-[1fr_repeat(5,110px)] bg-[#007b82] text-white sticky top-0 z-30 shadow-md">
+                  <div className="p-3"></div>
+                  <div className="p-3 text-center font-bold text-[10px] uppercase tracking-wider border-l border-[#006b72]">Strongly Dislike</div>
+                  <div className="p-3 text-center font-bold text-[10px] uppercase tracking-wider border-l border-[#006b72]">Dislike</div>
+                  <div className="p-3 text-center font-bold text-[10px] uppercase tracking-wider border-l border-[#006b72]">Unsure</div>
+                  <div className="p-3 text-center font-bold text-[10px] uppercase tracking-wider border-l border-[#006b72]">Like</div>
+                  <div className="p-3 text-center font-bold text-[10px] uppercase tracking-wider border-l border-[#006b72]">Strongly Like</div>
                 </div>
+              </div>
+            </div>
 
-                {/* Table Structure */}
-                <div className="w-full">
-                  {/* Headers */}
-                  <div className="grid grid-cols-[1fr_repeat(5,110px)] bg-[#007b82] text-white">
-                    <div className="p-3"></div>
-                    <div className="p-3 text-center font-bold text-[10px] uppercase tracking-wider border-l border-[#006b72]">Strongly Dislike</div>
-                    <div className="p-3 text-center font-bold text-[10px] uppercase tracking-wider border-l border-[#006b72]">Dislike</div>
-                    <div className="p-3 text-center font-bold text-[10px] uppercase tracking-wider border-l border-[#006b72]">Unsure</div>
-                    <div className="p-3 text-center font-bold text-[10px] uppercase tracking-wider border-l border-[#006b72]">Like</div>
-                    <div className="p-3 text-center font-bold text-[10px] uppercase tracking-wider border-l border-[#006b72]">Strongly Like</div>
-                  </div>
-
-                  {/* Scrolled Question Area */}
+            <div
+              ref={questionsContainerRef}
+              className="flex-1 overflow-y-auto scroll-smooth w-full"
+            >
+              <div className="min-w-[800px]">
+                <style>{`
+                  .scroll-smooth::-webkit-scrollbar {
+                    width: 6px;
+                  }
+                  .scroll-smooth::-webkit-scrollbar-track {
+                    background: #f1f1f1;
+                  }
+                  .scroll-smooth::-webkit-scrollbar-thumb {
+                    background: #007b82;
+                    border-radius: 10px;
+                  }
+                `}</style>
+                {testQuestions.map((question, qIdx) => (
                   <div
-                    ref={questionsContainerRef}
-                    className="bg-white overflow-y-auto max-h-[500px] scroll-smooth"
+                    key={question.questionId}
+                    className={`grid grid-cols-[1fr_repeat(5,110px)] items-center border-b border-gray-50 transition-colors hover:bg-slate-50 ${qIdx % 2 === 1 ? 'bg-[#fbfbfb]' : 'bg-white'}`}
                   >
-                    <style>{`
-                      .scroll-smooth::-webkit-scrollbar {
-                        width: 6px;
-                      }
-                      .scroll-smooth::-webkit-scrollbar-track {
-                        background: #f1f1f1;
-                      }
-                      .scroll-smooth::-webkit-scrollbar-thumb {
-                        background: #007b82;
-                        border-radius: 10px;
-                      }
-                    `}</style>
-                    {testQuestions.map((question, qIdx) => (
-                      <div
-                        key={question.questionId}
-                        className={`grid grid-cols-[1fr_repeat(5,110px)] items-center border-b border-gray-100 transition-colors hover:bg-slate-50 ${qIdx % 2 === 1 ? 'bg-[#f9f9f9]' : 'bg-white'}`}
-                      >
-                        <div className="p-4 text-sm font-semibold text-[#2d2d2d] pl-8">
-                          {question.questionText}
-                        </div>
+                    <div className="p-4 text-sm font-semibold text-[#2d2d2d] pl-8">
+                      {question.questionText}
+                    </div>
 
-                        {/* Preference Cells */}
-                        {[1, 2, 3, 4, 5].map((idx) => {
-                          const option = question.options?.[idx - 1];
-                          const optionValue = option ? String(option.optionId) : String(idx);
-                          const isSelected = getCurrentAnswer(question.questionId.toString()) === optionValue;
+                    {/* Preference Cells */}
+                    {[1, 2, 3, 4, 5].map((idx) => {
+                      const option = question.options?.[idx - 1];
+                      const optionValue = option ? String(option.optionId) : String(idx);
+                      const isSelected = getCurrentAnswer(question.questionId.toString()) === optionValue;
 
-                          return (
-                            <div key={idx} className="p-2 flex justify-center border-l border-gray-100">
-                              <button
-                                className="relative h-6 w-6 rounded-full border-2 flex items-center justify-center transition-all duration-200 hover:border-[#007b82]"
-                                onClick={() => setAnswerLocally(question.questionId.toString(), optionValue)}
-                              >
-                                <div className={`
-                                  w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200
-                                  ${isSelected
-                                    ? 'border-[#007b82] bg-white'
-                                    : 'border-gray-300 bg-white'}
-                                `}>
-                                  {isSelected && (
-                                    <div className="w-2.5 h-2.5 rounded-full bg-[#3b82f6] shadow-inner animate-in fade-in zoom-in duration-200" />
-                                  )}
-                                </div>
-                              </button>
+                      return (
+                        <div key={idx} className="p-2 flex justify-center border-l border-gray-50">
+                          <button
+                            className="relative h-6 w-6 rounded-full border-2 flex items-center justify-center transition-all duration-200 hover:border-[#007b82]"
+                            onClick={() => setAnswerLocally(question.questionId.toString(), optionValue)}
+                          >
+                            <div className={`
+                              w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200
+                              ${isSelected
+                                ? 'border-[#007b82] bg-white'
+                                : 'border-gray-300 bg-white'}
+                            `}>
+                              {isSelected && (
+                                <div className="w-2.5 h-2.5 rounded-full bg-[#3b82f6] shadow-inner animate-in fade-in zoom-in duration-200" />
+                              )}
                             </div>
-                          );
-                        })}
-                      </div>
-                    ))}
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
-                </div>
+                ))}
               </div>
-            </div>
-          </div>
-
-          {/* Controls Hook Section */}
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 pb-16">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handlePreviousQuestion}
-                disabled={!hasPrevious}
-                className="h-12 px-8 rounded-lg border-gray-300 text-gray-700 hover:bg-slate-50 font-bold transition-all disabled:opacity-20"
-              >
-                <ChevronLeft className="h-5 w-5 mr-1" />
-                Previous Set
-              </Button>
-            </div>
-
-            <div className="flex items-center gap-4">
-              {/* Pagination Info Badge */}
-              <div className="bg-slate-100 px-6 py-2 rounded-full text-slate-700 font-bold text-xs tracking-widest uppercase border border-slate-200 shadow-sm">
-                Set {currentPage} of {totalPages}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4">
-              {hasNext ? (
-                <Button
-                  size="sm"
-                  onClick={handleNextQuestion}
-                  className="h-12 px-10 rounded-lg bg-[#007b82] hover:bg-[#006b72] text-white font-bold shadow-lg shadow-teal-50 transition-all transform active:scale-95 flex items-center"
-                >
-                  <span className="mr-1">Next Set</span>
-                  <ChevronRight className="h-5 w-5" />
-                </Button>
-              ) : (
-                <Button
-                  size="sm"
-                  onClick={handleSubmitTest}
-                  disabled={isSubmitting}
-                  className="h-12 px-12 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-lg shadow-indigo-50 transition-all transform active:scale-95"
-                >
-                  {isSubmitting ? "Submitting..." : "Submit Assessment"}
-                </Button>
-              )}
             </div>
           </div>
         </div>
+      </main>
 
-        {/* Global Floating Footer Info */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 px-6 py-3 z-50 flex justify-between items-center text-xs text-gray-500 font-bold shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
-          <div className="flex items-center gap-8">
-            <span className="flex items-center gap-2 text-green-600">
-              <CheckCircle className="h-4 w-4" />
-              Auto-saved
-            </span>
-            <span className={`flex items-center gap-2 ${timeRemaining && timeRemaining < 300 ? 'text-red-500 animate-pulse' : 'text-slate-700'}`}>
-              <Timer className="h-4 w-4" />
-              {timeRemaining ? formatTime(timeRemaining) : '--:--'}
-            </span>
+      {/* Fixed Bottom Navigation Section */}
+      <div className="flex-none bg-white border-t border-gray-200 z-40 pb-[50px]">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center bg-white">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handlePreviousQuestion}
+            disabled={!hasPrevious}
+            className="h-10 px-6 rounded-lg border-gray-300 text-gray-700 hover:bg-slate-50 font-bold transition-all disabled:opacity-20"
+          >
+            <ChevronLeft className="h-4 w-4 mr-1" />
+            Previous Set
+          </Button>
+
+          <div className="bg-slate-100 px-4 py-1.5 rounded-full text-slate-700 font-bold text-[10px] tracking-widest uppercase border border-slate-200">
+            Set {currentPage} of {totalPages}
           </div>
 
-          <div className="flex items-center gap-4">
+          {hasNext ? (
             <Button
-              variant="ghost"
               size="sm"
-              onClick={isFullScreen ? exitFullScreen : enterFullScreen}
-              className="h-8 w-8 p-0 rounded-full hover:bg-slate-100 text-slate-600 transition-all active:scale-90"
-              title={isFullScreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+              onClick={handleNextQuestion}
+              className="h-10 px-8 rounded-lg bg-[#007b82] hover:bg-[#006b72] text-white font-bold shadow-md shadow-teal-50 transition-all transform active:scale-95 flex items-center"
             >
-              {isFullScreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+              <span className="mr-1">Next Set</span>
+              <ChevronRight className="h-4 w-4" />
             </Button>
-            <div className="w-px h-4 bg-slate-200" />
-            <span className="text-slate-400">Code: {testId}</span>
-            <div className="w-px h-4 bg-slate-200" />
-            <button onClick={handleExitTest} className="text-red-500 hover:underline">Exit</button>
-          </div>
+          ) : (
+            <Button
+              size="sm"
+              onClick={handleSubmitTest}
+              disabled={isSubmitting}
+              className="h-10 px-10 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-md shadow-indigo-50 transition-all transform active:scale-95"
+            >
+              {isSubmitting ? "Submitting..." : "Submit Assessment"}
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Global Floating Footer Info */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 px-6 py-3 z-50 flex justify-between items-center text-xs text-gray-500 font-bold shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
+        <div className="flex items-center gap-8">
+          <span className="flex items-center gap-2 text-green-600">
+            <CheckCircle className="h-4 w-4" />
+            Auto-saved
+          </span>
+          <span className={`flex items-center gap-2 ${timeRemaining && timeRemaining < 300 ? 'text-red-500 animate-pulse' : 'text-slate-700'}`}>
+            <Timer className="h-4 w-4" />
+            {timeRemaining ? formatTime(timeRemaining) : '--:--'}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={isFullScreen ? exitFullScreen : enterFullScreen}
+            className="h-8 w-8 p-0 rounded-full hover:bg-slate-100 text-slate-600 transition-all active:scale-90"
+            title={isFullScreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+          >
+            {isFullScreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+          </Button>
+          <div className="w-px h-4 bg-slate-200" />
+          <span className="text-slate-400">Code: {testId}</span>
+          <div className="w-px h-4 bg-slate-200" />
+          <button onClick={handleExitTest} className="text-red-500 hover:underline">Exit</button>
         </div>
       </div>
     </div>

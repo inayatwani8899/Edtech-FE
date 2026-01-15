@@ -43,7 +43,7 @@ export interface Test {
     color?: any;
     participants: any;
     rating: number;
-    difficulty(difficulty: any): string;
+    difficulty?: string;
     progress: number;
     tags: any;
     price: number;
