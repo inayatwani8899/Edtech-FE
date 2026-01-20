@@ -67,36 +67,36 @@ const Counselors: React.FC = () => {
 
             <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10">
                 {/* Header Section */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
                     <div>
-                        <div className="flex items-center gap-2 mb-1">
+                        <div className="flex items-center gap-2 mb-0.5">
                             <div className="h-px w-6 bg-primary/40"></div>
                             <span className="text-[9px] font-black uppercase tracking-[0.25em] text-primary">Core Personnel</span>
                         </div>
-                        <h1 className="text-3xl font-black tracking-tight text-slate-900 mb-1">
+                        <h1 className="text-2xl font-black tracking-tight text-slate-900 flex items-center gap-2 mb-0.5">
                             Counselor <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-indigo-600">Hub</span>
                         </h1>
-                        <p className="text-slate-500 font-medium text-sm">
+                        <p className="text-xs font-medium text-slate-500 max-w-2xl">
                             Manage guidance professionals and assign student cohorts.
                         </p>
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <div className="bg-white/80 backdrop-blur-xl p-2 rounded-xl shadow-soft border border-white/50 flex items-center gap-3 px-4">
-                            <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
-                                <Users2 className="h-5 w-5 text-emerald-600" />
-                            </div>
-                            <div className="flex flex-col">
+                        {/* <div className="bg-white/80 backdrop-blur-xl p-1.5 rounded-lg shadow-soft border border-white/50 flex items-center gap-3 px-3"> */}
+                        {/* <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                                <Users2 className="h-4 w-4 text-emerald-600" />
+                            </div> */}
+                        {/* <div className="flex flex-col">
                                 <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider">Total Staff</span>
-                                <span className="text-lg font-black text-slate-900 leading-none">{totalCount || 0}</span>
-                            </div>
-                        </div>
+                                <span className="text-sm font-black text-slate-900 leading-none">{totalCount || 0}</span>
+                            </div> */}
+                        {/* </div> */}
                         <Button
                             onClick={() => navigate("/counselors/add")}
-                            className="h-12 px-6 rounded-xl bg-slate-900 text-white shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-95 transition-all duration-300 group"
+                            className="bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-900/20 rounded-lg h-9 px-4 transition-all hover:scale-105 active:scale-95 group"
                         >
-                            <Plus className="h-4 w-4 mr-2 group-hover:rotate-90 transition-transform" />
-                            <span className="font-bold text-xs uppercase tracking-wide">Onboard Counselor</span>
+                            <Plus className="h-3.5 w-3.5 mr-2 group-hover:rotate-90 transition-transform" />
+                            <span className="font-bold text-[10px] uppercase tracking-wide">Onboard Counselor</span>
                         </Button>
                     </div>
                 </div>
