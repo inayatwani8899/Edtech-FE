@@ -28,7 +28,7 @@
 //                 Student Dashboard
 //               </h1>
 //             </div>
-            
+
 //             <div className="flex items-center gap-3">
 //               <span className="text-sm text-muted-foreground">
 //                 Welcome, {user.firstName}
