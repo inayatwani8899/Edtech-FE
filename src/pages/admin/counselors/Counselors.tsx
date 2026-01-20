@@ -165,65 +165,62 @@ const Counselors: React.FC = () => {
                                     <TableBody>
                                         {normalizedCounselors(counselors).map((counselor) => (
                                             <TableRow key={counselor?.id} className="border-slate-100 hover:bg-slate-50 transition-all duration-200 group">
-                                                <TableCell className="px-4 py-3">
+                                                <TableCell className="px-4 py-2">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center font-bold text-white text-sm shadow-md shadow-emerald-500/20 border border-white/20 ring-2 ring-slate-50 group-hover:scale-105 transition-transform flex-shrink-0">
+                                                        <div className="h-6 w-6 rounded-md bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center font-bold text-white text-[10px] shadow-sm shadow-emerald-500/20 border border-white/20 ring-1 ring-slate-50 group-hover:scale-105 transition-transform flex-shrink-0">
                                                             {counselor?.firstName?.[0]}{counselor?.lastName?.[0]}
                                                         </div>
                                                         <div className="min-w-0 flex-1">
-                                                            <p className="text-sm font-bold text-slate-900 leading-none mb-1 group-hover:text-primary transition-colors truncate">
+                                                            <p className="text-xs font-bold text-slate-900 leading-none mb-0.5 group-hover:text-primary transition-colors truncate">
                                                                 {`${counselor?.firstName} ${counselor?.lastName}`}
                                                             </p>
                                                             <div className="flex items-center gap-1.5">
-                                                                <Badge variant="secondary" className="bg-slate-100 text-[8px] font-bold uppercase text-slate-400 py-0 px-1.5 border-none rounded">
-                                                                    ID: {counselor?.id?.toString().slice(0, 6)}
-                                                                </Badge>
                                                                 {counselor?.hireDate && (
                                                                     <span className="text-[9px] text-slate-400 font-medium hidden sm:inline-block">
-                                                                        • Since {new Date(counselor.hireDate).getFullYear()}
+                                                                        Since {new Date(counselor.hireDate).getFullYear()}
                                                                     </span>
                                                                 )}
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </TableCell>
-                                                <TableCell className="px-4 py-3">
+                                                <TableCell className="px-4 py-2">
                                                     <div className="flex items-center gap-1.5 max-w-[200px]">
                                                         {/* Icon removed to match Users style simpler text or kept if Users has icons - Users has no icon in email cell, just text. I will match users simpler email style */}
-                                                        <span className="text-sm font-semibold text-slate-700 truncate block" title={counselor?.email}>{counselor?.email}</span>
+                                                        <span className="text-xs font-semibold text-slate-700 truncate block" title={counselor?.email}>{counselor?.email}</span>
                                                     </div>
                                                 </TableCell>
-                                                <TableCell className="px-4 py-3">
+                                                <TableCell className="px-4 py-2">
                                                     {counselor?.phoneNumber ? (
                                                         <div className="flex items-center gap-1.5">
-                                                            <div className="h-5 w-5 rounded-full bg-slate-50 flex items-center justify-center flex-shrink-0">
-                                                                <Phone className="h-3 w-3 text-slate-400" />
+                                                            <div className="h-4 w-4 rounded-full bg-slate-50 flex items-center justify-center flex-shrink-0">
+                                                                <Phone className="h-2.5 w-2.5 text-slate-400" />
                                                             </div>
-                                                            <span className="text-sm font-semibold text-slate-600">{counselor.phoneNumber}</span>
+                                                            <span className="text-xs font-semibold text-slate-600">{counselor.phoneNumber}</span>
                                                         </div>
                                                     ) : (
-                                                        <span className="text-xs text-slate-400 italic">Not provided</span>
+                                                        <span className="text-[10px] text-slate-400 italic">Not provided</span>
                                                     )}
                                                 </TableCell>
-                                                <TableCell className="px-4 py-3">
+                                                <TableCell className="px-4 py-2">
                                                     <div className="flex justify-center gap-2 opacity-100 transition-all duration-200">
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
                                                             onClick={() => navigate(`/counselors/edit/${counselor.id}`)}
-                                                            className="h-8 w-8 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 transition-all"
+                                                            className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 transition-all"
                                                             title="Edit Profile"
                                                         >
-                                                            <Edit className="h-4 w-4" />
+                                                            <Edit className="h-3.5 w-3.5" />
                                                         </Button>
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
                                                             onClick={() => openDeleteDialog(counselor.id)}
-                                                            className="h-8 w-8 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-300 transition-all"
+                                                            className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-300 transition-all"
                                                             title="Revoke Access"
                                                         >
-                                                            <Trash2 className="h-4 w-4" />
+                                                            <Trash2 className="h-3.5 w-3.5" />
                                                         </Button>
                                                     </div>
                                                 </TableCell>
