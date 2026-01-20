@@ -74,7 +74,7 @@ const Users: React.FC = () => {
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] bg-indigo-500/5 rounded-full blur-[140px] animate-pulse" style={{ animationDelay: '1s' }}></div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10">
+            <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10">
                 {/* Header Section */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                     <div>
@@ -170,8 +170,8 @@ const Users: React.FC = () => {
                                 <Table>
                                     <TableHeader className="bg-slate-50">
                                         <TableRow className="border-slate-200 hover:bg-transparent">
-                                            <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[30%]">User</TableHead>
-                                            <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[35%]">Email</TableHead>
+                                            <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[32%]">User</TableHead>
+                                            <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[33%]">Email</TableHead>
                                             <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider text-center w-[15%]">Role</TableHead>
                                             <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider text-center w-[20%]">Actions</TableHead>
                                         </TableRow>
@@ -180,15 +180,15 @@ const Users: React.FC = () => {
                                         {users?.map((user) => (
                                             <TableRow key={user?.id} className="border-slate-100 hover:bg-slate-50 transition-all duration-200 group">
                                                 <TableCell className="px-4 py-3">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-primary to-indigo-600 flex items-center justify-center font-bold text-white text-sm shadow-md shadow-primary/20 border border-white ring-2 ring-slate-50 group-hover:scale-105 transition-transform">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="h-9 w-9 rounded-lg bg-gradient-to-tr from-primary to-indigo-600 flex items-center justify-center font-bold text-white text-sm shadow-md shadow-primary/20 border border-white ring-2 ring-slate-50 group-hover:scale-105 transition-transform flex-shrink-0">
                                                             {user?.firstName?.[0]}{user?.lastName?.[0]}
                                                         </div>
-                                                        <div>
-                                                            <p className="text-sm font-bold text-slate-900 leading-none mb-1 group-hover:text-primary transition-colors">
+                                                        <div className="min-w-0 flex-1">
+                                                            <p className="text-sm font-bold text-slate-900 leading-none mb-1 group-hover:text-primary transition-colors truncate">
                                                                 {`${user?.firstName} ${user?.lastName}`}
                                                             </p>
-                                                            <div className="flex items-center gap-2">
+                                                            <div className="flex items-center gap-1.5">
                                                                 <Badge variant="secondary" className="bg-slate-100 text-[8px] font-bold uppercase text-slate-400 py-0 px-1.5 border-none">
                                                                     ID: {user?.id?.toString().slice(0, 6)}
                                                                 </Badge>
@@ -201,7 +201,7 @@ const Users: React.FC = () => {
                                                     </div>
                                                 </TableCell>
                                                 <TableCell className="px-4 py-3">
-                                                    <span className="text-sm font-semibold text-slate-700 truncate block max-w-[250px]">{user?.email}</span>
+                                                    <span className="text-sm font-semibold text-slate-700 truncate block">{user?.email}</span>
                                                 </TableCell>
                                                 <TableCell className="px-4 py-3 text-center">
                                                     <Badge
@@ -247,20 +247,20 @@ const Users: React.FC = () => {
                                     </TableBody>
                                 </Table>
 
-                                {/* Pagination Console */}
-                                <div className="p-10 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-8 bg-slate-50/20">
-                                    <div className="flex items-center gap-4">
-                                        <div className="p-3 bg-white rounded-2xl shadow-soft border border-slate-100">
-                                            <Sparkles className="h-5 w-5 text-amber-500 animate-pulse" />
+                                {/* Pagination Footer */}
+                                <div className="p-6 border-t border-slate-200 bg-slate-50/50 flex flex-col md:flex-row items-center justify-between gap-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-white rounded-lg shadow-sm border border-slate-200">
+                                            <Sparkles className="h-4 w-4 text-primary" />
                                         </div>
                                         <div>
-                                            <p className="text-[11px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">Grid Distribution</p>
-                                            <p className="text-sm font-black text-slate-800 uppercase tracking-tighter">
-                                                Presenting <span className="text-primary">{((currentPage - 1) * limit) + 1} - {Math.min(currentPage * limit, totalCount)}</span> of {totalCount} Neural Assets
+                                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 leading-none mb-0.5">Grid Distribution</p>
+                                            <p className="text-sm font-bold text-slate-700">
+                                                Showing <span className="text-primary">{((currentPage - 1) * limit) + 1}-{Math.min(currentPage * limit, totalCount)}</span> of {totalCount} users
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="bg-white p-2 rounded-2xl shadow-soft border border-slate-100">
+                                    <div className="bg-white p-1.5 rounded-xl shadow-sm border border-slate-200">
                                         <Pagination
                                             currentPage={currentPage}
                                             totalPages={totalPages}
@@ -269,12 +269,7 @@ const Users: React.FC = () => {
                                             onLimitChange={setLimit}
                                         />
                                     </div>
-                                    <Button
-                                        variant="ghost"
-                                        className="hidden md:flex text-[11px] font-black uppercase tracking-[0.3em] text-primary hover:bg-primary/5 rounded-2xl py-6 px-8 group"
-                                    >
-                                        Telemetry Hub <ArrowUpRight className="h-4 w-4 ml-3 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                                    </Button>
+
                                 </div>
                             </div>
                         )}
