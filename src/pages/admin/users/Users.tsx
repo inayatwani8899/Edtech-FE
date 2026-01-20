@@ -76,56 +76,56 @@ const Users: React.FC = () => {
 
             <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10">
                 {/* Header Section */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
                     <div>
-                        <div className="flex items-center gap-2 mb-1">
+                        <div className="flex items-center gap-2 mb-0.5">
                             <div className="h-px w-6 bg-primary/40"></div>
                             <span className="text-[9px] font-black uppercase tracking-[0.25em] text-primary">Identity Hub</span>
                         </div>
-                        <h1 className="text-3xl font-black tracking-tight text-slate-900 mb-1">
+                        <h1 className="text-2xl font-black tracking-tight text-slate-900 flex items-center gap-2 mb-0.5">
                             User <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-600">Management</span>
                         </h1>
-                        <p className="text-slate-500 font-medium text-sm">
+                        <p className="text-xs font-medium text-slate-500 max-w-2xl">
                             Manage institutional roles and access control.
                         </p>
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <div className="bg-white/80 backdrop-blur-xl p-2 rounded-xl shadow-soft border border-white/50 flex items-center gap-3 px-4">
-                            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                                <Users2 className="h-5 w-5 text-primary" />
+                        {/* <div className="bg-white/80 backdrop-blur-xl p-1.5 rounded-lg shadow-soft border border-white/50 flex items-center gap-3 px-3">
+                            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                                <Users2 className="h-4 w-4 text-primary" />
                             </div>
                             <div className="flex flex-col">
                                 <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider">Total Users</span>
-                                <span className="text-lg font-black text-slate-900 leading-none">{totalCount.toLocaleString()}</span>
+                                <span className="text-sm font-black text-slate-900 leading-none">{totalCount.toLocaleString()}</span>
                             </div>
-                        </div>
+                        </div> */}
                         <Button
                             onClick={() => navigate("/users/add")}
-                            className="h-12 px-6 rounded-xl bg-slate-900 text-white shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-95 transition-all duration-300 group"
+                            className="bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-900/20 rounded-lg h-9 px-4 transition-all hover:scale-105 active:scale-95 group"
                         >
-                            <Plus className="h-4 w-4 mr-2 group-hover:rotate-90 transition-transform duration-300" />
-                            <span className="text-xs font-bold uppercase tracking-wider">Add User</span>
+                            <Plus className="h-3.5 w-3.5 mr-2 group-hover:rotate-90 transition-transform duration-300" />
+                            <span className="text-[10px] font-bold uppercase tracking-wide">Add User</span>
                         </Button>
                     </div>
                 </div>
 
                 {/* Primary Data Hub */}
                 <Card className="glass-card border-none shadow-elegant rounded-2xl overflow-hidden">
-                    <CardHeader className="p-6 pb-4 border-b border-slate-50">
-                        <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
-                            <div className="relative group w-full md:w-96">
-                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 group-focus-within:text-primary transition-colors" />
+                    <CardHeader className="p-3 border-b border-slate-50">
+                        <div className="flex flex-col md:flex-row gap-3 justify-between items-center">
+                            <div className="relative group w-full md:w-80">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500 group-focus-within:text-primary transition-colors" />
                                 <Input
                                     placeholder="Search by name or email..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="h-12 pl-11 bg-white border border-slate-200 rounded-xl font-semibold text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all w-full"
+                                    className="h-9 pl-9 bg-white border border-slate-200 rounded-lg font-medium text-xs text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all w-full"
                                 />
                             </div>
                             <div className="flex items-center gap-2">
-                                <Button variant="ghost" className="h-10 px-4 rounded-xl bg-slate-100 border border-slate-200 font-semibold text-slate-700 hover:text-primary hover:bg-slate-50 transition-all text-sm">
-                                    <Filter className="h-4 w-4 mr-2" />
+                                <Button variant="ghost" className="h-9 px-3 rounded-lg bg-slate-100 border border-slate-200 font-semibold text-slate-700 hover:text-primary hover:bg-slate-50 transition-all text-xs">
+                                    <Filter className="h-3.5 w-3.5 mr-2" />
                                     Filters
                                 </Button>
                             </div>
@@ -179,66 +179,67 @@ const Users: React.FC = () => {
                                     <TableBody>
                                         {users?.map((user) => (
                                             <TableRow key={user?.id} className="border-slate-100 hover:bg-slate-50 transition-all duration-200 group">
-                                                <TableCell className="px-4 py-3">
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="h-9 w-9 rounded-lg bg-gradient-to-tr from-primary to-indigo-600 flex items-center justify-center font-bold text-white text-sm shadow-md shadow-primary/20 border border-white ring-2 ring-slate-50 group-hover:scale-105 transition-transform flex-shrink-0">
+                                                <TableCell className="px-4 py-2">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="h-6 w-6 rounded-md bg-gradient-to-tr from-primary to-indigo-600 flex items-center justify-center font-bold text-white text-[10px] shadow-sm shadow-primary/20 border border-white/20 ring-1 ring-slate-50 group-hover:scale-105 transition-transform flex-shrink-0">
                                                             {user?.firstName?.[0]}{user?.lastName?.[0]}
                                                         </div>
                                                         <div className="min-w-0 flex-1">
-                                                            <p className="text-sm font-bold text-slate-900 leading-none mb-1 group-hover:text-primary transition-colors truncate">
+                                                            <p className="text-xs font-bold text-slate-900 leading-none mb-0.5 group-hover:text-primary transition-colors truncate">
                                                                 {`${user?.firstName} ${user?.lastName}`}
                                                             </p>
                                                             <div className="flex items-center gap-1.5">
-                                                                <Badge variant="secondary" className="bg-slate-100 text-[8px] font-bold uppercase text-slate-400 py-0 px-1.5 border-none">
+                                                                {/* ID removed to match Counselors exact style */}
+                                                                {/* <Badge variant="secondary" className="bg-slate-100 text-[8px] font-bold uppercase text-slate-400 py-0 px-1.5 border-none">
                                                                     ID: {user?.id?.toString().slice(0, 6)}
-                                                                </Badge>
+                                                                </Badge> */}
                                                                 <div className="flex items-center gap-0.5">
-                                                                    <ShieldCheck className="h-3 w-3 text-emerald-500" />
+                                                                    <ShieldCheck className="h-2.5 w-2.5 text-emerald-500" />
                                                                     <span className="text-[8px] font-bold text-emerald-600 uppercase">ACTIVE</span>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </TableCell>
-                                                <TableCell className="px-4 py-3">
-                                                    <span className="text-sm font-semibold text-slate-700 truncate block">{user?.email}</span>
+                                                <TableCell className="px-4 py-2">
+                                                    <span className="text-xs font-semibold text-slate-700 truncate block">{user?.email}</span>
                                                 </TableCell>
-                                                <TableCell className="px-4 py-3 text-center">
+                                                <TableCell className="px-4 py-2 text-center">
                                                     <Badge
                                                         variant="outline"
-                                                        className={`px-3 py-1 rounded-lg font-bold text-[9px] uppercase tracking-wide border ${getRoleColor(user?.role)}`}
+                                                        className={`px-2 py-0.5 rounded-md font-bold text-[9px] uppercase tracking-wide border ${getRoleColor(user?.role)}`}
                                                     >
                                                         {user?.role?.charAt(0)?.toUpperCase() + user?.role?.slice(1)}
                                                     </Badge>
                                                 </TableCell>
-                                                <TableCell className="px-4 py-3">
+                                                <TableCell className="px-4 py-2">
                                                     <div className="flex justify-center gap-2 opacity-100 transition-all duration-200">
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
                                                             onClick={() => navigate(`/users/view/${user.id}`)}
-                                                            className="h-8 w-8 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-primary hover:bg-primary/5 hover:border-primary/30 transition-all"
+                                                            className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-primary hover:bg-primary/5 hover:border-primary/30 transition-all"
                                                             title="View"
                                                         >
-                                                            <Eye className="h-4 w-4" />
+                                                            <Eye className="h-3.5 w-3.5" />
                                                         </Button>
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
                                                             onClick={() => navigate(`/users/edit/${user.id}`)}
-                                                            className="h-8 w-8 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 transition-all"
+                                                            className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 transition-all"
                                                             title="Edit"
                                                         >
-                                                            <Edit className="h-4 w-4" />
+                                                            <Edit className="h-3.5 w-3.5" />
                                                         </Button>
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
                                                             onClick={() => openDeleteDialog(user.id)}
-                                                            className="h-8 w-8 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-300 transition-all"
+                                                            className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-300 transition-all"
                                                             title="Delete"
                                                         >
-                                                            <Trash2 className="h-4 w-4" />
+                                                            <Trash2 className="h-3.5 w-3.5" />
                                                         </Button>
                                                     </div>
                                                 </TableCell>
@@ -248,19 +249,19 @@ const Users: React.FC = () => {
                                 </Table>
 
                                 {/* Pagination Footer */}
-                                <div className="p-6 border-t border-slate-200 bg-slate-50/50 flex flex-col md:flex-row items-center justify-between gap-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-white rounded-lg shadow-sm border border-slate-200">
-                                            <Sparkles className="h-4 w-4 text-primary" />
+                                <div className="p-2 border-t border-slate-200 bg-slate-50/50 flex flex-col md:flex-row items-center justify-between gap-2">
+                                    <div className="flex items-center gap-2">
+                                        <div className="p-1.5 bg-white rounded-md shadow-sm border border-slate-200">
+                                            <Sparkles className="h-3.5 w-3.5 text-primary" />
                                         </div>
                                         <div>
-                                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 leading-none mb-0.5">Grid Distribution</p>
-                                            <p className="text-sm font-bold text-slate-700">
+                                            <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400 leading-none mb-0.5">Grid Distribution</p>
+                                            <p className="text-xs font-bold text-slate-700">
                                                 Showing <span className="text-primary">{((currentPage - 1) * limit) + 1}-{Math.min(currentPage * limit, totalCount)}</span> of {totalCount} users
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="bg-white p-1.5 rounded-xl shadow-sm border border-slate-200">
+                                    <div className="bg-white p-1 rounded-lg shadow-sm border border-slate-200 scale-90 origin-right">
                                         <Pagination
                                             currentPage={currentPage}
                                             totalPages={totalPages}
