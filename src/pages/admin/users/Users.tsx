@@ -170,8 +170,8 @@ const Users: React.FC = () => {
                                 <Table>
                                     <TableHeader className="bg-slate-50">
                                         <TableRow className="border-slate-200 hover:bg-transparent">
-                                            <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[35%]">User</TableHead>
-                                            <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[30%]">Email</TableHead>
+                                            <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[30%]">User</TableHead>
+                                            <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[35%]">Email</TableHead>
                                             <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider text-center w-[15%]">Role</TableHead>
                                             <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider text-center w-[20%]">Actions</TableHead>
                                         </TableRow>
@@ -201,7 +201,7 @@ const Users: React.FC = () => {
                                                     </div>
                                                 </TableCell>
                                                 <TableCell className="px-4 py-3">
-                                                    <span className="text-sm font-semibold text-slate-700">{user?.email}</span>
+                                                    <span className="text-sm font-semibold text-slate-700 truncate block max-w-[250px]">{user?.email}</span>
                                                 </TableCell>
                                                 <TableCell className="px-4 py-3 text-center">
                                                     <Badge
