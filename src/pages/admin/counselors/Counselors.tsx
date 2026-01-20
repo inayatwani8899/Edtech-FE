@@ -103,20 +103,20 @@ const Counselors: React.FC = () => {
 
                 {/* Main Content Card */}
                 <Card className="glass-card border-none shadow-elegant rounded-2xl overflow-hidden">
-                    <CardHeader className="p-6 pb-4 border-b border-slate-50">
-                        <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
-                            <div className="relative group w-full md:w-96">
-                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 group-focus-within:text-primary transition-colors" />
+                    <CardHeader className="p-3 border-b border-slate-50">
+                        <div className="flex flex-col md:flex-row gap-3 justify-between items-center">
+                            <div className="relative group w-full md:w-80">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500 group-focus-within:text-primary transition-colors" />
                                 <Input
                                     placeholder="Search by name, email or specialization..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="h-12 pl-11 bg-white border border-slate-200 rounded-xl font-semibold text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all w-full"
+                                    className="h-9 pl-9 bg-white border border-slate-200 rounded-lg font-medium text-xs text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all w-full"
                                 />
                             </div>
                             <div className="flex items-center gap-2">
-                                <Button variant="ghost" className="h-10 px-4 rounded-xl bg-slate-100 border border-slate-200 font-semibold text-slate-700 hover:text-primary hover:bg-slate-50 transition-all text-sm">
-                                    <Filter className="h-4 w-4 mr-2" />
+                                <Button variant="ghost" className="h-9 px-3 rounded-lg bg-slate-100 border border-slate-200 font-semibold text-slate-700 hover:text-primary hover:bg-slate-50 transition-all text-xs">
+                                    <Filter className="h-3.5 w-3.5 mr-2" />
                                     Filter Matrix
                                 </Button>
                             </div>
