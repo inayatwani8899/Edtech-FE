@@ -154,8 +154,8 @@ const Counselors: React.FC = () => {
                                     <TableHeader className="bg-slate-50/50">
                                         <TableRow className="border-slate-200 hover:bg-transparent">
                                             <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[35%]">Counselor Identity</TableHead>
-                                            <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[25%]">Contact</TableHead>
-                                            <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[20%]">Status</TableHead>
+                                            <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[25%]">Email</TableHead>
+                                            <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[20%]">Phone</TableHead>
                                             <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider text-center w-[20%]">Actions</TableHead>
                                         </TableRow>
                                     </TableHeader>
@@ -185,33 +185,24 @@ const Counselors: React.FC = () => {
                                                     </div>
                                                 </TableCell>
                                                 <TableCell className="px-4 py-3">
-                                                    <div className="space-y-1">
-                                                        <div className="flex items-center gap-1.5 max-w-[200px]">
-                                                            <div className="h-5 w-5 rounded-full bg-slate-50 flex items-center justify-center flex-shrink-0">
-                                                                <span className="text-xs text-slate-400">@</span>
-                                                            </div>
-                                                            <span className="text-xs font-semibold text-slate-600 truncate" title={counselor?.email}>{counselor?.email}</span>
+                                                    <div className="flex items-center gap-1.5 max-w-[200px]">
+                                                        <div className="h-5 w-5 rounded-full bg-slate-50 flex items-center justify-center flex-shrink-0">
+                                                            <span className="text-xs text-slate-400">@</span>
                                                         </div>
-                                                        {counselor?.phoneNumber && (
-                                                            <div className="flex items-center gap-1.5">
-                                                                <div className="h-5 w-5 rounded-full bg-slate-50 flex items-center justify-center flex-shrink-0">
-                                                                    <Phone className="h-3 w-3 text-slate-400" />
-                                                                </div>
-                                                                <span className="text-xs font-semibold text-slate-500">{counselor.phoneNumber}</span>
-                                                            </div>
-                                                        )}
+                                                        <span className="text-xs font-semibold text-slate-600 truncate" title={counselor?.email}>{counselor?.email}</span>
                                                     </div>
                                                 </TableCell>
                                                 <TableCell className="px-4 py-3">
-                                                    <div className="flex items-center gap-2">
-                                                        <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 font-bold px-2 py-0.5 text-[10px] uppercase tracking-wide gap-1">
-                                                            <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                                                            Active
-                                                        </Badge>
-                                                        <Badge variant="secondary" className="bg-slate-100 text-slate-500 text-[10px] font-bold uppercase tracking-wide border-none">
-                                                            Counselor
-                                                        </Badge>
-                                                    </div>
+                                                    {counselor?.phoneNumber ? (
+                                                        <div className="flex items-center gap-1.5">
+                                                            <div className="h-5 w-5 rounded-full bg-slate-50 flex items-center justify-center flex-shrink-0">
+                                                                <Phone className="h-3 w-3 text-slate-400" />
+                                                            </div>
+                                                            <span className="text-xs font-semibold text-slate-600">{counselor.phoneNumber}</span>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-xs text-slate-400 italic">Not provided</span>
+                                                    )}
                                                 </TableCell>
                                                 <TableCell className="px-4 py-3">
                                                     <div className="flex items-center justify-center gap-1">
