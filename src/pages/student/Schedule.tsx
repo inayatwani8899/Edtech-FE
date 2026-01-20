@@ -12,7 +12,9 @@ import {
     ChevronRight,
     BookOpen,
     Zap,
-    Bell
+    Bell,
+    Sparkles,
+    Trophy
 } from "lucide-react";
 
 export const Schedule: React.FC = () => {
@@ -105,48 +107,52 @@ export const Schedule: React.FC = () => {
                             </div>
 
                             {events.map((event, i) => (
-                                <div key={i} className="relative group pl-24 pb-8 border-l-2 border-slate-50 ml-4 last:pb-0">
-                                    {/* Time Label */}
-                                    <div className="absolute left-[-96px] top-1 text-right">
-                                        <p className="text-sm font-black text-slate-900 tracking-tight">{event.time}</p>
-                                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{event.duration}</p>
+                                <div key={i} className="flex gap-6 md:gap-10 group pb-10 last:pb-0">
+                                    {/* Time Block - Fixed Width for consistent alignment */}
+                                    <div className="w-20 md:w-24 shrink-0 text-right pt-2 border-r-2 border-slate-50 relative pr-6 md:pr-10">
+                                        <div className="space-y-0.5">
+                                            <p className="text-sm font-black text-slate-900 tracking-tight">{event.time}</p>
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{event.duration}</p>
+                                        </div>
+                                        {/* Timeline Dot - Positioned on the border */}
+                                        <div className="absolute -right-[7px] top-3 h-3 w-3 rounded-full bg-slate-200 group-hover:bg-primary transition-all duration-300 ring-4 ring-white shadow-sm ring-offset-2 z-10 scale-90 group-hover:scale-110"></div>
                                     </div>
 
-                                    {/* Timeline Dot */}
-                                    <div className="absolute left-[-5px] top-2 h-2 w-2 rounded-full bg-slate-200 group-hover:bg-primary transition-colors duration-300 ring-4 ring-white shadow-sm ring-offset-2"></div>
-
-                                    <Card className="glass-card border-none hover:shadow-elegant transition-all duration-300 group overflow-hidden rounded-[2rem]">
-                                        <CardContent className="p-6">
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-6">
-                                                    <div className={`p-4 rounded-2xl ${event.bg} group-hover:scale-105 transition-transform duration-500`}>
-                                                        <event.icon className={`h-6 w-6 ${event.color}`} />
-                                                    </div>
-                                                    <div className="space-y-1">
-                                                        <h4 className="text-lg font-black text-slate-900 leading-none">{event.title}</h4>
-                                                        <div className="flex items-center gap-3">
-                                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                                                                <Clock className="h-3 w-3" />
-                                                                {event.type}
-                                                            </span>
-                                                            <span className="h-1 w-1 rounded-full bg-slate-200"></span>
-                                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                                                                with {event.instructor}
-                                                            </span>
+                                    {/* Card Content */}
+                                    <div className="flex-1">
+                                        <Card className="glass-card border-none hover:shadow-elegant transition-all duration-300 group overflow-hidden rounded-[2rem]">
+                                            <CardContent className="p-6">
+                                                <div className="flex flex-col xl:flex-row items-center justify-between gap-6">
+                                                    <div className="flex items-center gap-6 w-full xl:w-auto">
+                                                        <div className={`p-4 rounded-2xl ${event.bg} group-hover:scale-105 transition-transform duration-500 shrink-0`}>
+                                                            <event.icon className={`h-6 w-6 ${event.color}`} />
+                                                        </div>
+                                                        <div className="space-y-1">
+                                                            <h4 className="text-lg font-black text-slate-900 leading-none">{event.title}</h4>
+                                                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                                                                    <Clock className="h-3 w-3" />
+                                                                    {event.type}
+                                                                </span>
+                                                                <span className="h-1 w-1 rounded-full bg-slate-200 hidden sm:block"></span>
+                                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                                                    with {event.instructor}
+                                                                </span>
+                                                            </div>
                                                         </div>
                                                     </div>
+                                                    <div className="flex items-center justify-between xl:justify-end gap-4 w-full xl:w-auto pt-4 xl:pt-0 border-t xl:border-none border-slate-50">
+                                                        <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-400 hover:bg-slate-50 rounded-xl">
+                                                            <MoreVertical className="h-4 w-4" />
+                                                        </Button>
+                                                        <Button className={`h-10 px-6 rounded-xl text-white hover:opacity-90 text-[10px] font-bold uppercase tracking-widest shadow-lg ${event.color.replace('text-', 'bg-')}`}>
+                                                            Join Room
+                                                        </Button>
+                                                    </div>
                                                 </div>
-                                                <div className="flex items-center gap-4">
-                                                    <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-400 hover:bg-slate-50 rounded-xl">
-                                                        <MoreVertical className="h-4 w-4" />
-                                                    </Button>
-                                                    <Button className={`h-10 px-6 rounded-xl text-white hover:opacity-90 text-[10px] font-bold uppercase tracking-widest shadow-lg ${event.color.replace('text-', 'bg-')}`}>
-                                                        Join Room
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        </CardContent>
-                                    </Card>
+                                            </CardContent>
+                                        </Card>
+                                    </div>
                                 </div>
                             ))}
                         </div>
@@ -174,15 +180,33 @@ export const Schedule: React.FC = () => {
                             </div>
                         </Card>
 
-                        <Card className="glass-card border-none shadow-soft p-6 rounded-3xl bg-indigo-600 text-white">
-                            <h4 className="text-lg font-black tracking-tight mb-2">Weekly Goal</h4>
-                            <p className="text-indigo-100 text-xs font-medium mb-6">Complete 12 hours of focused learning to stay on track for your scholar badge.</p>
-                            <div className="flex items-center justify-between mb-2">
-                                <span className="text-[10px] font-bold uppercase tracking-widest">7.5 / 12 Hours</span>
-                                <span className="text-[10px] font-bold">62%</span>
+                        <Card className="border-none shadow-elegant p-6 rounded-[2rem] bg-gradient-to-br from-indigo-600 via-indigo-700 to-blue-700 text-white relative overflow-hidden group">
+                            {/* Decorative Sparkle */}
+                            <div className="absolute -right-4 -top-4 text-white/10 group-hover:scale-110 transition-transform duration-700">
+                                <Sparkles className="h-24 w-24" />
                             </div>
-                            <div className="w-full h-2 bg-white/20 rounded-full overflow-hidden">
-                                <div className="h-full bg-white w-[62%] rounded-full shadow-sm"></div>
+
+                            <div className="relative z-10">
+                                <h4 className="text-xl font-black tracking-tight mb-2 flex items-center gap-2">
+                                    <Trophy className="h-5 w-5 text-warning" />
+                                    Weekly Goal
+                                </h4>
+                                <p className="text-indigo-100/80 text-xs font-medium mb-6 leading-relaxed">
+                                    Complete <span className="text-white font-bold">12 hours</span> of focused learning to stay on track for your scholar badge.
+                                </p>
+
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-indigo-100">Progress</span>
+                                        <span className="text-[10px] font-black bg-white/20 px-2 py-0.5 rounded-full">62%</span>
+                                    </div>
+                                    <div className="w-full h-2.5 bg-black/20 rounded-full overflow-hidden p-0.5">
+                                        <div className="h-full bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.5)] transition-all duration-1000" style={{ width: '62%' }}></div>
+                                    </div>
+                                    <p className="text-[9px] font-bold text-center text-indigo-100/60 uppercase tracking-widest pt-1">
+                                        7.5 / 12 Hours Completed
+                                    </p>
+                                </div>
                             </div>
                         </Card>
                     </div>
