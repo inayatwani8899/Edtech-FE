@@ -118,9 +118,9 @@ export const AdminDashboard = () => {
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[100px] -z-10 animate-pulse"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-400/5 rounded-full blur-[100px] -z-10 animate-pulse" style={{ animationDelay: '2s' }}></div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8  relative z-10">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
           <div>
             <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 mb-2">
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600">
@@ -148,29 +148,31 @@ export const AdminDashboard = () => {
         {/* Stats Cards - Exactly same as student dashboard */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {[
-            { label: 'Total Users', value: totalUsers.toLocaleString(), icon: Users, color: 'text-primary', bg: 'bg-primary/10', sub: '+12% this month' },
-            { label: 'Counsellors', value: totalCounsellors.toLocaleString(), icon: Shield, color: 'text-success', bg: 'bg-success/10', sub: 'Top tier mentors' },
-            { label: 'Active Students', value: totalStudents.toLocaleString(), icon: UserCheck, color: 'text-orange-500', bg: 'bg-orange-500/10', sub: 'Engagement: 92%' },
-            { label: 'System Tests', value: totalTests.toLocaleString(), icon: FileText, color: 'text-purple-500', bg: 'bg-purple-500/10', sub: '4 new added' }
+            { label: 'Total Users', value: totalUsers.toLocaleString(), icon: Users, color: 'text-primary', bg: 'bg-primary/10', sub: '+12% this month', link: '/manage/users' },
+            { label: 'Counsellors', value: totalCounsellors.toLocaleString(), icon: Shield, color: 'text-success', bg: 'bg-success/10', sub: 'Top tier mentors', link: '/manage/counselors' },
+            { label: 'Active Students', value: totalStudents.toLocaleString(), icon: UserCheck, color: 'text-orange-500', bg: 'bg-orange-500/10', sub: 'Engagement: 92%', link: '/manage/students' },
+            { label: 'System Tests', value: totalTests.toLocaleString(), icon: FileText, color: 'text-purple-500', bg: 'bg-purple-500/10', sub: '4 new added', link: '/manage/tests' }
           ].map((stat, i) => (
-            <Card key={i} className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-md bg-white/70 group hover:translate-y-[-4px] transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div className={`${stat.bg} p-2.5 rounded-xl transition-transform group-hover:scale-110`}>
-                    <stat.icon className={`h-5 w-5 ${stat.color}`} />
+            <Link key={i} to={stat.link}>
+              <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-md bg-white/70 group hover:translate-y-[-4px] transition-all duration-300 h-full">
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className={`${stat.bg} p-2.5 rounded-xl transition-transform group-hover:scale-110`}>
+                      <stat.icon className={`h-5 w-5 ${stat.color}`} />
+                    </div>
+                    <Badge variant="outline" className="border-slate-100 text-slate-400 bg-white/50">Live</Badge>
                   </div>
-                  <Badge variant="outline" className="border-slate-100 text-slate-400 bg-white/50">Live</Badge>
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">{stat.label}</p>
-                  <p className="text-2xl font-black text-slate-800">{loading ? '...' : stat.value}</p>
-                  <p className="text-[10px] font-bold text-slate-500 mt-2 uppercase tracking-tighter flex items-center gap-1">
-                    <Sparkles className="h-3 w-3 text-yellow-500" />
-                    {stat.sub}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+                  <div>
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">{stat.label}</p>
+                    <p className="text-2xl font-black text-slate-800">{loading ? '...' : stat.value}</p>
+                    <p className="text-[10px] font-bold text-slate-500 mt-2 uppercase tracking-tighter flex items-center gap-1">
+                      <Sparkles className="h-3 w-3 text-yellow-500" />
+                      {stat.sub}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
 
@@ -282,7 +284,7 @@ export const AdminDashboard = () => {
                   <Card key={i} className="group hover:shadow-xl transition-all duration-300 border-slate-100 overflow-hidden rounded-2xl p-6">
                     <div className="flex justify-between items-start mb-4">
                       <div className={`p-2.5 rounded-xl ${alert.severity === 'high' ? 'bg-rose-50 text-rose-500' :
-                          alert.severity === 'medium' ? 'bg-amber-50 text-amber-500' : 'bg-emerald-50 text-emerald-500'
+                        alert.severity === 'medium' ? 'bg-amber-50 text-amber-500' : 'bg-emerald-50 text-emerald-500'
                         }`}>
                         <AlertTriangle className="h-5 w-5" />
                       </div>
@@ -296,7 +298,7 @@ export const AdminDashboard = () => {
                     </p>
                     <div className="flex gap-2">
                       <Badge className={`${alert.severity === 'high' ? 'bg-rose-500 text-white' :
-                          alert.severity === 'medium' ? 'bg-amber-500 text-white' : 'bg-emerald-500 text-white'
+                        alert.severity === 'medium' ? 'bg-amber-500 text-white' : 'bg-emerald-500 text-white'
                         } border-none font-bold text-[9px] uppercase`}>
                         {alert.severity} Priority
                       </Badge>
