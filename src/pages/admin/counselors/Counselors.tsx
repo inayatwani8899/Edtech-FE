@@ -21,10 +21,6 @@ import {
     Loader2,
     Eye,
     Users2,
-    AlertCircle,
-    UserCircle2,
-    Briefcase,
-    ShieldCheck,
     Sparkles,
     Filter,
     Phone
@@ -47,7 +43,7 @@ const Counselors: React.FC = () => {
         setSearchTerm,
         fetchCounselors,
         deleteOpen,
-        openDeleteDialog, // Assuming this is available in store, if not, adjust logic
+        openDeleteDialog,
         closeDeleteDialog,
         deleteCounselor,
     } = useCounselorStore();
@@ -74,28 +70,30 @@ const Counselors: React.FC = () => {
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                     <div>
                         <div className="flex items-center gap-2 mb-1">
-                            <div className="h-px w-8 bg-gradient-to-r from-primary to-transparent"></div>
-                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Core Personnel</span>
+                            <div className="h-px w-6 bg-primary/40"></div>
+                            <span className="text-[9px] font-black uppercase tracking-[0.25em] text-primary">Core Personnel</span>
                         </div>
-                        <h1 className="text-3xl font-black tracking-tight text-slate-900 flex items-center gap-3">
+                        <h1 className="text-3xl font-black tracking-tight text-slate-900 mb-1">
                             Counselor <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-indigo-600">Hub</span>
                         </h1>
-                        <p className="text-sm font-medium text-slate-500 mt-1 max-w-2xl">
+                        <p className="text-slate-500 font-medium text-sm">
                             Manage guidance professionals and assign student cohorts.
                         </p>
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-white rounded-xl border border-slate-200 shadow-sm">
-                            <Users2 className="h-4 w-4 text-emerald-500" />
+                        <div className="bg-white/80 backdrop-blur-xl p-2 rounded-xl shadow-soft border border-white/50 flex items-center gap-3 px-4">
+                            <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                                <Users2 className="h-5 w-5 text-emerald-600" />
+                            </div>
                             <div className="flex flex-col">
-                                <span className="text-[10px] font-bold uppercase text-slate-400 leading-none">Total Staff</span>
-                                <span className="text-sm font-black text-slate-900 leading-none">{totalCount || 0}</span>
+                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider">Total Staff</span>
+                                <span className="text-lg font-black text-slate-900 leading-none">{totalCount || 0}</span>
                             </div>
                         </div>
                         <Button
                             onClick={() => navigate("/counselors/add")}
-                            className="bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-900/20 rounded-xl h-11 px-6 transition-all hover:scale-105 active:scale-95 group"
+                            className="h-12 px-6 rounded-xl bg-slate-900 text-white shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-95 transition-all duration-300 group"
                         >
                             <Plus className="h-4 w-4 mr-2 group-hover:rotate-90 transition-transform" />
                             <span className="font-bold text-xs uppercase tracking-wide">Onboard Counselor</span>
@@ -104,46 +102,51 @@ const Counselors: React.FC = () => {
                 </div>
 
                 {/* Main Content Card */}
-                <Card className="border-none shadow-elegant bg-white/80 backdrop-blur-xl rounded-2xl overflow-hidden">
-                    <CardHeader className="p-1 pb-0">
-                        {/* Search & Filter Bar */}
-                        <div className="px-6 pt-6 pb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div className="relative flex-1 max-w-md group">
-                                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 transition-colors group-focus-within:text-primary" />
+                <Card className="glass-card border-none shadow-elegant rounded-2xl overflow-hidden">
+                    <CardHeader className="p-6 pb-4 border-b border-slate-50">
+                        <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
+                            <div className="relative group w-full md:w-96">
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 group-focus-within:text-primary transition-colors" />
                                 <Input
                                     placeholder="Search by name, email or specialization..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="pl-10 h-11 bg-white border border-slate-200 rounded-xl font-medium placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-primary/10 transition-all shadow-sm"
+                                    className="h-12 pl-11 bg-white border border-slate-200 rounded-xl font-semibold text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all w-full"
                                 />
                             </div>
-                            <Button variant="outline" className="h-11 px-4 bg-slate-50 border-slate-200 text-slate-600 hover:bg-white hover:text-primary font-semibold rounded-xl gap-2 transition-all">
-                                <Filter className="h-4 w-4" />
-                                <span className="text-xs uppercase tracking-wide">Filter Matrix</span>
-                            </Button>
+                            <div className="flex items-center gap-2">
+                                <Button variant="ghost" className="h-10 px-4 rounded-xl bg-slate-100 border border-slate-200 font-semibold text-slate-700 hover:text-primary hover:bg-slate-50 transition-all text-sm">
+                                    <Filter className="h-4 w-4 mr-2" />
+                                    Filter Matrix
+                                </Button>
+                            </div>
                         </div>
                     </CardHeader>
 
                     <CardContent className="p-0">
                         {loading ? (
-                            <div className="flex flex-col justify-center items-center py-20 bg-slate-50/30">
+                            <div className="flex flex-col justify-center items-center py-32 space-y-6">
                                 <div className="relative">
-                                    <div className="h-12 w-12 rounded-full border-t-2 border-primary animate-spin"></div>
-                                    <Loader2 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-5 w-5 text-primary animate-pulse" />
+                                    <div className="h-20 w-20 rounded-full border-t-4 border-primary animate-spin"></div>
+                                    <div className="absolute inset-0 bg-primary/10 blur-2xl rounded-full"></div>
+                                    <Loader2 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-8 w-8 text-primary animate-pulse" />
                                 </div>
-                                <span className="text-sm font-bold text-slate-400 mt-4 animate-pulse">Synchronizing Personnel Data...</span>
+                                <div className="text-center">
+                                    <span className="text-lg font-black text-slate-400 uppercase tracking-[0.3em] block mb-1">Synchronizing Data</span>
+                                    <span className="text-xs font-bold text-slate-300 uppercase tracking-widest">Accessing personnel records...</span>
+                                </div>
                             </div>
                         ) : normalizedCounselors(counselors).length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-20 text-center bg-slate-50/30">
-                                <div className="h-20 w-20 rounded-3xl bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center mb-4 group hover:border-primary/50 transition-colors">
-                                    <Users2 className="h-10 w-10 text-slate-300 group-hover:text-primary/50 transition-colors" />
+                            <div className="flex flex-col items-center justify-center py-32 text-center px-10">
+                                <div className="bg-slate-50/80 p-12 rounded-[3rem] mb-8 relative group">
+                                    <Users2 className="h-24 w-24 text-slate-200 group-hover:scale-110 transition-transform duration-500" />
                                 </div>
-                                <h3 className="text-lg font-bold text-slate-900 mb-1">No personnel records found</h3>
-                                <p className="text-slate-500 text-sm max-w-xs mx-auto mb-6">
+                                <h3 className="text-3xl font-black text-slate-900 tracking-tight mb-3">No Records Found</h3>
+                                <p className="text-slate-400 font-medium max-w-sm text-lg mb-8 leading-relaxed">
                                     {searchTerm ? "No results match your search parameters." : "Begin by onboarding new counselors to the platform."}
                                 </p>
                                 {searchTerm && (
-                                    <Button variant="ghost" onClick={() => setSearchTerm("")} className="text-primary font-bold text-xs uppercase tracking-wide">
+                                    <Button onClick={() => setSearchTerm("")} variant="outline" className="h-12 px-8 rounded-xl font-bold border-slate-200 hover:bg-slate-50">
                                         Clear Search Filters
                                     </Button>
                                 )}
@@ -151,7 +154,7 @@ const Counselors: React.FC = () => {
                         ) : (
                             <div>
                                 <Table>
-                                    <TableHeader className="bg-slate-50/50">
+                                    <TableHeader className="bg-slate-50">
                                         <TableRow className="border-slate-200 hover:bg-transparent">
                                             <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[35%]">Counselor Identity</TableHead>
                                             <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[25%]">Email</TableHead>
@@ -161,7 +164,7 @@ const Counselors: React.FC = () => {
                                     </TableHeader>
                                     <TableBody>
                                         {normalizedCounselors(counselors).map((counselor) => (
-                                            <TableRow key={counselor?.id} className="border-slate-100 hover:bg-slate-50/50 transition-all duration-200 group">
+                                            <TableRow key={counselor?.id} className="border-slate-100 hover:bg-slate-50 transition-all duration-200 group">
                                                 <TableCell className="px-4 py-3">
                                                     <div className="flex items-center gap-3">
                                                         <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center font-bold text-white text-sm shadow-md shadow-emerald-500/20 border border-white/20 ring-2 ring-slate-50 group-hover:scale-105 transition-transform flex-shrink-0">
@@ -186,10 +189,8 @@ const Counselors: React.FC = () => {
                                                 </TableCell>
                                                 <TableCell className="px-4 py-3">
                                                     <div className="flex items-center gap-1.5 max-w-[200px]">
-                                                        <div className="h-5 w-5 rounded-full bg-slate-50 flex items-center justify-center flex-shrink-0">
-                                                            <span className="text-xs text-slate-400">@</span>
-                                                        </div>
-                                                        <span className="text-xs font-semibold text-slate-600 truncate" title={counselor?.email}>{counselor?.email}</span>
+                                                        {/* Icon removed to match Users style simpler text or kept if Users has icons - Users has no icon in email cell, just text. I will match users simpler email style */}
+                                                        <span className="text-sm font-semibold text-slate-700 truncate block" title={counselor?.email}>{counselor?.email}</span>
                                                     </div>
                                                 </TableCell>
                                                 <TableCell className="px-4 py-3">
@@ -198,19 +199,19 @@ const Counselors: React.FC = () => {
                                                             <div className="h-5 w-5 rounded-full bg-slate-50 flex items-center justify-center flex-shrink-0">
                                                                 <Phone className="h-3 w-3 text-slate-400" />
                                                             </div>
-                                                            <span className="text-xs font-semibold text-slate-600">{counselor.phoneNumber}</span>
+                                                            <span className="text-sm font-semibold text-slate-600">{counselor.phoneNumber}</span>
                                                         </div>
                                                     ) : (
                                                         <span className="text-xs text-slate-400 italic">Not provided</span>
                                                     )}
                                                 </TableCell>
                                                 <TableCell className="px-4 py-3">
-                                                    <div className="flex items-center justify-center gap-1">
+                                                    <div className="flex justify-center gap-2 opacity-100 transition-all duration-200">
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
                                                             onClick={() => navigate(`/counselors/edit/${counselor.id}`)}
-                                                            className="h-8 w-8 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                                                            className="h-8 w-8 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 transition-all"
                                                             title="Edit Profile"
                                                         >
                                                             <Edit className="h-4 w-4" />
@@ -219,7 +220,7 @@ const Counselors: React.FC = () => {
                                                             variant="ghost"
                                                             size="icon"
                                                             onClick={() => openDeleteDialog(counselor.id)}
-                                                            className="h-8 w-8 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                                                            className="h-8 w-8 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-300 transition-all"
                                                             title="Revoke Access"
                                                         >
                                                             <Trash2 className="h-4 w-4" />
