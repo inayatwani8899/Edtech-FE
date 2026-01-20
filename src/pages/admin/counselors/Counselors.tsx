@@ -230,19 +230,19 @@ const Counselors: React.FC = () => {
                                 </Table>
 
                                 {/* Pagination Footer */}
-                                <div className="p-6 border-t border-slate-200 bg-slate-50/50 flex flex-col md:flex-row items-center justify-between gap-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-white rounded-lg shadow-sm border border-slate-200">
-                                            <Sparkles className="h-4 w-4 text-primary" />
+                                <div className="p-2 border-t border-slate-200 bg-slate-50/50 flex flex-col md:flex-row items-center justify-between gap-2">
+                                    <div className="flex items-center gap-2">
+                                        <div className="p-1.5 bg-white rounded-md shadow-sm border border-slate-200">
+                                            <Sparkles className="h-3.5 w-3.5 text-primary" />
                                         </div>
                                         <div>
-                                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 leading-none mb-0.5">Grid Distribution</p>
-                                            <p className="text-sm font-bold text-slate-700">
+                                            <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400 leading-none mb-0.5">Grid Distribution</p>
+                                            <p className="text-xs font-bold text-slate-700">
                                                 Showing <span className="text-primary">{((currentPage - 1) * limit) + 1}-{Math.min(currentPage * limit, totalCount)}</span> of {totalCount} records
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="bg-white p-1.5 rounded-xl shadow-sm border border-slate-200">
+                                    <div className="bg-white p-1 rounded-lg shadow-sm border border-slate-200 scale-90 origin-right">
                                         <Pagination
                                             currentPage={currentPage}
                                             totalPages={totalPages}
