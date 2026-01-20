@@ -6,11 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useUserStatsStore } from "../../store/userStatsStore";
-import * as types from "@/types/types";
-import { 
+import {
   Users,
   BarChart3,
-  Settings,
   Shield,
   Database,
   Activity,
@@ -19,24 +17,29 @@ import {
   UserCheck,
   FileText,
   Calendar,
-  Plus
+  Plus,
+  ArrowRight,
+  ShieldCheck,
+  Sparkles,
+  Target,
+  Compass,
+  CheckCircle2,
+  Flag,
+  Trophy,
+  Zap,
+  Settings,
+  HelpCircle,
+  LogOut
 } from "lucide-react";
 import {
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   Tooltip as ReTooltip,
-  PieChart,
-  Pie,
-  Cell,
   ResponsiveContainer,
-  BarChart,
-  Bar,
   CartesianGrid
 } from "recharts";
-
-// Removed static adminStats object
 
 const systemAlerts = [
   {
@@ -66,14 +69,20 @@ const recentActivity = [
   {
     action: "New user registration",
     user: "yamin@gmail.com",
-    time: "2 minutes ago"
+    time: "2 minutes ago",
+    type: "user"
   },
-  
+  {
+    action: "System config updated",
+    user: "admin@ecosystem.io",
+    time: "15 minutes ago",
+    type: "config"
+  }
 ];
 
 export const AdminDashboard = () => {
   const { user } = useAuthStore();
-  const { stats, loading, error, fetchUserStats } = useUserStatsStore();
+  const { stats, loading, fetchUserStats } = useUserStatsStore();
   const [greeting, setGreeting] = useState("");
 
   useEffect(() => {
@@ -87,318 +96,273 @@ export const AdminDashboard = () => {
     fetchUserStats();
   }, [fetchUserStats]);
 
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case "high": return "bg-destructive/10 text-destructive border-destructive/20";
-      case "medium": return "bg-warning/10 text-warning border-warning/20";
-      case "low": return "bg-success/10 text-success border-success/20";
-      default: return "bg-muted/10 text-muted-foreground border-muted/20";
-    }
-  };
-
-  // Prepare analytics data (derived from `stats` if available)
   const totalUsers = stats?.totalUsers ?? 0;
-  const totalCounsellors = stats?.totalCounsellors ?? stats?.totalCounsellors ?? 0;
+  const totalCounsellors = stats?.totalCounsellors ?? 0;
   const totalStudents = stats?.totalStudents ?? 0;
   const totalTests = stats?.totalTests ?? 0;
   const totalCategories = stats?.totalCategories ?? 0;
 
-  const userTrendData = Array.from({ length: 6 }).map((_, idx) => {
-    const monthIndex = idx + 1;
-    // spread users across 6 intervals, last value equals totalUsers
-    const users = Math.round((totalUsers * monthIndex) / 6);
-    return { month: `M-${6 - idx}`, users };
-  });
-
-  const roleDistribution = [
-    { name: "Students", value: totalStudents },
-    { name: "Counsellors", value: totalCounsellors },
-    { name: "Others", value: Math.max(totalUsers - totalStudents - totalCounsellors, 0) },
+  const userTrendData = [
+    { name: 'Mon', score: 40 },
+    { name: 'Tue', score: 45 },
+    { name: 'Wed', score: 65 },
+    { name: 'Thu', score: 55 },
+    { name: 'Fri', score: 80 },
+    { name: 'Sat', score: 75 },
+    { name: 'Sun', score: 85 },
   ];
-
-  const testCategoryData = [
-    { name: "Tests", value: totalTests },
-    { name: "Categories", value: totalCategories },
-  ];
-
-  const PIE_COLORS = ["#6366F1", "#10B981", "#60A5FA"];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-950 dark:via-blue-950 dark:to-indigo-950 relative overflow-hidden">
-      {/* decorative orbs */}
-      <div className="absolute -top-40 -right-40 w-72 h-72 rounded-full bg-gradient-to-br from-blue-300 to-cyan-300 opacity-10 blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-40 -left-40 w-72 h-72 rounded-full bg-gradient-to-tr from-purple-300 to-pink-300 opacity-10 blur-3xl pointer-events-none" />
+    <div className="min-h-screen bg-[#F8FAFC] relative overflow-hidden">
+      {/* Dynamic Background Elements */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[100px] -z-10 animate-pulse"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-400/5 rounded-full blur-[100px] -z-10 animate-pulse" style={{ animationDelay: '2s' }}></div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl sm:text-5xl font-extrabold bg-gradient-to-r from-blue-600 via-emerald-600 to-purple-600 bg-clip-text text-transparent inline-block">
-            {greeting}, {user?.name?.split(' ')[0]}! ⚡
-          </h1>
-          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 mt-3">
-            System overview and management dashboard for administrators.
-          </p>
-        </div>
-
-        {/* Quick actions */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <div className="flex items-center gap-3">
-            <Button asChild className="bg-gradient-to-r from-emerald-500 to-sky-500 text-white shadow-md hover:scale-105 transition">
-              <Link to="/manage/users">
-                <Plus className="w-4 h-4 mr-2 inline" />
-                New User
-              </Link>
-            </Button>
-
-            <Button asChild variant="outline" className="border-2">
-              <Link to="/manage/tests">
-                <FileText className="w-4 h-4 mr-2 inline" />
-                New Test
-              </Link>
-            </Button>
-
-            <Button variant="ghost" asChild>
-              <Link to="/analytics">
-                <BarChart3 className="w-4 h-4 mr-2 inline" />
-                View Analytics
-              </Link>
-            </Button>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
+          <div>
+            <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 mb-2">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600">
+                {greeting},
+              </span>
+              <span className="ml-2">
+                {user?.name ? user.name.split(' ')[0] : 'Admin'}! 👋
+              </span>
+            </h1>
+            <p className="text-lg text-slate-500 font-medium">
+              System overview and management command center.
+            </p>
           </div>
-
-          <div className="flex items-center gap-3">
-            <input
-              placeholder="Search users, tests..."
-              className="hidden sm:inline-block px-3 py-2 rounded-lg border bg-white/70 dark:bg-slate-900/60"
-            />
+          <div className="flex items-center gap-3 bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
+            <div className="bg-primary/10 p-2 rounded-xl">
+              <ShieldCheck className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">System Status</p>
+              <p className="text-sm font-semibold text-slate-700">All Systems Operational</p>
+            </div>
           </div>
         </div>
 
-        {/* Stats Cards (integrated with backend totals) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8">
-          <Card className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transition transform hover:-translate-y-1">
-            <CardHeader className="flex items-center gap-3 pb-2">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-cyan-400 flex items-center justify-center shadow-md">
-                <Users className="w-5 h-5 text-white" />
-              </div>
-              <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <div className="text-2xl font-bold">Loading...</div>
-              ) : error ? (
-                <div className="text-2xl font-bold text-gray-400">N/A</div>
-              ) : (
-                <div className="text-2xl font-bold">{stats?.totalUsers ? stats.totalUsers.toLocaleString() : '0'}</div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transition transform hover:-translate-y-1">
-            <CardHeader className="flex items-center gap-3 pb-2">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center shadow-md">
-                <Shield className="w-5 h-5 text-white" />
-              </div>
-              <CardTitle className="text-sm font-medium">Counsellors</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats?.totalCounsellors ? stats.totalCounsellors.toLocaleString() : '0'}</div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transition transform hover:-translate-y-1">
-            <CardHeader className="flex items-center gap-3 pb-2">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center shadow-md">
-                <UserCheck className="w-5 h-5 text-white" />
-              </div>
-              <CardTitle className="text-sm font-medium">Students</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats?.totalStudents ? stats.totalStudents.toLocaleString() : '0'}</div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transition transform hover:-translate-y-1">
-            <CardHeader className="flex items-center gap-3 pb-2">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-500 to-pink-400 flex items-center justify-center shadow-md">
-                <FileText className="w-5 h-5 text-white" />
-              </div>
-              <CardTitle className="text-sm font-medium">Tests</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats?.totalTests ? stats.totalTests.toLocaleString() : '0'}</div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transition transform hover:-translate-y-1">
-            <CardHeader className="flex items-center gap-3 pb-2">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-stone-400 to-stone-600 flex items-center justify-center shadow-md">
-                <Database className="w-5 h-5 text-white" />
-              </div>
-              <CardTitle className="text-sm font-medium">Categories</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats?.totalCategories ? stats.totalCategories.toLocaleString() : '0'}</div>
-            </CardContent>
-          </Card>
+        {/* Stats Cards - Exactly same as student dashboard */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {[
+            { label: 'Total Users', value: totalUsers.toLocaleString(), icon: Users, color: 'text-primary', bg: 'bg-primary/10', sub: '+12% this month' },
+            { label: 'Counsellors', value: totalCounsellors.toLocaleString(), icon: Shield, color: 'text-success', bg: 'bg-success/10', sub: 'Top tier mentors' },
+            { label: 'Active Students', value: totalStudents.toLocaleString(), icon: UserCheck, color: 'text-orange-500', bg: 'bg-orange-500/10', sub: 'Engagement: 92%' },
+            { label: 'System Tests', value: totalTests.toLocaleString(), icon: FileText, color: 'text-purple-500', bg: 'bg-purple-500/10', sub: '4 new added' }
+          ].map((stat, i) => (
+            <Card key={i} className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-md bg-white/70 group hover:translate-y-[-4px] transition-all duration-300">
+              <CardContent className="p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <div className={`${stat.bg} p-2.5 rounded-xl transition-transform group-hover:scale-110`}>
+                    <stat.icon className={`h-5 w-5 ${stat.color}`} />
+                  </div>
+                  <Badge variant="outline" className="border-slate-100 text-slate-400 bg-white/50">Live</Badge>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">{stat.label}</p>
+                  <p className="text-2xl font-black text-slate-800">{loading ? '...' : stat.value}</p>
+                  <p className="text-[10px] font-bold text-slate-500 mt-2 uppercase tracking-tighter flex items-center gap-1">
+                    <Sparkles className="h-3 w-3 text-yellow-500" />
+                    {stat.sub}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Management Tools */}
-          <div className="lg:col-span-2 space-y-6">
-            
+        {/* System Health Roadmap - Matching student roadmap style */}
+        <div className="mb-10 p-6 rounded-[2rem] bg-slate-900 shadow-2xl relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12 group-hover:rotate-0 transition-transform duration-700">
+            <Compass className="h-40 w-40 text-white" />
+          </div>
+          <div className="relative z-10">
+            <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+              <Activity className="h-5 w-5 text-primary" />
+              Infrastructure Health
+            </h3>
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 relative">
+              <div className="absolute top-1/2 left-0 w-full h-0.5 bg-white/10 hidden md:block -translate-y-1/2"></div>
+              {[
+                { step: 'Database', title: 'Operational', status: 'completed' },
+                { step: 'Security', title: 'Hardened', status: 'completed' },
+                { step: 'API Gate', title: 'Performance', status: 'active' },
+                { step: 'Scaling', title: 'Auto-Mode', status: 'pending' }
+              ].map((item, i) => (
+                <div key={i} className="flex md:flex-col items-center gap-4 relative z-10 group/item">
+                  <div className={`h-12 w-12 rounded-2xl flex items-center justify-center transition-all duration-300 ${item.status === 'completed' ? 'bg-success shadow-[0_0_20px_rgba(34,197,94,0.3)]' :
+                    item.status === 'active' ? 'bg-primary animate-pulse shadow-[0_0_20px_rgba(59,130,246,0.5)]' : 'bg-white/10'
+                    }`}>
+                    {item.status === 'completed' ? <CheckCircle2 className="h-6 w-6 text-white" /> :
+                      <span className="text-sm font-black text-white">{i + 1}</span>}
+                  </div>
+                  <div className="text-left md:text-center">
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-1">{item.step}</p>
+                    <p className={`text-sm font-bold ${item.status === 'pending' ? 'text-white/30' : 'text-white'}`}>{item.title}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
 
-            <div className="space-y-6">
-              <Card className="bg-white/95 dark:bg-slate-900/80 rounded-2xl shadow">
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <BarChart3 className="h-5 w-5 mr-2 text-accent" />
-                    User Trends
-                  </CardTitle>
-                  <CardDescription>Monthly active users (simulated)</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div style={{ width: "100%", height: 260 }}>
+        <div className="grid lg:grid-cols-4 gap-8">
+          <div className="lg:col-span-3 space-y-8">
+            {/* Main Traffic Hub - Matches student score card style */}
+            <Card className="relative bg-white border-slate-100 shadow-xl overflow-hidden rounded-2xl group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary/10 to-blue-600/10 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-1000"></div>
+              <div className="md:flex">
+                <div className="md:w-2/3 p-8">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Badge variant="secondary" className="bg-primary/10 text-primary border-none px-3 py-1 font-bold">
+                      TRAFFIC ANALYSIS
+                    </Badge>
+                    <Badge variant="outline" className="border-slate-200 text-slate-500">
+                      Real-time Feed
+                    </Badge>
+                  </div>
+                  <h2 className="text-3xl font-black text-slate-900 mb-4 group-hover:text-primary transition-colors">
+                    Global Engagement Index
+                  </h2>
+                  <div style={{ width: "100%", height: 300 }}>
                     <ResponsiveContainer>
-                      <LineChart data={userTrendData}>
-                        <XAxis dataKey="month" />
-                        <YAxis />
-                        <ReTooltip />
-                        <Line type="monotone" dataKey="users" stroke="#6366F1" strokeWidth={3} dot={{ r: 4 }} />
-                      </LineChart>
+                      <AreaChart data={userTrendData}>
+                        <defs>
+                          <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                            <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                        <XAxis
+                          dataKey="name"
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fontSize: 12, fontWeight: 'bold', fill: '#94a3b8' }}
+                        />
+                        <YAxis hide />
+                        <ReTooltip
+                          contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)', fontWeight: 'bold' }}
+                        />
+                        <Area type="monotone" dataKey="score" stroke="#6366f1" strokeWidth={4} fillOpacity={1} fill="url(#colorScore)" />
+                      </AreaChart>
                     </ResponsiveContainer>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+                <div className="hidden md:flex md:w-1/3 bg-slate-50 items-center justify-center p-8 border-l border-slate-100">
+                  <div className="bg-white p-6 rounded-3xl shadow-soft text-center">
+                    <TrendingUp className="h-16 w-16 text-primary animate-pulse mx-auto mb-4" />
+                    <p className="text-2xl font-black text-slate-800">1.2M</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Global Requests</p>
+                  </div>
+                </div>
+              </div>
+            </Card>
 
-              <div className="grid md:grid-cols-2 gap-4">
-                <Card className="bg-white/95 dark:bg-slate-900/80 rounded-2xl shadow">
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <Users className="h-5 w-5 mr-2 text-primary" />
-                      Role Distribution
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div style={{ width: "100%", height: 220 }}>
-                      <ResponsiveContainer>
-                        <PieChart>
-                          <Pie data={roleDistribution} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70} fill="#8884d8" label>
-                            {roleDistribution.map((_, idx) => (
-                              <Cell key={idx} fill={PIE_COLORS[idx % PIE_COLORS.length]} />
-                            ))}
-                          </Pie>
-                          <ReTooltip />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </CardContent>
-                </Card>
+            {/* Quick Management Grid */}
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-black text-slate-800">System Alerts</h2>
+                  <p className="text-slate-500 font-medium">Critical logs and monitoring</p>
+                </div>
+                <Button variant="ghost" className="text-primary font-bold hover:text-primary/80 hover:bg-primary/5" asChild>
+                  <Link to="/settings" className="flex items-center">
+                    Configure
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
 
-                <Card className="bg-white/95 dark:bg-slate-900/80 rounded-2xl shadow">
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <FileText className="h-5 w-5 mr-2 text-secondary" />
-                      Tests & Categories
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div style={{ width: "100%", height: 220 }}>
-                      <ResponsiveContainer>
-                        <BarChart data={testCategoryData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="name" />
-                          <YAxis />
-                          <ReTooltip />
-                          <Bar dataKey="value" fill="#10B981" />
-                        </BarChart>
-                      </ResponsiveContainer>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {systemAlerts.map((alert, i) => (
+                  <Card key={i} className="group hover:shadow-xl transition-all duration-300 border-slate-100 overflow-hidden rounded-2xl p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className={`p-2.5 rounded-xl ${alert.severity === 'high' ? 'bg-rose-50 text-rose-500' :
+                          alert.severity === 'medium' ? 'bg-amber-50 text-amber-500' : 'bg-emerald-50 text-emerald-500'
+                        }`}>
+                        <AlertTriangle className="h-5 w-5" />
+                      </div>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{alert.time}</span>
                     </div>
-                  </CardContent>
-                </Card>
+                    <CardTitle className="text-lg font-bold text-slate-800 mb-2 group-hover:text-primary transition-colors">
+                      {alert.title}
+                    </CardTitle>
+                    <p className="text-slate-500 font-medium text-sm mb-4 line-clamp-2">
+                      {alert.description}
+                    </p>
+                    <div className="flex gap-2">
+                      <Badge className={`${alert.severity === 'high' ? 'bg-rose-500 text-white' :
+                          alert.severity === 'medium' ? 'bg-amber-500 text-white' : 'bg-emerald-500 text-white'
+                        } border-none font-bold text-[9px] uppercase`}>
+                        {alert.severity} Priority
+                      </Badge>
+                    </div>
+                  </Card>
+                ))}
               </div>
             </div>
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            <Card className="bg-white/95 dark:bg-slate-900/80 rounded-2xl shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <AlertTriangle className="h-5 w-5 mr-2 text-warning" />
-                  System Alerts
+          <div className="space-y-8">
+            {/* Quick Actions - Exact match to student sidebar style */}
+            <Card className="border-none shadow-lg rounded-2xl bg-slate-900 text-white overflow-hidden">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-xl font-bold flex items-center gap-2 underline decoration-primary underline-offset-8">
+                  Quick Actions
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {systemAlerts.map((alert, index) => (
-                  <div key={index} className={`flex items-start space-x-3 p-3 rounded-lg border ${getSeverityColor(alert.severity)} bg-opacity-10`}>
-                    <div className="mt-0.5">
-                      <AlertTriangle className={`h-5 w-5 ${
-                        alert.severity === 'high' ? 'text-destructive' :
-                        alert.severity === 'medium' ? 'text-warning' : 'text-success'
-                      }`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm font-medium">{alert.title}</p>
-                        <Badge variant="outline" className={getSeverityColor(alert.severity)}>
-                          {alert.severity}
-                        </Badge>
-                      </div>
-                      <p className="text-xs text-muted-foreground">{alert.description}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{alert.time}</p>
-                    </div>
-                  </div>
-                ))}
+                <Button variant="ghost" className="w-full justify-start text-white hover:bg-white/10 hover:text-white rounded-xl h-12" asChild>
+                  <Link to="/manage/users">
+                    <Plus className="h-5 w-5 mr-3 text-primary" />
+                    <span className="font-bold">Add New User</span>
+                  </Link>
+                </Button>
+                <Button variant="ghost" className="w-full justify-start text-white hover:bg-white/10 hover:text-white rounded-xl h-12" asChild>
+                  <Link to="/manage/tests">
+                    <FileText className="h-5 w-5 mr-3 text-primary" />
+                    <span className="font-bold">Manage Tests</span>
+                  </Link>
+                </Button>
+                <Button variant="ghost" className="w-full justify-start text-white hover:bg-white/10 hover:text-white rounded-xl h-12" asChild>
+                  <Link to="/settings">
+                    <Settings className="h-5 w-5 mr-3 text-primary" />
+                    <span className="font-bold">Settings</span>
+                  </Link>
+                </Button>
               </CardContent>
             </Card>
 
-            {/* Recent Activity */}
-            <Card className="bg-white/95 dark:bg-slate-900/80 rounded-2xl shadow">
+            {/* Performance Card - Exact match to student milestone card */}
+            <Card className="bg-gradient-to-br from-primary to-blue-700 border-none shadow-xl rounded-2xl text-white">
               <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Calendar className="h-5 w-5 mr-2 text-primary" />
-                  Recent Activity
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {recentActivity.map((activity, index) => (
-                  <div key={index} className="flex items-start space-x-3">
-                    <div className="w-8 h-8 rounded-full bg-blue-50 dark:bg-slate-800 flex items-center justify-center mt-0.5">
-                      <Activity className="h-4 w-4 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium">{activity.action}</p>
-                      <p className="text-xs text-muted-foreground">{activity.user}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{activity.time}</p>
-                    </div>
-                  </div>
-                ))}
-                {recentActivity.length === 0 && (
-                  <div className="text-sm text-muted-foreground">No recent activity</div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* System Performance */}
-            <Card className="bg-white/95 dark:bg-slate-900/80 rounded-2xl shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <TrendingUp className="h-5 w-5 mr-2 text-accent" />
-                  System Performance
+                <CardTitle className="flex items-center gap-2">
+                  <Activity className="h-6 w-6 text-white" />
+                  System Health
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  <div className="text-2xl font-bold">98%</div>
-                  <p className="text-sm opacity-90">Uptime this month</p>
-                  <Progress value={98} className="bg-muted/20 [&>div]:bg-accent" />
-                  <p className="text-xs opacity-75">System running smoothly with minimal downtime.</p>
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex justify-between text-sm font-bold mb-2">
+                      <span>Uptime Index</span>
+                      <span>98%</span>
+                    </div>
+                    <Progress value={98} className="h-2 bg-white/20 [&>div]:bg-white" />
+                  </div>
+                  <p className="text-sm text-blue-50 font-medium">
+                    All clusters are operating within optimal parameters. No performance degradation detected.
+                  </p>
                 </div>
               </CardContent>
             </Card>
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 };
