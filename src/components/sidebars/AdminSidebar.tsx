@@ -87,33 +87,33 @@ export function AdminSidebar() {
                     theme === "dark" ? "bg-[#0b0d11] text-slate-100" : "bg-white text-slate-900 shadow-sm"
                 )}
             >
-                {/* Fixed Header - Exact Match to Target Image */}
+                {/* Fixed Header - Scaled Down */}
                 <div className={cn(
-                    "flex px-4 py-7 transition-all duration-300",
+                    "flex px-3.5 py-5 transition-all duration-300",
                     isCollapsed ? "justify-center" : "justify-between items-center"
                 )}>
-                    <div className="flex items-center gap-3 min-w-0">
-                        {/* Logo Container with Smooth Squircle feel */}
+                    <div className="flex items-center gap-2.5 min-w-0">
+                        {/* Scaled Logo Container */}
                         <div className={cn(
-                            "flex h-[42px] w-[42px] flex-shrink-0 items-center justify-center rounded-[14px] border transition-all duration-300",
+                            "flex h-[34px] w-[34px] flex-shrink-0 items-center justify-center rounded-[10px] border transition-all duration-300",
                             theme === "dark"
                                 ? "bg-white/5 border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]"
                                 : "bg-slate-50 border-slate-200 shadow-sm shadow-blue-500/5"
                         )}>
-                            <Brain className="h-6 w-6 text-indigo-500 stroke-[1.8]" />
+                            <Brain className="h-5 w-5 text-indigo-500 stroke-[1.8]" />
                         </div>
 
                         {!isCollapsed && (
                             <div className="flex flex-col min-w-0 animate-in fade-in slide-in-from-left-2 duration-300">
-                                <div className="flex items-baseline font-black tracking-tighter text-[19px] leading-[1.1]">
+                                <div className="flex items-baseline font-black tracking-tighter text-[16px] leading-[1.1]">
                                     <span className={cn(
                                         theme === "dark" ? "text-white" : "text-slate-900"
                                     )}>EDTECH</span>
-                                    <span className="text-blue-500">NEURAL</span>
+                                    <span className="text-blue-500 ml-0.5">NEURAL</span>
                                 </div>
-                                <div className="flex items-center gap-1.5 mt-0.5">
-                                    <div className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#10b981] opacity-70" />
-                                    <span className="text-[9px] font-bold tracking-[0.25em] text-slate-500 uppercase whitespace-nowrap">
+                                <div className="flex items-center gap-1 mt-0.5">
+                                    <div className="h-1 w-1 flex-shrink-0 rounded-full bg-[#10b981] opacity-70" />
+                                    <span className="text-[7.5px] font-bold tracking-[0.2em] text-slate-500 uppercase whitespace-nowrap">
                                         Executive Interface
                                     </span>
                                 </div>
@@ -125,12 +125,12 @@ export function AdminSidebar() {
                         <button
                             onClick={() => toggleSidebar()}
                             className={cn(
-                                "flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[12px] border transition-all hover:bg-white/10 group",
+                                "flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-[9px] border transition-all hover:bg-white/10 group",
                                 theme === "dark" ? "bg-white/5 border-white/10" : "bg-slate-50 border-slate-200 hover:bg-slate-100 shadow-sm"
                             )}
                             title="Collapse"
                         >
-                            <PanelLeft className="h-5 w-5 text-slate-400 group-hover:text-indigo-400 transition-colors" />
+                            <PanelLeft className="h-4 w-4 text-slate-400 group-hover:text-indigo-400 transition-colors" />
                         </button>
                     )}
                 </div>
