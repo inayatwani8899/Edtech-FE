@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
     LayoutDashboard,
@@ -13,7 +14,12 @@ import {
     BarChart3,
     Users2,
     Cog,
-    Book
+    Book,
+    Sun,
+    Moon,
+    Menu,
+    ChevronLeft,
+    ChevronRight,
 } from "lucide-react";
 import {
     Sidebar,
@@ -100,38 +106,111 @@ export function AdminSidebar() {
     const currentPath = location.pathname;
     const { user } = useAuthStore(); // Use auth to display tenant info
 
+    // Persisted UI preferences for this sidebar only
+    const [collapsed, setCollapsed] = useState<boolean>(() => {
+        try {
+            const raw = localStorage.getItem('adminSidebarCollapsed');
+            return raw ? JSON.parse(raw) : false;
+        } catch {
+            return false;
+        }
+    });
+
+    const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+        try {
+            const raw = localStorage.getItem('adminSidebarTheme');
+            return raw === 'light' ? 'light' : 'dark';
+        } catch {
+            return 'dark';
+        }
+    });
+
+    useEffect(() => {
+        try {
+            localStorage.setItem('adminSidebarCollapsed', JSON.stringify(collapsed));
+        } catch {}
+    }, [collapsed]);
+
+    useEffect(() => {
+        try {
+            localStorage.setItem('adminSidebarTheme', theme);
+        } catch {}
+    }, [theme]);
+
+    // Theme is scoped to this component only (no global `dark` class applied).
+
     // Function to determine active state, supporting nested routes (e.g., /manage/users/new)
     const isActive = (path: string) => {
         return currentPath === path || currentPath.startsWith(`${path}/`);
     };
 
     return (
-        <Sidebar className="w-64">
-            <SidebarContent className="bg-sidebar">
-                <SidebarGroup>
-                    <SidebarGroupLabel className="text-sidebar-foreground/70 font-bold text-xs uppercase tracking-wider px-3 py-2">
-                        Admin Portal
+        <Sidebar className={`transition-all duration-300 ${collapsed ? 'w-20' : 'w-64'}`}>
+            <SidebarContent
+                    className={
+                        `flex flex-col h-full transition-colors duration-200 ${
+                            theme === 'dark'
+                                ? 'bg-slate-900 text-slate-100'
+                                : 'bg-white text-slate-700 shadow-sm'
+                        }`
+                    }
+            >
+                {/* Header: brand, collapse & theme toggles */}
+                <div className="flex items-center justify-between px-3 py-2 border-b border-border">
+                    <div className="flex items-center gap-2">
+                        <Menu className={`h-5 w-5 ${theme === 'dark' ? 'text-slate-100' : 'text-primary'}`} />
+                        <span className={`${collapsed ? 'hidden' : 'font-semibold text-sm'}`}>Admin Portal</span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <button
+                            title={theme === 'dark' ? 'Switch to light' : 'Switch to dark'}
+                            onClick={() => setTheme((s) => (s === 'dark' ? 'light' : 'dark'))}
+                            className={`p-1 rounded-md transition-colors ${theme === 'dark' ? 'hover:bg-slate-800' : 'hover:bg-slate-50'}`}
+                        >
+                            {theme === 'dark' ? (
+                                <Sun className="h-4 w-4" />
+                            ) : (
+                                <Moon className="h-4 w-4" />
+                            )}
+                        </button>
+
+                        <button
+                            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                            onClick={() => setCollapsed((c) => !c)}
+                            className={`p-1 rounded-md transition-transform ${theme === 'dark' ? 'hover:bg-slate-800' : 'hover:bg-slate-50'}`}
+                        >
+                            {collapsed ? (
+                                <ChevronRight className="h-4 w-4" />
+                            ) : (
+                                <ChevronLeft className="h-4 w-4" />
+                            )}
+                        </button>
+                    </div>
+                </div>
+
+                <SidebarGroup className="flex-1 overflow-auto">
+                    <SidebarGroupLabel className={`font-bold text-xs uppercase tracking-wider px-3 py-2 ${collapsed ? 'hidden' : (theme === 'dark' ? 'text-slate-300' : 'text-sidebar-foreground/70')}`}>
+                        Navigation
                     </SidebarGroupLabel>
                     <SidebarGroupContent>
-                        <SidebarMenu className="space-y-1">
+                        <SidebarMenu className="space-y-1 px-1 py-2">
                             {adminMenuItems.map((item) => (
                                 <SidebarMenuItem key={item.title}>
                                     <SidebarMenuButton
                                         asChild
                                         isActive={isActive(item.url)}
-                                        className="
-                                            transition-all duration-200 hover:bg-sidebar-accent group
-                                        "
+                                        className={`transition-all duration-200 rounded-lg ${theme === 'dark' ? 'hover:bg-slate-800' : 'hover:bg-slate-50'} group`}
                                     >
                                         <NavLink
                                             to={item.url}
-                                            className="flex items-center gap-3 px-3 py-2.5 rounded-lg w-full"
+                                            title={item.title}
+                                            className={`flex items-center gap-3 px-3 py-2.5 ${collapsed ? 'justify-center' : ''} w-full`}
                                         >
                                             <item.icon
-                                                className={`h-5 w-5 ${isActive(item.url) ? item.color : 'text-sidebar-foreground/70'} 
-                                                    group-hover:scale-110 transition-transform duration-200`}
+                                                className={`h-5 w-5 ${isActive(item.url) ? item.color : (theme === 'dark' ? 'text-slate-300' : 'text-slate-500')} group-hover:scale-110 transition-transform duration-200`}
                                             />
-                                            <span className="text-sm font-medium">{item.title}</span>
+                                            <span className={`${collapsed ? 'hidden' : 'text-sm font-medium'}`}>{item.title}</span>
                                         </NavLink>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
@@ -140,48 +219,28 @@ export function AdminSidebar() {
                     </SidebarGroupContent>
                 </SidebarGroup>
 
-                {/* Quick Actions and System/Tenant Info Section */}
-                {/* <SidebarGroup className="mt-auto">
-                    <SidebarGroupLabel className="text-sidebar-foreground/70 font-semibold text-xs uppercase tracking-wider px-3 py-2">
-                        System & Account
-                    </SidebarGroupLabel>
-                    <SidebarGroupContent>
-                        <div className="px-3 py-1 text-xs text-muted-foreground/80 border-b pb-2 mb-2">
-                            <Shield className="h-3 w-3 inline-block mr-1 text-red-500" />
-                            Role: {user?.role?.toUpperCase() || 'ADMIN'}
-                            <br />
-                            
+                {/* Footer: quick account info + sign out */}
+                <div className={`px-3 py-3 border-t ${theme === 'dark' ? 'border-slate-700' : 'border-slate-100'}`}>
+                    <div className="flex items-center justify-between">
+                        <div className={`flex items-center gap-2 ${collapsed ? 'justify-center w-full' : ''}`}>
+                            <Shield className="h-4 w-4 text-rose-500" />
+                            <div className={`${collapsed ? 'hidden' : 'text-xs'}`}>
+                                <div className="font-medium">{user?.name || 'Admin'}</div>
+                                <div className={`${theme === 'dark' ? 'text-slate-300' : 'text-muted-foreground'} text-[11px]`}>{user?.role?.toUpperCase() || 'ADMIN'}</div>
+                            </div>
                         </div>
-                        <SidebarMenu className="space-y-1">
-                            <SidebarMenuItem>
-                                <SidebarMenuButton asChild>
-                                    <NavLink to="/settings" className="text-sidebar-foreground hover:text-sidebar-accent-foreground hover:bg-sidebar-accent">
-                                        <Settings className="h-4 w-4" />
-                                        <span className="text-sm">Global Settings</span>
-                                    </NavLink>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                            <SidebarMenuItem>
-                                <SidebarMenuButton asChild>
-                                    <NavLink to="/support" className="text-sidebar-foreground hover:text-sidebar-accent-foreground hover:bg-sidebar-accent">
-                                        <HelpCircle className="h-4 w-4" />
-                                        <span className="text-sm">Help & Docs</span>
-                                    </NavLink>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                            <SidebarMenuItem>
-                                <SidebarMenuButton
-                                    // Use a direct button for logout action
-                                    onClick={() => {}}
-                                    className="text-destructive hover:text-destructive-foreground hover:bg-destructive/10"
-                                >
-                                    <LogOut className="h-4 w-4" />
-                                    <span className="text-sm">Sign Out</span>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                        </SidebarMenu>
-                    </SidebarGroupContent>
-                </SidebarGroup> */}
+
+                        <div>
+                            <button
+                                onClick={() => { /* wire logout externally if needed */ }}
+                                title="Sign out"
+                                className={`p-1 rounded-md ${theme === 'dark' ? 'hover:bg-slate-800' : 'hover:bg-slate-50'}`}
+                            >
+                                <LogOut className="h-4 w-4" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </SidebarContent>
         </Sidebar>
     );
