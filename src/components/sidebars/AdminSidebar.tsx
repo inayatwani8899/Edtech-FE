@@ -84,9 +84,14 @@ export function AdminSidebar() {
                 }`}
             >
                 <div className="flex items-center justify-between px-3 py-2 border-b border-border">
-                    <div className="flex items-center gap-2">
-                        <Menu className={`h-5 w-5 ${theme === "dark" ? "text-slate-100" : "text-primary"}`} />
-                        <span className={`${isCollapsed ? "hidden" : "font-semibold text-sm"}`}>Admin Portal</span>
+                    <div className="flex items-center gap-3">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground shadow-sm">
+                            <Menu className="h-5 w-5" />
+                        </div>
+                        <div className={`${isCollapsed ? "hidden" : "flex flex-col"}`}>
+                            <span className="text-sm font-semibold">PathGrad</span>
+                            <span className="text-[11px] text-sidebar-foreground/60">Admin Portal</span>
+                        </div>
                     </div>
 
                     <div className="flex items-center gap-2">
