@@ -84,80 +84,67 @@ export function AdminSidebar() {
             <SidebarContent
                 className={cn(
                     "flex flex-col h-full transition-colors duration-200 overflow-hidden",
-                    theme === "dark" ? "bg-[#0c0f14] text-slate-100" : "bg-white text-slate-900 shadow-sm"
+                    theme === "dark" ? "bg-[#0b0d11] text-slate-100" : "bg-white text-slate-900 shadow-sm"
                 )}
             >
-                {/* Redesigned Header Part - Robust Layout */}
+                {/* Fixed Header - Exact Match to Target Image */}
                 <div className={cn(
-                    "flex flex-col px-4 py-8",
-                    isCollapsed ? "items-center" : "items-stretch"
+                    "flex px-4 py-7 transition-all duration-300",
+                    isCollapsed ? "justify-center" : "justify-between items-center"
                 )}>
-                    <div className={cn(
-                        "flex items-center w-full min-w-0",
-                        isCollapsed ? "justify-center" : "justify-between gap-3"
-                    )}>
-                        <div className="flex items-center gap-3 overflow-hidden min-w-0">
-                            <div className={cn(
-                                "flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl border transition-all duration-300",
-                                theme === "dark" ? "bg-white/5 border-white/10 shadow-inner" : "bg-slate-50 border-slate-200 shadow-sm"
-                            )}>
-                                <Brain className="h-7 w-7 text-indigo-500 stroke-[1.5]" />
-                            </div>
-
-                            {!isCollapsed && (
-                                <div className="flex flex-col min-w-0 animate-in fade-in slide-in-from-left-2 duration-300">
-                                    <div className="flex items-baseline font-black tracking-tighter text-xl leading-none">
-                                        <span className={cn(
-                                            theme === "dark" ? "text-white" : "text-slate-950"
-                                        )}>EDTECH</span>
-                                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-indigo-600">NEURAL</span>
-                                    </div>
-                                    <div className="flex items-center gap-1.5 mt-2">
-                                        <div className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.7)]" />
-                                        <span className="text-[10px] font-bold tracking-[0.2em] text-slate-500 uppercase truncate">
-                                            Executive Interface
-                                        </span>
-                                    </div>
-                                </div>
-                            )}
+                    <div className="flex items-center gap-3 min-w-0">
+                        {/* Logo Container with Smooth Squircle feel */}
+                        <div className={cn(
+                            "flex h-[42px] w-[42px] flex-shrink-0 items-center justify-center rounded-[14px] border transition-all duration-300",
+                            theme === "dark"
+                                ? "bg-white/5 border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]"
+                                : "bg-slate-50 border-slate-200 shadow-sm shadow-blue-500/5"
+                        )}>
+                            <Brain className="h-6 w-6 text-indigo-500 stroke-[1.8]" />
                         </div>
 
                         {!isCollapsed && (
-                            <div className="flex items-center gap-1 flex-shrink-0">
-                                <button
-                                    onClick={() => setTheme((s) => (s === "dark" ? "light" : "dark"))}
-                                    className={cn(
-                                        "flex h-9 w-9 items-center justify-center rounded-xl border transition-all hover:scale-105",
-                                        theme === "dark" ? "border-white/10 bg-white/5 hover:bg-white/10" : "border-slate-200 bg-slate-50 hover:bg-slate-100 shadow-sm"
-                                    )}
-                                    title={theme === "dark" ? "Light Mode" : "Dark Mode"}
-                                >
-                                    {theme === "dark" ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4 text-slate-600" />}
-                                </button>
-                                <button
-                                    onClick={() => toggleSidebar()}
-                                    className={cn(
-                                        "flex h-9 w-9 items-center justify-center rounded-xl border transition-all hover:scale-105 group",
-                                        theme === "dark" ? "border-white/10 bg-white/5 hover:bg-white/10" : "border-slate-200 bg-slate-50 hover:bg-slate-100 shadow-sm"
-                                    )}
-                                    title="Collapse"
-                                >
-                                    <PanelLeft className="h-4.5 w-4.5 text-slate-400 group-hover:text-indigo-500 transition-colors" />
-                                </button>
+                            <div className="flex flex-col min-w-0 animate-in fade-in slide-in-from-left-2 duration-300">
+                                <div className="flex items-baseline font-black tracking-tighter text-[19px] leading-[1.1]">
+                                    <span className={cn(
+                                        theme === "dark" ? "text-white" : "text-slate-900"
+                                    )}>EDTECH</span>
+                                    <span className="text-blue-500">NEURAL</span>
+                                </div>
+                                <div className="flex items-center gap-1.5 mt-0.5">
+                                    <div className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#10b981] opacity-70" />
+                                    <span className="text-[9px] font-bold tracking-[0.25em] text-slate-500 uppercase whitespace-nowrap">
+                                        Executive Interface
+                                    </span>
+                                </div>
                             </div>
                         )}
                     </div>
+
+                    {!isCollapsed && (
+                        <button
+                            onClick={() => toggleSidebar()}
+                            className={cn(
+                                "flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[12px] border transition-all hover:bg-white/10 group",
+                                theme === "dark" ? "bg-white/5 border-white/10" : "bg-slate-50 border-slate-200 hover:bg-slate-100 shadow-sm"
+                            )}
+                            title="Collapse"
+                        >
+                            <PanelLeft className="h-5 w-5 text-slate-400 group-hover:text-indigo-400 transition-colors" />
+                        </button>
+                    )}
                 </div>
 
-                <SidebarGroup className="flex-1 overflow-auto pt-0">
+                {/* Navigation Section - REVERTED TO PREVIOUS BODY STYLE */}
+                <SidebarGroup className="flex-1">
                     {!isCollapsed && (
-                        <div className="px-5 mb-5 flex items-center gap-4 animate-in fade-in slide-in-from-top-2 duration-500">
-                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500/80 whitespace-nowrap">
+                        <div className="px-4 mb-4 flex items-center gap-4">
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-600 whitespace-nowrap">
                                 Neural Flow
                             </span>
                             <div className={cn(
                                 "h-[1px] w-full",
-                                theme === "dark" ? "bg-slate-800" : "bg-slate-100"
+                                theme === "dark" ? "bg-slate-800/50" : "bg-slate-100"
                             )} />
                         </div>
                     )}
@@ -177,28 +164,37 @@ export function AdminSidebar() {
                     </SidebarGroupContent>
                 </SidebarGroup>
 
-                <div className={`px-3 py-3 border-t ${theme === "dark" ? "border-white/5 bg-white/0" : "border-slate-100 bg-slate-50/30"}`}>
+                {/* Footer Section - REVERTED TO PREVIOUS FOOTER STYLE */}
+                <div className={`px-3 py-3 border-t ${theme === "dark" ? "border-slate-700" : "border-slate-100"}`}>
                     <div className="flex items-center justify-between">
-                        <div className={`flex items-center gap-3 ${isCollapsed ? "justify-center w-full" : ""}`}>
-                            <div className="h-8 w-8 rounded-lg bg-indigo-500/10 flex items-center justify-center">
-                                <Shield className="h-4 w-4 text-indigo-500" />
+                        <div className={`flex items-center gap-2 ${isCollapsed ? "justify-center w-full" : ""}`}>
+                            <div className={cn(
+                                "h-8 w-8 rounded-lg flex items-center justify-center font-bold text-white flex-shrink-0",
+                                "bg-gradient-to-br from-indigo-500 to-purple-600"
+                            )}>
+                                {user?.name?.charAt(0) || <Shield className="h-4 w-4" />}
                             </div>
-                            <div className={`${isCollapsed ? "hidden" : "text-xs flex flex-col"}`}>
-                                <div className={cn(
-                                    "font-bold truncate max-w-[120px]",
-                                    theme === "dark" ? "text-slate-200" : "text-slate-900"
-                                )}>{user?.name || "Admin User"}</div>
-                                <div className="text-slate-500 text-[10px] font-black uppercase tracking-wider">{user?.role || "Administrator"}</div>
-                            </div>
+                            {!isCollapsed && (
+                                <div className="text-xs">
+                                    <div className="font-medium">{user?.name || "Admin"}</div>
+                                    <div className={`${theme === "dark" ? "text-slate-300" : "text-muted-foreground"} text-[11px]`}>{user?.role?.toUpperCase() || "ADMIN"}</div>
+                                </div>
+                            )}
                         </div>
 
                         {!isCollapsed && (
-                            <button onClick={() => { }} title="Sign out" className={cn(
-                                "p-1.5 rounded-lg transition-colors duration-200",
-                                theme === "dark" ? "hover:bg-red-500/10 hover:text-red-400" : "hover:bg-red-50 hover:text-red-600"
-                            )}>
-                                <LogOut className="h-4 w-4" />
-                            </button>
+                            <div className="flex items-center gap-1">
+                                <button
+                                    onClick={() => setTheme((s) => (s === "dark" ? "light" : "dark"))}
+                                    className={`p-1 rounded-md transition-colors ${theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"}`}
+                                    title="Toggle Theme"
+                                >
+                                    {theme === "dark" ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4" />}
+                                </button>
+                                <button onClick={() => { }} title="Sign out" className={`p-1 rounded-md ${theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"}`}>
+                                    <LogOut className="h-4 w-4" />
+                                </button>
+                            </div>
                         )}
                     </div>
                 </div>
