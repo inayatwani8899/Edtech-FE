@@ -657,7 +657,7 @@ export const useTestStore = create<TestState>((set, get) => ({
                 userId,
                 answers: answersArray
             };
-            await api.post(`/Question/submitTest`, payload);
+            await api.post(`/tests/submit`, payload);
             usePaymentStore.getState().clearPaidTest(userId, testId);
             get().resetTestState();
         } catch (err) {
