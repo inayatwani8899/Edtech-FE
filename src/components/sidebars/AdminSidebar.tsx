@@ -20,6 +20,8 @@ import {
     Menu,
     ChevronLeft,
     ChevronRight,
+    Brain,
+    PanelLeft,
 } from "lucide-react";
 import {
     Sidebar,
@@ -33,6 +35,7 @@ import {
     useSidebar,
 } from "@/components/ui/sidebar";
 import { useAuthStore } from "../../store/useAuthStore";
+import { cn } from "@/lib/utils";
 
 // Define navigation items specific to the Admin role
 const adminMenuItems = [
@@ -65,58 +68,92 @@ export function AdminSidebar() {
     useEffect(() => {
         try {
             localStorage.setItem("adminSidebarCollapsed", JSON.stringify(isCollapsed));
-        } catch {}
+        } catch { }
     }, [isCollapsed]);
 
     useEffect(() => {
         try {
             localStorage.setItem("adminSidebarTheme", theme);
-        } catch {}
+        } catch { }
     }, [theme]);
 
     const isActive = (path: string) => currentPath === path || currentPath.startsWith(`${path}/`);
 
     return (
-        <Sidebar collapsible="icon" className="transition-all duration-300">
+        <Sidebar collapsible="icon" className="transition-all duration-300 border-none">
             <SidebarContent
-                className={`flex flex-col h-full transition-colors duration-200 ${
-                    theme === "dark" ? "bg-slate-900 text-slate-100" : "bg-white text-slate-700 shadow-sm"
-                }`}
+                className={cn(
+                    "flex flex-col h-full transition-colors duration-200 overflow-hidden",
+                    theme === "dark" ? "bg-[#0c0f14] text-slate-100" : "bg-white text-slate-700 shadow-sm"
+                )}
             >
-                <div className="flex items-center justify-between px-3 py-2 border-b border-border">
-                    <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground shadow-sm">
-                            <Menu className="h-5 w-5" />
+                {/* Redesigned Header Part */}
+                <div className={cn(
+                    "flex items-center px-4 py-8",
+                    isCollapsed ? "justify-center" : "justify-between"
+                )}>
+                    <div className="flex items-center gap-3 overflow-hidden">
+                        <div className={cn(
+                            "flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 shadow-inner transition-all duration-300 hover:rotate-6",
+                            theme === "light" && "border-slate-200 bg-slate-50"
+                        )}>
+                            <Brain className="h-7 w-7 text-indigo-400 stroke-[1.5]" />
                         </div>
-                        <div className={`${isCollapsed ? "hidden" : "flex flex-col"}`}>
-                            <span className="text-sm font-semibold">PathGrad</span>
-                            <span className="text-[11px] text-sidebar-foreground/60">Admin Portal</span>
-                        </div>
+
+                        {!isCollapsed && (
+                            <div className="flex flex-col leading-none animate-in fade-in slide-in-from-left-2 duration-300">
+                                <div className="flex items-baseline">
+                                    <span className={cn(
+                                        "text-xl font-black tracking-tighter",
+                                        theme === "dark" ? "text-white" : "text-slate-900"
+                                    )}>EDTECH</span>
+                                    <span className="text-xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-500">NEURAL</span>
+                                </div>
+                                <div className="flex items-center gap-1.5 mt-1.5">
+                                    <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
+                                    <span className="text-[9px] font-bold tracking-[0.25em] text-slate-500 uppercase">
+                                        Executive Interface
+                                    </span>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
-                    <div className="flex items-center gap-2">
-                        <button
-                            title={theme === "dark" ? "Switch to light" : "Switch to dark"}
-                            onClick={() => setTheme((s) => (s === "dark" ? "light" : "dark"))}
-                            className={`p-1 rounded-md transition-colors ${theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"}`}
-                        >
-                            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-                        </button>
-
-                        <button
-                            title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-                            onClick={() => toggleSidebar()}
-                            className={`p-1 rounded-md transition-transform ${theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"}`}
-                        >
-                            {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-                        </button>
-                    </div>
+                    {!isCollapsed && (
+                        <div className="flex items-center gap-1 animate-in fade-in duration-500">
+                            <button
+                                onClick={() => setTheme((s) => (s === "dark" ? "light" : "dark"))}
+                                className={cn(
+                                    "flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 transition-all hover:bg-white/10",
+                                    theme === "light" && "border-slate-200 bg-slate-50 hover:bg-slate-100"
+                                )}
+                                title={theme === "dark" ? "Switch to light" : "Switch to dark"}
+                            >
+                                {theme === "dark" ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4 text-slate-600" />}
+                            </button>
+                            <button
+                                onClick={() => toggleSidebar()}
+                                className={cn(
+                                    "flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 transition-all hover:bg-white/10 group",
+                                    theme === "light" && "border-slate-200 bg-slate-50 hover:bg-slate-100"
+                                )}
+                                title="Collapse Sidebar"
+                            >
+                                <PanelLeft className="h-4 w-4 text-slate-400 group-hover:text-slate-200 transition-colors" />
+                            </button>
+                        </div>
+                    )}
                 </div>
 
-                <SidebarGroup className="flex-1 overflow-auto">
-                    <SidebarGroupLabel className={`font-bold text-xs uppercase tracking-wider px-3 py-2 ${isCollapsed ? "hidden" : theme === "dark" ? "text-slate-300" : "text-sidebar-foreground/70"}`}>
-                        Navigation
-                    </SidebarGroupLabel>
+                <SidebarGroup className="flex-1 overflow-auto pt-0">
+                    {!isCollapsed && (
+                        <div className="px-4 mb-6 flex items-center gap-4 animate-in fade-in slide-in-from-top-2 duration-500">
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-600 whitespace-nowrap">
+                                Neural Flow
+                            </span>
+                            <div className="h-[1px] w-full bg-slate-800/40" />
+                        </div>
+                    )}
                     <SidebarGroupContent>
                         <SidebarMenu className="space-y-1 px-1 py-2">
                             {adminMenuItems.map((item) => (
@@ -144,7 +181,7 @@ export function AdminSidebar() {
                         </div>
 
                         <div>
-                            <button onClick={() => {}} title="Sign out" className={`p-1 rounded-md ${theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"}`}>
+                            <button onClick={() => { }} title="Sign out" className={`p-1 rounded-md ${theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"}`}>
                                 <LogOut className="h-4 w-4" />
                             </button>
                         </div>
