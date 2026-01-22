@@ -1,14 +1,29 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCounselorStore } from "@/store/counsellorStore";
+import {
+    Loader2,
+    Save,
+    User,
+    Mail,
+    Phone,
+    Briefcase,
+    Award,
+    Building2,
+    Fingerprint,
+    Shield,
+    Sparkles,
+    CheckCircle2,
+    Quote
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 const CounsellorForm = () => {
     const { id } = useParams<{ id: string }>();
@@ -31,16 +46,15 @@ const CounsellorForm = () => {
         licenseNumber: ""
     });
 
+    const [focusedField, setFocusedField] = useState<string | null>(null);
+
     // Load existing counselor if editing
     useEffect(() => {
-        if (id) {
-            fetchCounselor(id);
-        }
-    }, [id]);
+        if (id) fetchCounselor(id);
+    }, [id, fetchCounselor]);
 
     // Set form data when counselor is loaded
     useEffect(() => {
-        console.log(counselor)
         if (counselor && id) {
             setFormData({
                 firstName: counselor.firstName || "",
@@ -61,23 +75,20 @@ const CounsellorForm = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        if (!id && formData.password !== formData.confirmPassword) {
-            toast({ variant: "destructive", description: "Passwords do not match!" });
-            return;
-        }
-
         try {
             if (id) {
-                delete (formData as any).confirmPassword;
-                await updateCounselor(id, formData);
+                const payload = { ...formData };
+                delete (payload as any).confirmPassword;
+                if (!payload.password) delete (payload as any).password;
+                await updateCounselor(id, payload);
             } else {
-                delete (formData as any).confirmPassword;
-                await createCounselor(formData);
+                const payload = { ...formData };
+                delete (payload as any).confirmPassword;
+                await createCounselor(payload);
             }
             navigate("/manage/counselors");
         } catch (error) {
-
+            console.error(error);
         }
     };
 
@@ -86,260 +97,312 @@ const CounsellorForm = () => {
     };
 
     return (
-        <div className="min-h-screen bg-background">
-            <div className="container mx-auto px-4 py-2">
-                {/* <Button
-          variant="ghost"
-          onClick={() => navigate("/get-started")}
-          className="mb-6"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back
-        </Button> */}
+        <div className="min-h-screen w-full bg-[#FAFAFA] relative overflow-hidden flex flex-col">
+            {/* Ambient Background */}
+            <div className="absolute top-0 left-0 w-full h-[600px] bg-gradient-to-b from-indigo-50 via-slate-50 to-transparent pointer-events-none z-0" />
+            <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[50%] bg-blue-400/5 rounded-full blur-[100px] animate-pulse z-0" />
+            <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-500/5 rounded-full blur-[100px] animate-pulse z-0" />
 
-                <div className=" mx-auto">
-                    <Card className="shadow-card">
-                        <CardHeader className=" pb-2">
-                            <CardTitle className="text-2xl font-small text-gray-900">
-                                {id ? "Edit Counselor" : "Add New Counselor"}
-                            </CardTitle>
-                        </CardHeader>
+            {/* Top Navigation Bar */}
+            <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200/60 px-6 py-4 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                    <Button variant="ghost" size="icon" onClick={() => navigate("/manage/counselors")} className="rounded-full hover:bg-slate-100 text-slate-500">
+                        <span className="sr-only">Back</span>
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                    </Button>
+                    <div>
+                        <h1 className="text-xl font-bold text-slate-900 tracking-tight">
+                            {id ? "Edit Profile" : "Create Profile"}
+                        </h1>
+                        <p className="text-xs font-medium text-slate-500">
+                            Counselor Directory &bull; {formData.firstName ? `${formData.firstName} ${formData.lastName}` : "New Entry"}
+                        </p>
+                    </div>
+                </div>
+                <div className="flex items-center gap-3">
+                    <Button
+                        variant="ghost"
+                        onClick={() => navigate("/manage/counselors")}
+                        className="text-slate-500 hover:text-slate-800 hidden sm:flex font-medium"
+                    >
+                        Discard
+                    </Button>
+                    <Button
+                        onClick={handleSubmit}
+                        disabled={loading}
+                        className="bg-slate-900 text-white hover:bg-slate-800 rounded-full px-6 shadow-xl shadow-slate-900/10 transition-all hover:scale-105 active:scale-95 font-bold"
+                    >
+                        {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                        {id ? "Save Changes" : "Publish Profile"}
+                    </Button>
+                </div>
+            </div>
 
-                        <CardContent>
-                            {/* Google Sign In Button */}
-                            <div className="mb-6">
-                                <div className="flex">
+            <div className="flex-1 max-w-[1600px] mx-auto w-full p-6 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 relative z-10">
 
+                {/* LEFT COLUMN: The Editor */}
+                <div className="lg:col-span-7 space-y-10 pb-20">
+
+                    {/* Section 01: Identity */}
+                    <div className="group space-y-6">
+                        <div className="flex items-center gap-4">
+                            <div className="h-10 w-10 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-sm shadow-lg shadow-slate-900/20">01</div>
+                            <h2 className="text-2xl font-black text-slate-900 tracking-tight">Identity Details</h2>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pl-4 md:pl-14">
+                            <div className="space-y-2">
+                                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">First Name</Label>
+                                <Input
+                                    value={formData.firstName}
+                                    onChange={(e) => handleInputChange("firstName", e.target.value)}
+                                    onFocus={() => setFocusedField('name')}
+                                    onBlur={() => setFocusedField(null)}
+                                    className="h-12 bg-white border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-xl font-bold text-lg transition-all"
+                                    placeholder="e.g. Sarah"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Last Name</Label>
+                                <Input
+                                    value={formData.lastName}
+                                    onChange={(e) => handleInputChange("lastName", e.target.value)}
+                                    onFocus={() => setFocusedField('name')}
+                                    onBlur={() => setFocusedField(null)}
+                                    className="h-12 bg-white border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-xl font-bold text-lg transition-all"
+                                    placeholder="e.g. Connor"
+                                />
+                            </div>
+                            <div className="space-y-2 md:col-span-2">
+                                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Email Address</Label>
+                                <div className="relative">
+                                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300" />
+                                    <Input
+                                        value={formData.email}
+                                        onChange={(e) => handleInputChange("email", e.target.value)}
+                                        onFocus={() => setFocusedField('email')}
+                                        onBlur={() => setFocusedField(null)}
+                                        className="h-12 pl-12 bg-white border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-xl font-medium text-base transition-all"
+                                        placeholder="sarah.connor@institute.com"
+                                    />
                                 </div>
-                                {/* <Button
-                  type="button"
-                  variant="outline"
-                  className="w-half py-3 border-2 flex text-center items-center justify-center gap-3"
-                  onClick={handleGoogleSignIn}
-                >
-                  <svg className="w-5 h-5" viewBox="0 0 24 24">
-                    <path
-                      fill="#4285F4"
-                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                    />
-                    <path
-                      fill="#34A853"
-                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                    />
-                    <path
-                      fill="#FBBC05"
-                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                    />
-                    <path
-                      fill="#EA4335"
-                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                    />
-                  </svg>
-                  <span className="font-medium">Sign up with Google</span>
-                </Button> */}
-                                {/* <div className="relative my-6">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">
-                      Or continue with email
-                    </span>
-                  </div>
-                </div> */}
+                            </div>
+                            <div className="space-y-2 md:col-span-2">
+                                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Phone</Label>
+                                <div className="relative">
+                                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300" />
+                                    <Input
+                                        value={formData.phoneNumber}
+                                        onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
+                                        onFocus={() => setFocusedField('phone')}
+                                        onBlur={() => setFocusedField(null)}
+                                        className="h-12 pl-12 bg-white border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-xl font-medium text-base transition-all"
+                                        placeholder="+1 (555) 000-0000"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="w-full h-px bg-slate-200/60" />
+
+                    {/* Section 02: Credentials */}
+                    <div className="group space-y-6">
+                        <div className="flex items-center gap-4">
+                            <div className="h-10 w-10 rounded-full bg-white border-2 border-slate-200 text-slate-400 flex items-center justify-center font-bold text-sm shadow-sm">02</div>
+                            <h2 className="text-2xl font-black text-slate-900 tracking-tight">Professional Config</h2>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pl-4 md:pl-14">
+                            <div className="space-y-2">
+                                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Qualification</Label>
+                                <Select
+                                    value={formData.highestQualification}
+                                    onValueChange={(val) => { handleInputChange("highestQualification", val); setFocusedField('qual') }}
+                                >
+                                    <SelectTrigger className="h-12 bg-white border-slate-200 rounded-xl font-semibold text-slate-700">
+                                        <SelectValue placeholder="Select Degree" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="bachelor">Bachelor's Degree</SelectItem>
+                                        <SelectItem value="master">Master's Degree</SelectItem>
+                                        <SelectItem value="phd">PhD</SelectItem>
+                                        <SelectItem value="diploma">Professional Diploma</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Experience</Label>
+                                <Select
+                                    value={String(formData.yearsOfExperience || "")}
+                                    onValueChange={(val) => handleInputChange("yearsOfExperience", Number(val))}
+                                >
+                                    <SelectTrigger className="h-12 bg-white border-slate-200 rounded-xl font-semibold text-slate-700">
+                                        <SelectValue placeholder="Years Active" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="1">1 Year</SelectItem>
+                                        <SelectItem value="3">3 Years</SelectItem>
+                                        <SelectItem value="5">5 Years</SelectItem>
+                                        <SelectItem value="10">10+ Years</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2 md:col-span-2">
+                                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Specialization Area</Label>
+                                <Select
+                                    value={formData.areaOfSpecialization}
+                                    onValueChange={(val) => { handleInputChange("areaOfSpecialization", val); setFocusedField('spec') }}
+                                >
+                                    <SelectTrigger className="h-12 bg-white border-slate-200 rounded-xl font-semibold text-slate-700">
+                                        <SelectValue placeholder="Primary Domain" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="academic">Academic Counselling</SelectItem>
+                                        <SelectItem value="career">Career Guidance</SelectItem>
+                                        <SelectItem value="mental-health">Mental Health</SelectItem>
+                                        <SelectItem value="college-admission">College Admission</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2 md:col-span-2">
+                                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Institution / Organization</Label>
+                                <div className="relative">
+                                    <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300" />
+                                    <Input
+                                        value={formData.currentOrganization}
+                                        onChange={(e) => handleInputChange("currentOrganization", e.target.value)}
+                                        onFocus={() => setFocusedField('org')}
+                                        onBlur={() => setFocusedField(null)}
+                                        className="h-12 pl-12 bg-white border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-xl font-medium text-base transition-all"
+                                        placeholder="Current Workplace"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="w-full h-px bg-slate-200/60" />
+
+                    {/* Section 03: Biography */}
+                    <div className="group space-y-6">
+                        <div className="flex items-center gap-4">
+                            <div className="h-10 w-10 rounded-full bg-white border-2 border-slate-200 text-slate-400 flex items-center justify-center font-bold text-sm shadow-sm">03</div>
+                            <h2 className="text-2xl font-black text-slate-900 tracking-tight">Public Profile</h2>
+                        </div>
+                        <div className="pl-4 md:pl-14 space-y-6">
+                            <div className="space-y-2">
+                                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Professional Bio</Label>
+                                <Textarea
+                                    value={formData.professionalBio}
+                                    onChange={(e) => handleInputChange("professionalBio", e.target.value)}
+                                    onFocus={() => setFocusedField('bio')}
+                                    onBlur={() => setFocusedField(null)}
+                                    className="min-h-[150px] bg-white border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-xl font-medium text-base p-4 leading-relaxed resize-none"
+                                    placeholder="Write a compelling introduction..."
+                                />
+                                <div className="flex justify-end">
+                                    <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">{formData.professionalBio.length} Characters</span>
+                                </div>
                             </div>
 
-                            <form onSubmit={handleSubmit} className="space-y-6">
-                                <div className="grid md:grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="firstName">First Name</Label>
-                                        <Input
-                                            id="firstName"
-                                            value={formData.firstName}
-                                            onChange={(e) => handleInputChange("firstName", e.target.value)}
-                                            placeholder="Enter your first name"
-                                            required
-                                        />
+                            {!id && (
+                                <div className="p-6 bg-slate-50 border border-slate-100 rounded-2xl space-y-4">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <Shield className="h-4 w-4 text-emerald-600" />
+                                        <span className="text-xs font-bold text-emerald-800 uppercase tracking-wide">Security Credentials</span>
                                     </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="lastName">Last Name</Label>
-                                        <Input
-                                            id="lastName"
-                                            value={formData.lastName}
-                                            onChange={(e) => handleInputChange("lastName", e.target.value)}
-                                            placeholder="Enter your last name"
-                                            required
-                                        />
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <Input type="password" placeholder="Set Password" value={formData.password} onChange={(e) => handleInputChange("password", e.target.value)} className="bg-white border-slate-200" />
+                                        <Input type="password" placeholder="Confirm Password" value={formData.confirmPassword} onChange={(e) => handleInputChange("confirmPassword", e.target.value)} className="bg-white border-slate-200" />
                                     </div>
                                 </div>
-                                <div className="grid md:grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="email">Email Address</Label>
-                                        <Input
-                                            id="email"
-                                            type="email"
-                                            value={formData.email}
-                                            disabled={!!id}
-                                            onChange={(e) => handleInputChange("email", e.target.value)}
-                                            placeholder="Enter your professional email"
-                                            required
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="phoneNumber">Phone Number</Label>
-                                        <Input
-                                            id="phoneNumber"
-                                            type="tel"
-                                            value={formData.phoneNumber}
-                                            onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
-                                            placeholder="Enter your contact number"
-                                            required
-                                        />
-                                    </div>
-                                </div>
+                            )}
+                        </div>
+                    </div>
 
-
-                                {!id && (<><div className="grid md:grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="password">Password</Label>
-                                        <Input
-                                            id="password"
-                                            type="password"
-                                            value={formData.password}
-                                            onChange={(e) => handleInputChange("password", e.target.value)}
-                                            placeholder="Create a password"
-                                            required
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="confirmPassword">Confirm Password</Label>
-                                        <Input
-                                            id="confirmPassword"
-                                            type="password"
-                                            value={formData.confirmPassword}
-                                            onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
-                                            placeholder="Confirm your password"
-                                            required
-                                        />
-                                    </div>
-                                </div>
-                                </>)}
-
-
-
-
-                                <div className="grid md:grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="highestQualification">Highest Qualification</Label>
-                                        <Select onValueChange={(value) => handleInputChange("highestQualification", value)}>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select highest qualification" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="bachelor">Bachelor's Degree</SelectItem>
-                                                <SelectItem value="master">Master's Degree</SelectItem>
-                                                <SelectItem value="phd">PhD</SelectItem>
-                                                <SelectItem value="diploma">Professional Diploma</SelectItem>
-                                                <SelectItem value="certificate">Professional Certificate</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="yearsOfExperience">Years of Experience</Label>
-                                        <Select
-                                            value={String(formData.yearsOfExperience || "")}
-                                            onValueChange={(value) => handleInputChange("yearsOfExperience", Number(value))} //convert to number
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select years of experience" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="1">1 year</SelectItem>
-                                                <SelectItem value="2">2 years</SelectItem>
-                                                <SelectItem value="3">3 years</SelectItem>
-                                                <SelectItem value="5">5 years</SelectItem>
-                                                <SelectItem value="10">10+ years</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-
-                                </div>
-                                <div className="grid md:grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="areaOfSpecialization">Area of Specialization</Label>
-                                        <Select onValueChange={(value) => handleInputChange("areaOfSpecialization", value)}>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select your area of specialization" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="academic">Academic Counselling</SelectItem>
-                                                <SelectItem value="career">Career Guidance</SelectItem>
-                                                <SelectItem value="mental-health">Mental Health</SelectItem>
-                                                <SelectItem value="college-admission">College Admission</SelectItem>
-                                                <SelectItem value="personal-development">Personal Development</SelectItem>
-                                                <SelectItem value="other">Other</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label htmlFor="currentOrganization">Current Organization</Label>
-                                        <Input
-                                            id="currentOrganization"
-                                            value={formData.currentOrganization}
-                                            onChange={(e) => handleInputChange("currentOrganization", e.target.value)}
-                                            placeholder="Enter your current workplace"
-                                            required
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="grid md:grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="licenseNumber">License Number (if applicable)</Label>
-                                        <Input
-                                            id="licenseNumber"
-                                            value={formData.licenseNumber}
-                                            onChange={(e) => handleInputChange("licenseNumber", e.target.value)}
-                                            placeholder="Enter professional license number"
-                                        />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label htmlFor="professionalBio">Professional Bio</Label>
-                                        <Textarea
-                                            id="professionalBio"
-                                            value={formData.professionalBio}
-                                            onChange={(e) => handleInputChange("professionalBio", e.target.value)}
-                                            placeholder="About background and approach to counselling..."
-                                            rows={4}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="flex justify-end gap-4 pt-6">
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={() => navigate("/manage/counselors")}
-                                    >
-                                        Cancel
-                                    </Button>
-                                    <Button type="submit" disabled={loading}>
-                                        {loading ? (
-                                            <div className="flex items-center gap-2">
-                                                <Loader2 className="h-4 w-4 animate-spin" />
-                                                {id ? "Updating..." : "Adding..."}
-                                            </div>
-                                        ) : (
-                                            id ? "Update Counselor" : "Add Counselor"
-                                        )}
-                                    </Button>
-                                </div>
-                            </form>
-                        </CardContent>
-                    </Card>
                 </div>
+
+                {/* RIGHT COLUMN: The Interactive Preview */}
+                <div className="lg:col-span-5 hidden lg:block">
+                    <div className="sticky top-32">
+                        <div className="relative">
+                            {/* Decorative Glow behind the card */}
+                            <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500 to-violet-500 blur-[80px] opacity-20 rounded-full"></div>
+
+                            {/* The Card */}
+                            <Card className="border-none shadow-2xl bg-white/90 backdrop-blur-xl rounded-[2.5rem] overflow-hidden relative transform transition-all duration-700 hover:scale-[1.02]">
+                                <div className="h-32 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 relative overflow-hidden">
+                                    <div className="absolute inset-0 opacity-30 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
+                                    <div className="absolute top-0 right-0 p-6">
+                                        <div className="h-10 w-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-md border border-white/20">
+                                            <Sparkles className="h-5 w-5 text-indigo-300" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="px-8 pb-8 -mt-16 relative z-10">
+                                    <div className="flex justify-between items-end">
+                                        <div className="h-32 w-32 rounded-[2rem] bg-white p-1.5 shadow-xl">
+                                            <div className="h-full w-full rounded-[1.6rem] bg-slate-100 flex items-center justify-center overflow-hidden relative">
+                                                {/* If they had an image we'd show it, else icon */}
+                                                <User className="h-12 w-12 text-slate-300" />
+                                            </div>
+                                        </div>
+                                        <div className="mb-2 space-y-1 text-right">
+                                            <Badge className="bg-indigo-600 hover:bg-indigo-700 text-white border-none px-3 py-1 rounded-full text-[10px] items-center gap-1">
+                                                <CheckCircle2 className="h-3 w-3" />
+                                                VERIFIED COUNSELOR
+                                            </Badge>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-6 space-y-1">
+                                        <h2 className={`text-3xl font-black text-slate-900 tracking-tight transition-all duration-300 ${!formData.firstName ? "opacity-30" : ""}`}>
+                                            {formData.firstName || "Name"} {formData.lastName}
+                                        </h2>
+                                        <p className={`text-sm font-bold text-indigo-600 uppercase tracking-wide transition-all duration-300 ${!formData.areaOfSpecialization ? "opacity-30" : ""}`}>
+                                            {formData.areaOfSpecialization ? formData.areaOfSpecialization.replace("-", " ") : "Specialization"} Specialization
+                                        </p>
+                                    </div>
+
+                                    <div className="mt-8 grid grid-cols-2 gap-4">
+                                        <div className={`p-4 rounded-2xl bg-slate-50 border border-slate-100 transition-all duration-500 ${focusedField === 'org' ? 'ring-2 ring-indigo-500 ring-offset-2' : ''}`}>
+                                            <Building2 className="h-4 w-4 text-slate-400 mb-2" />
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase">Organization</p>
+                                            <p className="font-bold text-slate-800 text-sm truncate">{formData.currentOrganization || "N/A"}</p>
+                                        </div>
+                                        <div className={`p-4 rounded-2xl bg-slate-50 border border-slate-100 transition-all duration-500 ${focusedField === 'qual' ? 'ring-2 ring-indigo-500 ring-offset-2' : ''}`}>
+                                            <Award className="h-4 w-4 text-slate-400 mb-2" />
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase">Credentials</p>
+                                            <p className="font-bold text-slate-800 text-sm capitalize">{formData.highestQualification || "N/A"}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className={`mt-4 p-5 rounded-2xl bg-indigo-50/50 border border-indigo-100/50 transition-all duration-500 ${focusedField === 'bio' ? 'scale-[1.02] shadow-sm' : ''}`}>
+                                        <Quote className="h-4 w-4 text-indigo-300 mb-2" />
+                                        <p className="text-xs font-medium text-slate-600 leading-relaxed line-clamp-4 italic">
+                                            "{formData.professionalBio || "Biography will appear here..."}"
+                                        </p>
+                                    </div>
+
+                                    <div className="mt-6 pt-6 border-t border-slate-100 flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Available for Sessions</span>
+                                        </div>
+                                        <div className="text-right">
+                                            <span className="text-lg font-black text-slate-900">{formData.yearsOfExperience}+</span>
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase ml-1">Years Exp.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Card>
+
+                            <div className="mt-6 text-center">
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Profile Preview Mode</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     );

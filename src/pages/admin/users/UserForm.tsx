@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/select";
 import { useUserStore } from "@/store/userStore";
 import {
-    ArrowLeft,
     Loader2,
     ShieldCheck,
     User,
@@ -26,7 +25,10 @@ import {
     Save,
     Fingerprint,
     Building2,
-    Award
+    Award,
+    Sparkles,
+    Shield,
+    Star
 } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 
@@ -122,356 +124,368 @@ const UserForm: React.FC = () => {
 
     if (id && (loading || rolesLoading) && !user) {
         return (
-            <div className="min-h-screen w-full bg-[#F8FAFC] flex flex-col items-center justify-center">
+            <div className="min-h-screen w-full bg-[#FAFAFA] flex flex-col items-center justify-center">
                 <div className="relative">
-                    <div className="h-16 w-16 rounded-full border-t-4 border-primary animate-spin"></div>
-                    <Loader2 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-primary animate-pulse" />
+                    <div className="h-16 w-16 rounded-full border-t-4 border-indigo-600 animate-spin"></div>
+                    <Loader2 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-indigo-600 animate-pulse" />
                 </div>
-                <p className="mt-4 text-sm font-semibold text-slate-400">Loading user profile...</p>
+                <p className="mt-4 text-sm font-semibold text-slate-400">Retrieving Dossier...</p>
             </div>
         );
     }
 
+    const isStudent = selectedRole?.name.toLowerCase() === "student";
+    const isCounselor = selectedRole?.name.toLowerCase() === "counsellor";
+    const isAdminRole = selectedRole?.name.toLowerCase() === "admin";
+
     return (
         <div className="min-h-screen w-full bg-[#F8FAFC] py-8 px-4 sm:px-6">
-            {/* Dynamic Background Elements */}
+            {/* Dynamic Background */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-                <div className="absolute top-[-20%] left-[-20%] w-[50%] h-[50%] bg-blue-500/5 rounded-full blur-[120px]"></div>
-                <div className="absolute bottom-[-20%] right-[-20%] w-[50%] h-[50%] bg-indigo-500/5 rounded-full blur-[120px]"></div>
+                <div className="absolute top-[-20%] right-[-20%] w-[60%] h-[60%] bg-indigo-500/5 rounded-full blur-[120px] animate-pulse"></div>
+                <div className="absolute bottom-[-20%] left-[-20%] w-[60%] h-[60%] bg-sky-500/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }}></div>
             </div>
 
-            <div className="max-w-5xl mx-auto relative z-10">
-                {/* Header */}
+            <div className="max-w-6xl mx-auto relative z-10">
+                {/* Modern Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                     <div className="space-y-1">
-
-                        <h1 className="text-3xl font-black tracking-tight text-slate-900">
-                            {id ? "Edit User" : "Create User"}
+                        <div className="flex items-center gap-2 mb-1">
+                            <Badge variant="outline" className="bg-white/50 backdrop-blur-md border-slate-200 text-slate-500 text-[10px] uppercase tracking-widest font-bold px-2 py-0.5">
+                                User Management
+                            </Badge>
+                        </div>
+                        <h1 className="text-3xl font-black tracking-tight text-slate-900 flex items-center gap-2">
+                            {id ? "Edit Profile" : "New User"}
+                            <span className="text-slate-300">/</span>
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-sky-600">Identity Hub</span>
                         </h1>
-
-
-                        <p className="text-sm font-medium text-slate-500">
-                            Manage user identity, roles, and institutional access.
-                        </p>
                     </div>
                     <div className="flex items-center gap-3">
                         <Button
-                            variant="outline"
+                            variant="ghost"
                             onClick={() => navigate("/manage/users")}
-                            className="bg-white border-slate-200 text-slate-600 font-semibold hover:bg-slate-50 h-10 px-5"
+                            className="bg-transparent hover:bg-slate-100 text-slate-500 hover:text-slate-700 font-semibold h-10 px-5 transition-all"
                         >
-                            Discard
+                            Cancel
                         </Button>
                         <Button
                             onClick={handleSubmit}
                             disabled={loading}
-                            className="bg-primary text-white font-bold h-10 px-6 shadow-lg shadow-primary/20 hover:bg-primary/90"
+                            className="bg-slate-900 text-white font-bold h-10 px-6 shadow-xl shadow-slate-900/20 hover:bg-slate-800 transition-all hover:scale-105 active:scale-95 rounded-xl"
                         >
-                            {loading ? (
-                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                            ) : (
-                                <Save className="h-4 w-4 mr-2" />
-                            )}
-                            {id ? "Update User" : "Save Changes"}
+                            {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+                            Save Record
                         </Button>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    {/* Main Form Column */}
-                    <div className="lg:col-span-8 space-y-6">
-                        <form id="user-form" onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-min">
 
-                            {/* Personal & Contact Information Group */}
-                            <Card className="border-none shadow-sm bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden">
-                                <div className="h-1 bg-gradient-to-r from-primary to-indigo-500 w-full"></div>
-                                <CardHeader className="p-6 pb-2 border-b border-slate-100/50">
-                                    <div className="flex items-center gap-3">
-                                        <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center border border-slate-100">
-                                            <User className="h-5 w-5 text-slate-600" />
-                                        </div>
-                                        <div>
-                                            <h3 className="text-lg font-bold text-slate-900">Personal Information</h3>
-                                            <p className="text-xs text-slate-500 font-medium">Basic identity and contact details</p>
-                                        </div>
+                    {/* CARD 1: IDENTITY (Hero) - Spans 8 cols */}
+                    <Card className="md:col-span-8 border-none shadow-elegant bg-white/80 backdrop-blur-xl rounded-[2rem] overflow-hidden group hover:shadow-2xl transition-all duration-500">
+                        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 via-sky-500 to-blue-500"></div>
+                        <CardContent className="p-8">
+                            <div className="flex flex-col md:flex-row gap-8">
+                                {/* Visual Avatar Section */}
+                                <div className="flex-shrink-0 flex flex-col items-center gap-3">
+                                    <div className="h-32 w-32 rounded-[2rem] bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center border-4 border-white shadow-lg relative overflow-hidden group-hover:scale-105 transition-transform duration-500">
+                                        {isStudent ? (
+                                            <GraduationCap className="h-12 w-12 text-slate-300" />
+                                        ) : isCounselor ? (
+                                            <Briefcase className="h-12 w-12 text-slate-300" />
+                                        ) : (
+                                            <User className="h-12 w-12 text-slate-300" />
+                                        )}
+                                        <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                     </div>
-                                </CardHeader>
-                                <CardContent className="p-6 grid gap-6">
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="firstName" className="text-xs font-bold uppercase text-slate-500 tracking-wider">First Name</Label>
-                                            <Input
-                                                id="firstName"
-                                                name="firstName"
-                                                placeholder="e.g. Jonathan"
-                                                value={formData.firstName}
-                                                onChange={handleFormChange}
-                                                required
-                                                className="h-11 bg-slate-50 border-slate-200 focus:bg-white transition-all font-semibold text-slate-900"
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="lastName" className="text-xs font-bold uppercase text-slate-500 tracking-wider">Last Name</Label>
-                                            <Input
-                                                id="lastName"
-                                                name="lastName"
-                                                placeholder="e.g. Doe"
-                                                value={formData.lastName}
-                                                onChange={handleFormChange}
-                                                required
-                                                className="h-11 bg-slate-50 border-slate-200 focus:bg-white transition-all font-semibold text-slate-900"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="email" className="text-xs font-bold uppercase text-slate-500 tracking-wider">Email Address</Label>
-                                            <div className="relative">
-                                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                                                <Input
-                                                    id="email"
-                                                    name="email"
-                                                    type="email"
-                                                    placeholder="name@company.com"
-                                                    value={formData.email}
-                                                    onChange={handleFormChange}
-                                                    required
-                                                    className="h-11 pl-10 bg-slate-50 border-slate-200 focus:bg-white transition-all font-semibold text-slate-900"
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="phoneNumber" className="text-xs font-bold uppercase text-slate-500 tracking-wider">Phone Number</Label>
-                                            <div className="relative">
-                                                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                                                <Input
-                                                    id="phoneNumber"
-                                                    name="phoneNumber"
-                                                    type="tel"
-                                                    placeholder="+1 (555) 000-0000"
-                                                    value={formData.phoneNumber}
-                                                    onChange={handleFormChange}
-                                                    className="h-11 pl-10 bg-slate-50 border-slate-200 focus:bg-white transition-all font-semibold text-slate-900"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            {/* Dynamic Role Sections */}
-                            {selectedRole?.name.toLowerCase() === "student" && (
-                                <Card className="border-none shadow-sm bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                    <div className="h-1 bg-indigo-500 w-full"></div>
-                                    <CardHeader className="p-6 pb-2 border-b border-indigo-50/50">
-                                        <div className="flex items-center gap-3">
-                                            <div className="h-10 w-10 rounded-xl bg-indigo-50 flex items-center justify-center border border-indigo-100">
-                                                <GraduationCap className="h-5 w-5 text-indigo-600" />
-                                            </div>
-                                            <div>
-                                                <h3 className="text-lg font-bold text-slate-900">Student Profile</h3>
-                                                <p className="text-xs text-slate-500 font-medium">Academic placement details</p>
-                                            </div>
-                                        </div>
-                                    </CardHeader>
-                                    <CardContent className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                        <div className="space-y-2">
-                                            <Label className="text-xs font-bold uppercase text-slate-500 tracking-wider">Grade Level</Label>
-                                            <Select
-                                                value={formData.gradeLevel}
-                                                onValueChange={(val) => setFormData({ gradeLevel: val })}
-                                            >
-                                                <SelectTrigger className="h-11 bg-slate-50 border-slate-200 font-semibold text-slate-800">
-                                                    <SelectValue placeholder="Select Grade" />
-                                                </SelectTrigger>
-                                                <SelectContent className="max-h-[200px]">
-                                                    {gradeOptions.map((grade, idx) => (
-                                                        <SelectItem key={idx} value={grade}>{grade}</SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label className="text-xs font-bold uppercase text-slate-500 tracking-wider">Date of Birth</Label>
-                                            <div className="relative">
-                                                <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                                                <Input
-                                                    name="dateOfBirth"
-                                                    type="date"
-                                                    value={formData.dateOfBirth}
-                                                    onChange={handleFormChange}
-                                                    className="h-11 pl-10 bg-slate-50 border-slate-200 font-semibold text-slate-900"
-                                                />
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            )}
-
-                            {selectedRole?.name.toLowerCase() === "counsellor" && (
-                                <Card className="border-none shadow-sm bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                    <div className="h-1 bg-emerald-500 w-full"></div>
-                                    <CardHeader className="p-6 pb-2 border-b border-emerald-50/50">
-                                        <div className="flex items-center gap-3">
-                                            <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center border border-emerald-100">
-                                                <Briefcase className="h-5 w-5 text-emerald-600" />
-                                            </div>
-                                            <div>
-                                                <h3 className="text-lg font-bold text-slate-900">Professional Profile</h3>
-                                                <p className="text-xs text-slate-500 font-medium">Qualifications and expertise</p>
-                                            </div>
-                                        </div>
-                                    </CardHeader>
-                                    <CardContent className="p-6 grid gap-5">
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                            <div className="space-y-2">
-                                                <Label className="text-xs font-bold uppercase text-slate-500 tracking-wider">Highest Qualification</Label>
-                                                <div className="relative">
-                                                    <Award className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                                                    <Input
-                                                        name="highestQualification"
-                                                        placeholder="e.g. Master's Degree"
-                                                        value={formData.highestQualification}
-                                                        onChange={handleFormChange}
-                                                        className="h-11 pl-10 bg-slate-50 border-slate-200 font-semibold"
-                                                    />
-                                                </div>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label className="text-xs font-bold uppercase text-slate-500 tracking-wider">Experience Items</Label>
-                                                <Input
-                                                    name="yearsOfExperience"
-                                                    type="number"
-                                                    placeholder="Years"
-                                                    value={formData.yearsOfExperience}
-                                                    onChange={handleNumberChange}
-                                                    className="h-11 bg-slate-50 border-slate-200 font-semibold"
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                            <div className="space-y-2">
-                                                <Label className="text-xs font-bold uppercase text-slate-500 tracking-wider">Area of Specialization</Label>
-                                                <Input
-                                                    name="areaOfSpecialization"
-                                                    placeholder="e.g. Psychology"
-                                                    value={formData.areaOfSpecialization}
-                                                    onChange={handleFormChange}
-                                                    className="h-11 bg-slate-50 border-slate-200 font-semibold"
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label className="text-xs font-bold uppercase text-slate-500 tracking-wider">Organization</Label>
-                                                <div className="relative">
-                                                    <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                                                    <Input
-                                                        name="currentOrganization"
-                                                        placeholder="Current Organization"
-                                                        value={formData.currentOrganization}
-                                                        onChange={handleFormChange}
-                                                        className="h-11 pl-10 bg-slate-50 border-slate-200 font-semibold"
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label className="text-xs font-bold uppercase text-slate-500 tracking-wider">License Number</Label>
-                                            <div className="relative">
-                                                <Fingerprint className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                                                <Input
-                                                    name="licenseNumber"
-                                                    placeholder="Professional License ID"
-                                                    value={formData.licenseNumber}
-                                                    onChange={handleFormChange}
-                                                    className="h-11 pl-10 bg-slate-50 border-slate-200 font-semibold"
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label className="text-xs font-bold uppercase text-slate-500 tracking-wider">Professional Bio</Label>
-                                            <textarea
-                                                name="professionalBio"
-                                                placeholder="Brief professional summary..."
-                                                value={formData.professionalBio}
-                                                onChange={(e) => setFormData({ professionalBio: e.target.value })}
-                                                rows={4}
-                                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-900 placeholder:text-slate-400 resize-none focus:bg-white focus:ring-2 focus:ring-emerald-600/20 outline-none transition-all"
-                                            />
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            )}
-
-                        </form>
-                    </div>
-
-                    {/* Sidebar Configuration Column */}
-                    <div className="lg:col-span-4 space-y-6">
-
-                        {/* Role Selector Card */}
-                        <Card className="border-none shadow-sm bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden sticky top-6">
-                            <CardHeader className="p-6 pb-2 border-b border-slate-100/50">
-                                <div className="flex items-center gap-3">
-                                    <div className="h-10 w-10 rounded-xl bg-slate-900 flex items-center justify-center">
-                                        <ShieldCheck className="h-5 w-5 text-white" />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-lg font-bold text-slate-900">Role & Access</h3>
-                                        <p className="text-xs text-slate-500 font-medium">System permissions</p>
+                                    <div className="text-center">
+                                        <Badge variant="secondary" className="bg-slate-100 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+                                            {selectedRole?.name || "Unknown Role"}
+                                        </Badge>
                                     </div>
                                 </div>
-                            </CardHeader>
-                            <CardContent className="p-6 space-y-6">
+
+                                {/* Identity Inputs */}
+                                <div className="flex-grow grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs font-bold text-slate-500">First Name</Label>
+                                        <Input
+                                            name="firstName"
+                                            value={formData.firstName}
+                                            onChange={handleFormChange}
+                                            className="h-11 bg-slate-50 border-transparent hover:border-slate-200 focus:bg-white focus:border-indigo-200 transition-all rounded-xl font-bold text-slate-700"
+                                            placeholder="Given Name"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs font-bold text-slate-500">Last Name</Label>
+                                        <Input
+                                            name="lastName"
+                                            value={formData.lastName}
+                                            onChange={handleFormChange}
+                                            className="h-11 bg-slate-50 border-transparent hover:border-slate-200 focus:bg-white focus:border-indigo-200 transition-all rounded-xl font-bold text-slate-700"
+                                            placeholder="Family Name"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5 col-span-2">
+                                        <Label className="text-xs font-bold text-slate-500">Email Address</Label>
+                                        <div className="relative">
+                                            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                            <Input
+                                                name="email"
+                                                value={formData.email}
+                                                onChange={handleFormChange}
+                                                className="h-11 pl-10 bg-slate-50 border-transparent hover:border-slate-200 focus:bg-white focus:border-indigo-200 transition-all rounded-xl font-semibold text-slate-700"
+                                                placeholder="user@institution.com"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs font-bold text-slate-500">Contact Number</Label>
+                                        <div className="relative">
+                                            <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                            <Input
+                                                name="phoneNumber"
+                                                value={formData.phoneNumber}
+                                                onChange={handleFormChange}
+                                                className="h-11 pl-10 bg-slate-50 border-transparent hover:border-slate-200 focus:bg-white focus:border-indigo-200 transition-all rounded-xl font-semibold text-slate-700"
+                                                placeholder="+1 (555) 000-0000"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* CARD 2: DYNAMIC METRICS - Spans 4 cols */}
+                    <Card className="md:col-span-4 border-none shadow-elegant bg-gradient-to-br from-slate-900 to-indigo-900 text-white rounded-[2rem] overflow-hidden relative group">
+                        <div className="absolute top-0 right-0 w-[150%] h-[150%] bg-gradient-to-br from-white/10 to-transparent rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+                        <CardHeader className="p-6 pb-2 relative z-10">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-white/10 rounded-lg backdrop-blur-md">
+                                    {isStudent ? <GraduationCap className="h-5 w-5 text-sky-300" /> :
+                                        isCounselor ? <Star className="h-5 w-5 text-amber-300" /> :
+                                            <ShieldCheck className="h-5 w-5 text-emerald-300" />}
+                                </div>
+                                <h3 className="text-lg font-bold">
+                                    {isStudent ? "Academic Grade" :
+                                        isCounselor ? "Experience" :
+                                            "System Access"}
+                                </h3>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="p-6 relative z-10 space-y-4">
+                            {isStudent ? (
                                 <div className="space-y-2">
-                                    <Label className="text-xs font-bold uppercase text-slate-500 tracking-wider">Assigned Role</Label>
+                                    <div className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/70 tracking-tight leading-none">
+                                        {formData.gradeLevel || "N/A"}
+                                    </div>
                                     <Select
-                                        value={formData.roleId !== 0 ? String(formData.roleId) : ""}
-                                        onValueChange={handleRoleChange}
-                                        disabled={rolesLoading}
+                                        value={formData.gradeLevel}
+                                        onValueChange={(val) => setFormData({ gradeLevel: val })}
                                     >
-                                        <SelectTrigger className="h-12 bg-white border-slate-200 font-bold text-slate-800 shadow-sm hover:border-slate-300">
-                                            <SelectValue placeholder={rolesLoading ? "Loading..." : "Select Role"} />
+                                        <SelectTrigger className="h-10 bg-white/10 border-white/5 text-white font-bold hover:bg-white/20 transition-all border-none focus:ring-0 rounded-xl">
+                                            <SelectValue placeholder="Select Grade" />
                                         </SelectTrigger>
-                                        <SelectContent>
-                                            {roles.map((role) => (
-                                                <SelectItem key={role.id} value={String(role.id)} className="font-semibold py-3 text-slate-700">
-                                                    {role.name}
-                                                </SelectItem>
+                                        <SelectContent className="bg-slate-900 border-slate-800 text-white">
+                                            {gradeOptions.map((grade, idx) => (
+                                                <SelectItem key={idx} value={grade} className="focus:bg-slate-800 focus:text-white">{grade}</SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
                                 </div>
-
-                                {selectedRole?.name.toLowerCase() === "admin" && (
-                                    <div className="p-4 rounded-xl bg-slate-900 text-white space-y-3">
-                                        <div className="flex items-start gap-3">
-                                            <Checkbox
-                                                id="isAdmin"
-                                                checked={formData.isAdmin}
-                                                onCheckedChange={(checked) => setFormData({ isAdmin: checked as boolean })}
-                                                className="mt-1 border-white/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                                            />
-                                            <div className="space-y-1">
-                                                <Label htmlFor="isAdmin" className="text-sm font-bold cursor-pointer">Administrator Privileges</Label>
-                                                <p className="text-xs text-slate-400 leading-relaxed">
-                                                    Grant full access to system configuration and user management.
-                                                </p>
-                                            </div>
-                                        </div>
+                            ) : isCounselor ? (
+                                <div className="text-center py-2">
+                                    <span className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/50 tracking-tighter">
+                                        {formData.yearsOfExperience}+
+                                    </span>
+                                    <p className="text-sm font-medium text-slate-400 uppercase tracking-widest mt-1">Years Active</p>
+                                </div>
+                            ) : (
+                                <div className="flex flex-col items-center justify-center py-2 h-full">
+                                    {formData.isAdmin ? (
+                                        <Badge className="bg-emerald-500 text-white px-4 py-1 text-xs">Full Admin</Badge>
+                                    ) : (
+                                        <Badge variant="outline" className="text-slate-300 border-slate-600 px-4 py-1 text-xs">Standard User</Badge>
+                                    )}
+                                    <div className="mt-4 w-full">
+                                        <Label className="text-xs font-bold text-slate-400 uppercase mb-2 block">Role Selection</Label>
+                                        <Select
+                                            value={formData.roleId !== 0 ? String(formData.roleId) : ""}
+                                            onValueChange={handleRoleChange}
+                                        >
+                                            <SelectTrigger className="h-10 bg-white/10 border-white/5 text-white font-bold hover:bg-white/20 transition-all border-none focus:ring-0 rounded-xl">
+                                                <SelectValue placeholder="Change Role" />
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-slate-900 border-slate-800 text-white">
+                                                {roles.map((role) => (
+                                                    <SelectItem key={role.id} value={String(role.id)} className="focus:bg-slate-800 focus:text-white">
+                                                        {role.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </div>
-                                )}
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
 
-                                <div className="pt-4 border-t border-slate-100 grid grid-cols-2 gap-4">
-                                    <div>
-                                        <p className="text-[10px] font-bold uppercase text-slate-400 mb-1">Status</p>
-                                        <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border-emerald-200">Active</Badge>
+                    {/* CARD 3: ROLE-SPECIFIC DETAILS (Wide Strip) - Spans 8 cols */}
+                    {isCounselor && (
+                        <Card className="md:col-span-8 border-none shadow-elegant bg-white/60 backdrop-blur-xl rounded-[2rem] overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
+                            <CardHeader className="p-6 pb-2">
+                                <div className="flex items-center gap-2">
+                                    <Award className="h-5 w-5 text-emerald-600" />
+                                    <h3 className="text-lg font-bold text-slate-900">Professional Credentials</h3>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="p-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs font-bold text-slate-500">Highest Qualification</Label>
+                                        <Input
+                                            name="highestQualification"
+                                            value={formData.highestQualification}
+                                            onChange={handleFormChange}
+                                            className="h-11 bg-white border-slate-200/50 hover:border-emerald-200 transition-all rounded-xl font-semibold text-slate-700"
+                                            placeholder="Degree"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs font-bold text-slate-500">Specialization</Label>
+                                        <Input
+                                            name="areaOfSpecialization"
+                                            value={formData.areaOfSpecialization}
+                                            onChange={handleFormChange}
+                                            className="h-11 bg-white border-slate-200/50 hover:border-emerald-200 transition-all rounded-xl font-semibold text-slate-700"
+                                            placeholder="Field of Study"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs font-bold text-slate-500">Current Organization</Label>
+                                        <Input
+                                            name="currentOrganization"
+                                            value={formData.currentOrganization}
+                                            onChange={handleFormChange}
+                                            className="h-11 bg-white border-slate-200/50 hover:border-emerald-200 transition-all rounded-xl font-semibold text-slate-700"
+                                            placeholder="Institution Name"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs font-bold text-slate-500">License ID</Label>
+                                        <Input
+                                            name="licenseNumber"
+                                            value={formData.licenseNumber}
+                                            onChange={handleFormChange}
+                                            className="h-11 bg-white border-slate-200/50 hover:border-emerald-200 transition-all rounded-xl font-semibold text-slate-700"
+                                            placeholder="Lic. #"
+                                        />
                                     </div>
                                 </div>
                             </CardContent>
                         </Card>
+                    )}
+
+                    {isStudent && (
+                        <Card className="md:col-span-8 border-none shadow-elegant bg-white/60 backdrop-blur-xl rounded-[2rem] overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
+                            <CardHeader className="p-6 pb-2">
+                                <div className="flex items-center gap-2">
+                                    <CalendarIcon className="h-5 w-5 text-sky-600" />
+                                    <h3 className="text-lg font-bold text-slate-900">Student Particulars</h3>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="p-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs font-bold text-slate-500">Date of Birth</Label>
+                                        <Input
+                                            name="dateOfBirth"
+                                            type="date"
+                                            value={formData.dateOfBirth}
+                                            onChange={handleFormChange}
+                                            className="h-11 bg-white border-slate-200/50 hover:border-sky-200 transition-all rounded-xl font-semibold text-slate-700"
+                                        />
+                                    </div>
+                                    {/* Placeholder for future student fields like Guardian, etc. */}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {/* CARD 4: BIO OR ADMIN SETTINGS - Spans 4 cols -> actually fits in remaining space */}
+                    <div className="md:col-span-4 space-y-6">
+                        {/* Bio is mostly for Counselors, but users might have it? */}
+                        {isCounselor && (
+                            <Card className="border-none shadow-elegant bg-white/60 backdrop-blur-xl rounded-[2rem] overflow-hidden flex-grow">
+                                <CardHeader className="p-6 pb-2">
+                                    <div className="flex items-center gap-2">
+                                        <Briefcase className="h-5 w-5 text-indigo-600" />
+                                        <h3 className="text-lg font-bold text-slate-900">Bio</h3>
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="p-6">
+                                    <textarea
+                                        name="professionalBio"
+                                        value={formData.professionalBio}
+                                        onChange={(e) => setFormData({ professionalBio: e.target.value })}
+                                        placeholder="Professional statement..."
+                                        className="w-full min-h-[140px] bg-white/50 border-slate-200/50 hover:border-indigo-200 focus:bg-white rounded-xl resize-none text-slate-700 font-medium leading-relaxed p-4 outline-none transition-all"
+                                    />
+                                </CardContent>
+                            </Card>
+                        )}
+
+                        {/* Admin Privileges Checkbox */}
+                        {isAdminRole && (
+                            <Card className="border-none shadow-elegant bg-slate-900 text-white rounded-[2rem] overflow-hidden">
+                                <CardContent className="p-6 flex items-center gap-4">
+                                    <Checkbox
+                                        id="isAdmin"
+                                        checked={formData.isAdmin}
+                                        onCheckedChange={(checked) => setFormData({ isAdmin: checked as boolean })}
+                                        className="h-6 w-6 border-white/50 data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
+                                    />
+                                    <div className="space-y-0.5">
+                                        <Label htmlFor="isAdmin" className="text-sm font-bold cursor-pointer hover:text-emerald-300 transition-colors">Administrator Privileges</Label>
+                                        <p className="text-[10px] text-slate-400">Grant full system configuration access.</p>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
+
+                        {/* Password/Security (If creating new) */}
+                        {!id && (
+                            <Card className="border-none shadow-elegant bg-amber-50/50 backdrop-blur-xl rounded-[2rem] overflow-hidden">
+                                <CardHeader className="p-6 pb-2">
+                                    <div className="flex items-center gap-2">
+                                        <Shield className="h-5 w-5 text-amber-600" />
+                                        <h3 className="text-lg font-bold text-slate-900">Security</h3>
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="p-6 space-y-3">
+                                    <Input
+                                        type="password"
+                                        value={formData.password}
+                                        onChange={(e) => setFormData({ password: e.target.value })}
+                                        className="h-11 bg-white border-amber-200/50 focus:border-amber-400 rounded-xl font-semibold"
+                                        placeholder="Set Password"
+                                    />
+                                    <Input
+                                        type="password"
+                                        value={formData.confirmPassword}
+                                        onChange={(e) => setFormData({ confirmPassword: e.target.value })}
+                                        className="h-11 bg-white border-amber-200/50 focus:border-amber-400 rounded-xl font-semibold"
+                                        placeholder="Confirm Password"
+                                    />
+                                </CardContent>
+                            </Card>
+                        )}
                     </div>
-                </div>
+
+                </form>
             </div>
         </div>
     );

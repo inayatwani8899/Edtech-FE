@@ -1,299 +1,3 @@
-// import React, { useState, useEffect } from "react";
-// import { useNavigate, useParams } from "react-router-dom";
-// import { useTestStore } from "@/store/testStore";
-// import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
-// import { Textarea } from "@/components/ui/textarea";
-// import { useUserStore } from "@/store/userStore";
-
-// type Message = { text: string; type: "success" | "error" | "info" } | null;
-
-// const defaultFormData = {
-//   roleId: "",
-//   testId: "",
-//   price: 0,
-//   durationMinutes: 0,
-//   questionsPerPage: 5,
-//   submitType: "PerPage" as "PerPage" | "OneGo",
-//   allowMultiplePurchases: false,
-//   canResume: false,
-//   testInstructions: "",
-// };
-
-// export const TestConfigurationForm: React.FC<{ configId?: string }> = ({ configId }) => {
-//   const [formData, setFormData] = useState(defaultFormData);
-//   const [message, setMessage] = useState<Message>(null);
-//   const [isEditMode, setIsEditMode] = useState(false);
-
-//   const navigate = useNavigate();
-//   const { id: paramId } = useParams();
-//   const actualConfigId = configId || paramId;
-
-//   const {
-//     tests,
-//     loading,
-//     currentConfiguration,
-//     fetchTests,
-//     fetchConfigurationById,
-//     createConfiguration,
-//     updateConfiguration,
-//     clearCurrentConfiguration,
-//   } = useTestStore();
-//   const { roles, fetchRoles } = useUserStore();
-//   // Load configuration when editing
-//   useEffect(() => {
-//     if (actualConfigId) {
-//       fetchConfigurationById(actualConfigId);
-//       setIsEditMode(true);
-//     } else {
-//       clearCurrentConfiguration();
-//       setIsEditMode(false);
-//       setFormData(defaultFormData);
-//     }
-//   }, [actualConfigId]);
-
-//   // Fetch roles and tests on component mount
-//   useEffect(() => {
-//     fetchTests();
-//     fetchRoles();
-//   }, []);
-
-//   // When store updates currentConfiguration, sync to local form
-//   useEffect(() => {
-//     if (currentConfiguration && isEditMode) {
-//       setFormData({
-//         roleId: currentConfiguration.roleId,
-//         testId: currentConfiguration.testId,
-//         price: currentConfiguration.price,
-//         durationMinutes: currentConfiguration.durationMinutes,
-//         questionsPerPage: currentConfiguration.questionsPerPage,
-//         submitType: currentConfiguration.submitType,
-//         allowMultiplePurchases: currentConfiguration.allowMultiplePurchases,
-//         canResume: currentConfiguration.canResume,
-//         testInstructions: currentConfiguration.testInstructions,
-//       });
-//     }
-//   }, [currentConfiguration]);
-
-//   const showMessage = (text: string, type: "success" | "error" | "info") => {
-//     setMessage({ text, type });
-//     setTimeout(() => setMessage(null), 3000);
-//   };
-
-//   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-//     const target = e.target as HTMLInputElement;
-//     const value =
-//       target.type === "checkbox"
-//         ? target.checked
-//         : target.type === "number"
-//           ? parseFloat(target.value)
-//           : target.value;
-
-//     setFormData((prev) => ({ ...prev, [target.name]: value }));
-//   };
-
-//   const handleSubmit = async (e: React.FormEvent) => {
-//     e.preventDefault();
-
-//     if (!formData.roleId || !formData.testId) {
-//       showMessage("Role and Test are required.", "error");
-//       return;
-//     }
-
-//     if (formData.price < 0 || formData.durationMinutes <= 0 || formData.questionsPerPage <= 0) {
-//       showMessage("Price, duration, and questions per page must be valid values.", "error");
-//       return;
-//     }
-
-//     try {
-//       if (isEditMode && actualConfigId) {
-//         await updateConfiguration(actualConfigId, formData);
-//         showMessage(`Configuration updated successfully!`, "success");
-//       } else {
-//         await createConfiguration(formData);
-//         showMessage(`Configuration created successfully!`, "success");
-//       }
-
-//       setTimeout(() => navigate("/manage/configurations"), 1000);
-//     } catch (err) {
-//       showMessage(
-//         `Failed to ${isEditMode ? "update" : "create"} configuration. Please try again.`,
-//         "error"
-//       );
-//     }
-//   };
-
-//   const messageClasses =
-//     message?.type === "success"
-//       ? "bg-green-100 text-green-800 border-green-400"
-//       : message?.type === "error"
-//         ? "bg-red-100 text-red-800 border-red-400"
-//         : "bg-blue-100 text-blue-800 border-blue-400";
-
-//   return (
-//     <div className="bg-white rounded-xl p-3 sm:p-8 max-w-4xl mx-auto my-4 border border-gray-100">
-//       <h2 className="text-2xl font-semibold leading-none tracking-tight mb-3">
-//         {isEditMode ? "Edit Configuration" : "Create New Configuration"}
-//       </h2>
-
-//       {message && (
-//         <div
-//           className={`p-3 mb-4 text-center border-l-4 rounded font-medium transition duration-300 ${messageClasses}`}
-//         >
-//           {message.text}
-//         </div>
-//       )}
-
-//       <form onSubmit={handleSubmit} className="space-y-4">
-//         {/* Role and Test Dropdowns */}
-//         <div className="grid grid-cols-2 gap-4">
-//           <div>
-//             <label className="font-semibold text-gray-700">Role *</label>
-//             <select
-//               name="roleId"
-//               value={formData.roleId}
-//               onChange={handleChange}
-//               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-//               disabled={loading}
-//             >
-//               <option value="">Select a role</option>
-//               {roles.map(role => (
-//                 <option key={role.id} value={role.id}>
-//                   {role.name}
-//                 </option>
-//               ))}
-//             </select>
-//             {loading && <span className="text-sm text-gray-500">Loading roles...</span>}
-//           </div>
-
-//           <div>
-//             <label className="font-semibold text-gray-700">Test *</label>
-//             <select
-//               name="testId"
-//               value={formData.testId}
-//               onChange={handleChange}
-//               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-//               disabled={loading}
-//             >
-//               <option value="">Select a test</option>
-//               {tests.map(test => (
-//                 <option key={test.id} value={test.id}>
-//                   {test.title}
-//                 </option>
-//               ))}
-//             </select>
-//             {loading && <span className="text-sm text-gray-500">Loading tests...</span>}
-//           </div>
-//         </div>
-
-//         {/* Price and Duration */}
-//         <div className="grid grid-cols-2 gap-4">
-//           <div>
-//             <label className="font-semibold text-gray-700">Price (₹)</label>
-//             <Input
-//               type="number"
-//               name="price"
-//               value={formData.price}
-//               onChange={handleChange}
-//               min={0}
-//               step="0.01"
-//               placeholder="0.00"
-//             />
-//           </div>
-
-//           <div>
-//             <label className="font-semibold text-gray-700">Duration (minutes) *</label>
-//             <Input
-//               type="number"
-//               name="durationMinutes"
-//               value={formData.durationMinutes}
-//               onChange={handleChange}
-//               min={1}
-//               placeholder="60"
-//             />
-//           </div>
-//         </div>
-
-//         {/* Questions Per Page and Submit Type */}
-//         <div className="grid grid-cols-2 gap-4">
-//           <div>
-//             <label className="font-semibold text-gray-700">Questions Per Page *</label>
-//             <Input
-//               type="number"
-//               name="questionsPerPage"
-//               value={formData.questionsPerPage}
-//               onChange={handleChange}
-//               min={1}
-//               max={50}
-//               placeholder="5"
-//             />
-//           </div>
-
-//           <div>
-//             <label className="font-semibold text-gray-700">Submit Type</label>
-//             <select
-//               name="submitType"
-//               value={formData.submitType}
-//               onChange={handleChange}
-//               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-//             >
-//               <option value="PerPage">Submit Per Page</option>
-//               <option value="OneGo">Submit in One Go</option>
-//             </select>
-//           </div>
-//         </div>
-
-//         {/* Checkbox Options */}
-//         <div className="grid grid-cols-2 gap-4">
-//           <div className="flex items-center space-x-2">
-//             <input
-//               type="checkbox"
-//               name="allowMultiplePurchases"
-//               checked={formData.allowMultiplePurchases}
-//               onChange={handleChange}
-//               className="w-4 h-4"
-//             />
-//             <label className="text-gray-700 font-medium">Allow Multiple Purchases</label>
-//           </div>
-
-//           <div className="flex items-center space-x-2">
-//             <input
-//               type="checkbox"
-//               name="canResume"
-//               checked={formData.canResume}
-//               onChange={handleChange}
-//               className="w-4 h-4"
-//             />
-//             <label className="text-gray-700 font-medium">Can Resume Test</label>
-//           </div>
-//         </div>
-
-//         {/* Instructions */}
-//         <div>
-//           <label className="font-semibold text-gray-700">Test Instructions</label>
-//           <Textarea
-//             name="testInstructions"
-//             value={formData.testInstructions}
-//             onChange={handleChange}
-//             rows={6}
-//             placeholder="Enter test instructions for candidates..."
-//             className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-//           />
-//         </div>
-
-//         {/* Submit Button */}
-//         <div className="flex justify-end space-x-3">
-//           <Button type="button" variant="outline" onClick={() => navigate("/manage/configurations")}>
-//             Cancel
-//           </Button>
-//           <Button type="submit" disabled={loading}>
-//             {loading ? "Saving..." : isEditMode ? "Update Configuration" : "Create Configuration"}
-//           </Button>
-//         </div>
-//       </form>
-//     </div>
-//   );
-// };
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTestStore } from "@/store/testStore";
@@ -301,8 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useUserStore } from "@/store/userStore";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Save, X, Settings2, Sliders, DollarSign, ScrollText, Loader2, PlayCircle, Hash } from "lucide-react";
 import { useTestConfigurationStore } from "@/store/testConfigurationStore";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 
 type Message = { text: string; type: "success" | "error" | "info" } | null;
 
@@ -332,15 +39,11 @@ export const TestConfigurationForm: React.FC<{ configId?: string }> = ({ configI
 
   const {
     tests,
-
     fetchTests,
-
   } = useTestStore();
   const {
-
     loading,
     currentConfiguration,
-
     fetchConfigurationById,
     createConfiguration,
     updateConfiguration,
@@ -446,7 +149,7 @@ export const TestConfigurationForm: React.FC<{ configId?: string }> = ({ configI
     }
 
     if (formData.questionsPerPage <= 0) {
-      showMessage("Duration and questions per page must be valid values.", "error");
+      showMessage("Questions per page must be valid values.", "error");
       return;
     }
 
@@ -469,7 +172,7 @@ export const TestConfigurationForm: React.FC<{ configId?: string }> = ({ configI
         showMessage(`Configuration created successfully!`, "success");
       }
 
-      setTimeout(() => navigate("/manage/configurations"), 1000);
+      setTimeout(() => navigate("/manage/test-configurations"), 1000);
     } catch (err) {
       showMessage(
         `Failed to ${isEditMode ? "update" : "create"} configuration. Please try again.`,
@@ -478,272 +181,263 @@ export const TestConfigurationForm: React.FC<{ configId?: string }> = ({ configI
     }
   };
 
-  const messageClasses =
-    message?.type === "success"
-      ? "bg-green-50 text-green-800 border border-green-200 rounded-lg p-4"
-      : message?.type === "error"
-        ? "bg-red-50 text-red-800 border border-red-200 rounded-lg p-4"
-        : "bg-blue-50 text-blue-800 border border-blue-200 rounded-lg p-4";
+  if (loading && isEditMode && !currentConfiguration) {
+    return (
+      <div className="min-h-screen w-full bg-[#FAFAFA] flex flex-col items-center justify-center">
+        <div className="relative">
+          <div className="h-16 w-16 rounded-full border-t-4 border-cyan-500 animate-spin"></div>
+          <Loader2 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-cyan-500 animate-pulse" />
+        </div>
+        <p className="mt-4 text-sm font-semibold text-slate-400">Loading Configuration...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-6xl mx-auto px-2 sm:px-4 lg:px-2">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8">
-          {/* Header */}
-          <div className="mb-8">
-            <h3 className="text-2xl font-bold text-gray-900">
-              {isEditMode ? "Edit Configuration" : "Create New Configuration"}
-            </h3>
+    <div className="min-h-screen w-full bg-[#F8FAFC] py-8 px-4 sm:px-6">
+      {/* Dynamic Background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] bg-cyan-500/5 rounded-full blur-[120px] animate-pulse"></div>
+        <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] bg-sky-500/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }}></div>
+      </div>
+
+      <div className="max-w-6xl mx-auto relative z-10">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 mb-1">
+              <Badge variant="outline" className="bg-white/50 backdrop-blur-md border-slate-200 text-slate-500 text-[10px] uppercase tracking-widest font-bold px-2 py-0.5">
+                Deployment
+              </Badge>
+            </div>
+            <h1 className="text-3xl font-black tracking-tight text-slate-900 flex items-center gap-2">
+              {isEditMode ? "Edit Config" : "New Config"}
+              <span className="text-slate-300">/</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-sky-600">Distribution Rule</span>
+            </h1>
           </div>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              onClick={() => navigate("/manage/test-configurations")}
+              className="bg-transparent hover:bg-slate-100 text-slate-500 hover:text-slate-700 font-semibold h-10 px-5 transition-all"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={loading}
+              className="bg-slate-900 text-white font-bold h-10 px-6 shadow-xl shadow-slate-900/20 hover:bg-slate-800 transition-all hover:scale-105 active:scale-95 rounded-xl"
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+              Save Rule
+            </Button>
+          </div>
+        </div>
 
-          {message && (
-            <div className={`mb-6 ${messageClasses}`}>
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  {message.type === "success" && (
-                    <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                  )}
-                  {message.type === "error" && (
-                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                    </svg>
-                  )}
-                  {message.type === "info" && (
-                    <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                    </svg>
-                  )}
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-min">
+
+          {/* CARD 1: IDENTITY (Hero) - Spans 8 cols */}
+          <Card className="md:col-span-8 border-none shadow-elegant bg-white/80 backdrop-blur-xl rounded-[2rem] overflow-hidden group hover:shadow-2xl transition-all duration-500">
+            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-500"></div>
+            <CardContent className="p-8">
+              <div className="flex flex-col sm:flex-row gap-8 items-start">
+                {/* Visual Icon Section */}
+                <div className="flex-shrink-0 flex flex-col items-center gap-3">
+                  <div className="h-24 w-24 rounded-[2rem] bg-gradient-to-br from-cyan-50 to-sky-50 flex items-center justify-center border-4 border-white shadow-lg relative overflow-hidden group-hover:scale-105 transition-transform duration-500">
+                    <Settings2 className="h-10 w-10 text-cyan-300" />
+                    <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  </div>
+                  <div className="text-center">
+                    <Badge className="bg-cyan-100 text-cyan-600 border-none">Active Rule</Badge>
+                  </div>
                 </div>
-                <div className="ml-3">
-                  <p className="text-sm font-medium">{message.text}</p>
+
+                {/* Identity Inputs */}
+                <div className="flex-grow space-y-4 w-full">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Target Assessment</Label>
+                    <select
+                      name="testId"
+                      value={formData.testId}
+                      onChange={handleChange}
+                      className="w-full h-11 px-3 bg-slate-50 border-transparent hover:border-slate-200 focus:bg-white focus:border-cyan-200 transition-all rounded-xl font-bold text-slate-700 outline-none"
+                      disabled={loading}
+                    >
+                      <option value="">Select Assessment...</option>
+                      {tests.map(test => (
+                        <option key={test?.id} value={test?.id}>{test.title}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Page Pagination</Label>
+                      <div className="relative">
+                        <Hash className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                        <Input
+                          name="questionsPerPage"
+                          type="number"
+                          value={formData.questionsPerPage}
+                          onChange={handleChange}
+                          className="h-11 pl-10 bg-slate-50 border-transparent hover:border-slate-200 focus:bg-white focus:border-cyan-200 transition-all rounded-xl font-bold text-slate-700"
+                          min={1}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Mode</Label>
+                      <select
+                        name="submitType"
+                        value={formData.submitType}
+                        onChange={handleChange}
+                        className="w-full h-11 px-3 bg-slate-50 border-transparent hover:border-slate-200 focus:bg-white focus:border-cyan-200 transition-all rounded-xl font-bold text-slate-700 outline-none"
+                      >
+                        <option value="PerPage">Paginated</option>
+                        <option value="OneGo">Full Exam</option>
+                      </select>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            </CardContent>
+          </Card>
 
-          <form onSubmit={handleSubmit} className="space-y-8">
-
-            {/* Test Selection */}
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">
-                  Test *
-                </label>
-                <select
-                  name="testId"
-                  value={formData.testId}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                  disabled={loading}
-                >
-                  <option value="">Select a test</option>
-                  {tests.map(test => (
-                    <option key={test?.id} value={test?.id}>
-                      {test.title}
-                    </option>
-                  ))}
-                </select>
-                {loading && (
-                  <p className="text-sm text-gray-500 mt-2">Loading tests...</p>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">
-                  Questions Per Page *
-                </label>
-                <Input
-                  type="number"
-                  name="questionsPerPage"
-                  value={formData.questionsPerPage}
-                  onChange={handleChange}
-                  min={1}
-                  max={50}
-                  placeholder="5"
-                  className="w-full"
-                />
-              </div>
-            </div>
-
-            {/* Submit Type */}
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">
-                  Submit Type
-                </label>
-                <select
-                  name="submitType"
-                  value={formData.submitType}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                >
-                  <option value="PerPage">Submit Per Page</option>
-                  <option value="OneGo">Submit in One Go</option>
-                </select>
-              </div>
-            </div>
-            {/* Checkbox Options */}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <label className="flex items-center space-x-3 p-3 rounded-lg hover:bg-white transition-colors cursor-pointer">
-                <input
-                  type="checkbox"
-                  name="allowMultiplePurchases"
-                  checked={formData.allowMultiplePurchases}
-                  onChange={handleChange}
-                  className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                />
-                <div>
-                  <span className="text-gray-900 font-medium">Allow Multiple Purchases</span>
+          {/* CARD 2: BEHAVIOR TOGGLES - Spans 4 cols */}
+          <Card className="md:col-span-4 border-none shadow-elegant bg-slate-900 text-white rounded-[2rem] overflow-hidden relative group">
+            <CardHeader className="p-6 pb-2 relative z-10">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-white/10 rounded-lg backdrop-blur-md">
+                  <Sliders className="h-5 w-5 text-cyan-300" />
                 </div>
-              </label>
-
-              <label className="flex items-center space-x-3 p-3 rounded-lg hover:bg-white transition-colors cursor-pointer">
-                <input
-                  type="checkbox"
-                  name="canResume"
-                  checked={formData.canResume}
-                  onChange={handleChange}
-                  className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                />
-                <div>
-                  <span className="text-gray-900 font-medium">Can Resume Test</span>
+                <h3 className="text-lg font-bold">Policy</h3>
+              </div>
+            </CardHeader>
+            <CardContent className="p-6 relative z-10 space-y-4">
+              <label className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors cursor-pointer group/item">
+                <span className="text-sm font-bold text-slate-300 group-hover/item:text-white transition-colors">Resume Capability</span>
+                <div className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="canResume"
+                    checked={formData.canResume}
+                    onChange={handleChange}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
                 </div>
               </label>
-            </div>
-            {/* Instructions */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">
-                Test Instructions
+
+              <label className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors cursor-pointer group/item">
+                <span className="text-sm font-bold text-slate-300 group-hover/item:text-white transition-colors">Multiple Attempts</span>
+                <div className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="allowMultiplePurchases"
+                    checked={formData.allowMultiplePurchases}
+                    onChange={handleChange}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
+                </div>
               </label>
+            </CardContent>
+          </Card>
+
+          {/* CARD 3: PRICING MATRIX - Spans 12 cols */}
+          <Card className="md:col-span-12 border-none shadow-elegant bg-white/60 backdrop-blur-xl rounded-[2rem] overflow-hidden">
+            <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
+              <div className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5 text-emerald-600" />
+                <h3 className="text-lg font-bold text-slate-900">Access & Pricing Matrix</h3>
+              </div>
+              <Button
+                type="button"
+                onClick={addRolePrice}
+                variant="outline"
+                className="bg-white border-slate-200 hover:bg-emerald-50 hover:text-emerald-600 text-xs font-bold h-8"
+              >
+                <Plus className="w-3 h-3 mr-1" />
+                Add Segment
+              </Button>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="overflow-hidden rounded-xl border border-slate-200">
+                <table className="w-full text-sm text-left">
+                  <thead className="text-xs text-slate-500 uppercase bg-slate-50/50">
+                    <tr>
+                      <th scope="col" className="px-6 py-3 font-bold">Target Role</th>
+                      <th scope="col" className="px-6 py-3 font-bold">Price (₹)</th>
+                      <th scope="col" className="px-6 py-3 font-bold text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {formData.rolePrices.map((rolePrice, index) => (
+                      <tr key={index} className="bg-white border-b border-slate-100 last:border-none hover:bg-slate-50/50 transition-colors">
+                        <td className="px-6 py-3">
+                          <select
+                            value={rolePrice.roleId}
+                            onChange={(e) => handleRolePriceChange(index, 'roleId', e.target.value)}
+                            className="w-full h-10 px-3 bg-slate-50 border-transparent hover:border-slate-200 focus:bg-white focus:border-cyan-200 transition-all rounded-lg font-bold text-slate-700 outline-none"
+                          >
+                            <option value="">Select Role...</option>
+                            {getAvailableRoles(index).map(role => (
+                              <option key={role.id} value={role.id}>{role.name}</option>
+                            ))}
+                          </select>
+                        </td>
+                        <td className="px-6 py-3">
+                          <div className="relative max-w-[150px]">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">₹</span>
+                            <Input
+                              type="number"
+                              value={rolePrice.price}
+                              onChange={(e) => handleRolePriceChange(index, 'price', e.target.value === "" ? "" : parseFloat(e.target.value))}
+                              min={0}
+                              className="h-10 pl-7 bg-slate-50 border-transparent hover:border-slate-200 focus:bg-white focus:border-emerald-200 rounded-lg font-bold text-slate-900"
+                            />
+                          </div>
+                        </td>
+                        <td className="px-6 py-3 text-right">
+                          {formData.rolePrices.length > 1 && (
+                            <Button
+                              type="button"
+                              onClick={() => removeRolePrice(index)}
+                              variant="ghost"
+                              className="h-8 w-8 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* CARD 4: Instructions - Spans 12 cols */}
+          <Card className="md:col-span-12 border-none shadow-elegant bg-white/60 backdrop-blur-xl rounded-[2rem] overflow-hidden">
+            <CardHeader className="p-6 pb-2">
+              <div className="flex items-center gap-2">
+                <ScrollText className="h-5 w-5 text-indigo-600" />
+                <h3 className="text-lg font-bold text-slate-900">Candidate Instructions</h3>
+              </div>
+            </CardHeader>
+            <CardContent className="p-6">
               <Textarea
                 name="testInstructions"
                 value={formData.testInstructions}
                 onChange={handleChange}
-                rows={6}
-                placeholder="Enter detailed test instructions for candidates. Include information about time limits, question types, navigation rules, and any other important guidelines..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-vertical"
+                placeholder="Detailed guidelines for the exam..."
+                className="w-full min-h-[140px] bg-white/50 border-slate-200/50 hover:border-indigo-200 focus:bg-white rounded-xl resize-none text-slate-700 font-medium leading-relaxed p-4 outline-none transition-all"
               />
-            </div>
-            <div className="rounded-xl p-6 border border-gray-200">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Pricing</h3>
-                </div>
-                <Button
-                  type="button"
-                  onClick={addRolePrice}
-                  className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  Add Role
-                </Button>
-              </div>
+            </CardContent>
+          </Card>
 
-              <div className=" p-6">
-                {/* Table Header */}
-                <div className="grid grid-cols-12 gap-4 mb-4 pb-3 border-b border-gray-200">
-                  <div className="md:col-span-5">
-                    <label className="block text-sm font-semibold text-gray-700">
-                      Role
-                    </label>
-                  </div>
-                  <div className="md:col-span-4">
-                    <label className="block text-sm font-semibold text-gray-700">
-                      Price (₹)
-                    </label>
-                  </div>
-                  <div className="md:col-span-3">
-                    <label className="block text-sm font-semibold text-gray-700">
-                      Actions
-                    </label>
-                  </div>
-                </div>
-
-                {/* Role Price Rows */}
-                <div className="space-y-3">
-                  {formData.rolePrices.map((rolePrice, index) => (
-                    <div key={index} className="grid grid-cols-12 gap-4 items-center">
-                      {/* Role Select */}
-                      <div className="md:col-span-5">
-                        <select
-                          value={rolePrice.roleId}
-                          onChange={(e) => handleRolePriceChange(index, 'roleId', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                          disabled={loading}
-                        >
-                          <option value="">Select a role</option>
-                          {getAvailableRoles(index).map(role => (
-                            <option key={role.id} value={role.id}>
-                              {role.name}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      {/* Price Input */}
-                      <div className="md:col-span-4">
-                        <Input
-                          type="number"
-                          value={rolePrice.price}
-                          onChange={(e) => handleRolePriceChange(index, 'price', e.target.value === "" ? "" : parseFloat(e.target.value))}
-                          min={0}
-                          step="0.01"
-                          placeholder="0.00"
-                          className="w-full"
-                        />
-                      </div>
-
-                      {/* Actions */}
-                      <div className="md:col-span-3 flex items-center gap-2">
-                        {/* Delete Button - Show only if more than one row exists */}
-                        {formData.rolePrices.length > 1 && (
-                          <Button
-                            type="button"
-                            onClick={() => removeRolePrice(index)}
-                            variant="outline"
-                            size="sm"
-                            className="text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700 hover:border-red-400 transition-colors"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-            {/* Submit Button */}
-            <div className="flex flex-col sm:flex-row justify-end gap-3 pt-6 border-t border-gray-200">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate("/manage/configurations")}
-                className="w-full sm:w-auto"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                {loading ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Saving...
-                  </div>
-                ) : isEditMode ? (
-                  "Update Configuration"
-                ) : (
-                  "Create Configuration"
-                )}
-              </Button>
-            </div>
-          </form>
-        </div>
+        </form>
       </div>
     </div>
   );
