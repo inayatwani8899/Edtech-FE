@@ -55,7 +55,8 @@ import { Outlet, Navigate } from "react-router-dom";
 import { useAuthStore } from "../../store/useAuthStore"; // ✅ using zustand
 import { AdminSidebar } from "../sidebars/AdminSidebar";
 import { Navbar } from "../ui/navbar";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
+import { ChevronRight } from "lucide-react";
 
 export const AdminLayout = () => {
   const { user, isAuthenticated, isLoading } = useAuthStore();
@@ -80,6 +81,9 @@ export const AdminLayout = () => {
         {/* Sidebar */}
         <AdminSidebar />
 
+        {/* Visible rail button: appears when sidebar is collapsed and toggles it open */}
+        <VisibleSidebarRail />
+
         {/* Content area */}
         <div className="flex-1 flex flex-col">
           {/* Navbar */}
@@ -94,3 +98,25 @@ export const AdminLayout = () => {
     </SidebarProvider>
   );
 };
+
+// Small component rendered inside the provider so it can access sidebar context.
+function VisibleSidebarRail() {
+  try {
+    const { state, toggleSidebar } = useSidebar();
+
+    if (state !== "collapsed") return null;
+
+    return (
+      <button
+        onClick={() => toggleSidebar()}
+        aria-label="Open sidebar"
+        title="Open sidebar"
+        className="fixed left-1 top-1/2 z-50 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-r-md bg-white border border-slate-200 shadow-md hover:bg-white/95 dark:bg-slate-800 dark:border-slate-700"
+      >
+        <ChevronRight className="h-5 w-5 text-slate-700 dark:text-slate-100" />
+      </button>
+    );
+  } catch {
+    return null;
+  }
+}

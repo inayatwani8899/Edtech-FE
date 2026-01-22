@@ -77,7 +77,7 @@ export function AdminSidebar() {
     const isActive = (path: string) => currentPath === path || currentPath.startsWith(`${path}/`);
 
     return (
-        <Sidebar className="transition-all duration-300">
+        <Sidebar collapsible="icon" className="transition-all duration-300">
             <SidebarContent
                 className={`flex flex-col h-full transition-colors duration-200 ${
                     theme === "dark" ? "bg-slate-900 text-slate-100" : "bg-white text-slate-700 shadow-sm"
