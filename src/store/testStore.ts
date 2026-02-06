@@ -646,22 +646,41 @@ export const useTestStore = create<TestState>((set, get) => ({
     submitTest: async (testId, userId) => {
         const { userAnswers } = get();
         try {
-
-            // Convert Map into required array format
+            // Convert Map into required array format with numeric IDs
             const answersArray = Array.from(userAnswers.entries()).map(([questionId, optionId]) => ({
-                questionId,
-                optionId
+                questionId: Number(questionId),
+                optionId: Number(optionId)
             }));
 
             const payload = {
-                testId,
-                userId,
+                testId: Number(testId),
+                userId: Number(userId),
                 answers: answersArray
             };
-            await api.post(`/tests/submit`, payload);
+
+            // Specify responseType as blob because the backend returns the generated report
+            const response = await api.post(`/tests/submit`, payload, {
+                responseType: 'blob'
+            });
+
+            // Trigger file download if a blob was returned
+            if (response.data instanceof Blob && response.data.size > 0) {
+                const blob = new Blob([response.data], { type: 'text/html' });
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                const testTitle = get().currentTest?.title?.replace(/\s+/g, "_") || "Report";
+                link.download = `${testTitle}_${testId}.html`;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                window.URL.revokeObjectURL(url);
+            }
+
             usePaymentStore.getState().clearPaidTest(userId, testId);
             get().resetTestState();
         } catch (err) {
+            console.error("Test submission error:", err);
             throw err;
         }
     },

@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -15,8 +14,6 @@ import {
   User,
   Settings,
   LogOut,
-  Menu,
-  X,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -24,15 +21,14 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 export const Navbar = () => {
   const navigate = useNavigate();
   const { user, logout, isAuthenticated } = useAuthStore();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center gap-4">
-            <SidebarTrigger className="md:hidden" />
-            <Link to="/student/dashboard" className="flex items-center space-x-2 md:hidden">
+            {isAuthenticated && <SidebarTrigger className="md:hidden" />}
+            <Link to={isAuthenticated ? (user?.role === 'Admin' ? '/dashboard' : '/student/dashboard') : '/'} className="flex items-center space-x-2">
               <Brain className="h-6 w-6 text-primary" />
               <span className="text-lg font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
                 PathGrad

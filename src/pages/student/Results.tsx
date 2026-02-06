@@ -99,17 +99,17 @@ export const Results = () => {
         responseType: "blob",
       });
 
-      const blob = new Blob([response.data], { type: "application/pdf" });
+      const blob = new Blob([response.data], { type: "text/html" });
       const downloadUrl = window.URL.createObjectURL(blob);
 
       const link = document.createElement("a");
       link.href = downloadUrl;
-      link.download = `${testTitle.replace(/\s+/g, "_")}_Report_${reportId}.pdf`;
+      link.download = `${testTitle.replace(/\s+/g, "_")}_Report_${reportId}.html`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
 
-      window.URL.revokeObjectURL(downloadUrl);
+      window.URL.revokeObjectURL(downloadUrl) as any;
     } catch (error) {
       console.error(error);
       alert("Failed to download report. Please try again.");
@@ -138,16 +138,16 @@ export const Results = () => {
         responseType: "blob",
       });
 
-      const blob = new Blob([response.data], { type: "application/pdf" });
+      const blob = new Blob([response.data], { type: "text/html" });
       const fileURL = window.URL.createObjectURL(blob);
 
       const link = document.createElement("a");
       link.href = fileURL;
-      link.download = `${testTitle.replace(/\s+/g, "_")}_Report_${attemptId}.pdf`;
+      link.download = `${testTitle.replace(/\s+/g, "_")}_Report_${attemptId}.html`;
       document.body.appendChild(link);
       link.click();
       link.remove();
-      window.URL.revokeObjectURL(fileURL);
+      window.URL.revokeObjectURL(fileURL) as any;
 
     } catch (error) {
       console.error(error);
