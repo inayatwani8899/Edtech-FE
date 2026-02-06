@@ -168,7 +168,7 @@ const StudentProfile: React.FC = () => {
             <Sparkles className="h-3 w-3 text-primary animate-pulse" />
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">Student Identity</span>
           </div>
-          <h1 className="text-4xl lg:text-5xl font-black tracking-tight text-slate-900 mb-4">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-slate-900 mb-4">
             Portal <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-indigo-600 to-blue-600">Dossier</span>
           </h1>
           <p className="text-slate-500 font-medium text-base max-w-2xl mx-auto">
@@ -253,16 +253,16 @@ const StudentProfile: React.FC = () => {
             {/* Performance Pulse Mini-Card */}
             <Card className="glass-card border-white/20 rounded-[2rem] shadow-soft p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
+                <h3 className="text-[10px] md:text-xs font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
                   <TrendingUp className="h-4 w-4 text-primary" />
                   Performance Pulse
                 </h3>
-                <span className="text-[10px] font-bold text-primary bg-primary/5 px-2 py-0.5 rounded-full">LIVE</span>
+                <span className="text-[8px] md:text-[10px] font-bold text-primary bg-primary/5 px-2 py-0.5 rounded-full">LIVE</span>
               </div>
 
-              <div className="h-[200px] w-full">
+              <div className="h-[150px] sm:h-[200px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart cx="50%" cy="50%" outerRadius="80%" data={[
+                  <RadarChart cx="50%" cy="50%" outerRadius="70%" data={[
                     { subject: 'Logic', A: 120, fullMark: 150 },
                     { subject: 'Verbal', A: 98, fullMark: 150 },
                     { subject: 'Math', A: 86, fullMark: 150 },
@@ -270,7 +270,7 @@ const StudentProfile: React.FC = () => {
                     { subject: 'Focus', A: 85, fullMark: 150 },
                   ]}>
                     <PolarGrid stroke="#e2e8f0" />
-                    <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }} />
+                    <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 8, fontWeight: 700 }} />
                     <Radar
                       name="Student"
                       dataKey="A"

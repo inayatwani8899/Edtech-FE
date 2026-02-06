@@ -19,6 +19,7 @@ import {
   X,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export const Navbar = () => {
   const navigate = useNavigate();
@@ -29,13 +30,14 @@ export const Navbar = () => {
     <nav className="sticky top-0 z-50 w-full border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
-          <div className="flex items-center">
-            {/* <Link to="/" className="flex items-center space-x-2">
-              <Brain className="h-8 w-8 text-primary" />
-              <span className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+          <div className="flex items-center gap-4">
+            <SidebarTrigger className="md:hidden" />
+            <Link to="/student/dashboard" className="flex items-center space-x-2 md:hidden">
+              <Brain className="h-6 w-6 text-primary" />
+              <span className="text-lg font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
                 PathGrad
               </span>
-            </Link> */}
+            </Link>
           </div>
 
           {/* User Menu */}
@@ -82,28 +84,14 @@ export const Navbar = () => {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-
-                {/* Mobile menu button */}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="md:hidden"
-                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                >
-                  {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-                </Button>
               </>
             ) : (
               <div className="flex items-center space-x-2">
                 <Button variant="ghost" asChild>
                   <Link to="/login">Login</Link>
                 </Button>
-                {/* <Button asChild>
-                  <Link to="/get-started">Get Started</Link>
-                </Button> */}
                 <Button
                   onClick={(e) => {
-
                     localStorage.removeItem("testId");
                     localStorage.removeItem("testFlowActive");
                     navigate("/get-started");
@@ -111,20 +99,10 @@ export const Navbar = () => {
                 >
                   Get Started
                 </Button>
-
               </div>
             )}
           </div>
         </div>
-
-        {/* Mobile Navigation */}
-        {isAuthenticated && mobileMenuOpen && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t">
-              {/* This section should ideally be moved to a mobile sidebar component */}
-            </div>
-          </div>
-        )}
       </div>
     </nav>
   );

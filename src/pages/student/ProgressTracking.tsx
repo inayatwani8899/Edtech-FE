@@ -50,7 +50,7 @@ export const ProgressTracking: React.FC = () => {
                             <div className="h-px w-6 bg-primary/30"></div>
                             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">Performance Analytics</span>
                         </div>
-                        <h1 className="text-4xl font-black tracking-tight text-slate-900 mb-2">
+                        <h1 className="text-3xl md:text-4xl font-black tracking-tight text-slate-900 mb-2">
                             Progress <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-indigo-600">Tracking</span>
                         </h1>
                         <p className="text-slate-500 font-medium text-base">Visualize your academic trajectory and cross-compare with global benchmarks.</p>
@@ -97,10 +97,10 @@ export const ProgressTracking: React.FC = () => {
                 <div className="grid lg:grid-cols-12 gap-8">
                     <Card className="lg:col-span-8 glass-card border-none shadow-elegant rounded-[2.5rem] overflow-hidden">
                         <CardHeader className="p-8 pb-4">
-                            <div className="flex items-center justify-between">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                 <div>
-                                    <CardTitle className="text-xl font-black text-slate-900">Performance Velocity</CardTitle>
-                                    <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Weekly growth trajectory</p>
+                                    <CardTitle className="text-lg md:text-xl font-black text-slate-900">Performance Velocity</CardTitle>
+                                    <p className="text-[10px] md:text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Weekly growth trajectory</p>
                                 </div>
                                 <div className="flex items-center gap-4">
                                     <div className="flex items-center gap-2">
@@ -114,8 +114,8 @@ export const ProgressTracking: React.FC = () => {
                                 </div>
                             </div>
                         </CardHeader>
-                        <CardContent className="p-8 pt-0">
-                            <div className="h-[350px] w-full mt-6">
+                        <CardContent className="p-4 md:p-8 pt-0">
+                            <div className="h-[250px] md:h-[350px] w-full mt-6">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <AreaChart data={data}>
                                         <defs>
@@ -129,13 +129,13 @@ export const ProgressTracking: React.FC = () => {
                                             dataKey="name"
                                             axisLine={false}
                                             tickLine={false}
-                                            tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 700 }}
+                                            tick={{ fill: '#94a3b8', fontSize: 9, fontWeight: 700 }}
                                             dy={10}
                                         />
                                         <YAxis
                                             axisLine={false}
                                             tickLine={false}
-                                            tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 700 }}
+                                            tick={{ fill: '#94a3b8', fontSize: 9, fontWeight: 700 }}
                                         />
                                         <Tooltip
                                             contentStyle={{

@@ -72,7 +72,7 @@ export const LearningPath: React.FC = () => {
                         <div className="h-px w-6 bg-warning/30"></div>
                         <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-warning">Educational Roadmap</span>
                     </div>
-                    <h1 className="text-4xl font-black tracking-tight text-slate-900 mb-4">
+                    <h1 className="text-3xl md:text-4xl font-black tracking-tight text-slate-900 mb-4">
                         Learning <span className="text-transparent bg-clip-text bg-gradient-to-r from-warning to-orange-600">Path</span>
                     </h1>
                     <p className="text-slate-500 font-medium text-base max-w-2xl">

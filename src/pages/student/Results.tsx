@@ -272,7 +272,7 @@ export const Results = () => {
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[100px] -z-10 animate-pulse"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-400/5 rounded-full blur-[100px] -z-10 animate-pulse" style={{ animationDelay: '2s' }}></div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10 space-y-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 relative z-10 space-y-6 md:space-y-8">
 
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-6">
@@ -291,24 +291,24 @@ export const Results = () => {
 
           <div className="flex flex-col sm:flex-row gap-4">
             {/* View Mode Toggle */}
-            <div className="bg-white p-1 rounded-xl shadow-sm border border-slate-100 flex">
+            <div className="bg-white p-1 rounded-xl shadow-sm border border-slate-100 flex w-full sm:w-auto">
               <Button
                 variant={viewMode === 'table' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setViewMode('table')}
-                className={`rounded-lg px-4 gap-2 transition-all duration-300 ${viewMode === 'table' ? 'shadow-md font-bold' : 'text-slate-500 hover:text-slate-700'}`}
+                className={`flex-1 sm:flex-none rounded-lg px-4 gap-2 transition-all duration-300 ${viewMode === 'table' ? 'shadow-md font-bold' : 'text-slate-500 hover:text-slate-700'}`}
               >
                 <Table className="h-4 w-4" />
-                Table
+                <span className="hidden xs:inline">Table</span>
               </Button>
               <Button
                 variant={viewMode === 'cards' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setViewMode('cards')}
-                className={`rounded-lg px-4 gap-2 transition-all duration-300 ${viewMode === 'cards' ? 'shadow-md font-bold' : 'text-slate-500 hover:text-slate-700'}`}
+                className={`flex-1 sm:flex-none rounded-lg px-4 gap-2 transition-all duration-300 ${viewMode === 'cards' ? 'shadow-md font-bold' : 'text-slate-500 hover:text-slate-700'}`}
               >
                 <List className="h-4 w-4" />
-                Cards
+                <span className="hidden xs:inline">Cards</span>
               </Button>
             </div>
 
@@ -353,23 +353,23 @@ export const Results = () => {
           ))}
         </div>
 
-        <Tabs defaultValue="detailed" className="space-y-8">
-          <TabsList className="bg-slate-100/50 p-1 rounded-2xl">
+        <Tabs defaultValue="detailed" className="space-y-6 md:space-y-8">
+          <TabsList className="bg-slate-100/50 p-1 rounded-2xl w-full justify-start overflow-x-auto no-scrollbar md:w-auto">
             <TabsTrigger
               value="detailed"
-              className="rounded-xl px-6 data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all"
+              className="rounded-xl px-4 md:px-6 whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all text-xs md:text-sm"
             >
               Detailed Results
             </TabsTrigger>
             <TabsTrigger
               value="overview"
-              className="rounded-xl px-6 data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all"
+              className="rounded-xl px-4 md:px-6 whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all text-xs md:text-sm"
             >
               Overview
             </TabsTrigger>
             <TabsTrigger
               value="insights"
-              className="rounded-xl px-6 data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all"
+              className="rounded-xl px-4 md:px-6 whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all text-xs md:text-sm"
             >
               AI Insights
             </TabsTrigger>
@@ -535,17 +535,17 @@ export const Results = () => {
 
                   {/* Pagination */}
                   {userSubmissions && userSubmissions.totalPages > 1 && (
-                    <div className="flex justify-center items-center space-x-4 p-6 border-t border-slate-100">
+                    <div className="flex flex-col sm:flex-row justify-center items-center gap-4 p-6 border-t border-slate-100">
                       <Button
                         variant="outline"
                         disabled={!userSubmissions.hasPreviousPage}
                         onClick={() => handlePageChange(userSubmissions.pageNumber - 1)}
-                        className="rounded-xl hover:bg-slate-100"
+                        className="rounded-xl hover:bg-slate-100 w-full sm:w-auto text-xs"
                       >
                         Previous
                       </Button>
 
-                      <span className="text-sm font-bold text-slate-600">
+                      <span className="text-xs font-bold text-slate-600 order-first sm:order-none">
                         Page {userSubmissions.pageNumber} of {userSubmissions.totalPages}
                       </span>
 
@@ -553,7 +553,7 @@ export const Results = () => {
                         variant="outline"
                         disabled={!userSubmissions.hasNextPage}
                         onClick={() => handlePageChange(userSubmissions.pageNumber + 1)}
-                        className="rounded-xl hover:bg-slate-100"
+                        className="rounded-xl hover:bg-slate-100 w-full sm:w-auto text-xs"
                       >
                         Next
                       </Button>

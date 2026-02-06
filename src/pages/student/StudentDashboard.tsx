@@ -123,27 +123,27 @@ export const StudentDashboard = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 md:mb-10">
           <div>
-            <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 mb-2">
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 mb-2">
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600">
                 {greeting},
               </span>
-              <span className="ml-2">
+              <span className="ml-2 block sm:inline">
                 {user?.firstName ? user.firstName.split(' ')[0] : 'Scholar'}! 👋
               </span>
             </h1>
-            <p className="text-lg text-slate-500 font-medium">
+            <p className="text-base md:text-lg text-slate-500 font-medium">
               Ready to unlock your potential today?
             </p>
           </div>
-          <div className="flex items-center gap-3 bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
+          <div className="flex items-center gap-3 bg-white p-2 md:p-3 rounded-2xl shadow-sm border border-slate-100 w-fit">
             <div className="bg-primary/10 p-2 rounded-xl">
               <Target className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Current Goal</p>
-              <p className="text-sm font-semibold text-slate-700">Complete Career Path</p>
+              <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider">Current Goal</p>
+              <p className="text-xs md:text-sm font-semibold text-slate-700">Complete Career Path</p>
             </div>
           </div>
         </div>
@@ -184,16 +184,16 @@ export const StudentDashboard = () => {
         </div>
 
         {/* Learning Journey Roadmap */}
-        <div className="mb-10 p-6 rounded-[2rem] bg-slate-900 shadow-2xl relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12 group-hover:rotate-0 transition-transform duration-700">
+        <div className="mb-10 p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] bg-slate-900 shadow-2xl relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12 group-hover:rotate-0 transition-transform duration-700 pointer-events-none">
             <Compass className="h-40 w-40 text-white" />
           </div>
           <div className="relative z-10">
-            <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+            <h3 className="text-lg md:text-xl font-bold text-white mb-8 flex items-center gap-2">
               <Compass className="h-5 w-5 text-primary" />
               Your Career Journey
             </h3>
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 relative">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8 relative">
               <div className="absolute top-1/2 left-0 w-full h-0.5 bg-white/10 hidden md:block -translate-y-1/2"></div>
               {[
                 { step: 'Start', title: 'Onboarding', status: 'completed' },
@@ -201,16 +201,17 @@ export const StudentDashboard = () => {
                 { step: 'Insight', title: 'Skill Profile', status: 'pending' },
                 { step: 'Goal', title: 'Career Path', status: 'pending' }
               ].map((item, i) => (
-                <div key={i} className="flex md:flex-col items-center gap-4 relative z-10 group/item">
+                <div key={i} className="flex flex-col items-center gap-2 md:gap-4 relative z-10 group/item w-full md:w-auto">
+                  {i > 0 && <div className="md:hidden h-8 w-0.5 bg-white/10 mb-2"></div>}
                   <div className={`h-12 w-12 rounded-2xl flex items-center justify-center transition-all duration-300 ${item.status === 'completed' ? 'bg-success shadow-[0_0_20px_rgba(34,197,94,0.3)]' :
                     item.status === 'active' ? 'bg-primary animate-pulse shadow-[0_0_20px_rgba(59,130,246,0.5)]' : 'bg-white/10'
                     }`}>
                     {item.status === 'completed' ? <CheckCircle2 className="h-6 w-6 text-white" /> :
                       <span className="text-sm font-black text-white">{i + 1}</span>}
                   </div>
-                  <div className="text-left md:text-center">
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-1">{item.step}</p>
-                    <p className={`text-sm font-bold ${item.status === 'pending' ? 'text-white/30' : 'text-white'}`}>{item.title}</p>
+                  <div className="text-center">
+                    <p className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-1">{item.step}</p>
+                    <p className={`text-xs md:text-sm font-bold ${item.status === 'pending' ? 'text-white/30' : 'text-white'}`}>{item.title}</p>
                   </div>
                 </div>
               ))}
@@ -241,12 +242,12 @@ export const StudentDashboard = () => {
                       <p className="text-slate-600 text-lg mb-6 leading-relaxed">
                         {psychometricTest.description}
                       </p>
-                      <div className="flex flex-wrap items-center gap-6 mb-8">
-                        <div className="flex items-center text-slate-500 font-semibold">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-4 md:gap-6 mb-8">
+                        <div className="flex items-center text-slate-500 font-semibold text-sm">
                           <Clock className="h-5 w-5 mr-2 text-primary" />
                           {psychometricTest.timeDuration} mins
                         </div>
-                        <div className="flex items-center text-slate-500 font-semibold">
+                        <div className="flex items-center text-slate-500 font-semibold text-sm">
                           <BarChart3 className="h-5 w-5 mr-2 text-primary" />
                           Complete Evaluation
                         </div>
