@@ -126,7 +126,7 @@ const StudentRegister = () => {
       <div className="flex items-center justify-center px-6 py-12 z-20">
         <div className="w-full max-w-xl">
 
-        
+
 
           <Card className="bg-white/95 shadow-2xl border-0 rounded-3xl overflow-hidden">
             <div className="relative">
