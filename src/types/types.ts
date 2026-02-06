@@ -171,6 +171,7 @@ export interface TestConfiguration {
   isActive?: boolean;
   rolePrices: RolePrice[];
   testId: string;
+  testPrice?: number | string; // Optional property for display
   questionsPerPage: number;
   submitType: 'OneGo' | 'PerPage';
   allowMultiplePurchases: boolean;

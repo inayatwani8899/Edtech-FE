@@ -153,81 +153,143 @@ const Counselors: React.FC = () => {
                             </div>
                         ) : (
                             <div>
-                                <Table>
-                                    <TableHeader className="bg-slate-50">
-                                        <TableRow className="border-slate-200 hover:bg-transparent">
-                                            <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[35%]">Counselor Identity</TableHead>
-                                            <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[25%]">Email</TableHead>
-                                            <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[20%]">Phone</TableHead>
-                                            <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider text-center w-[20%]">Actions</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {normalizedCounselors(counselors).map((counselor) => (
-                                            <TableRow key={counselor?.id} className="border-slate-100 hover:bg-slate-50 transition-all duration-200 group">
-                                                <TableCell className="px-4 py-2">
+                                <div className="hidden md:block overflow-x-auto">
+                                    <Table>
+                                        <TableHeader className="bg-slate-50">
+                                            <TableRow className="border-slate-200 hover:bg-transparent">
+                                                <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[35%]">Counselor Identity</TableHead>
+                                                <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[25%]">Email</TableHead>
+                                                <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[20%]">Phone</TableHead>
+                                                <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider text-center w-[20%]">Actions</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {normalizedCounselors(counselors).map((counselor) => (
+                                                <TableRow key={counselor?.id} className="border-slate-100 hover:bg-slate-50 transition-all duration-200 group">
+                                                    <TableCell className="px-4 py-2">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="h-6 w-6 rounded-md bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center font-bold text-white text-[10px] shadow-sm shadow-emerald-500/20 border border-white/20 ring-1 ring-slate-50 group-hover:scale-105 transition-transform flex-shrink-0">
+                                                                {counselor?.firstName?.[0]}{counselor?.lastName?.[0]}
+                                                            </div>
+                                                            <div className="min-w-0 flex-1">
+                                                                <p className="text-xs font-bold text-slate-900 leading-none mb-0.5 group-hover:text-primary transition-colors truncate">
+                                                                    {`${counselor?.firstName} ${counselor?.lastName}`}
+                                                                </p>
+                                                                <div className="flex items-center gap-1.5">
+                                                                    {counselor?.hireDate && (
+                                                                        <span className="text-[9px] text-slate-400 font-medium hidden sm:inline-block">
+                                                                            Since {new Date(counselor.hireDate).getFullYear()}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell className="px-4 py-2">
+                                                        <div className="flex items-center gap-1.5 max-w-[200px]">
+                                                            <span className="text-xs font-semibold text-slate-700 truncate block" title={counselor?.email}>{counselor?.email}</span>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell className="px-4 py-2">
+                                                        {counselor?.phoneNumber ? (
+                                                            <div className="flex items-center gap-1.5">
+                                                                <div className="h-4 w-4 rounded-full bg-slate-50 flex items-center justify-center flex-shrink-0">
+                                                                    <Phone className="h-2.5 w-2.5 text-slate-400" />
+                                                                </div>
+                                                                <span className="text-xs font-semibold text-slate-600">{counselor.phoneNumber}</span>
+                                                            </div>
+                                                        ) : (
+                                                            <span className="text-[10px] text-slate-400 italic">Not provided</span>
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell className="px-4 py-2">
+                                                        <div className="flex justify-center gap-2 opacity-100 transition-all duration-200">
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                onClick={() => navigate(`/counselors/edit/${counselor.id}`)}
+                                                                className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 transition-all"
+                                                                title="Edit Profile"
+                                                            >
+                                                                <Edit className="h-3.5 w-3.5" />
+                                                            </Button>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                onClick={() => openDeleteDialog(counselor.id)}
+                                                                className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-300 transition-all"
+                                                                title="Revoke Access"
+                                                            >
+                                                                <Trash2 className="h-3.5 w-3.5" />
+                                                            </Button>
+                                                        </div>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+
+                                {/* Mobile Card View */}
+                                <div className="grid grid-cols-1 gap-4 p-4 md:hidden">
+                                    {normalizedCounselors(counselors).map((counselor) => (
+                                        <Card key={counselor?.id} className="border border-slate-200 shadow-sm overflow-hidden rounded-xl bg-white">
+                                            <CardContent className="p-4 space-y-4">
+                                                <div className="flex items-start justify-between">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="h-6 w-6 rounded-md bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center font-bold text-white text-[10px] shadow-sm shadow-emerald-500/20 border border-white/20 ring-1 ring-slate-50 group-hover:scale-105 transition-transform flex-shrink-0">
+                                                        <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center font-bold text-white shadow-sm shadow-emerald-500/20">
                                                             {counselor?.firstName?.[0]}{counselor?.lastName?.[0]}
                                                         </div>
                                                         <div className="min-w-0 flex-1">
-                                                            <p className="text-xs font-bold text-slate-900 leading-none mb-0.5 group-hover:text-primary transition-colors truncate">
-                                                                {`${counselor?.firstName} ${counselor?.lastName}`}
+                                                            <p className="text-sm font-bold text-slate-900 leading-tight mb-1">
+                                                                {counselor?.firstName} {counselor?.lastName}
                                                             </p>
-                                                            <div className="flex items-center gap-1.5">
-                                                                {counselor?.hireDate && (
-                                                                    <span className="text-[9px] text-slate-400 font-medium hidden sm:inline-block">
-                                                                        Since {new Date(counselor.hireDate).getFullYear()}
-                                                                    </span>
-                                                                )}
-                                                            </div>
+                                                            <span className="text-[10px] font-medium text-slate-500 block truncate">{counselor?.email}</span>
                                                         </div>
                                                     </div>
-                                                </TableCell>
-                                                <TableCell className="px-4 py-2">
-                                                    <div className="flex items-center gap-1.5 max-w-[200px]">
-                                                        {/* Icon removed to match Users style simpler text or kept if Users has icons - Users has no icon in email cell, just text. I will match users simpler email style */}
-                                                        <span className="text-xs font-semibold text-slate-700 truncate block" title={counselor?.email}>{counselor?.email}</span>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell className="px-4 py-2">
-                                                    {counselor?.phoneNumber ? (
+                                                </div>
+
+                                                <div className="grid grid-cols-2 gap-4 border-t border-slate-50 pt-3">
+                                                    <div className="space-y-1">
+                                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Contact Number</p>
                                                         <div className="flex items-center gap-1.5">
-                                                            <div className="h-4 w-4 rounded-full bg-slate-50 flex items-center justify-center flex-shrink-0">
-                                                                <Phone className="h-2.5 w-2.5 text-slate-400" />
-                                                            </div>
-                                                            <span className="text-xs font-semibold text-slate-600">{counselor.phoneNumber}</span>
+                                                            <Phone className="h-3 w-3 text-slate-400" />
+                                                            <p className="text-xs font-bold text-slate-700">
+                                                                {counselor?.phoneNumber || "N/A"}
+                                                            </p>
                                                         </div>
-                                                    ) : (
-                                                        <span className="text-[10px] text-slate-400 italic">Not provided</span>
-                                                    )}
-                                                </TableCell>
-                                                <TableCell className="px-4 py-2">
-                                                    <div className="flex justify-center gap-2 opacity-100 transition-all duration-200">
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            onClick={() => navigate(`/counselors/edit/${counselor.id}`)}
-                                                            className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 transition-all"
-                                                            title="Edit Profile"
-                                                        >
-                                                            <Edit className="h-3.5 w-3.5" />
-                                                        </Button>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            onClick={() => openDeleteDialog(counselor.id)}
-                                                            className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-300 transition-all"
-                                                            title="Revoke Access"
-                                                        >
-                                                            <Trash2 className="h-3.5 w-3.5" />
-                                                        </Button>
                                                     </div>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
+                                                    <div className="space-y-1">
+                                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Staff Since</p>
+                                                        <p className="text-xs font-bold text-slate-700">
+                                                            {counselor?.hireDate ? new Date(counselor.hireDate).getFullYear() : "N/A"}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex gap-2 pt-2">
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => navigate(`/counselors/edit/${counselor.id}`)}
+                                                        className="flex-1 h-9 rounded-lg border-slate-200 text-indigo-600 font-bold text-[10px] uppercase tracking-wider"
+                                                    >
+                                                        <Edit className="h-3.5 w-3.5 mr-2" />
+                                                        Edit Profile
+                                                    </Button>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => openDeleteDialog(counselor.id)}
+                                                        className="h-9 w-9 rounded-lg border-rose-200 text-rose-600 hover:bg-rose-50"
+                                                    >
+                                                        <Trash2 className="h-3.5 w-3.5" />
+                                                    </Button>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    ))}
+                                </div>
 
                                 {/* Pagination Footer */}
                                 <div className="p-2 border-t border-slate-200 bg-slate-50/50 flex flex-col md:flex-row items-center justify-between gap-2">

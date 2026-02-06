@@ -129,78 +129,140 @@ export const CategoriesList: React.FC = () => {
                             </div>
                         ) : (
                             <div>
-                                <Table>
-                                    <TableHeader className="bg-slate-50">
-                                        <TableRow className="border-slate-200 hover:bg-transparent">
-                                            <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[30%]">Category Name</TableHead>
-                                            <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[40%]">Description</TableHead>
-                                            <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[15%]">Status</TableHead>
-                                            <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider text-center w-[15%]">Actions</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {categories?.map((category) => (
-                                            <TableRow key={category?.id} className="border-slate-100 hover:bg-slate-50 transition-all duration-200 group">
-                                                <TableCell className="px-4 py-2">
+                                <div className="hidden md:block overflow-x-auto">
+                                    <Table>
+                                        <TableHeader className="bg-slate-50">
+                                            <TableRow className="border-slate-200 hover:bg-transparent">
+                                                <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[30%]">Category Name</TableHead>
+                                                <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[40%]">Description</TableHead>
+                                                <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[15%]">Status</TableHead>
+                                                <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider text-center w-[15%]">Actions</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {categories?.map((category) => (
+                                                <TableRow key={category?.id} className="border-slate-100 hover:bg-slate-50 transition-all duration-200 group">
+                                                    <TableCell className="px-4 py-2">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="h-6 w-6 rounded-md bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center font-bold text-white text-[10px] shadow-sm shadow-emerald-500/20 border border-white/20 ring-1 ring-slate-50 group-hover:scale-105 transition-transform flex-shrink-0">
+                                                                <Tag className="h-3 w-3" />
+                                                            </div>
+                                                            <div className="min-w-0 flex-1">
+                                                                <p className="text-xs font-bold text-slate-900 leading-none mb-0.5 group-hover:text-primary transition-colors truncate">
+                                                                    {category?.categoryName}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell className="px-4 py-2">
+                                                        <div className="max-w-xs truncate text-xs font-medium text-slate-500" title={category?.description}>
+                                                            {category?.description}
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell className="px-4 py-2">
+                                                        <span className={`px-2 py-0.5 text-[9px] uppercase rounded-full font-bold ${category?.isActive
+                                                            ? "bg-emerald-100 text-emerald-700"
+                                                            : "bg-slate-100 text-slate-500"
+                                                            }`}>
+                                                            {category?.isActive ? "Active" : "Inactive"}
+                                                        </span>
+                                                    </TableCell>
+                                                    <TableCell className="px-4 py-2">
+                                                        <div className="flex justify-center gap-2 opacity-100 transition-all duration-200">
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                onClick={() => navigate(`/manage/categories/view/${category.id}`)}
+                                                                className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-primary hover:bg-primary/5 hover:border-primary/30 transition-all"
+                                                                title="View Details"
+                                                            >
+                                                                <Eye className="h-3.5 w-3.5" />
+                                                            </Button>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                onClick={() => navigate(`/manage/categories/edit/${category.id}`)}
+                                                                className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 transition-all"
+                                                                title="Edit Category"
+                                                            >
+                                                                <Edit className="h-3.5 w-3.5" />
+                                                            </Button>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                onClick={() => openDeleteDialog(category.id)}
+                                                                className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-300 transition-all"
+                                                                title="Delete Category"
+                                                            >
+                                                                <Trash2 className="h-3.5 w-3.5" />
+                                                            </Button>
+                                                        </div>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+
+                                {/* Mobile Card View */}
+                                <div className="grid grid-cols-1 gap-4 p-4 md:hidden">
+                                    {categories?.map((category) => (
+                                        <Card key={category?.id} className="border border-slate-200 shadow-sm overflow-hidden rounded-xl bg-white">
+                                            <CardContent className="p-4 space-y-4">
+                                                <div className="flex items-start justify-between">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="h-6 w-6 rounded-md bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center font-bold text-white text-[10px] shadow-sm shadow-emerald-500/20 border border-white/20 ring-1 ring-slate-50 group-hover:scale-105 transition-transform flex-shrink-0">
-                                                            <Tag className="h-3 w-3" />
+                                                        <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-sm">
+                                                            <Tag className="h-5 w-5 text-white" />
                                                         </div>
                                                         <div className="min-w-0 flex-1">
-                                                            <p className="text-xs font-bold text-slate-900 leading-none mb-0.5 group-hover:text-primary transition-colors truncate">
+                                                            <p className="text-sm font-bold text-slate-900 leading-tight mb-1">
                                                                 {category?.categoryName}
                                                             </p>
+                                                            <Badge variant="secondary" className={`${category?.isActive ? "bg-emerald-50 text-emerald-700" : "bg-slate-50 text-slate-500"} text-[10px] font-bold border-none px-2 py-0.5`}>
+                                                                {category?.isActive ? "Active" : "Inactive"}
+                                                            </Badge>
                                                         </div>
                                                     </div>
-                                                </TableCell>
-                                                <TableCell className="px-4 py-2">
-                                                    <div className="max-w-xs truncate text-xs font-medium text-slate-500" title={category?.description}>
-                                                        {category?.description}
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell className="px-4 py-2">
-                                                    <span className={`px-2 py-0.5 text-[9px] uppercase rounded-full font-bold ${category?.isActive
-                                                        ? "bg-emerald-100 text-emerald-700"
-                                                        : "bg-slate-100 text-slate-500"
-                                                        }`}>
-                                                        {category?.isActive ? "Active" : "Inactive"}
-                                                    </span>
-                                                </TableCell>
-                                                <TableCell className="px-4 py-2">
-                                                    <div className="flex justify-center gap-2 opacity-100 transition-all duration-200">
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            onClick={() => navigate(`/manage/categories/view/${category.id}`)}
-                                                            className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-primary hover:bg-primary/5 hover:border-primary/30 transition-all"
-                                                            title="View Details"
-                                                        >
-                                                            <Eye className="h-3.5 w-3.5" />
-                                                        </Button>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            onClick={() => navigate(`/manage/categories/edit/${category.id}`)}
-                                                            className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 transition-all"
-                                                            title="Edit Category"
-                                                        >
-                                                            <Edit className="h-3.5 w-3.5" />
-                                                        </Button>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            onClick={() => openDeleteDialog(category.id)}
-                                                            className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-300 transition-all"
-                                                            title="Delete Category"
-                                                        >
-                                                            <Trash2 className="h-3.5 w-3.5" />
-                                                        </Button>
-                                                    </div>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
+                                                </div>
+
+                                                <div className="border-t border-slate-50 pt-3">
+                                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Description</p>
+                                                    <p className="text-xs font-medium text-slate-600 leading-relaxed line-clamp-2">
+                                                        {category?.description || "No description provided."}
+                                                    </p>
+                                                </div>
+
+                                                <div className="flex gap-2 pt-2">
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => navigate(`/manage/categories/view/${category.id}`)}
+                                                        className="flex-1 h-9 rounded-lg border-slate-200 text-slate-600 font-bold text-[10px] uppercase tracking-wider"
+                                                    >
+                                                        <Eye className="h-3.5 w-3.5 mr-2" />
+                                                        View
+                                                    </Button>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => navigate(`/manage/categories/edit/${category.id}`)}
+                                                        className="h-9 w-9 rounded-lg border-slate-200 text-indigo-600 hover:bg-indigo-50"
+                                                    >
+                                                        <Edit className="h-3.5 w-3.5" />
+                                                    </Button>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => openDeleteDialog(category.id)}
+                                                        className="h-9 w-9 rounded-lg border-rose-200 text-rose-600 hover:bg-rose-50"
+                                                    >
+                                                        <Trash2 className="h-3.5 w-3.5" />
+                                                    </Button>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    ))}
+                                </div>
 
                                 {/* Pagination Footer */}
                                 <div className="p-2 border-t border-slate-200 bg-slate-50/50 flex flex-col md:flex-row items-center justify-between gap-2">
