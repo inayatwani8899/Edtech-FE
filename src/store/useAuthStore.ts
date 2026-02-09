@@ -130,6 +130,7 @@ interface AuthState {
   logout: () => void;
   registerStudent: (payload) => Promise<{ success: boolean, error?: any }>;
   registerCounsellor: (firstName: string, lastName: string, email: string, password: string, dateOfBirth: string, grade: string, phone: string, role: string) => Promise<void>;
+  registerSchool: (payload: any) => Promise<{ success: boolean, error?: any }>;
 
   loadFromStorage: () => void;
   setTestId: (testId: string | null) => void;
@@ -265,6 +266,24 @@ export const useAuthStore = create<AuthState>(
 
         //   // Auto login after registration
         //   await get().login(email, password);
+      } finally {
+        set({ isLoading: false });
+      }
+    },
+    registerSchool: async (payload: any) => {
+      set({ isLoading: true });
+      try {
+        const response = await api.post("/School/register", payload);
+        if (response.data.code === 201) {
+          return {
+            success: true,
+            message: "Registration completed successfully",
+            data: response.data
+          };
+        }
+        return { success: false, error: response.data };
+      } catch (error) {
+        return { success: false, error };
       } finally {
         set({ isLoading: false });
       }
