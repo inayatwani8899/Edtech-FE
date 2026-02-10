@@ -1,67 +1,67 @@
 import React from "react";
 import {
-    Brain,
-    Users,
-    Target,
-    BarChart3,
-    CheckCircle2,
-    FileText,
-    Sparkles,
-    Activity,
-    BookOpen,
-    TrendingUp,
-    Zap,
-    GitBranch,
-    ArrowRight,
-    Layers,
-    GraduationCap,
-    Briefcase,
-    School,
-    Baby
+  Brain,
+  Users,
+  Target,
+  BarChart3,
+  CheckCircle2,
+  FileText,
+  Sparkles,
+  Activity,
+  BookOpen,
+  TrendingUp,
+  Zap,
+  GitBranch,
+  ArrowRight,
+  Layers,
+  GraduationCap,
+  Briefcase,
+  School,
+  Baby
 } from "lucide-react";
 
 // ═══════════════════════════════════════
 // PSYCHOMETRIC TESTING PROCESS VISUALIZATION
 // ═══════════════════════════════════════
 export const PsychometricVisualization = () => {
-    const stages = [
-        {
-            icon: Brain,
-            title: "Cognitive Assessment",
-            theory: "Cattell-Horn-Carroll (CHC) Theory",
-            description: "Measures fluid intelligence, crystallized intelligence, and processing speed",
-            color: "#c8622a",
-            metrics: ["Verbal Reasoning", "Numerical Ability", "Spatial Processing", "Working Memory"]
-        },
-        {
-            icon: Users,
-            title: "Personality Profiling",
-            theory: "Big Five (OCEAN) Model",
-            description: "Evaluates openness, conscientiousness, extraversion, agreeableness, neuroticism",
-            color: "#d4a843",
-            metrics: ["Openness", "Conscientiousness", "Extraversion", "Agreeableness"]
-        },
-        {
-            icon: Target,
-            title: "Interest Mapping",
-            theory: "Holland's RIASEC Framework",
-            description: "Identifies career interests across six personality types",
-            color: "#0ea5e9",
-            metrics: ["Realistic", "Investigative", "Artistic", "Social", "Enterprising", "Conventional"]
-        },
-        {
-            icon: Activity,
-            title: "Emotional Intelligence",
-            theory: "Goleman's EQ Model",
-            description: "Assesses self-awareness, empathy, motivation, and social skills",
-            color: "#34d399",
-            metrics: ["Self-Awareness", "Self-Regulation", "Motivation", "Empathy"]
-        }
-    ];
+  const stages = [
+    {
+      icon: Brain,
+      title: "Cognitive Assessment",
+      theory: "Cattell-Horn-Carroll (CHC) Theory",
+      description: "Measures fluid intelligence, crystallized intelligence, and processing speed",
+      color: "#c8622a",
+      metrics: ["Verbal Reasoning", "Numerical Ability", "Spatial Processing", "Working Memory"]
+    },
+    {
+      icon: Users,
+      title: "Personality Profiling",
+      theory: "Big Five (OCEAN) Model",
+      description: "Evaluates openness, conscientiousness, extraversion, agreeableness, neuroticism",
+      color: "#d4a843",
+      metrics: ["Openness", "Conscientiousness", "Extraversion", "Agreeableness"]
+    },
+    {
+      icon: Target,
+      title: "Interest Mapping",
+      theory: "Holland's RIASEC Framework",
+      description: "Identifies career interests across six personality types",
+      color: "#0ea5e9",
+      metrics: ["Realistic", "Investigative", "Artistic", "Social", "Enterprising", "Conventional"]
+    },
+    {
+      icon: Activity,
+      title: "Emotional Intelligence",
+      theory: "Goleman's EQ Model",
+      description: "Assesses self-awareness, empathy, motivation, and social skills",
+      color: "#34d399",
+      metrics: ["Self-Awareness", "Self-Regulation", "Motivation", "Empathy"]
+    }
+  ];
 
-    return (
-        <div className="psycho-viz">
-            <style>{`
+  return (
+    <div className="psycho-viz">
+      <style>{`
         .psycho-viz {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -201,45 +201,45 @@ export const PsychometricVisualization = () => {
         }
       `}</style>
 
-            {stages.map((stage, idx) => (
-                <div
-                    key={idx}
-                    className="stage-card"
-                    style={{ "--stage-color": stage.color } as React.CSSProperties}
-                >
-                    <div className="stage-icon-wrap">
-                        <stage.icon size={28} color="#ffffff" strokeWidth={2.5} />
-                    </div>
-                    <div className="stage-theory">{stage.theory}</div>
-                    <h3 className="stage-title">{stage.title}</h3>
-                    <p className="stage-desc">{stage.description}</p>
-                    <div className="stage-metrics">
-                        {stage.metrics.map((metric, i) => (
-                            <span key={i} className="metric-tag">{metric}</span>
-                        ))}
-                    </div>
-                </div>
+      {stages.map((stage, idx) => (
+        <div
+          key={idx}
+          className="stage-card"
+          style={{ "--stage-color": stage.color } as React.CSSProperties}
+        >
+          <div className="stage-icon-wrap">
+            <stage.icon size={28} color="#ffffff" strokeWidth={2.5} />
+          </div>
+          <div className="stage-theory">{stage.theory}</div>
+          <h3 className="stage-title">{stage.title}</h3>
+          <p className="stage-desc">{stage.description}</p>
+          <div className="stage-metrics">
+            {stage.metrics.map((metric, i) => (
+              <span key={i} className="metric-tag">{metric}</span>
             ))}
+          </div>
         </div>
-    );
+      ))}
+    </div>
+  );
 };
 
 // ═══════════════════════════════════════
 // AI WORKFLOW VISUALIZATION - Animated Flow
 // ═══════════════════════════════════════
 export const AIWorkflowVisualization = () => {
-    const steps = [
-        { id: 1, title: "Grade Detection", icon: GraduationCap, desc: "AI identifies student level" },
-        { id: 2, title: "Theory Selection", icon: BookOpen, desc: "Picks relevant frameworks" },
-        { id: 3, title: "Question Generation", icon: Sparkles, desc: "Creates adaptive items" },
-        { id: 4, title: "Response Analysis", icon: Brain, desc: "Evaluates answers in real-time" },
-        { id: 5, title: "Score Calculation", icon: BarChart3, desc: "Applies psychometric models" },
-        { id: 6, title: "Report Generation", icon: FileText, desc: "Produces insights & guidance" },
-    ];
+  const steps = [
+    { id: 1, title: "Grade Detection", icon: GraduationCap, desc: "AI identifies student level" },
+    { id: 2, title: "Theory Selection", icon: BookOpen, desc: "Picks relevant frameworks" },
+    { id: 3, title: "Question Generation", icon: Sparkles, desc: "Creates adaptive items" },
+    { id: 4, title: "Response Analysis", icon: Brain, desc: "Evaluates answers in real-time" },
+    { id: 5, title: "Score Calculation", icon: BarChart3, desc: "Applies psychometric models" },
+    { id: 6, title: "Report Generation", icon: FileText, desc: "Produces insights & guidance" },
+  ];
 
-    return (
-        <div className="workflow-viz">
-            <style>{`
+  return (
+    <div className="workflow-viz">
+      <style>{`
         .workflow-viz {
           position: relative;
           padding: 60px 0;
@@ -379,72 +379,72 @@ export const AIWorkflowVisualization = () => {
         }
       `}</style>
 
-            <div className="workflow-grid">
-                {steps.map((step) => (
-                    <div key={step.id} className="workflow-step">
-                        <div className="step-number">{step.id}</div>
-                        <div className="step-icon-box">
-                            <step.icon size={24} color="#d4a843" strokeWidth={2} />
-                        </div>
-                        <h4 className="step-title">{step.title}</h4>
-                        <p className="step-desc">{step.desc}</p>
-                    </div>
-                ))}
+      <div className="workflow-grid">
+        {steps.map((step) => (
+          <div key={step.id} className="workflow-step">
+            <div className="step-number">{step.id}</div>
+            <div className="step-icon-box">
+              <step.icon size={24} color="#d4a843" strokeWidth={2} />
             </div>
-        </div>
-    );
+            <h4 className="step-title">{step.title}</h4>
+            <p className="step-desc">{step.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 };
 
 // ═══════════════════════════════════════
 // GRADES VISUALIZATION - Level Progression
 // ═══════════════════════════════════════
 export const GradesVisualization = () => {
-    const gradeCategories = [
-        {
-            category: "Early Education",
-            icon: Baby,
-            color: "#34d399",
-            grades: ["Pre-K", "K", "Grade 1", "Grade 2"],
-            focus: "Foundational cognitive & social skills",
-            tests: "Picture-based assessments, basic problem-solving"
-        },
-        {
-            category: "Elementary",
-            icon: School,
-            color: "#0ea5e9",
-            grades: ["Grade 3", "Grade 4", "Grade 5", "Grade 6"],
-            focus: "Core competencies & learning styles",
-            tests: "Reading comprehension, math reasoning, creativity"
-        },
-        {
-            category: "Secondary",
-            icon: GraduationCap,
-            color: "#d4a843",
-            grades: ["Grade 7", "Grade 8", "Grade 9", "Grade 10"],
-            focus: "Subject mastery & career exploration",
-            tests: "Subject-specific aptitude, personality profiling"
-        },
-        {
-            category: "Higher Education",
-            icon: BookOpen,
-            color: "#c8622a",
-            grades: ["Grade 11", "Grade 12", "Undergraduate"],
-            focus: "College readiness & specialization",
-            tests: "Advanced reasoning, career alignment, EQ"
-        },
-        {
-            category: "Professional",
-            icon: Briefcase,
-            color: "#1e4035",
-            grades: ["Early Career", "Mid-Level", "Senior"],
-            focus: "Leadership & domain expertise",
-            tests: "Managerial assessment, technical proficiency"
-        }
-    ];
+  const gradeCategories = [
+    {
+      category: "Early Education",
+      icon: Baby,
+      color: "#34d399",
+      grades: ["Pre-K", "K", "Grade 1", "Grade 2"],
+      focus: "Foundational cognitive & social skills",
+      tests: "Picture-based assessments, basic problem-solving"
+    },
+    {
+      category: "Elementary",
+      icon: School,
+      color: "#0ea5e9",
+      grades: ["Grade 3", "Grade 4", "Grade 5", "Grade 6"],
+      focus: "Core competencies & learning styles",
+      tests: "Reading comprehension, math reasoning, creativity"
+    },
+    {
+      category: "Secondary",
+      icon: GraduationCap,
+      color: "#d4a843",
+      grades: ["Grade 7", "Grade 8", "Grade 9", "Grade 10"],
+      focus: "Subject mastery & career exploration",
+      tests: "Subject-specific aptitude, personality profiling"
+    },
+    {
+      category: "Higher Education",
+      icon: BookOpen,
+      color: "#c8622a",
+      grades: ["Grade 11", "Grade 12", "Undergraduate"],
+      focus: "College readiness & specialization",
+      tests: "Advanced reasoning, career alignment, EQ"
+    },
+    {
+      category: "Professional",
+      icon: Briefcase,
+      color: "#1e4035",
+      grades: ["Early Career", "Mid-Level", "Senior"],
+      focus: "Leadership & domain expertise",
+      tests: "Managerial assessment, technical proficiency"
+    }
+  ];
 
-    return (
-        <div className="grades-viz">
-            <style>{`
+  return (
+    <div className="grades-viz">
+      <style>{`
         .grades-viz {
           display: flex;
           flex-direction: column;
@@ -610,40 +610,40 @@ export const GradesVisualization = () => {
         }
       `}</style>
 
-            {gradeCategories.map((cat, idx) => (
-                <div
-                    key={idx}
-                    className="grade-category"
-                    style={{ "--cat-color": cat.color } as React.CSSProperties}
-                >
-                    <div className="category-icon-box">
-                        <cat.icon size={36} color="white" strokeWidth={2.5} />
-                    </div>
-                    <div className="category-content">
-                        <div className="category-header">
-                            <h3 className="category-name">{cat.category}</h3>
-                            <div className="grade-badges">
-                                {cat.grades.map((grade, i) => (
-                                    <span key={i} className="grade-badge">{grade}</span>
-                                ))}
-                            </div>
-                        </div>
-                        <p className="category-focus"><strong>Focus:</strong> {cat.focus}</p>
-                        <p className="category-tests"><strong>Assessments:</strong> {cat.tests}</p>
-                    </div>
-                </div>
-            ))}
+      {gradeCategories.map((cat, idx) => (
+        <div
+          key={idx}
+          className="grade-category"
+          style={{ "--cat-color": cat.color } as React.CSSProperties}
+        >
+          <div className="category-icon-box">
+            <cat.icon size={36} color="white" strokeWidth={2.5} />
+          </div>
+          <div className="category-content">
+            <div className="category-header">
+              <h3 className="category-name">{cat.category}</h3>
+              <div className="grade-badges">
+                {cat.grades.map((grade, i) => (
+                  <span key={i} className="grade-badge">{grade}</span>
+                ))}
+              </div>
+            </div>
+            <p className="category-focus"><strong>Focus:</strong> {cat.focus}</p>
+            <p className="category-tests"><strong>Assessments:</strong> {cat.tests}</p>
+          </div>
         </div>
-    );
+      ))}
+    </div>
+  );
 };
 
 // ═══════════════════════════════════════
 // TEST PROCESS FLOW - Complete Pipeline
 // ═══════════════════════════════════════
 export const TestProcessFlow = () => {
-    return (
-        <div className="process-flow">
-            <style>{`
+  return (
+    <div className="process-flow">
+      <style>{`
         .process-flow {
           max-width: 900px;
           margin: 0 auto;
@@ -801,194 +801,194 @@ export const TestProcessFlow = () => {
         }
       `}</style>
 
-            <div className="flow-container">
-                <div className="flow-stage">
-                    <div className="flow-header">
-                        <div className="flow-number">1</div>
-                        <h4 className="flow-title">Question Generation</h4>
-                        <div className="flow-icon">
-                            <Sparkles size={20} color="#d4a843" />
-                        </div>
-                    </div>
-                    <div className="flow-content">
-                        <p className="flow-desc">
-                            AI analyzes grade level, selects appropriate psychometric theories
-                            (CHC, Big Five, RIASEC), and generates contextually relevant questions
-                            with varying difficulty levels.
-                        </p>
-                        <div className="flow-details">
-                            <div className="detail-item">
-                                <div className="detail-check">
-                                    <CheckCircle2 size={10} color="white" strokeWidth={3} />
-                                </div>
-                                Grade-adaptive content
-                            </div>
-                            <div className="detail-item">
-                                <div className="detail-check">
-                                    <CheckCircle2 size={10} color="white" strokeWidth={3} />
-                                </div>
-                                Theory-based items
-                            </div>
-                            <div className="detail-item">
-                                <div className="detail-check">
-                                    <CheckCircle2 size={10} color="white" strokeWidth={3} />
-                                </div>
-                                Difficulty calibration
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="flow-stage">
-                    <div className="flow-header">
-                        <div className="flow-number">2</div>
-                        <h4 className="flow-title">Student Response</h4>
-                        <div className="flow-icon">
-                            <Target size={20} color="#d4a843" />
-                        </div>
-                    </div>
-                    <div className="flow-content">
-                        <p className="flow-desc">
-                            Student completes the assessment in a user-friendly interface.
-                            Responses are captured with timestamps and behavioral data for comprehensive analysis.
-                        </p>
-                        <div className="flow-details">
-                            <div className="detail-item">
-                                <div className="detail-check">
-                                    <CheckCircle2 size={10} color="white" strokeWidth={3} />
-                                </div>
-                                Timed responses
-                            </div>
-                            <div className="detail-item">
-                                <div className="detail-check">
-                                    <CheckCircle2 size={10} color="white" strokeWidth={3} />
-                                </div>
-                                Progress tracking
-                            </div>
-                            <div className="detail-item">
-                                <div className="detail-check">
-                                    <CheckCircle2 size={10} color="white" strokeWidth={3} />
-                                </div>
-                                Auto-save feature
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="flow-stage">
-                    <div className="flow-header">
-                        <div className="flow-number">3</div>
-                        <h4 className="flow-title">AI Evaluation</h4>
-                        <div className="flow-icon">
-                            <Brain size={20} color="#d4a843" />
-                        </div>
-                    </div>
-                    <div className="flow-content">
-                        <p className="flow-desc">
-                            Advanced algorithms evaluate responses using Item Response Theory (IRT),
-                            calculate raw scores, and apply normative data for standardized results.
-                        </p>
-                        <div className="flow-details">
-                            <div className="detail-item">
-                                <div className="detail-check">
-                                    <CheckCircle2 size={10} color="white" strokeWidth={3} />
-                                </div>
-                                IRT scoring model
-                            </div>
-                            <div className="detail-item">
-                                <div className="detail-check">
-                                    <CheckCircle2 size={10} color="white" strokeWidth={3} />
-                                </div>
-                                Pattern recognition
-                            </div>
-                            <div className="detail-item">
-                                <div className="detail-check">
-                                    <CheckCircle2 size={10} color="white" strokeWidth={3} />
-                                </div>
-                                Normative comparison
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="flow-stage">
-                    <div className="flow-header">
-                        <div className="flow-number">4</div>
-                        <h4 className="flow-title">Theory Application</h4>
-                        <div className="flow-icon">
-                            <BookOpen size={20} color="#d4a843" />
-                        </div>
-                    </div>
-                    <div className="flow-content">
-                        <p className="flow-desc">
-                            Scores are mapped to psychometric constructs—cognitive abilities (CHC),
-                            personality traits (Big Five), career interests (RIASEC), and emotional intelligence.
-                        </p>
-                        <div className="flow-details">
-                            <div className="detail-item">
-                                <div className="detail-check">
-                                    <CheckCircle2 size={10} color="white" strokeWidth={3} />
-                                </div>
-                                Multi-theory synthesis
-                            </div>
-                            <div className="detail-item">
-                                <div className="detail-check">
-                                    <CheckCircle2 size={10} color="white" strokeWidth={3} />
-                                </div>
-                                Trait profiling
-                            </div>
-                            <div className="detail-item">
-                                <div className="detail-check">
-                                    <CheckCircle2 size={10} color="white" strokeWidth={3} />
-                                </div>
-                                Career alignment
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="flow-stage">
-                    <div className="flow-header">
-                        <div className="flow-number">5</div>
-                        <h4 className="flow-title">Report Generation</h4>
-                        <div className="flow-icon">
-                            <FileText size={20} color="#d4a843" />
-                        </div>
-                    </div>
-                    <div className="flow-content">
-                        <p className="flow-desc">
-                            Comprehensive PDF report generated with visual analytics, percentile rankings,
-                            strength/weakness analysis, and personalized career pathway recommendations.
-                        </p>
-                        <div className="flow-details">
-                            <div className="detail-item">
-                                <div className="detail-check">
-                                    <CheckCircle2 size={10} color="white" strokeWidth={3} />
-                                </div>
-                                Visual dashboards
-                            </div>
-                            <div className="detail-item">
-                                <div className="detail-check">
-                                    <CheckCircle2 size={10} color="white" strokeWidth={3} />
-                                </div>
-                                Career suggestions
-                            </div>
-                            <div className="detail-item">
-                                <div className="detail-check">
-                                    <CheckCircle2 size={10} color="white" strokeWidth={3} />
-                                </div>
-                                Actionable insights
-                            </div>
-                            <div className="detail-item">
-                                <div className="detail-check">
-                                    <CheckCircle2 size={10} color="white" strokeWidth={3} />
-                                </div>
-                                Downloadable PDF
-                            </div>
-                        </div>
-                    </div>
-                </div>
+      <div className="flow-container">
+        <div className="flow-stage">
+          <div className="flow-header">
+            <div className="flow-number">1</div>
+            <h4 className="flow-title">Question Generation</h4>
+            <div className="flow-icon">
+              <Sparkles size={20} color="#d4a843" />
             </div>
+          </div>
+          <div className="flow-content">
+            <p className="flow-desc">
+              AI analyzes grade level, selects appropriate psychometric theories
+              (CHC, Big Five, RIASEC), and generates contextually relevant questions
+              with varying difficulty levels.
+            </p>
+            <div className="flow-details">
+              <div className="detail-item">
+                <div className="detail-check">
+                  <CheckCircle2 size={10} color="white" strokeWidth={3} />
+                </div>
+                Grade-adaptive content
+              </div>
+              <div className="detail-item">
+                <div className="detail-check">
+                  <CheckCircle2 size={10} color="white" strokeWidth={3} />
+                </div>
+                Theory-based items
+              </div>
+              <div className="detail-item">
+                <div className="detail-check">
+                  <CheckCircle2 size={10} color="white" strokeWidth={3} />
+                </div>
+                Difficulty calibration
+              </div>
+            </div>
+          </div>
         </div>
-    );
+
+        <div className="flow-stage">
+          <div className="flow-header">
+            <div className="flow-number">2</div>
+            <h4 className="flow-title">Student Response</h4>
+            <div className="flow-icon">
+              <Target size={20} color="#d4a843" />
+            </div>
+          </div>
+          <div className="flow-content">
+            <p className="flow-desc">
+              Student completes the assessment in a user-friendly interface.
+              Responses are captured with timestamps and behavioral data for comprehensive analysis.
+            </p>
+            <div className="flow-details">
+              <div className="detail-item">
+                <div className="detail-check">
+                  <CheckCircle2 size={10} color="white" strokeWidth={3} />
+                </div>
+                Timed responses
+              </div>
+              <div className="detail-item">
+                <div className="detail-check">
+                  <CheckCircle2 size={10} color="white" strokeWidth={3} />
+                </div>
+                Progress tracking
+              </div>
+              <div className="detail-item">
+                <div className="detail-check">
+                  <CheckCircle2 size={10} color="white" strokeWidth={3} />
+                </div>
+                Auto-save feature
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flow-stage">
+          <div className="flow-header">
+            <div className="flow-number">3</div>
+            <h4 className="flow-title">AI Evaluation</h4>
+            <div className="flow-icon">
+              <Brain size={20} color="#d4a843" />
+            </div>
+          </div>
+          <div className="flow-content">
+            <p className="flow-desc">
+              Advanced algorithms evaluate responses using Item Response Theory (IRT),
+              calculate raw scores, and apply normative data for standardized results.
+            </p>
+            <div className="flow-details">
+              <div className="detail-item">
+                <div className="detail-check">
+                  <CheckCircle2 size={10} color="white" strokeWidth={3} />
+                </div>
+                IRT scoring model
+              </div>
+              <div className="detail-item">
+                <div className="detail-check">
+                  <CheckCircle2 size={10} color="white" strokeWidth={3} />
+                </div>
+                Pattern recognition
+              </div>
+              <div className="detail-item">
+                <div className="detail-check">
+                  <CheckCircle2 size={10} color="white" strokeWidth={3} />
+                </div>
+                Normative comparison
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flow-stage">
+          <div className="flow-header">
+            <div className="flow-number">4</div>
+            <h4 className="flow-title">Theory Application</h4>
+            <div className="flow-icon">
+              <BookOpen size={20} color="#d4a843" />
+            </div>
+          </div>
+          <div className="flow-content">
+            <p className="flow-desc">
+              Scores are mapped to psychometric constructs—cognitive abilities (CHC),
+              personality traits (Big Five), career interests (RIASEC), and emotional intelligence.
+            </p>
+            <div className="flow-details">
+              <div className="detail-item">
+                <div className="detail-check">
+                  <CheckCircle2 size={10} color="white" strokeWidth={3} />
+                </div>
+                Multi-theory synthesis
+              </div>
+              <div className="detail-item">
+                <div className="detail-check">
+                  <CheckCircle2 size={10} color="white" strokeWidth={3} />
+                </div>
+                Trait profiling
+              </div>
+              <div className="detail-item">
+                <div className="detail-check">
+                  <CheckCircle2 size={10} color="white" strokeWidth={3} />
+                </div>
+                Career alignment
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flow-stage">
+          <div className="flow-header">
+            <div className="flow-number">5</div>
+            <h4 className="flow-title">Report Generation</h4>
+            <div className="flow-icon">
+              <FileText size={20} color="#d4a843" />
+            </div>
+          </div>
+          <div className="flow-content">
+            <p className="flow-desc">
+              Comprehensive PDF report generated with visual analytics, percentile rankings,
+              strength/weakness analysis, and personalized career pathway recommendations.
+            </p>
+            <div className="flow-details">
+              <div className="detail-item">
+                <div className="detail-check">
+                  <CheckCircle2 size={10} color="white" strokeWidth={3} />
+                </div>
+                Visual dashboards
+              </div>
+              <div className="detail-item">
+                <div className="detail-check">
+                  <CheckCircle2 size={10} color="white" strokeWidth={3} />
+                </div>
+                Career suggestions
+              </div>
+              <div className="detail-item">
+                <div className="detail-check">
+                  <CheckCircle2 size={10} color="white" strokeWidth={3} />
+                </div>
+                Actionable insights
+              </div>
+              <div className="detail-item">
+                <div className="detail-check">
+                  <CheckCircle2 size={10} color="white" strokeWidth={3} />
+                </div>
+                Downloadable PDF
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
