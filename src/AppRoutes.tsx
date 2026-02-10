@@ -100,8 +100,8 @@ const AppRoutes = () => {
     return (
         <Routes>
             {/* Public Routes */}
-            <Route element={<Layout />}>
                 <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
+            <Route element={<Layout />}>
                 <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
                 <Route path="/register/student" element={<StudentRegister />} />
                 <Route path="/register/counsellor" element={<CounsellorRegister />} />
