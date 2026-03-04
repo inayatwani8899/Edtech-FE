@@ -161,39 +161,36 @@ export interface TestProgress {
     }>;
 }
 // Add these interfaces to your existing types
-export interface UserTestSubmission {
-    testAttempts: any;
-    attempts: any;
+export interface TestAttemptReport {
+    reportId: number;
     testId: number;
-    testTitle: string;
-    testDescription: string;
+    testName: string;
     totalQuestions: number;
-    attemptCount: number;
-    lastAttemptDate: string;
+    attemptNumber: number;
+    format: string;
+    createdDate: string;
 }
 
-export interface UserTestSubmissionData {
-    items: UserTestSubmission[];
-    totalCount: number;
+export interface TestReportPaginatedResponse {
     pageNumber: number;
     pageSize: number;
+    totalRecords: number;
     totalPages: number;
-    hasNextPage: boolean;
-    hasPreviousPage: boolean;
+    sortBy: string;
+    sortDirection: string;
+    data: TestAttemptReport[];
 }
 
-export interface UserSubmissionsResponse {
-    code: number;
-    message: string;
-    data: UserTestSubmissionData;
-}
+
 
 export interface UserSubmissionsFilters {
     search?: string;
     filterColumn?: string;
     filterValue?: string;
-    page?: number;
-    limit?: number;
+    pageNumber?: number;
+    pageSize?: number;
+    sortBy?: string;
+    sortDirection?: string;
 }
 
 import { create } from 'zustand';
@@ -234,7 +231,7 @@ interface TestState {
     userAnswers: Map<string, string>;
     testTakingLoading: boolean;
     testTakingError: string | null;
-    userSubmissions: UserTestSubmissionData | null;
+    userSubmissions: TestReportPaginatedResponse | null;
     userSubmissionsLoading: boolean;
     userSubmissionsError: string | null;
     searchTerm: string | null;
@@ -764,33 +761,33 @@ export const useTestStore = create<TestState>((set, get) => ({
         set({ userSubmissionsLoading: true, userSubmissionsError: null });
         try {
             const {
-                search = '',
-                filterColumn = '',
-                filterValue = '',
-                page = 1,
-                limit = 10
+                pageNumber = 1,
+                pageSize = 10,
+                sortBy = 'createdDate',
+                sortDirection = 'desc',
+                search = ''
             } = filters;
 
-            const response = await api.get('/Test/user-submissions', {
+            const response = await api.get('/tests/report/all', {
                 params: {
-                    search,
-                    filterColumn,
-                    filterValue,
-                    page,
-                    limit
+                    pageNumber,
+                    pageSize,
+                    sortBy,
+                    sortDirection,
+                    search: search || undefined
                 }
             });
 
-            const data: UserSubmissionsResponse = response.data;
+            const data = response.data;
 
-            if (data.code === 200) {
+            if (data && data.data) {
                 set({
-                    userSubmissions: data.data,
+                    userSubmissions: data,
                     userSubmissionsLoading: false
                 });
             } else {
                 set({
-                    userSubmissionsError: data.message || 'Failed to fetch user submissions',
+                    userSubmissionsError: 'Unexpected response format from server',
                     userSubmissionsLoading: false
                 });
             }

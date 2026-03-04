@@ -57,8 +57,8 @@ export const CareerGuidance: React.FC = () => {
                         <div className="h-px w-6 bg-success/30"></div>
                         <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-success">Future Mapping</span>
                     </div>
-                    <h1 className="text-4xl font-black tracking-tight text-slate-900 mb-4">
-                        Career <span className="text-transparent bg-clip-text bg-gradient-to-r from-success to-emerald-600">Guidance</span>
+                    <h1 className="text-4xl font-black tracking-tight mb-4">
+                        <span className="text-slate-900">Career</span> <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-indigo-600">Guidance</span>
                     </h1>
                     <p className="text-slate-500 font-medium text-base max-w-2xl">
                         AI-powered career recommendations and expert mentorship based on your unique psychometric profile.

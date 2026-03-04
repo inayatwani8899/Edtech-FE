@@ -140,7 +140,7 @@ export const Login = () => {
                   )}
 
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] ml-4">Identity Hash</Label>
+                    <Label htmlFor="email" className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] ml-4">User Id / Email</Label>
                     <div className="relative group/input">
                       <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none group-focus-within/input:text-primary transition-colors text-white/20">
                         <Mail className="h-4 w-4" />
@@ -159,12 +159,12 @@ export const Login = () => {
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between px-4">
-                      <Label htmlFor="password" className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">Secret Key</Label>
+                      <Label htmlFor="password" className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">Password</Label>
                       <Link
                         to="/forgot-password"
                         className="text-[9px] font-black text-white/30 uppercase tracking-widest hover:text-white transition-colors"
                       >
-                        Override Path?
+                        Forgot Password?
                       </Link>
                     </div>
                     <div className="relative group/input">
@@ -200,11 +200,11 @@ export const Login = () => {
                     {isLoading ? (
                       <div className="flex items-center gap-2">
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        <span className="text-[9px] font-black uppercase tracking-widest">Hydrating...</span>
+                        <span className="text-[9px] font-black uppercase tracking-widest">Logging in...</span>
                       </div>
                     ) : (
                       <span className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em]">
-                        Initialize Session <ArrowRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
+                        Login <ArrowRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
                       </span>
                     )}
                   </Button>
@@ -212,12 +212,12 @@ export const Login = () => {
 
                 <div className="mt-6 text-center border-t border-white/5 pt-6">
                   <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em] flex items-center justify-center gap-2">
-                    Unauthorized Scholar?
+                    New user?
                     <Link
                       to="/get-started"
                       className="text-white hover:text-primary underline underline-offset-4 decoration-white/10 transition-all font-black"
                     >
-                      Establish Presence
+                      Signup
                     </Link>
                   </p>
                 </div>

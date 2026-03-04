@@ -52,7 +52,7 @@ export const Messages: React.FC = () => {
                         <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-warning">Communication Hub</span>
                     </div>
                     <h1 className="text-3xl md:text-4xl font-black tracking-tight text-slate-900 mb-2">
-                        Messages <span className="text-transparent bg-clip-text bg-gradient-to-r from-warning to-orange-600">Center</span>
+                        Messages <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-indigo-600">Center</span>
                     </h1>
                 </div>
 

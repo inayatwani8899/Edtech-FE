@@ -1,5 +1,7 @@
 
 import { useState, useEffect } from "react";
+// @ts-ignore
+import html2pdf from "html2pdf.js";
 import { useTestStore } from "@/store/testStore";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,14 +30,15 @@ import {
 } from "lucide-react";
 import api from "@/api/axios";
 
-// Interface matching your API response
+// Interface matching your new API response
 interface UserTestSubmission {
+  reportId: number;
   testId: number;
-  testTitle: string;
-  testDescription: string;
+  testName: string;
   totalQuestions: number;
-  attemptCount: number;
-  lastAttemptDate: string;
+  attemptNumber: number;
+  format: string;
+  createdDate: string;
 }
 
 interface SortConfig {
@@ -47,7 +50,7 @@ export const Results = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>("all");
   const [downloadingReports, setDownloadingReports] = useState<{ [key: number]: boolean }>({});
-  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'lastAttemptDate', direction: 'desc' });
+  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'createdDate', direction: 'desc' });
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
 
   // Get data from store
@@ -61,7 +64,7 @@ export const Results = () => {
 
   useEffect(() => {
     // Fetch user submissions when component mounts
-    fetchUserSubmissions({ page: 1, limit: 10 });
+    fetchUserSubmissions({ pageNumber: 1, pageSize: 5, sortBy: sortConfig.key, sortDirection: sortConfig.direction });
 
     // Cleanup on unmount
     return () => {
@@ -72,19 +75,24 @@ export const Results = () => {
   // Handle pagination
   const handlePageChange = (page: number) => {
     fetchUserSubmissions({
-      page,
-      limit: userSubmissions?.pageSize || 10
+      pageNumber: page,
+      pageSize: userSubmissions?.pageSize || 10,
+      sortBy: sortConfig.key,
+      sortDirection: sortConfig.direction
     });
   };
 
   // Handle retry
   const handleRetry = () => {
     fetchUserSubmissions({
-      page: userSubmissions?.pageNumber || 1,
-      limit: userSubmissions?.pageSize || 10
+      pageNumber: 1,
+      pageSize: 10,
+      sortBy: sortConfig.key,
+      sortDirection: sortConfig.direction
     });
   };
 
+  // Download report when we have reportId
   // Download report when we have reportId
   const downloadReportWithReportId = async (reportId: number, testTitle: string) => {
     if (!reportId) {
@@ -95,67 +103,95 @@ export const Results = () => {
     setDownloadingReports(prev => ({ ...prev, [reportId]: true }));
 
     try {
-      const response = await api.get(`/ReportGeneration/download/${reportId}`, {
-        responseType: "blob",
+      // 1. Fetch the HTML content
+      const response = await api.get(`/tests/report/${reportId}/html`);
+      let htmlContent = response.data;
+
+      // 2. Pre-process HTML: Move styles from <head> to <body> to ensure html2canvas sees them
+      // This is a common fix for styles being lost in iframe captures
+      const styleMatch = htmlContent.match(/<style>([\s\S]*?)<\/style>/i);
+      if (styleMatch) {
+        const styleBlock = styleMatch[0];
+        // Remove style from head (optional, but cleaner)
+        // htmlContent = htmlContent.replace(styleBlock, ''); 
+        // Inject style at the beginning of body
+        htmlContent = htmlContent.replace('<body>', `<body>${styleBlock}`);
+      }
+
+      // 3. Create an iframe to render the content
+      const iframe = document.createElement('iframe');
+      Object.assign(iframe.style, {
+        position: 'fixed',
+        left: '0',
+        top: '0',
+        width: '210mm',
+        height: '297mm', // Start A4 size
+        border: 'none',
+        zIndex: '-1000',
+        visibility: 'visible'
+      });
+      document.body.appendChild(iframe);
+
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (!iframeDoc) {
+        throw new Error("Could not create iframe document");
+      }
+
+      iframeDoc.open();
+      iframeDoc.write(htmlContent);
+      iframeDoc.close();
+
+      // 4. Wait for rendering
+      await new Promise<void>((resolve) => {
+        const timeout = setTimeout(() => {
+          console.warn("Report render timed out, trying to print anyway...");
+          resolve();
+        }, 10000); // 10s wait for AI/Images
+
+        const checkRender = setInterval(() => {
+          try {
+            // @ts-ignore
+            if (iframe.contentWindow?.RENDER_COMPLETE === true) {
+              clearInterval(checkRender);
+              clearTimeout(timeout);
+              resolve();
+            }
+          } catch (e) { }
+        }, 500);
       });
 
-      const blob = new Blob([response.data], { type: "text/html" });
-      const downloadUrl = window.URL.createObjectURL(blob);
+      // 5. Configure PDF options
+      const opt = {
+        margin: 0,
+        filename: `${testTitle.replace(/\s+/g, "_")}_Report_${reportId}.pdf`,
+        image: { type: 'jpeg' as const, quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          scrollY: 0,
+          window: iframe.contentWindow as any // Important for finding resources
+        },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
 
-      const link = document.createElement("a");
-      link.href = downloadUrl;
-      link.download = `${testTitle.replace(/\s+/g, "_")}_Report_${reportId}.html`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // 5. Generate and download PDF from iframe body
+      // We target the body which contains the .page elements
+      // @ts-ignore
+      await html2pdf().set(opt).from(iframeDoc.body).save();
 
-      window.URL.revokeObjectURL(downloadUrl) as any;
+      // Cleanup
+      document.body.removeChild(iframe);
+
     } catch (error) {
-      console.error(error);
+      console.error("PDF generation failed:", error);
       alert("Failed to download report. Please try again.");
     } finally {
       setDownloadingReports(prev => ({ ...prev, [reportId]: false }));
     }
   };
 
-  // When we have only attemptId
-  const downloadReport = async (attemptId: number, testTitle: string) => {
-    if (!attemptId) {
-      alert("Invalid attempt selected.");
-      return;
-    }
 
-    setDownloadingReports(prev => ({ ...prev, [attemptId]: true }));
-    try {
-      const generateResponse = await api.post(`/ReportGeneration/generate`, {
-        attemptId: attemptId
-      });
-      const reportId = generateResponse?.data?.data?.report_Id;
-      if (!reportId) {
-        throw new Error("Report ID not received from generate API");
-      }
-      const response = await api.get(`/ReportGeneration/download/${reportId}`, {
-        responseType: "blob",
-      });
-
-      const blob = new Blob([response.data], { type: "text/html" });
-      const fileURL = window.URL.createObjectURL(blob);
-
-      const link = document.createElement("a");
-      link.href = fileURL;
-      link.download = `${testTitle.replace(/\s+/g, "_")}_Report_${attemptId}.html`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(fileURL) as any;
-
-    } catch (error) {
-      console.error(error);
-      alert("Failed to download report. Please try again.");
-    } finally {
-      setDownloadingReports(prev => ({ ...prev, [attemptId]: false }));
-    }
-  };
 
   // Get category badge color based on test title
   const getCategoryBadge = (testTitle: string) => {
@@ -172,48 +208,22 @@ export const Results = () => {
     return { label: 'General', variant: 'default' as const };
   };
 
-  // Filter submissions based on selected filters
-  const filteredSubmissions = userSubmissions?.items.filter(submission => {
-    if (selectedCategory !== "all") {
-      const categoryMap: { [key: string]: string } = {
-        'aptitude': 'psychometric',
-        'personality': 'personality',
-        'interest': 'interest',
-        'eq': 'emotional'
-      };
-
-      if (selectedCategory in categoryMap) {
-        return submission.testTitle.toLowerCase().includes(categoryMap[selectedCategory]);
-      }
-    }
-    return true;
-  }) || [];
-
-  // Sort submissions
-  const sortedSubmissions = [...filteredSubmissions].sort((a, b) => {
-    if (sortConfig.key === 'category') {
-      const categoryA = getCategoryBadge(a.testTitle).label;
-      const categoryB = getCategoryBadge(b.testTitle).label;
-      if (categoryA < categoryB) return sortConfig.direction === 'asc' ? -1 : 1;
-      if (categoryA > categoryB) return sortConfig.direction === 'asc' ? 1 : -1;
-      return 0;
-    }
-
-    const aValue = a[sortConfig.key];
-    const bValue = b[sortConfig.key];
-
-    if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
-    if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
-    return 0;
-  });
-
   // Handle sort
   const handleSort = (key: SortConfig['key']) => {
-    setSortConfig(current => ({
-      key,
-      direction: current.key === key && current.direction === 'asc' ? 'desc' : 'asc'
-    }));
+    const newDirection = sortConfig.key === key && sortConfig.direction === 'asc' ? 'desc' : 'asc';
+    setSortConfig({ key, direction: newDirection });
+
+    fetchUserSubmissions({
+      pageNumber: 1,
+      pageSize: userSubmissions?.pageSize || 10,
+      sortBy: key,
+      sortDirection: newDirection
+    });
   };
+
+  // Submissions data from server (already sorted, filtered and paginated)
+  const sortedSubmissions = userSubmissions?.data || [];
+  const submissions = sortedSubmissions; // For backward compatibility with other uses in the file
 
   // Format date for display
   const formatDate = (dateString: string) => {
@@ -226,10 +236,13 @@ export const Results = () => {
     });
   };
 
-  // Calculate statistics from actual data
-  const totalTests = userSubmissions?.totalCount || 0;
-  const averageAttempts = userSubmissions?.items.length
-    ? Math.round(userSubmissions.items.reduce((sum, submission) => sum + submission.attemptCount, 0) / userSubmissions.items.length)
+  // Calculate statistics
+  const totalAttempts = userSubmissions?.totalRecords || 0;
+  const uniqueTests = submissions.length > 0
+    ? new Set(submissions.map(s => s.testId)).size
+    : 0;
+  const averageQuestions = submissions.length > 0
+    ? Math.round(submissions.reduce((sum, s) => sum + s.totalQuestions, 0) / submissions.length)
     : 0;
 
   // Loading state
@@ -314,7 +327,22 @@ export const Results = () => {
 
             {/* Category Filter */}
             <div className="min-w-[180px]">
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <Select value={selectedCategory} onValueChange={(val) => {
+                setSelectedCategory(val);
+                const searchMap: { [key: string]: string } = {
+                  'aptitude': 'psychometric',
+                  'personality': 'personality',
+                  'interest': 'interest',
+                  'eq': 'emotional'
+                };
+                fetchUserSubmissions({
+                  pageNumber: 1,
+                  pageSize: userSubmissions?.pageSize || 10,
+                  sortBy: sortConfig.key,
+                  sortDirection: sortConfig.direction,
+                  search: val === 'all' ? '' : (searchMap[val] || val)
+                });
+              }}>
                 <SelectTrigger className="w-full bg-white border-slate-200 rounded-xl shadow-sm h-10 ring-offset-0 focus:ring-0">
                   <SelectValue placeholder="Filter by category" />
                 </SelectTrigger>
@@ -333,9 +361,9 @@ export const Results = () => {
         {/* Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
           {[
-            { label: 'Tests Taken', value: totalTests, icon: BarChart3, color: 'text-blue-600', bg: 'bg-blue-50' },
-            { label: 'Total Attempts', value: userSubmissions?.items.reduce((sum, submission) => sum + submission.attemptCount, 0) || 0, icon: Target, color: 'text-purple-600', bg: 'bg-purple-50' },
-            { label: 'Avg. Attempts', value: averageAttempts, icon: TrendingUp, color: 'text-teal-600', bg: 'bg-teal-50' }
+            { label: 'Total Attempts', value: totalAttempts, icon: Target, color: 'text-purple-600', bg: 'bg-purple-50' },
+            { label: 'Unique Tests', value: uniqueTests, icon: BarChart3, color: 'text-blue-600', bg: 'bg-blue-50' },
+            { label: 'Avg. Questions', value: averageQuestions, icon: TrendingUp, color: 'text-teal-600', bg: 'bg-teal-50' }
           ].map((stat, i) => (
             <Card key={i} className="border-none shadow-sm backdrop-blur-md bg-white/70 group hover:translate-y-[-2px] transition-all duration-300 rounded-xl">
               <CardContent className="p-4">
@@ -392,11 +420,11 @@ export const Results = () => {
                         <tr>
                           <th
                             className="h-12 px-6 align-middle cursor-pointer hover:bg-slate-100/50 transition-colors"
-                            onClick={() => handleSort('testTitle')}
+                            onClick={() => handleSort('testName')}
                           >
                             <div className="flex items-center gap-2">
                               Test Name
-                              {sortConfig.key === 'testTitle' && (
+                              {sortConfig.key === 'testName' && (
                                 sortConfig.direction === 'asc' ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />
                               )}
                             </div>
@@ -414,22 +442,23 @@ export const Results = () => {
                           </th>
                           <th
                             className="h-12 px-6 align-middle cursor-pointer hover:bg-slate-100/50 transition-colors"
-                            onClick={() => handleSort('attemptCount')}
+                            onClick={() => handleSort('attemptNumber')}
                           >
                             <div className="flex items-center gap-2">
-                              Attempts
-                              {sortConfig.key === 'attemptCount' && (
+                              Attempt #
+                              {sortConfig.key === 'attemptNumber' && (
+
                                 sortConfig.direction === 'asc' ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />
                               )}
                             </div>
                           </th>
                           <th
                             className="h-12 px-6 align-middle cursor-pointer hover:bg-slate-100/50 transition-colors"
-                            onClick={() => handleSort('lastAttemptDate')}
+                            onClick={() => handleSort('createdDate')}
                           >
                             <div className="flex items-center gap-2">
-                              Last Attempt
-                              {sortConfig.key === 'lastAttemptDate' && (
+                              Date
+                              {sortConfig.key === 'createdDate' && (
                                 sortConfig.direction === 'asc' ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />
                               )}
                             </div>
@@ -440,15 +469,14 @@ export const Results = () => {
                       </thead>
                       <tbody className="divide-y divide-slate-100">
                         {sortedSubmissions.map((submission) => {
-                          const category = getCategoryBadge(submission.testTitle);
+                          const category = getCategoryBadge(submission.testName);
+                          const isDownloading = downloadingReports[submission.reportId];
+
                           return (
-                            <tr key={submission.testId} className="hover:bg-blue-50/30 transition-colors duration-200">
+                            <tr key={submission.reportId} className="hover:bg-blue-50/30 transition-colors duration-200">
                               <td className="px-6 py-4 align-middle">
                                 <div className="max-w-[300px]">
-                                  <div className="font-bold text-slate-800 text-sm">{submission.testTitle}</div>
-                                  <div className="text-[11px] text-slate-500 line-clamp-1 mt-0.5 font-medium">
-                                    {submission.testDescription}
-                                  </div>
+                                  <div className="font-bold text-slate-800 text-sm">{submission.testName}</div>
                                 </div>
                               </td>
                               <td className="px-6 py-4 align-middle">
@@ -459,65 +487,34 @@ export const Results = () => {
                               <td className="px-6 py-4 align-middle">
                                 <div className="flex items-center gap-2">
                                   <span className="font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded text-xs">
-                                    {submission.attemptCount}
+                                    Attempt {submission.attemptNumber}
                                   </span>
                                 </div>
                               </td>
                               <td className="px-6 py-4 align-middle">
                                 <div className="flex items-center gap-1.5 text-xs font-medium text-slate-600">
                                   <Calendar className="h-3.5 w-3.5 text-slate-400" />
-                                  {formatDate(submission.lastAttemptDate)}
+                                  {formatDate(submission.createdDate)}
                                 </div>
                               </td>
                               <td className="px-6 py-4 align-middle text-xs font-medium text-slate-600">
                                 {submission.totalQuestions}
                               </td>
                               <td className="px-6 py-4 align-middle text-right">
-                                {submission?.testAttempts?.length > 0 ? (
-                                  <Select
-                                    onValueChange={(attemptId) => {
-                                      const attempt = submission.testAttempts.find(a => String(a.attemptId) === String(attemptId));
-                                      if (!attempt) return;
-
-                                      if (attempt.reportId) {
-                                        downloadReportWithReportId(attempt.reportId, submission.testTitle);
-                                      } else if (attempt.attemptId) {
-                                        downloadReport(attempt.attemptId, submission.testTitle);
-                                      }
-                                    }}
-                                  >
-                                    <SelectTrigger className="w-[150px] ml-auto rounded-lg border-slate-200 bg-white shadow-sm hover:border-primary/50 transition-colors h-8 text-xs">
-                                      <SelectValue placeholder="Download Report" />
-                                    </SelectTrigger>
-                                    <SelectContent className="rounded-xl border-slate-100 shadow-xl">
-                                      <SelectGroup>
-                                        <SelectLabel className="pl-2">Select Attempt</SelectLabel>
-                                        {submission.testAttempts.map((attempt, index) => {
-                                          const isDownloading = downloadingReports[attempt.attemptId || attempt.reportId];
-                                          return (
-                                            <SelectItem
-                                              key={attempt.attemptId}
-                                              value={String(attempt.attemptId)}
-                                              disabled={isDownloading}
-                                              className="cursor-pointer"
-                                            >
-                                              <div className="flex items-center justify-between w-full gap-2">
-                                                <span>
-                                                  {isDownloading ? "Downloading..." : `Attempt ${attempt?.attemptNumber || index + 1}`}
-                                                </span>
-                                                <Download className="h-3 w-3 text-slate-400" />
-                                              </div>
-                                            </SelectItem>
-                                          );
-                                        })}
-                                      </SelectGroup>
-                                    </SelectContent>
-                                  </Select>
-                                ) : (
-                                  <Button variant="outline" size="sm" disabled className="rounded-xl opacity-50">
-                                    No Reports
-                                  </Button>
-                                )}
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="rounded-xl hover:bg-primary hover:text-white transition-all gap-2"
+                                  onClick={() => downloadReportWithReportId(submission.reportId, submission.testName)}
+                                  disabled={isDownloading}
+                                >
+                                  {isDownloading ? (
+                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                  ) : (
+                                    <Download className="h-3 w-3" />
+                                  )}
+                                  Report
+                                </Button>
                               </td>
                             </tr>
                           );
@@ -533,30 +530,54 @@ export const Results = () => {
                     </table>
                   </div>
 
-                  {/* Pagination */}
-                  {userSubmissions && userSubmissions.totalPages > 1 && (
-                    <div className="flex flex-col sm:flex-row justify-center items-center gap-4 p-6 border-t border-slate-100">
-                      <Button
-                        variant="outline"
-                        disabled={!userSubmissions.hasPreviousPage}
-                        onClick={() => handlePageChange(userSubmissions.pageNumber - 1)}
-                        className="rounded-xl hover:bg-slate-100 w-full sm:w-auto text-xs"
-                      >
-                        Previous
-                      </Button>
-
-                      <span className="text-xs font-bold text-slate-600 order-first sm:order-none">
-                        Page {userSubmissions.pageNumber} of {userSubmissions.totalPages}
-                      </span>
-
-                      <Button
-                        variant="outline"
-                        disabled={!userSubmissions.hasNextPage}
-                        onClick={() => handlePageChange(userSubmissions.pageNumber + 1)}
-                        className="rounded-xl hover:bg-slate-100 w-full sm:w-auto text-xs"
-                      >
-                        Next
-                      </Button>
+                  {/* Pagination Controls */}
+                  {/* Pagination Controls */}
+                  {userSubmissions && userSubmissions.totalRecords > 0 && (
+                    <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100 bg-slate-50/30">
+                      <div className="text-xs font-medium text-slate-500">
+                        Showing {(userSubmissions.pageNumber - 1) * userSubmissions.pageSize + 1} to {Math.min(userSubmissions.pageNumber * userSubmissions.pageSize, userSubmissions.totalRecords)} of {userSubmissions.totalRecords} results
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={userSubmissions.pageNumber <= 1}
+                          onClick={() => handlePageChange(userSubmissions.pageNumber - 1)}
+                          className="rounded-lg h-8 text-xs font-bold"
+                        >
+                          Previous
+                        </Button>
+                        {Array.from({ length: Math.min(5, userSubmissions.totalPages) }, (_, i) => {
+                          // Simple pagination logic to show limited page numbers
+                          let pageNum = i + 1;
+                          if (userSubmissions.totalPages > 5 && userSubmissions.pageNumber > 3) {
+                            pageNum = userSubmissions.pageNumber - 2 + i;
+                            if (pageNum > userSubmissions.totalPages) {
+                              return null;
+                            }
+                          }
+                          return (
+                            <Button
+                              key={pageNum}
+                              variant={userSubmissions.pageNumber === pageNum ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => handlePageChange(pageNum)}
+                              className="rounded-lg h-8 w-8 p-0 text-xs font-bold shadow-sm"
+                            >
+                              {pageNum}
+                            </Button>
+                          );
+                        }).filter(Boolean)}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={userSubmissions.pageNumber >= userSubmissions.totalPages}
+                          onClick={() => handlePageChange(userSubmissions.pageNumber + 1)}
+                          className="rounded-lg h-8 text-xs font-bold"
+                        >
+                          Next
+                        </Button>
+                      </div>
                     </div>
                   )}
                 </CardContent>
@@ -565,9 +586,11 @@ export const Results = () => {
               /* Card View */
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {sortedSubmissions.map((submission) => {
-                  const category = getCategoryBadge(submission.testTitle);
+                  const category = getCategoryBadge(submission.testName);
+                  const isDownloading = downloadingReports[submission.reportId];
+
                   return (
-                    <Card key={submission.testId} className="group hover:shadow-2xl transition-all duration-300 border-none shadow-soft bg-white rounded-2xl overflow-hidden">
+                    <Card key={submission.reportId} className="group hover:shadow-2xl transition-all duration-300 border-none shadow-soft bg-white rounded-2xl overflow-hidden">
                       <CardHeader className="pb-4 relative">
                         <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-primary to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         <div className="flex items-start justify-between">
@@ -577,84 +600,45 @@ export const Results = () => {
                                 {category.label}
                               </Badge>
                             </div>
-                            <CardTitle className="text-lg font-bold text-slate-800 line-clamp-1 mb-2 group-hover:text-primary transition-colors" title={submission.testTitle}>
-                              {submission.testTitle}
+                            <CardTitle className="text-lg font-bold text-slate-800 line-clamp-1 mb-2 group-hover:text-primary transition-colors" title={submission.testName}>
+                              {submission.testName}
                             </CardTitle>
-                            <CardDescription className="line-clamp-2 text-sm font-medium text-slate-500">
-                              {submission.testDescription}
-                            </CardDescription>
                           </div>
                           <div className="text-center bg-slate-50 p-3 rounded-xl border border-slate-100">
                             <div className="text-xl font-black text-primary">
-                              {submission.attemptCount}
+                              #{submission.attemptNumber}
                             </div>
                             <p className="text-[10px] uppercase font-bold text-slate-400">
-                              {submission.attemptCount === 1 ? 'try' : 'tries'}
+                              Attempt
                             </p>
                           </div>
                         </div>
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-5">
-                          <div>
-                            <div className="flex justify-between mb-2">
-                              <span className="text-xs font-bold text-slate-400 uppercase">Mastery</span>
-                              <span className="text-xs font-bold text-slate-600">{Math.min((submission.attemptCount / 5) * 100, 100)}%</span>
-                            </div>
-                            <Progress value={Math.min((submission.attemptCount / 5) * 100, 100)} className="h-1.5 bg-slate-100 [&>div]:bg-success" />
-                          </div>
-
                           <div className="bg-slate-50 rounded-xl p-3 text-sm space-y-2">
                             <div className="flex justify-between">
                               <span className="text-slate-500 font-medium">Questions:</span>
                               <span className="text-slate-800 font-bold">{submission.totalQuestions}</span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-slate-500 font-medium">Last Attempt:</span>
-                              <span className="text-slate-800 font-bold">{formatDate(submission.lastAttemptDate)}</span>
+                              <span className="text-slate-500 font-medium">Date:</span>
+                              <span className="text-slate-800 font-bold">{formatDate(submission.createdDate)}</span>
                             </div>
                           </div>
 
-                          {submission?.testAttempts?.length > 0 && (
-                            <Select
-                              onValueChange={(attemptId) => {
-                                const attempt = submission.testAttempts.find(a => String(a.attemptId) === String(attemptId));
-                                if (!attempt) return;
-
-                                if (attempt.reportId) {
-                                  downloadReportWithReportId(attempt.reportId, submission.testTitle);
-                                } else if (attempt.attemptId) {
-                                  downloadReport(attempt.attemptId, submission.testTitle);
-                                }
-                              }}
-                            >
-                              <SelectTrigger className="w-full rounded-xl border-primary/20 bg-primary/5 text-primary font-bold hover:bg-primary/10 hover:border-primary/40 transition-all shadow-none">
-                                <SelectValue placeholder="Download Report" />
-                              </SelectTrigger>
-                              <SelectContent className="rounded-xl border-slate-100 shadow-xl">
-                                <SelectGroup>
-                                  <SelectLabel>Select Attempt</SelectLabel>
-                                  {submission.testAttempts.map((attempt, index) => {
-                                    const isDownloading = downloadingReports[attempt.attemptId || attempt.reportId];
-                                    return (
-                                      <SelectItem
-                                        key={attempt.attemptId}
-                                        value={String(attempt.attemptId)}
-                                        disabled={isDownloading}
-                                        className="flex justify-between items-center"
-                                      >
-                                        <div className="flex items-center justify-between w-full">
-                                          <span>
-                                            {isDownloading ? "Downloading..." : `Attempt ${attempt?.attemptNumber || index + 1}`}
-                                          </span>
-                                        </div>
-                                      </SelectItem>
-                                    );
-                                  })}
-                                </SelectGroup>
-                              </SelectContent>
-                            </Select>
-                          )}
+                          <Button
+                            className="w-full rounded-xl bg-primary text-white font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 gap-2"
+                            onClick={() => downloadReportWithReportId(submission.reportId, submission.testName)}
+                            disabled={isDownloading}
+                          >
+                            {isDownloading ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Download className="h-4 w-4" />
+                            )}
+                            Download Report
+                          </Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -678,15 +662,15 @@ export const Results = () => {
                 <CardContent className="p-6">
                   <div className="space-y-5">
                     {sortedSubmissions.slice(0, 5).map((submission, idx) => (
-                      <div key={submission?.testId} className="group">
+                      <div key={submission?.reportId} className="group">
                         <div className="flex justify-between mb-1.5 items-center">
-                          <span className="text-xs font-bold text-slate-700 truncate group-hover:text-primary transition-colors" title={submission?.testTitle}>
-                            {idx + 1}. {submission?.testTitle}
+                          <span className="text-xs font-bold text-slate-700 truncate group-hover:text-primary transition-colors" title={submission?.testName}>
+                            {idx + 1}. {submission?.testName}
                           </span>
-                          <Badge variant="outline" className="text-[10px] text-slate-500 bg-slate-50 h-5 border-slate-100">{submission?.attemptCount} attempts</Badge>
+                          <Badge variant="outline" className="text-[10px] text-slate-500 bg-slate-50 h-5 border-slate-100">Attempt {submission?.attemptNumber}</Badge>
                         </div>
                         <Progress
-                          value={Math.min((submission?.attemptCount / 10) * 100, 100)}
+                          value={Math.min((submission?.attemptNumber / 10) * 100, 100)}
                           className="h-1.5 bg-slate-100 [&>div]:bg-gradient-to-r from-blue-500 to-indigo-500"
                         />
                       </div>
@@ -708,13 +692,13 @@ export const Results = () => {
                 <CardContent className="p-6">
                   <div className="space-y-4">
                     {sortedSubmissions.slice(0, 4).map((submission) => {
-                      const category = getCategoryBadge(submission?.testTitle);
+                      const category = getCategoryBadge(submission?.testName);
                       return (
-                        <div key={submission.testId} className="flex items-center justify-between p-3 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors cursor-default">
+                        <div key={submission.reportId} className="flex items-center justify-between p-3 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors cursor-default">
                           <div className="flex-1 min-w-0 mr-4">
                             <div className="flex items-center gap-2 mb-0.5">
-                              <p className="font-bold text-slate-800 text-xs truncate" title={submission?.testTitle}>
-                                {submission.testTitle}
+                              <p className="font-bold text-slate-800 text-xs truncate" title={submission?.testName}>
+                                {submission.testName}
                               </p>
                             </div>
                             <div className="flex items-center gap-2">
@@ -723,12 +707,12 @@ export const Results = () => {
                               </Badge>
                               <p className="text-[10px] text-slate-500 font-medium flex items-center">
                                 <Calendar className="h-3 w-3 mr-1" />
-                                {formatDate(submission?.lastAttemptDate)}
+                                {formatDate(submission?.createdDate)}
                               </p>
                             </div>
                           </div>
                           <div className="h-8 w-8 flex items-center justify-center rounded-lg bg-slate-100 font-bold text-slate-600 text-[10px]">
-                            {submission.attemptCount}
+                            #{submission.attemptNumber}
                           </div>
                         </div>
                       );
@@ -763,7 +747,7 @@ export const Results = () => {
                       Engagement
                     </h4>
                     <p className="text-slate-300 text-xs leading-relaxed">
-                      You've completed <span className="font-bold text-white text-sm mx-0.5">{totalTests}</span> assessments with an average of <span className="font-bold text-white text-sm mx-0.5">{averageAttempts}</span> attempts each.
+                      You've completed <span className="font-bold text-white text-sm mx-0.5">{totalAttempts}</span> attempts across <span className="font-bold text-white text-sm mx-0.5">{uniqueTests}</span> assessments.
                     </p>
                   </div>
 
@@ -773,7 +757,7 @@ export const Results = () => {
                       Consistency
                     </h4>
                     <p className="text-slate-300 text-xs leading-relaxed">
-                      {userSubmissions?.items && userSubmissions.items.length > 0
+                      {submissions && submissions.length > 0
                         ? `Your activity shows steady progress. You're building a strong assessment profile.`
                         : `Start taking assessments to build your performance history.`
                       }
@@ -786,7 +770,7 @@ export const Results = () => {
                       Strategy
                     </h4>
                     <p className="text-slate-300 text-xs leading-relaxed">
-                      {userSubmissions?.items && userSubmissions.items.some(s => s.attemptCount > 1)
+                      {submissions && submissions.length > 1
                         ? `Persistence pays off! Your multiple attempts show commitment to mastery.`
                         : `Consider retaking key assessments to track your improvement over time.`
                       }

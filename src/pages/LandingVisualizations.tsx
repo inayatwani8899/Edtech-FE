@@ -1,994 +1,349 @@
 import React from "react";
 import {
-  Brain,
-  Users,
-  Target,
-  BarChart3,
-  CheckCircle2,
-  FileText,
-  Sparkles,
-  Activity,
-  BookOpen,
-  TrendingUp,
-  Zap,
-  GitBranch,
-  ArrowRight,
-  Layers,
-  GraduationCap,
-  Briefcase,
-  School,
-  Baby
+  Brain, Users, Target, BarChart3, CheckCircle2, FileText,
+  Sparkles, Activity, BookOpen, TrendingUp, Zap, GitBranch,
+  ArrowRight, Layers, GraduationCap, Briefcase, School, Baby,
+  Shield, Lock, Cloud, Monitor, UserCheck, Headphones, Key, Cpu
 } from "lucide-react";
 
+// These components are embedded INSIDE the bento cards as visual mockups
+// They simulate a real product UI — exactly like gumloop shows their product visuals
+
 // ═══════════════════════════════════════
-// PSYCHOMETRIC TESTING PROCESS VISUALIZATION
+// AI ASSESSMENT MOCKUP — Inside bento card
+// Shows a question being answered
 // ═══════════════════════════════════════
-export const PsychometricVisualization = () => {
-  const stages = [
-    {
-      icon: Brain,
-      title: "Cognitive Assessment",
-      theory: "Cattell-Horn-Carroll (CHC) Theory",
-      description: "Measures fluid intelligence, crystallized intelligence, and processing speed",
-      color: "#c8622a",
-      metrics: ["Verbal Reasoning", "Numerical Ability", "Spatial Processing", "Working Memory"]
-    },
-    {
-      icon: Users,
-      title: "Personality Profiling",
-      theory: "Big Five (OCEAN) Model",
-      description: "Evaluates openness, conscientiousness, extraversion, agreeableness, neuroticism",
-      color: "#d4a843",
-      metrics: ["Openness", "Conscientiousness", "Extraversion", "Agreeableness"]
-    },
-    {
-      icon: Target,
-      title: "Interest Mapping",
-      theory: "Holland's RIASEC Framework",
-      description: "Identifies career interests across six personality types",
-      color: "#0ea5e9",
-      metrics: ["Realistic", "Investigative", "Artistic", "Social", "Enterprising", "Conventional"]
-    },
-    {
-      icon: Activity,
-      title: "Emotional Intelligence",
-      theory: "Goleman's EQ Model",
-      description: "Assesses self-awareness, empathy, motivation, and social skills",
-      color: "#34d399",
-      metrics: ["Self-Awareness", "Self-Regulation", "Motivation", "Empathy"]
-    }
+export const AIAssessmentMockup = () => (
+  <div className="ai-assess-mock">
+    <div className="mock-question">
+      <div className="mock-q-label">Question 4 of 25 • CHC Cognitive</div>
+      <div className="mock-q-text">
+        If all Zorbs are Tilps, and some Tilps are Wubs, which conclusion must be true?
+      </div>
+      <div className="mock-options">
+        <div className="mock-option">
+          <div className="mock-option-dot" />
+          All Zorbs are Wubs
+        </div>
+        <div className="mock-option selected">
+          <div className="mock-option-dot" />
+          Some Zorbs may be Wubs
+        </div>
+        <div className="mock-option">
+          <div className="mock-option-dot" />
+          No Zorbs are Wubs
+        </div>
+      </div>
+    </div>
+    <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "0 4px" }}>
+      <Sparkles size={14} color="#6366f1" />
+      <span style={{ fontSize: "0.72rem", color: "#6366f1", fontWeight: 600 }}>
+        AI adapting difficulty based on response pattern...
+      </span>
+    </div>
+  </div>
+);
+
+// ═══════════════════════════════════════
+// AI ANALYSIS MOCKUP — Personality traits radar
+// ═══════════════════════════════════════
+export const AIAnalysisMockup = () => (
+  <div className="ai-analysis-mock">
+    <div className="ai-radar">
+      <div className="radar-ring radar-ring-1" />
+      <div className="radar-ring radar-ring-2" />
+      <div className="radar-ring radar-ring-3" />
+      <div className="radar-dot" style={{ top: "15%", left: "50%", transform: "translateX(-50%)" }} />
+      <div className="radar-dot" style={{ top: "35%", right: "8%" }} />
+      <div className="radar-dot" style={{ bottom: "25%", right: "15%" }} />
+      <div className="radar-dot" style={{ bottom: "10%", left: "30%" }} />
+      <div className="radar-dot" style={{ top: "40%", left: "5%" }} />
+      <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
+        <polygon
+          points="70,20 125,48 115,100 40,110 10,55"
+          fill="rgba(99,102,241,0.12)"
+          stroke="#6366f1"
+          strokeWidth="2"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </div>
+    <div className="ai-traits">
+      {[
+        { label: "Openness", pct: 87, color: "#6366f1" },
+        { label: "Conscient.", pct: 72, color: "#3b82f6" },
+        { label: "Extraversion", pct: 65, color: "#22c55e" },
+        { label: "Agreeable", pct: 81, color: "#f59e0b" },
+        { label: "Neuroticism", pct: 34, color: "#f43f5e" },
+      ].map((t) => (
+        <div key={t.label} className="trait-bar-item">
+          <span className="trait-label">{t.label}</span>
+          <div className="trait-bar">
+            <div className="trait-fill" style={{ width: `${t.pct}%`, background: t.color }} />
+          </div>
+          <span style={{ fontSize: "0.7rem", fontWeight: 700, color: t.color, width: 30, textAlign: "right" }}>
+            {t.pct}%
+          </span>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+// ═══════════════════════════════════════
+// DEPARTMENT/USER TYPES — Grid of audience pills
+// ═══════════════════════════════════════
+export const DepartmentsMockup = () => {
+  const depts = [
+    { label: "Students", icon: GraduationCap, bg: "#eef2ff", color: "#6366f1" },
+    { label: "Counselors", icon: Headphones, bg: "#fef3c7", color: "#f59e0b" },
+    { label: "Schools", icon: School, bg: "#f0fdf4", color: "#22c55e" },
+    { label: "HR Teams", icon: Briefcase, bg: "#fce7f3", color: "#ec4899" },
+    { label: "Professionals", icon: UserCheck, bg: "#eff6ff", color: "#3b82f6" },
+    { label: "Parents", icon: Users, bg: "#faf5ff", color: "#a855f7" },
   ];
 
   return (
-    <div className="psycho-viz">
-      <style>{`
-        .psycho-viz {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-          gap: 24px;
-          animation: fadeInScale 0.8s ease-out;
-        }
-        
-        @keyframes fadeInScale {
-          from {
-            opacity: 0;
-            transform: scale(0.95);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-        
-        .stage-card {
-          background: white;
-          border-radius: 20px;
-          padding: 32px;
-          border: 2px solid #ede7d9;
-          position: relative;
-          overflow: hidden;
-          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-          cursor: pointer;
-        }
-        
-        .stage-card::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          height: 4px;
-          background: var(--stage-color);
-          transform: scaleX(0);
-          transform-origin: left;
-          transition: transform 0.4s ease;
-        }
-        
-        .stage-card:hover::before {
-          transform: scaleX(1);
-        }
-        
-        .stage-card:hover {
-          transform: translateY(-8px);
-          box-shadow: 0 20px 60px rgba(0,0,0,0.12);
-          border-color: var(--stage-color);
-        }
-        
-        .stage-icon-wrap {
-          width: 64px;
-          height: 64px;
-          border-radius: 16px;
-          background: var(--stage-color);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin-bottom: 20px;
-          position: relative;
-          transition: all 0.3s ease;
-        }
-        
-        .stage-card:hover .stage-icon-wrap {
-          transform: rotate(-5deg) scale(1.05);
-        }
-        
-        .stage-icon-wrap::after {
-          content: '';
-          position: absolute;
-          inset: -4px;
-          border-radius: 18px;
-          background: var(--stage-color);
-          opacity: 0.2;
-          z-index: -1;
-          animation: pulse 2s ease-in-out infinite;
-        }
-        
-        @keyframes pulse {
-          0%, 100% {
-            transform: scale(1);
-            opacity: 0.2;
-          }
-          50% {
-            transform: scale(1.15);
-            opacity: 0.05;
-          }
-        }
-        
-        .stage-title {
-          font-family: 'Fraunces', serif;
-          font-size: 1.3rem;
-          font-weight: 700;
-          color: #1a1a18;
-          margin-bottom: 8px;
-          line-height: 1.2;
-        }
-        
-        .stage-theory {
-          font-size: 0.75rem;
-          font-weight: 600;
-          color: var(--stage-color);
-          text-transform: uppercase;
-          letter-spacing: 0.08em;
-          margin-bottom: 12px;
-        }
-        
-        .stage-desc {
-          font-size: 0.9rem;
-          color: #3d3d38;
-          line-height: 1.6;
-          margin-bottom: 20px;
-        }
-        
-        .stage-metrics {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
-        }
-        
-        .metric-tag {
-          font-size: 0.7rem;
-          padding: 4px 10px;
-          border-radius: 6px;
-          background: rgba(0,0,0,0.04);
-          color: #3d3d38;
-          font-weight: 500;
-          border: 1px solid rgba(0,0,0,0.06);
-        }
-        
-        .stage-card:hover .metric-tag {
-          background: var(--stage-color);
-          color: white;
-          border-color: var(--stage-color);
-        }
-      `}</style>
-
-      {stages.map((stage, idx) => (
-        <div
-          key={idx}
-          className="stage-card"
-          style={{ "--stage-color": stage.color } as React.CSSProperties}
-        >
-          <div className="stage-icon-wrap">
-            <stage.icon size={28} color="#ffffff" strokeWidth={2.5} />
+    <div className="dept-mock">
+      {depts.map((d) => (
+        <div key={d.label} className="dept-pill">
+          <div className="dept-icon" style={{ background: d.bg }}>
+            <d.icon size={16} color={d.color} />
           </div>
-          <div className="stage-theory">{stage.theory}</div>
-          <h3 className="stage-title">{stage.title}</h3>
-          <p className="stage-desc">{stage.description}</p>
-          <div className="stage-metrics">
-            {stage.metrics.map((metric, i) => (
-              <span key={i} className="metric-tag">{metric}</span>
+          {d.label}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// ═══════════════════════════════════════
+// INSTANT RESULTS — Processing status mockup
+// ═══════════════════════════════════════
+export const InstantResultsMockup = () => (
+  <div className="results-mock">
+    <div className="result-item">
+      <div className="result-status done" />
+      <span className="result-text">Cognitive Assessment</span>
+      <span style={{ fontSize: "0.7rem", fontWeight: 600, color: "#22c55e" }}>✓</span>
+      <span className="result-time">Completed 2:14 PM</span>
+    </div>
+    <div className="result-item">
+      <div className="result-status done" />
+      <span className="result-text">Personality Profiling</span>
+      <span style={{ fontSize: "0.7rem", fontWeight: 600, color: "#22c55e" }}>✓</span>
+      <span className="result-time">Completed 2:18 PM</span>
+    </div>
+    <div className="result-item" style={{ background: "#fffbeb", borderColor: "#fef3c7" }}>
+      <div className="result-status progress" />
+      <span className="result-text" style={{ color: "#92400e" }}>Career Matching</span>
+      <div className="result-bar">
+        <div className="result-bar-fill" style={{ width: "68%", background: "#f59e0b" }} />
+      </div>
+      <span className="result-time" style={{ color: "#b45309" }}>Processing...</span>
+    </div>
+    <div className="result-item">
+      <div className="result-status pending" />
+      <span className="result-text">Report Generation</span>
+      <span className="result-time">Pending</span>
+    </div>
+  </div>
+);
+
+// ═══════════════════════════════════════
+// CAREER PATHS — Recommendation mockup
+// ═══════════════════════════════════════
+export const CareerPathsMockup = () => (
+  <div className="career-mock">
+    {[
+      { title: "Data Scientist", match: "96%", level: "high" },
+      { title: "UX Researcher", match: "89%", level: "high" },
+      { title: "Product Manager", match: "84%", level: "med" },
+      { title: "Clinical Psychologist", match: "78%", level: "med" },
+    ].map((c) => (
+      <div key={c.title} className="career-path-item">
+        <span className={`career-match ${c.level}`}>{c.match}</span>
+        <span className="career-title">{c.title}</span>
+        <ArrowRight size={14} className="career-arrow" />
+      </div>
+    ))}
+  </div>
+);
+
+// ═══════════════════════════════════════
+// SMART REPORTS — PDF preview mockup
+// ═══════════════════════════════════════
+export const SmartReportsMockup = () => (
+  <div className="report-mock">
+    <div className="report-section-mock">
+      <div className="report-sec-title">Cognitive Profile</div>
+      <div className="report-bars">
+        {[65, 88, 72, 95, 58, 80, 90].map((h, i) => (
+          <div
+            key={i}
+            className="report-bar"
+            style={{
+              height: `${h}%`,
+              background: i % 2 === 0 ? "#6366f1" : "#c7d2fe",
+            }}
+          />
+        ))}
+      </div>
+    </div>
+    <div className="report-section-mock">
+      <div className="report-sec-title">Key Scores</div>
+      <div className="report-score-row">
+        {[
+          { val: "142", label: "IQ Estimate", color: "#6366f1" },
+          { val: "92nd", label: "Percentile", color: "#22c55e" },
+          { val: "A+", label: "Overall", color: "#f59e0b" },
+        ].map((s) => (
+          <div key={s.label} className="report-score-item">
+            <div className="report-score-val" style={{ color: s.color }}>
+              {s.val}
+            </div>
+            <div className="report-score-lbl">{s.label}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
+// ═══════════════════════════════════════
+// HOW IT WORKS — Step visuals
+// ═══════════════════════════════════════
+export const HowStep1Visual = () => (
+  <div className="how-step-visual">
+    <div className="how-integration-row">
+      {[
+        { label: "CHC Theory", bg: "#eef2ff", color: "#6366f1", fields: ["Verbal", "Spatial"] },
+        { label: "Big Five", bg: "#fef3c7", color: "#f59e0b", fields: ["OCEAN", "EQ"] },
+        { label: "RIASEC", bg: "#f0fdf4", color: "#22c55e", fields: ["Interest", "Career"] },
+      ].map((item) => (
+        <div key={item.label} className="how-integration">
+          <div className="how-int-icon" style={{ background: item.bg, color: item.color }}>
+            {item.label.charAt(0)}
+          </div>
+          {item.label}
+          <div className="how-int-fields">
+            {item.fields.map((f) => (
+              <span key={f} className="how-int-field">{f}</span>
             ))}
           </div>
         </div>
       ))}
     </div>
-  );
-};
+  </div>
+);
 
-// ═══════════════════════════════════════
-// AI WORKFLOW VISUALIZATION - Animated Flow
-// ═══════════════════════════════════════
-export const AIWorkflowVisualization = () => {
-  const steps = [
-    { id: 1, title: "Grade Detection", icon: GraduationCap, desc: "AI identifies student level" },
-    { id: 2, title: "Theory Selection", icon: BookOpen, desc: "Picks relevant frameworks" },
-    { id: 3, title: "Question Generation", icon: Sparkles, desc: "Creates adaptive items" },
-    { id: 4, title: "Response Analysis", icon: Brain, desc: "Evaluates answers in real-time" },
-    { id: 5, title: "Score Calculation", icon: BarChart3, desc: "Applies psychometric models" },
-    { id: 6, title: "Report Generation", icon: FileText, desc: "Produces insights & guidance" },
-  ];
-
-  return (
-    <div className="workflow-viz">
-      <style>{`
-        .workflow-viz {
-          position: relative;
-          padding: 60px 0;
-        }
-        
-        .workflow-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 48px 32px;
-          position: relative;
-          z-index: 2;
-        }
-        
-        .workflow-step {
-          background: rgba(245,240,232,0.08);
-          border: 1px solid rgba(245,240,232,0.15);
-          border-radius: 16px;
-          padding: 28px 24px;
-          text-align: center;
-          position: relative;
-          transition: all 0.4s ease;
-          animation: stepFadeIn 0.6s ease-out backwards;
-        }
-        
-        .workflow-step:nth-child(1) { animation-delay: 0.1s; }
-        .workflow-step:nth-child(2) { animation-delay: 0.2s; }
-        .workflow-step:nth-child(3) { animation-delay: 0.3s; }
-        .workflow-step:nth-child(4) { animation-delay: 0.4s; }
-        .workflow-step:nth-child(5) { animation-delay: 0.5s; }
-        .workflow-step:nth-child(6) { animation-delay: 0.6s; }
-        
-        @keyframes stepFadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        .workflow-step:hover {
-          background: rgba(245,240,232,0.12);
-          border-color: #d4a843;
-          transform: translateY(-4px);
-        }
-        
-        .step-number {
-          position: absolute;
-          top: -12px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 32px;
-          height: 32px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #c8622a 0%, #d4a843 100%);
-          color: white;
-          font-family: 'Fraunces', serif;
-          font-weight: 900;
-          font-size: 0.85rem;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow: 0 4px 12px rgba(200,98,42,0.3);
-        }
-        
-        .step-icon-box {
-          width: 56px;
-          height: 56px;
-          border-radius: 12px;
-          background: rgba(245,240,232,0.1);
-          border: 1px solid rgba(245,240,232,0.2);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin: 0 auto 16px;
-          transition: all 0.3s ease;
-        }
-        
-        .workflow-step:hover .step-icon-box {
-          background: rgba(212,168,67,0.2);
-          border-color: #d4a843;
-          transform: scale(1.08);
-        }
-        
-        .step-title {
-          font-family: 'Fraunces', serif;
-          font-size: 1.1rem;
-          font-weight: 700;
-          color: #f5f0e8;
-          margin-bottom: 8px;
-        }
-        
-        .step-desc {
-          font-size: 0.85rem;
-          color: rgba(245,240,232,0.6);
-          line-height: 1.5;
-        }
-        
-        .workflow-connector {
-          position: absolute;
-          top: 50%;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          pointer-events: none;
-          z-index: 1;
-        }
-        
-        .connector-line {
-          stroke: rgba(212,168,67,0.3);
-          stroke-width: 2;
-          fill: none;
-          stroke-dasharray: 8 4;
-          animation: dash 20s linear infinite;
-        }
-        
-        @keyframes dash {
-          to {
-            stroke-dashoffset: -240;
-          }
-        }
-        
-        @media (max-width: 960px) {
-          .workflow-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 40px 24px;
-          }
-        }
-        
-        @media (max-width: 600px) {
-          .workflow-grid {
-            grid-template-columns: 1fr;
-            gap: 32px;
-          }
-        }
-      `}</style>
-
-      <div className="workflow-grid">
-        {steps.map((step) => (
-          <div key={step.id} className="workflow-step">
-            <div className="step-number">{step.id}</div>
-            <div className="step-icon-box">
-              <step.icon size={24} color="#d4a843" strokeWidth={2} />
-            </div>
-            <h4 className="step-title">{step.title}</h4>
-            <p className="step-desc">{step.desc}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-// ═══════════════════════════════════════
-// GRADES VISUALIZATION - Level Progression
-// ═══════════════════════════════════════
-export const GradesVisualization = () => {
-  const gradeCategories = [
-    {
-      category: "Early Education",
-      icon: Baby,
-      color: "#34d399",
-      grades: ["Pre-K", "K", "Grade 1", "Grade 2"],
-      focus: "Foundational cognitive & social skills",
-      tests: "Picture-based assessments, basic problem-solving"
-    },
-    {
-      category: "Elementary",
-      icon: School,
-      color: "#0ea5e9",
-      grades: ["Grade 3", "Grade 4", "Grade 5", "Grade 6"],
-      focus: "Core competencies & learning styles",
-      tests: "Reading comprehension, math reasoning, creativity"
-    },
-    {
-      category: "Secondary",
-      icon: GraduationCap,
-      color: "#d4a843",
-      grades: ["Grade 7", "Grade 8", "Grade 9", "Grade 10"],
-      focus: "Subject mastery & career exploration",
-      tests: "Subject-specific aptitude, personality profiling"
-    },
-    {
-      category: "Higher Education",
-      icon: BookOpen,
-      color: "#c8622a",
-      grades: ["Grade 11", "Grade 12", "Undergraduate"],
-      focus: "College readiness & specialization",
-      tests: "Advanced reasoning, career alignment, EQ"
-    },
-    {
-      category: "Professional",
-      icon: Briefcase,
-      color: "#1e4035",
-      grades: ["Early Career", "Mid-Level", "Senior"],
-      focus: "Leadership & domain expertise",
-      tests: "Managerial assessment, technical proficiency"
-    }
-  ];
-
-  return (
-    <div className="grades-viz">
-      <style>{`
-        .grades-viz {
-          display: flex;
-          flex-direction: column;
-          gap: 20px;
-        }
-        
-        .grade-category {
-          background: white;
-          border-radius: 20px;
-          border: 2px solid #ede7d9;
-          padding: 32px;
-          display: grid;
-          grid-template-columns: auto 1fr;
-          gap: 28px;
-          align-items: start;
-          transition: all 0.4s ease;
-          position: relative;
-          overflow: hidden;
-          animation: slideIn 0.6s ease-out backwards;
-        }
-        
-        .grade-category:nth-child(1) { animation-delay: 0.1s; }
-        .grade-category:nth-child(2) { animation-delay: 0.2s; }
-        .grade-category:nth-child(3) { animation-delay: 0.3s; }
-        .grade-category:nth-child(4) { animation-delay: 0.4s; }
-        .grade-category:nth-child(5) { animation-delay: 0.5s; }
-        
-        @keyframes slideIn {
-          from {
-            opacity: 0;
-            transform: translateX(-30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-        
-        .grade-category::before {
-          content: '';
-          position: absolute;
-          left: 0;
-          top: 0;
-          bottom: 0;
-          width: 5px;
-          background: var(--cat-color);
-          transform: scaleY(0);
-          transition: transform 0.4s ease;
-        }
-        
-        .grade-category:hover::before {
-          transform: scaleY(1);
-        }
-        
-        .grade-category:hover {
-          border-color: var(--cat-color);
-          box-shadow: 0 12px 40px rgba(0,0,0,0.08);
-          transform: translateX(8px);
-        }
-        
-        .category-icon-box {
-          width: 80px;
-          height: 80px;
-          border-radius: 16px;
-          background: var(--cat-color);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-          position: relative;
-          transition: all 0.3s ease;
-        }
-        
-        .grade-category:hover .category-icon-box {
-          transform: rotate(-3deg) scale(1.05);
-        }
-        
-        .category-icon-box::after {
-          content: '';
-          position: absolute;
-          inset: -6px;
-          border-radius: 20px;
-          background: var(--cat-color);
-          opacity: 0.15;
-          z-index: -1;
-        }
-        
-        .category-content {
-          flex: 1;
-        }
-        
-        .category-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-bottom: 16px;
-          flex-wrap: wrap;
-          gap: 12px;
-        }
-        
-        .category-name {
-          font-family: 'Fraunces', serif;
-          font-size: 1.6rem;
-          font-weight: 900;
-          color: #1a1a18;
-        }
-        
-        .grade-badges {
-          display: flex;
-          gap: 8px;
-          flex-wrap: wrap;
-        }
-        
-        .grade-badge {
-          padding: 6px 14px;
-          border-radius: 8px;
-          background: rgba(0,0,0,0.04);
-          font-size: 0.8rem;
-          font-weight: 600;
-          color: #3d3d38;
-          border: 1px solid rgba(0,0,0,0.08);
-          transition: all 0.2s ease;
-        }
-        
-        .grade-category:hover .grade-badge {
-          background: var(--cat-color);
-          color: white;
-          border-color: var(--cat-color);
-          transform: translateY(-2px);
-        }
-        
-        .category-focus {
-          font-size: 0.95rem;
-          color: #3d3d38;
-          margin-bottom: 8px;
-          font-weight: 500;
-        }
-        
-        .category-tests {
-          font-size: 0.85rem;
-          color: #8a8a7a;
-          line-height: 1.6;
-        }
-        
-        @media (max-width: 768px) {
-          .grade-category {
-            grid-template-columns: 1fr;
-            text-align: center;
-          }
-          
-          .category-icon-box {
-            margin: 0 auto;
-          }
-          
-          .category-header {
-            flex-direction: column;
-            align-items: center;
-          }
-          
-          .grade-badges {
-            justify-content: center;
-          }
-        }
-      `}</style>
-
-      {gradeCategories.map((cat, idx) => (
+export const HowStep2Visual = () => (
+  <div className="how-step-visual">
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      {[
+        { label: "AI generates adaptive questions", icon: Sparkles, done: true },
+        { label: "Student responds with timed answers", icon: Target, done: true },
+        { label: "Real-time difficulty adjustment", icon: Zap, active: true },
+      ].map((item, i) => (
         <div
-          key={idx}
-          className="grade-category"
-          style={{ "--cat-color": cat.color } as React.CSSProperties}
+          key={i}
+          className="how-integration"
+          style={item.active ? { background: "#eef2ff", borderColor: "#c7d2fe" } : {}}
         >
-          <div className="category-icon-box">
-            <cat.icon size={36} color="white" strokeWidth={2.5} />
+          <div
+            className="how-int-icon"
+            style={{
+              background: item.active ? "#6366f1" : item.done ? "#f0fdf4" : "#f8f8f8",
+              color: item.active ? "white" : item.done ? "#22c55e" : "#a0a0ab",
+            }}
+          >
+            <item.icon size={14} />
           </div>
-          <div className="category-content">
-            <div className="category-header">
-              <h3 className="category-name">{cat.category}</h3>
-              <div className="grade-badges">
-                {cat.grades.map((grade, i) => (
-                  <span key={i} className="grade-badge">{grade}</span>
-                ))}
-              </div>
-            </div>
-            <p className="category-focus"><strong>Focus:</strong> {cat.focus}</p>
-            <p className="category-tests"><strong>Assessments:</strong> {cat.tests}</p>
-          </div>
+          <span style={{ fontSize: "0.78rem", fontWeight: 500, color: item.active ? "#6366f1" : "#52525b" }}>
+            {item.label}
+          </span>
+          {item.done && (
+            <span style={{ marginLeft: "auto", fontSize: "0.7rem", color: "#22c55e", fontWeight: 600 }}>✓</span>
+          )}
+          {item.active && (
+            <span style={{
+              marginLeft: "auto", fontSize: "0.65rem", color: "#6366f1",
+              fontWeight: 600, background: "#eef2ff", padding: "2px 8px",
+              borderRadius: 4
+            }}>
+              Active
+            </span>
+          )}
         </div>
       ))}
     </div>
-  );
-};
+  </div>
+);
 
-// ═══════════════════════════════════════
-// TEST PROCESS FLOW - Complete Pipeline
-// ═══════════════════════════════════════
-export const TestProcessFlow = () => {
-  return (
-    <div className="process-flow">
-      <style>{`
-        .process-flow {
-          max-width: 900px;
-          margin: 0 auto;
-        }
-        
-        .flow-container {
-          position: relative;
-          padding: 40px 0;
-        }
-        
-        .flow-stage {
-          background: rgba(245,240,232,0.06);
-          border: 2px solid rgba(245,240,232,0.12);
-          border-radius: 16px;
-          padding: 28px;
-          margin-bottom: 24px;
-          position: relative;
-          transition: all 0.4s ease;
-          animation: flowIn 0.7s ease-out backwards;
-        }
-        
-        .flow-stage:nth-child(1) { animation-delay: 0.1s; }
-        .flow-stage:nth-child(2) { animation-delay: 0.2s; }
-        .flow-stage:nth-child(3) { animation-delay: 0.3s; }
-        .flow-stage:nth-child(4) { animation-delay: 0.4s; }
-        .flow-stage:nth-child(5) { animation-delay: 0.5s; }
-        
-        @keyframes flowIn {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        .flow-stage::before {
-          content: '';
-          position: absolute;
-          left: 12px;
-          bottom: -24px;
-          width: 2px;
-          height: 24px;
-          background: linear-gradient(to bottom, rgba(212,168,67,0.5), transparent);
-        }
-        
-        .flow-stage:last-child::before {
-          display: none;
-        }
-        
-        .flow-stage:hover {
-          background: rgba(245,240,232,0.1);
-          border-color: #d4a843;
-          transform: translateX(8px);
-        }
-        
-        .flow-header {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-          margin-bottom: 16px;
-        }
-        
-        .flow-number {
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #c8622a 0%, #d4a843 100%);
-          color: white;
-          font-family: 'Fraunces', serif;
-          font-weight: 900;
-          font-size: 1.1rem;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-          box-shadow: 0 4px 12px rgba(200,98,42,0.3);
-        }
-        
-        .flow-title {
-          font-family: 'Fraunces', serif;
-          font-size: 1.4rem;
-          font-weight: 700;
-          color: #f5f0e8;
-          flex: 1;
-        }
-        
-        .flow-icon {
-          width: 44px;
-          height: 44px;
-          border-radius: 10px;
-          background: rgba(212,168,67,0.15);
-          border: 1px solid rgba(212,168,67,0.25);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-        }
-        
-        .flow-content {
-          padding-left: 56px;
-        }
-        
-        .flow-desc {
-          font-size: 0.95rem;
-          color: rgba(245,240,232,0.7);
-          line-height: 1.7;
-          margin-bottom: 16px;
-        }
-        
-        .flow-details {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-          gap: 12px;
-        }
-        
-        .detail-item {
-          padding: 10px 14px;
-          border-radius: 8px;
-          background: rgba(245,240,232,0.04);
-          border: 1px solid rgba(245,240,232,0.08);
-          font-size: 0.8rem;
-          color: rgba(245,240,232,0.8);
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-        
-        .detail-check {
-          width: 16px;
-          height: 16px;
-          border-radius: 4px;
-          background: #34d399;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-        }
-        
-        @media (max-width: 600px) {
-          .flow-content {
-            padding-left: 0;
-            padding-top: 16px;
-          }
-          
-          .flow-header {
-            flex-wrap: wrap;
-          }
-          
-          .flow-details {
-            grid-template-columns: 1fr;
-          }
-        }
-      `}</style>
-
-      <div className="flow-container">
-        <div className="flow-stage">
-          <div className="flow-header">
-            <div className="flow-number">1</div>
-            <h4 className="flow-title">Question Generation</h4>
-            <div className="flow-icon">
-              <Sparkles size={20} color="#d4a843" />
-            </div>
-          </div>
-          <div className="flow-content">
-            <p className="flow-desc">
-              AI analyzes grade level, selects appropriate psychometric theories
-              (CHC, Big Five, RIASEC), and generates contextually relevant questions
-              with varying difficulty levels.
-            </p>
-            <div className="flow-details">
-              <div className="detail-item">
-                <div className="detail-check">
-                  <CheckCircle2 size={10} color="white" strokeWidth={3} />
-                </div>
-                Grade-adaptive content
-              </div>
-              <div className="detail-item">
-                <div className="detail-check">
-                  <CheckCircle2 size={10} color="white" strokeWidth={3} />
-                </div>
-                Theory-based items
-              </div>
-              <div className="detail-item">
-                <div className="detail-check">
-                  <CheckCircle2 size={10} color="white" strokeWidth={3} />
-                </div>
-                Difficulty calibration
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="flow-stage">
-          <div className="flow-header">
-            <div className="flow-number">2</div>
-            <h4 className="flow-title">Student Response</h4>
-            <div className="flow-icon">
-              <Target size={20} color="#d4a843" />
-            </div>
-          </div>
-          <div className="flow-content">
-            <p className="flow-desc">
-              Student completes the assessment in a user-friendly interface.
-              Responses are captured with timestamps and behavioral data for comprehensive analysis.
-            </p>
-            <div className="flow-details">
-              <div className="detail-item">
-                <div className="detail-check">
-                  <CheckCircle2 size={10} color="white" strokeWidth={3} />
-                </div>
-                Timed responses
-              </div>
-              <div className="detail-item">
-                <div className="detail-check">
-                  <CheckCircle2 size={10} color="white" strokeWidth={3} />
-                </div>
-                Progress tracking
-              </div>
-              <div className="detail-item">
-                <div className="detail-check">
-                  <CheckCircle2 size={10} color="white" strokeWidth={3} />
-                </div>
-                Auto-save feature
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="flow-stage">
-          <div className="flow-header">
-            <div className="flow-number">3</div>
-            <h4 className="flow-title">AI Evaluation</h4>
-            <div className="flow-icon">
-              <Brain size={20} color="#d4a843" />
-            </div>
-          </div>
-          <div className="flow-content">
-            <p className="flow-desc">
-              Advanced algorithms evaluate responses using Item Response Theory (IRT),
-              calculate raw scores, and apply normative data for standardized results.
-            </p>
-            <div className="flow-details">
-              <div className="detail-item">
-                <div className="detail-check">
-                  <CheckCircle2 size={10} color="white" strokeWidth={3} />
-                </div>
-                IRT scoring model
-              </div>
-              <div className="detail-item">
-                <div className="detail-check">
-                  <CheckCircle2 size={10} color="white" strokeWidth={3} />
-                </div>
-                Pattern recognition
-              </div>
-              <div className="detail-item">
-                <div className="detail-check">
-                  <CheckCircle2 size={10} color="white" strokeWidth={3} />
-                </div>
-                Normative comparison
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="flow-stage">
-          <div className="flow-header">
-            <div className="flow-number">4</div>
-            <h4 className="flow-title">Theory Application</h4>
-            <div className="flow-icon">
-              <BookOpen size={20} color="#d4a843" />
-            </div>
-          </div>
-          <div className="flow-content">
-            <p className="flow-desc">
-              Scores are mapped to psychometric constructs—cognitive abilities (CHC),
-              personality traits (Big Five), career interests (RIASEC), and emotional intelligence.
-            </p>
-            <div className="flow-details">
-              <div className="detail-item">
-                <div className="detail-check">
-                  <CheckCircle2 size={10} color="white" strokeWidth={3} />
-                </div>
-                Multi-theory synthesis
-              </div>
-              <div className="detail-item">
-                <div className="detail-check">
-                  <CheckCircle2 size={10} color="white" strokeWidth={3} />
-                </div>
-                Trait profiling
-              </div>
-              <div className="detail-item">
-                <div className="detail-check">
-                  <CheckCircle2 size={10} color="white" strokeWidth={3} />
-                </div>
-                Career alignment
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="flow-stage">
-          <div className="flow-header">
-            <div className="flow-number">5</div>
-            <h4 className="flow-title">Report Generation</h4>
-            <div className="flow-icon">
-              <FileText size={20} color="#d4a843" />
-            </div>
-          </div>
-          <div className="flow-content">
-            <p className="flow-desc">
-              Comprehensive PDF report generated with visual analytics, percentile rankings,
-              strength/weakness analysis, and personalized career pathway recommendations.
-            </p>
-            <div className="flow-details">
-              <div className="detail-item">
-                <div className="detail-check">
-                  <CheckCircle2 size={10} color="white" strokeWidth={3} />
-                </div>
-                Visual dashboards
-              </div>
-              <div className="detail-item">
-                <div className="detail-check">
-                  <CheckCircle2 size={10} color="white" strokeWidth={3} />
-                </div>
-                Career suggestions
-              </div>
-              <div className="detail-item">
-                <div className="detail-check">
-                  <CheckCircle2 size={10} color="white" strokeWidth={3} />
-                </div>
-                Actionable insights
-              </div>
-              <div className="detail-item">
-                <div className="detail-check">
-                  <CheckCircle2 size={10} color="white" strokeWidth={3} />
-                </div>
-                Downloadable PDF
-              </div>
-            </div>
-          </div>
-        </div>
+export const HowStep3Visual = () => (
+  <div className="how-step-visual">
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      <div style={{
+        display: "flex", alignItems: "center", gap: 10,
+        padding: "10px 14px", background: "white", borderRadius: 8,
+        border: "1px solid #e4e4e7"
+      }}>
+        <FileText size={16} color="#6366f1" />
+        <span style={{ fontSize: "0.78rem", fontWeight: 600, color: "#0a0a0a" }}>
+          Comprehensive PDF Report
+        </span>
+        <span style={{
+          marginLeft: "auto", fontSize: "0.65rem", fontWeight: 600,
+          color: "#22c55e", background: "#f0fdf4", padding: "3px 8px", borderRadius: 4,
+        }}>
+          Ready to download
+        </span>
+      </div>
+      <div style={{
+        display: "flex", alignItems: "center", gap: 10,
+        padding: "10px 14px", background: "white", borderRadius: 8,
+        border: "1px solid #e4e4e7"
+      }}>
+        <BarChart3 size={16} color="#3b82f6" />
+        <span style={{ fontSize: "0.78rem", fontWeight: 600, color: "#0a0a0a" }}>
+          Career Pathway Recommendations
+        </span>
+        <span style={{
+          marginLeft: "auto", fontSize: "0.65rem", fontWeight: 600,
+          color: "#3b82f6", background: "#eff6ff", padding: "3px 8px", borderRadius: 4,
+        }}>
+          4 matches
+        </span>
+      </div>
+      <div style={{
+        display: "flex", alignItems: "center", gap: 10,
+        padding: "10px 14px", background: "white", borderRadius: 8,
+        border: "1px solid #e4e4e7"
+      }}>
+        <TrendingUp size={16} color="#f59e0b" />
+        <span style={{ fontSize: "0.78rem", fontWeight: 600, color: "#0a0a0a" }}>
+          Growth Development Plan
+        </span>
+        <span style={{
+          marginLeft: "auto", fontSize: "0.65rem", fontWeight: 600,
+          color: "#f59e0b", background: "#fffbeb", padding: "3px 8px", borderRadius: 4,
+        }}>
+          Personalized
+        </span>
       </div>
     </div>
-  );
-};
+  </div>
+);
+
+// ═══════════════════════════════════════
+// ENTERPRISE FEATURE CARDS
+// ═══════════════════════════════════════
+export const enterpriseFeatures = [
+  { icon: Lock, title: "Access Controls", desc: "Role-based permissions for students, counselors, admins and schools" },
+  { icon: Activity, title: "Audit Logging", desc: "Track all test activities and data access across your organization" },
+  { icon: Cloud, title: "Cloud Deployments", desc: "Secure cloud infrastructure with 99.9% uptime guarantee" },
+  { icon: Key, title: "API Access", desc: "Integrate assessments into your existing school management systems" },
+  { icon: Shield, title: "Data Privacy", desc: "GDPR and FERPA compliant with full data encryption" },
+  { icon: Cpu, title: "Scalable Compute", desc: "Handle thousands of concurrent assessments without slowdown" },
+  { icon: Headphones, title: "Priority Support", desc: "Dedicated account manager for your institution's needs" },
+];
