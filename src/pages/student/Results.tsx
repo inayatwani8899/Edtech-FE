@@ -131,8 +131,35 @@ export const Results = () => {
       // 4. Small extra delay for any final CSS transitions / font loading
       await new Promise((r) => setTimeout(r, 500));
 
-      // 5. Trigger browser's native Print dialog (user selects "Save as PDF")
-      //    This preserves 100% of CSS and produces real selectable text.
+      // 5. Inject print-fix CSS to eliminate blank pages
+      const printFixStyle = printWindow.document.createElement('style');
+      printFixStyle.textContent = `
+        @media print {
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          body { background: white !important; margin: 0 !important; padding: 0 !important; }
+          .page {
+            min-height: auto !important;
+            height: auto !important;
+            page-break-after: always !important;
+            page-break-inside: avoid !important;
+            break-after: page !important;
+            break-inside: avoid !important;
+            margin: 0 !important;
+            box-shadow: none !important;
+            overflow: visible !important;
+          }
+          .page:last-child {
+            page-break-after: auto !important;
+            break-after: auto !important;
+          }
+          .page-footer {
+            position: relative !important;
+          }
+        }
+      `;
+      printWindow.document.head.appendChild(printFixStyle);
+
+      // 6. Trigger browser's native Print dialog (user selects "Save as PDF")
       printWindow.focus();
       printWindow.print();
 
