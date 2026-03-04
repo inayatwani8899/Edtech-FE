@@ -1,7 +1,5 @@
 
 import { useState, useEffect } from "react";
-// @ts-ignore
-import html2pdf from "html2pdf.js";
 import { useTestStore } from "@/store/testStore";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -63,16 +61,12 @@ export const Results = () => {
   } = useTestStore();
 
   useEffect(() => {
-    // Fetch user submissions when component mounts
     fetchUserSubmissions({ pageNumber: 1, pageSize: 5, sortBy: sortConfig.key, sortDirection: sortConfig.direction });
-
-    // Cleanup on unmount
     return () => {
       clearUserSubmissions();
     };
   }, []);
 
-  // Handle pagination
   const handlePageChange = (page: number) => {
     fetchUserSubmissions({
       pageNumber: page,
@@ -82,7 +76,6 @@ export const Results = () => {
     });
   };
 
-  // Handle retry
   const handleRetry = () => {
     fetchUserSubmissions({
       pageNumber: 1,
@@ -92,8 +85,8 @@ export const Results = () => {
     });
   };
 
-  // Download report when we have reportId
-  // Download report when we have reportId
+  // Download report — uses browser's native print engine for
+  // pixel-perfect CSS and fully selectable text in the PDF.
   const downloadReportWithReportId = async (reportId: number, testTitle: string) => {
     if (!reportId) {
       alert("Report not available for this attempt.");
@@ -103,85 +96,50 @@ export const Results = () => {
     setDownloadingReports(prev => ({ ...prev, [reportId]: true }));
 
     try {
-      // 1. Fetch the HTML content
+      // 1. Fetch the HTML report from the API
       const response = await api.get(`/tests/report/${reportId}/html`);
-      let htmlContent = response.data;
+      const htmlContent: string = response.data;
 
-      // 2. Pre-process HTML: Move styles from <head> to <body> to ensure html2canvas sees them
-      // This is a common fix for styles being lost in iframe captures
-      const styleMatch = htmlContent.match(/<style>([\s\S]*?)<\/style>/i);
-      if (styleMatch) {
-        const styleBlock = styleMatch[0];
-        // Remove style from head (optional, but cleaner)
-        // htmlContent = htmlContent.replace(styleBlock, ''); 
-        // Inject style at the beginning of body
-        htmlContent = htmlContent.replace('<body>', `<body>${styleBlock}`);
+      // 2. Open a new window with the report HTML
+      const printWindow = window.open('', '_blank', 'width=900,height=700');
+      if (!printWindow) {
+        alert("Pop-up blocked! Please allow pop-ups for this site to download reports.");
+        return;
       }
 
-      // 3. Create an iframe to render the content
-      const iframe = document.createElement('iframe');
-      Object.assign(iframe.style, {
-        position: 'fixed',
-        left: '0',
-        top: '0',
-        width: '210mm',
-        height: '297mm', // Start A4 size
-        border: 'none',
-        zIndex: '-1000',
-        visibility: 'visible'
-      });
-      document.body.appendChild(iframe);
+      printWindow.document.open();
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
 
-      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-      if (!iframeDoc) {
-        throw new Error("Could not create iframe document");
-      }
-
-      iframeDoc.open();
-      iframeDoc.write(htmlContent);
-      iframeDoc.close();
-
-      // 4. Wait for rendering
+      // 3. Wait for the report to finish rendering (AI insights, charts, etc.)
       await new Promise<void>((resolve) => {
-        const timeout = setTimeout(() => {
-          console.warn("Report render timed out, trying to print anyway...");
-          resolve();
-        }, 10000); // 10s wait for AI/Images
-
-        const checkRender = setInterval(() => {
+        const timeout = setTimeout(resolve, 12000); // 12s safety fallback
+        const check = setInterval(() => {
           try {
-            // @ts-ignore
-            if (iframe.contentWindow?.RENDER_COMPLETE === true) {
-              clearInterval(checkRender);
+            // @ts-ignore — the report HTML sets window.RENDER_COMPLETE = true
+            if (printWindow.RENDER_COMPLETE === true) {
+              clearInterval(check);
               clearTimeout(timeout);
               resolve();
             }
-          } catch (e) { }
-        }, 500);
+          } catch (e) {
+            // cross-origin safety — shouldn't happen for same-origin blank
+          }
+        }, 300);
       });
 
-      // 5. Configure PDF options
-      const opt = {
-        margin: 0,
-        filename: `${testTitle.replace(/\s+/g, "_")}_Report_${reportId}.pdf`,
-        image: { type: 'jpeg' as const, quality: 0.98 },
-        html2canvas: {
-          scale: 2,
-          useCORS: true,
-          logging: false,
-          scrollY: 0,
-          window: iframe.contentWindow as any // Important for finding resources
-        },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-      };
+      // 4. Small extra delay for any final CSS transitions / font loading
+      await new Promise((r) => setTimeout(r, 500));
 
-      // 5. Generate and download PDF from iframe body
-      // We target the body which contains the .page elements
-      // @ts-ignore
-      await html2pdf().set(opt).from(iframeDoc.body).save();
+      // 5. Trigger browser's native Print dialog (user selects "Save as PDF")
+      //    This preserves 100% of CSS and produces real selectable text.
+      printWindow.focus();
+      printWindow.print();
 
-      // Cleanup
-      document.body.removeChild(iframe);
+      // 6. Close the print window after a short delay
+      setTimeout(() => {
+        printWindow.close();
+      }, 1000);
 
     } catch (error) {
       console.error("PDF generation failed:", error);
