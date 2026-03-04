@@ -16,9 +16,21 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
+export interface Option {
+    option_Id: number;
+    question_Id: number | string;
+    option_Text: string;
+    score: number;
+    order_No: number;
+}
+
 export interface Question {
-    questionId: number | string;
-    questionText: string;
+    question_Id: number | string;
+    question_Text: string;
+    category: string;
+    theory: string;
+    tag: string;
+    options: Option[];
     [key: string]: any;
 }
 
@@ -182,9 +194,9 @@ export const TestInterface = ({
 
                     <div className="flex-none grid grid-cols-[1fr_repeat(5,85px)] md:grid-cols-[1fr_repeat(5,110px)] bg-slate-900 text-white sticky top-0 z-30 shadow-md">
                         <div className="p-3 text-[10px] font-black uppercase tracking-widest pl-6 self-center text-blue-200">Matrix Parameter</div>
-                        {["S. Dislike", "Dislike", "Unsure", "Like", "S. Like"].map((label) => (
-                            <div key={label} className="p-3 text-center font-black text-[8px] uppercase tracking-tighter border-l border-white/5 flex items-center justify-center opacity-80">
-                                {label}
+                        {testQuestions.length > 0 && testQuestions[0].options.map((option) => (
+                            <div key={option.option_Id} className="p-3 text-center font-black text-[8px] uppercase tracking-tighter border-l border-white/5 flex items-center justify-center opacity-80">
+                                {option.option_Text}
                             </div>
                         ))}
                     </div>
@@ -193,7 +205,7 @@ export const TestInterface = ({
                         <div className="min-w-[700px]">
                             {testQuestions.map((question, qIdx) => (
                                 <div
-                                    key={question.questionId}
+                                    key={question.question_Id}
                                     className={`grid grid-cols-[1fr_repeat(5,85px)] md:grid-cols-[1fr_repeat(5,110px)] items-center border-b border-slate-100 transition-all hover:bg-blue-50/60 group relative ${qIdx % 2 === 1 ? 'bg-slate-50/40' : 'bg-white'}`}
                                 >
                                     {/* VISIBLE Scan Sweep */}
@@ -201,18 +213,18 @@ export const TestInterface = ({
 
                                     <div className="p-3 md:p-4 text-[12px] font-bold text-slate-700 pl-6 flex gap-3 relative z-10">
                                         <span className="text-blue-300 font-mono text-[10px]">{(currentPage - 1) * 10 + (qIdx + 1)}</span>
-                                        <span className="group-hover:text-blue-700 transition-colors duration-200">{question.questionText}</span>
+                                        <span className="group-hover:text-blue-700 transition-colors duration-200">{question.question_Text}</span>
                                     </div>
 
-                                    {[1, 2, 3, 4, 5].map((idx) => {
-                                        const optionValue = String(idx);
-                                        const isSelected = getCurrentAnswer(question.questionId.toString()) === optionValue;
+                                    {question.options.map((option) => {
+                                        const optionIdStr = String(option.option_Id);
+                                        const isSelected = getCurrentAnswer(question.question_Id.toString()) === optionIdStr;
                                         return (
-                                            <div key={idx} className="p-2 flex justify-center border-l border-slate-50 relative z-10">
+                                            <div key={option.option_Id} className="p-2 flex justify-center border-l border-slate-50 relative z-10">
                                                 <button
                                                     className={`relative h-6 w-6 rounded-lg border-2 flex items-center justify-center transition-all duration-300 ${isSelected ? 'bg-blue-600 border-blue-600 shadow-lg shadow-blue-400/30 scale-110' : 'bg-white border-slate-300 hover:border-blue-400 rotate-45 scale-90'}`}
                                                     onClick={() => {
-                                                        setAnswerLocally(question.questionId.toString(), optionValue);
+                                                        setAnswerLocally(question.question_Id.toString(), optionIdStr);
                                                         triggerSignature();
                                                     }}
                                                 >

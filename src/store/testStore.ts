@@ -17,18 +17,21 @@ export interface QuestionOption {
 //     explanation?: string;
 // }
 export interface Question {
-    questionId: number;
-    questionText: string;
+    question_Id: number | string;
+    question_Text: string;
     category?: string;
     theory?: string;
     tag?: string;
-    grade: string;
+    grade?: string;
     options: Option[];
 }
 
 export interface Option {
-    optionId: number | string;
-    optionText: string;
+    option_Id: number | string;
+    question_Id: number | string;
+    option_Text: string;
+    score?: number;
+    order_No?: number;
 }
 
 export enum OptionID {
@@ -549,18 +552,21 @@ export const useTestStore = create<TestState>((set, get) => ({
                         ? data.data.items
                         : [];
 
-            // Map upstream question shape to local `Question` shape
+            // Map upstream question shape to local `Question` shape preserving original property names
             const questions: Question[] = rawQuestions.map((q: any) => ({
-                questionId: q.question_Id ?? q.questionId ?? q.id,
-                questionText: q.question_Text ?? q.questionText ?? q.text ?? '',
+                question_Id: q.question_Id ?? q.questionId ?? q.id,
+                question_Text: q.question_Text ?? q.questionText ?? q.text ?? '',
                 category: q.category ?? '',
                 theory: q.theory ?? '',
                 tag: q.tag ?? '',
                 grade: data.grade ?? q.grade ?? '',
                 options: Array.isArray(q.options)
                     ? q.options.map((o: any) => ({
-                        optionId: o.option_Id ?? o.optionId ?? o.id,
-                        optionText: o.option_Text ?? o.optionText ?? o.text ?? ''
+                        option_Id: o.option_Id ?? o.optionId ?? o.id,
+                        question_Id: o.question_Id ?? q.question_Id ?? q.questionId ?? q.id,
+                        option_Text: o.option_Text ?? o.optionText ?? o.text ?? '',
+                        score: o.score ?? undefined,
+                        order_No: o.order_No ?? o.order_no ?? undefined
                     }))
                     : []
             }));
