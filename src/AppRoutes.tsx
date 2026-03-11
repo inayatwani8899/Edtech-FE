@@ -139,12 +139,14 @@ const AppRoutes = () => {
             {/* Public Routes */}
             <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
             <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+            <Route path="/get-started" element={<PublicRoute><RoleSelection /></PublicRoute>} />
+            <Route path="/register/student" element={<StudentRegister />} />
+            <Route path="/register/counsellor" element={<CounsellorRegister />} />
+            <Route path="/register/school" element={<SchoolRegister />} />
             <Route element={<Layout />}>
 
-                <Route path="/register/student" element={<StudentRegister />} />
-                <Route path="/register/counsellor" element={<CounsellorRegister />} />
-                <Route path="/register/school" element={<SchoolRegister />} />
-                <Route path="/get-started" element={<PublicRoute><RoleSelection /></PublicRoute>} />
+
+
                 <Route path="counselors" element={<ActiveCounselors />} />
             </Route>
 
