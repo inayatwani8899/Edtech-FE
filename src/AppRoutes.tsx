@@ -18,6 +18,8 @@ import { StudentLayout } from "./components/layout/StudentLayout";
 import { StudentDashboard } from "./pages/student/StudentDashboard";
 import { AdminLayout } from "./components/layout/AdminLayout";
 import { AdminDashboard } from "./pages/dashboards/AdminDashboard";
+import { CounselorLayout } from "./components/layout/CounselorLayout";
+import { CounselorDashboard } from "./pages/dashboards/CounselorDashboard";
 import { Tests } from "./pages/student/Tests";
 import Students from "./pages/admin/students/Students";
 import StudentForm from "./pages/admin/students/StudentForm";
@@ -43,11 +45,33 @@ import { ProgressTracking } from "./pages/student/ProgressTracking";
 import { Scholarships } from "./pages/student/Scholarships";
 import { Schedule } from "./pages/student/Schedule";
 import { Messages } from "./pages/student/Messages";
+
+// 🔐 RBAC Module Pages
+import RBACDashboard from "./modules/rbac/pages/RBACDashboard";
+import RolesList from "./modules/rbac/pages/RolesList";
+import RoleForm from "./modules/rbac/pages/RoleForm";
+import RoleDetail from "./modules/rbac/pages/RoleDetail";
+import PermissionsList from "./modules/rbac/pages/PermissionsList";
+import PermissionForm from "./modules/rbac/pages/PermissionForm";
+import RBACUsersList from "./modules/rbac/pages/RBACUsersList";
+import RBACUserForm from "./modules/rbac/pages/RBACUserForm";
+import RBACUserDetail from "./modules/rbac/pages/RBACUserDetail";
+import RolePermissionMapping from "./modules/rbac/pages/RolePermissionMapping";
+import UserPermissionMapping from "./modules/rbac/pages/UserPermissionMapping";
+
 // 🔒 Protected Route
 interface ProtectedRouteProps {
     children: React.ReactNode;
-    role?: "Admin" | "Student" | "School" | "Counselor";
+    role?: "Admin" | "Student" | "School" | "Counselor" | "Professional";
 }
+
+const isCounselorRole = (user: any) => {
+    if (!user) return false;
+    const roleId = Number(user.roleId);
+    if (roleId === 2) return true;
+    const roleName = (user.role || "").toLowerCase();
+    return roleName.includes("counselor") || roleName.includes("counsellor") || roleName === "professional";
+};
 
 const ProtectedRoute = ({ children, role }: ProtectedRouteProps) => {
     const { user, isAuthenticated, isLoading } = useAuthStore();
@@ -64,10 +88,19 @@ const ProtectedRoute = ({ children, role }: ProtectedRouteProps) => {
         return <Navigate to="/login" replace />;
     }
 
-    if (role && user?.role !== role) {
+    if (role && (
+        (role === "Student" && user?.role !== "Student") ||
+        (role === "Admin" && user?.role !== "Admin") ||
+        (role === "School" && user?.role !== "School") ||
+        (role === "Counselor" && !isCounselorRole(user))
+    )) {
+        let redirectPath = "/student/dashboard";
+        if (user?.role === "Admin") redirectPath = "/dashboard";
+        else if (isCounselorRole(user)) redirectPath = "/counselor/dashboard";
+
         return (
             <Navigate
-                to={user?.role === "Admin" ? "/dashboard" : "/student/dashboard"}
+                to={redirectPath}
                 replace
             />
         );
@@ -78,7 +111,7 @@ const ProtectedRoute = ({ children, role }: ProtectedRouteProps) => {
 
 //Public Route
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
-    const { isAuthenticated, isLoading } = useAuthStore();
+    const { user, isAuthenticated, isLoading } = useAuthStore();
 
     if (isLoading) {
         return (
@@ -90,7 +123,11 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
     }
 
     if (isAuthenticated) {
-        return <Navigate to="/dashboard" replace />;
+        let redirectPath = "/student/dashboard";
+        if (user?.role === "Admin") redirectPath = "/dashboard";
+        else if (isCounselorRole(user)) redirectPath = "/counselor/dashboard";
+
+        return <Navigate to={redirectPath} replace />;
     }
 
     return <>{children}</>;
@@ -100,14 +137,14 @@ const AppRoutes = () => {
     return (
         <Routes>
             {/* Public Routes */}
-                <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
+            <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
+            <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
             <Route element={<Layout />}>
-                <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+
                 <Route path="/register/student" element={<StudentRegister />} />
                 <Route path="/register/counsellor" element={<CounsellorRegister />} />
                 <Route path="/register/school" element={<SchoolRegister />} />
                 <Route path="/get-started" element={<PublicRoute><RoleSelection /></PublicRoute>} />
-                <Route path="*" element={<NotFound />} />
                 <Route path="counselors" element={<ActiveCounselors />} />
             </Route>
 
@@ -120,6 +157,11 @@ const AppRoutes = () => {
                 }
             >
                 <Route path="/dashboard" element={<AdminDashboard />} />
+
+                {/* 🔐 Access Control Mapping (Prioritized) */}
+                <Route path="/rbac/role-permissions" element={<RolePermissionMapping />} />
+                <Route path="/rbac/user-permissions" element={<UserPermissionMapping />} />
+
                 <Route path="/manage/users" element={<Users />} />
                 <Route path="/counselors/add" element={<CounselorForm />} />
                 <Route path="/counselors/edit/:id" element={<CounselorForm />} />
@@ -140,7 +182,27 @@ const AppRoutes = () => {
                 <Route path="/manage/configurations" element={<TestConfigurationsList />} />
                 <Route path="/manage/configurations/add" element={<TestConfigurationForm />} />
                 <Route path="/manage/configurations/edit/:id" element={<TestConfigurationForm />} />
-                <Route path="*" element={<NotFound />} />
+
+                {/* 🔐 Role-Based Access Control (RBAC) Routes */}
+                <Route path="/rbac" element={<RBACDashboard />} />
+
+                {/* Role Management */}
+                <Route path="/rbac/roles" element={<RolesList />} />
+                <Route path="/rbac/roles/add" element={<RoleForm />} />
+                <Route path="/rbac/roles/edit/:id" element={<RoleForm />} />
+                <Route path="/rbac/roles/view/:id" element={<RoleDetail />} />
+
+                {/* Permission Management */}
+                <Route path="/rbac/permissions" element={<PermissionsList />} />
+                <Route path="/rbac/permissions/add" element={<PermissionForm />} />
+                <Route path="/rbac/permissions/edit/:id" element={<PermissionForm />} />
+
+                {/* RBAC User Management */}
+                <Route path="/rbac/users" element={<RBACUsersList />} />
+                <Route path="/rbac/users/add" element={<RBACUserForm />} />
+                <Route path="/rbac/users/edit/:id" element={<RBACUserForm />} />
+                <Route path="/rbac/users/view/:id" element={<RBACUserDetail />} />
+
             </Route>
 
             {/* Student Routes */}
@@ -165,11 +227,28 @@ const AppRoutes = () => {
                 <Route path="/profile" element={<StudentProfile />} />
                 <Route path="/settings" element={<Settings />} />
                 {/* <Route path="/manage" element={<Manage />} /> */}
-                <Route path="*" element={<NotFound />} />
             </Route>
 
-            {/* Catch-all 404 */}
+            {/* Counselor Routes */}
+            <Route
+                element={
+                    <ProtectedRoute role="Counselor">
+                        <CounselorLayout />
+                    </ProtectedRoute>
+                }
+            >
+                <Route path="/counselor/dashboard" element={<CounselorDashboard />} />
+                <Route path="/counselor/students" element={<div className="p-4">My Students Page (Coming Soon)</div>} />
+                <Route path="/counselor/appointments" element={<div className="p-4">Appointments Calendar (Coming Soon)</div>} />
+                <Route path="/counselor/assessments" element={<div className="p-4">Student Assessments (Coming Soon)</div>} />
+                <Route path="/counselor/messages" element={<div className="p-4">Message Center (Coming Soon)</div>} />
+                <Route path="/counselor/reports" element={<div className="p-4">Reports Generator (Coming Soon)</div>} />
+                <Route path="/counselor/resources" element={<div className="p-4">Counseling Resources (Coming Soon)</div>} />
+                <Route path="/counselor/search" element={<div className="p-4">Search Students (Coming Soon)</div>} />
+            </Route>
 
+            {/* Global Catch-all 404 */}
+            <Route path="*" element={<NotFound />} />
         </Routes>
     );
 };

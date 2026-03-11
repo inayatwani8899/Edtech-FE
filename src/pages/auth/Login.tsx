@@ -43,7 +43,7 @@ export const Login = () => {
   };
 
   return (
-    <div className="min-h-[90vh] px-12 relative flex items-center justify-center overflow-hidden bg-[#0a0c10] select-none">
+    <div className="min-h-screen px-12 relative flex items-center justify-center overflow-hidden bg-[#0a0c10] select-none">
       {/* 🌌 ULTRA-FLUID DYNAMIC BACKDROP */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-primary/20 rounded-full blur-[160px] animate-pulse mix-blend-screen transition-opacity duration-1000"></div>

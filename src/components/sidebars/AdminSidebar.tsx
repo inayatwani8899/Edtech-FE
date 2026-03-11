@@ -22,6 +22,10 @@ import {
     ChevronRight,
     Brain,
     PanelLeft,
+    Lock,
+    Key,
+    UserCog,
+    UserCheck,
 } from "lucide-react";
 import {
     Sidebar,
@@ -47,6 +51,13 @@ const adminMenuItems = [
     { title: "Test Configuration Management", url: "/manage/configurations", icon: Cog, color: "text-green-600" },
     { title: "AI Question Generation", url: "/ai-generation", icon: BookOpen, color: "text-yellow-600" },
     { title: "Categories Management", url: "/manage/categories", icon: Book, color: "text-indigo-600" },
+];
+
+const rbacMenuItems = [
+    { title: "RBAC Dashboard", url: "/rbac", icon: Shield, color: "text-indigo-500" },
+    // { title: "Roles & Permissions", url: "/rbac/roles", icon: Lock, color: "text-purple-500" },
+    // { title: "Access Mapping", url: "/rbac/role-permissions", icon: Layers, color: "text-amber-500" },
+    // { title: "User Access", url: "/rbac/users", icon: UserCog, color: "text-blue-500" },
 ];
 
 export function AdminSidebar() {
@@ -150,16 +161,51 @@ export function AdminSidebar() {
                     )}
                     <SidebarGroupContent>
                         <SidebarMenu className="space-y-1 px-1 py-2">
-                            {adminMenuItems.map((item) => (
-                                <SidebarMenuItem key={item.title}>
-                                    <SidebarMenuButton asChild isActive={isActive(item.url)} className={`transition-all duration-200 rounded-lg ${theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"} group`}>
-                                        <NavLink to={item.url} title={item.title} className={`flex items-center gap-3 px-3 py-2.5 ${isCollapsed ? "justify-center" : ""} w-full`}>
-                                            <item.icon className={`h-5 w-5 ${isActive(item.url) ? item.color : theme === "dark" ? "text-slate-300" : "text-slate-500"} group-hover:scale-110 transition-transform duration-200`} />
-                                            <span className={`${isCollapsed ? "hidden" : "text-sm font-medium"}`}>{item.title}</span>
-                                        </NavLink>
-                                    </SidebarMenuButton>
-                                </SidebarMenuItem>
-                            ))}
+                            {adminMenuItems.map((item) => {
+                                const Icon = item.icon;
+                                return (
+                                    <SidebarMenuItem key={item.title}>
+                                        <SidebarMenuButton asChild isActive={isActive(item.url)} className={`transition-all duration-200 rounded-lg ${theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"} group`}>
+                                            <NavLink to={item.url} title={item.title} className={`flex items-center gap-3 px-3 py-2.5 ${isCollapsed ? "justify-center" : ""} w-full`}>
+                                                <Icon className={`h-5 w-5 ${isActive(item.url) ? item.color : theme === "dark" ? "text-slate-300" : "text-slate-500"} group-hover:scale-110 transition-transform duration-200`} />
+                                                <span className={`${isCollapsed ? "hidden" : "text-sm font-medium"}`}>{item.title}</span>
+                                            </NavLink>
+                                        </SidebarMenuButton>
+                                    </SidebarMenuItem>
+                                );
+                            })}
+                        </SidebarMenu>
+                    </SidebarGroupContent>
+                </SidebarGroup>
+
+                {/* Access Control Section */}
+                <SidebarGroup>
+                    {!isCollapsed && (
+                        <div className="px-4 mb-4 mt-2 flex items-center gap-4">
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-600 whitespace-nowrap">
+                                Access Control
+                            </span>
+                            <div className={cn(
+                                "h-[1px] w-full",
+                                theme === "dark" ? "bg-slate-800/50" : "bg-slate-100"
+                            )} />
+                        </div>
+                    )}
+                    <SidebarGroupContent>
+                        <SidebarMenu className="space-y-1 px-1 py-1">
+                            {rbacMenuItems.map((item) => {
+                                const Icon = item.icon;
+                                return (
+                                    <SidebarMenuItem key={item.title}>
+                                        <SidebarMenuButton asChild isActive={isActive(item.url)} className={`transition-all duration-200 rounded-lg ${theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"} group`}>
+                                            <NavLink to={item.url} title={item.title} className={`flex items-center gap-3 px-3 py-2 ${isCollapsed ? "justify-center" : ""} w-full`}>
+                                                <Icon className={`h-4.5 w-4.5 ${isActive(item.url) ? item.color : theme === "dark" ? "text-slate-300" : "text-slate-500"} group-hover:scale-110 transition-transform duration-200`} />
+                                                <span className={`${isCollapsed ? "hidden" : "text-sm font-medium"}`}>{item.title}</span>
+                                            </NavLink>
+                                        </SidebarMenuButton>
+                                    </SidebarMenuItem>
+                                );
+                            })}
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>

@@ -28,10 +28,18 @@ export const Navbar = () => {
         <div className="flex justify-between h-16">
           <div className="flex items-center gap-4">
             {isAuthenticated && <SidebarTrigger className="md:hidden" />}
-            <Link to={isAuthenticated ? (user?.role === 'Admin' ? '/dashboard' : '/student/dashboard') : '/'} className="flex items-center space-x-2">
+            <Link
+              to={
+                !isAuthenticated ? '/' :
+                  user?.role === 'Admin' ? '/dashboard' :
+                    (user?.role?.toLowerCase().includes('counsel') || user?.role?.toLowerCase() === 'professional') ? '/counselor/dashboard' :
+                      '/student/dashboard'
+              }
+              className="flex items-center space-x-2"
+            >
               {/* <Brain className="h-6 w-6 text-primary" /> */}
               <span className="text-lg font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-                
+
               </span>
             </Link>
           </div>
