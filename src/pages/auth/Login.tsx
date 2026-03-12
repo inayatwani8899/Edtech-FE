@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Eye, EyeOff, Loader2, Mail, Lock, ShieldCheck, Sparkles, ArrowRight, Activity, Users, Globe } from "lucide-react";
+import { Eye, EyeOff, Loader2, Mail, Lock, ShieldCheck, Sparkles, ArrowRight, Activity, Users, Globe, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuthStore } from "../../store/useAuthStore";
 
@@ -56,6 +56,16 @@ export const Login = () => {
           <div className="absolute h-1 w-1 bg-white rounded-full top-[60%] left-[80%] animate-ping" style={{ animationDuration: '4s' }}></div>
           <div className="absolute h-1 w-1 bg-white rounded-full top-[10%] left-[70%] animate-ping" style={{ animationDuration: '5s' }}></div>
         </div>
+      </div>
+
+      <div className="absolute top-6 left-6 md:left-12 z-50">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-[0.3em] text-white/30 hover:text-white hover:bg-white/5 border border-white/5 hover:border-white/10 backdrop-blur-3xl transition-all duration-300 group"
+        >
+          <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
+          Home
+        </Link>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 lg:px-8 py-4 relative z-10 w-full">

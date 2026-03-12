@@ -38,7 +38,7 @@ export const Landing = () => {
         {/* ═══════════ NAVBAR ═══════════ */}
         <nav className="lp-nav">
           <div className="nav-logo">
-            <img src="https://www.pathgrad.com/logo/pathgrad_logo.png" alt="PathGrad" style={{ height: "35px", width: "auto" }} />
+            Cognify<span>IQ</span>
           </div>
           <div className="nav-links">
             <Link to="/tests">Assessments</Link>
@@ -497,7 +497,7 @@ export const Landing = () => {
         <footer className="lp-footer">
           <div className="footer-inner">
             <div className="footer-logo">
-              <img src="https://www.pathgrad.com/logo/pathgrad_logo.png" alt="PathGrad" style={{ height: "30px", width: "auto" }} />
+              Cognify<span>IQ</span>
             </div>
             <div className="footer-links">
               <Link to="/tests">Assessments</Link>

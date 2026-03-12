@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -105,13 +105,20 @@ const StudentRegister = () => {
   return (
     <div className="h-screen w-full bg-[#0a0c10] relative flex items-center justify-center overflow-hidden select-none">
       {/* 🏠 Top-Left Navigation */}
-      <div className="absolute top-6 left-6 md:left-12 z-50">
+      <div className="absolute top-6 left-6 md:left-12 z-50 flex items-center gap-3">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-[0.3em] text-white/30 hover:text-white hover:bg-white/5 border border-white/5 hover:border-white/10 backdrop-blur-3xl transition-all duration-300 group"
+        >
+          <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
+          Home
+        </Link>
+        <div className="h-4 w-px bg-white/5" />
         <Button
           variant="ghost"
           onClick={() => navigate("/get-started")}
           className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-[0.3em] text-white/30 hover:text-white hover:bg-white/5 border border-white/5 hover:border-white/10 backdrop-blur-3xl transition-all duration-300 group"
         >
-          <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
           Back
         </Button>
       </div>

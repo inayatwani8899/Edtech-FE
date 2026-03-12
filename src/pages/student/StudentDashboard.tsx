@@ -235,7 +235,7 @@ export const StudentDashboard = () => {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div className="space-y-1">
               <h2 className="text-3xl font-black text-slate-900 tracking-tight">Assessment Ecosystem</h2>
-              <p className="text-slate-500 font-medium">Curated modules powered by the EDTECHNEURAL engine</p>
+              <p className="text-slate-500 font-medium">Curated modules powered by the CognifyIQ engine</p>
             </div>
             <Button variant="outline" className="rounded-2xl font-bold border-slate-200 bg-white hover:bg-slate-50 px-6 h-11 transition-all">
               Browse Full Library <ArrowRight className="ml-2 h-4 w-4" />

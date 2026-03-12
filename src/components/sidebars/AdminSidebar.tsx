@@ -116,11 +116,11 @@ export function AdminSidebar() {
 
                         {!isCollapsed && (
                             <div className="flex flex-col min-w-0 animate-in fade-in slide-in-from-left-2 duration-300">
-                                <div className="flex items-baseline font-black tracking-tighter text-[16px] leading-[1.1]">
+                                <div className="flex items-baseline font-black tracking-tight text-[18px] leading-[1.1] logo-serif">
                                     <span className={cn(
                                         theme === "dark" ? "text-white" : "text-slate-900"
-                                    )}>EDTECH</span>
-                                    <span className="text-blue-500 ml-0.5">NEURAL</span>
+                                    )}>Cognify</span>
+                                    <span className="text-blue-500 ml-0.5 italic">IQ</span>
                                 </div>
                                 <div className="flex items-center gap-1 mt-0.5">
                                     <div className="h-1 w-1 flex-shrink-0 rounded-full bg-[#10b981] opacity-70" />
@@ -151,7 +151,7 @@ export function AdminSidebar() {
                     {!isCollapsed && (
                         <div className="px-4 mb-4 flex items-center gap-4">
                             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-600 whitespace-nowrap">
-                                Neural Flow
+                                Cognify Flow
                             </span>
                             <div className={cn(
                                 "h-[1px] w-full",

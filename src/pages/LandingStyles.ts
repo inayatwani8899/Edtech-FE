@@ -1,5 +1,5 @@
 export const landingStyles = `
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,900;1,900&display=swap');
 
 :root {
   --bg: #fafafa;
@@ -59,11 +59,12 @@ a { text-decoration: none; color: inherit; }
 }
 
 .nav-logo {
-  font-size: 1.25rem; font-weight: 800; letter-spacing: -0.04em;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem; font-weight: 900; letter-spacing: -0.02em;
   color: var(--black);
-  display: flex; align-items: center; gap: 8px;
+  display: flex; align-items: center;
 }
-.nav-logo span { color: var(--primary); }
+.nav-logo span { color: var(--primary); font-style: italic; margin-left: 2px; }
 
 .nav-links {
   display: flex; align-items: center; gap: 28px;
@@ -908,10 +909,11 @@ a { text-decoration: none; color: inherit; }
   display: flex; justify-content: space-between; align-items: center;
 }
 .footer-logo {
-  font-size: 1.1rem; font-weight: 800; color: var(--black);
-  letter-spacing: -0.03em;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem; font-weight: 900; color: var(--black);
+  letter-spacing: -0.02em;
 }
-.footer-logo span { color: var(--primary); }
+.footer-logo span { color: var(--primary); font-style: italic; margin-left: 1px; }
 .footer-links {
   display: flex; gap: 24px;
 }

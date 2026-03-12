@@ -459,7 +459,7 @@ const StudentProfile: React.FC = () => {
                         <div className="space-y-4">
                           <div className="flex flex-col">
                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Primary Schooling</span>
-                            <span className="text-sm font-bold text-slate-700">EdTech Global Academy</span>
+                            <span className="text-sm font-bold text-slate-700">CognifyIQ Global Academy</span>
                           </div>
                           <div className="flex flex-col">
                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Grade Alignment</span>

@@ -62,12 +62,12 @@ export const MOCK_ROLE_PERMISSION_MAP: RolePermissionMap = {
 
 // ─── Users ──────────────────────────────────────────────────
 export const MOCK_RBAC_USERS: RBACUser[] = [
-    { id: 'u1', name: 'Marcus Chen', email: 'marcus.chen@edtech.io', roleId: 'r1', status: 'active', createdAt: '2025-11-01', updatedAt: '2025-12-01' },
-    { id: 'u2', name: 'Sarah Johnson', email: 'sarah.johnson@edtech.io', roleId: 'r2', status: 'active', createdAt: '2025-11-05', updatedAt: '2025-12-01' },
-    { id: 'u3', name: 'Alex Rivera', email: 'alex.rivera@edtech.io', roleId: 'r3', status: 'active', createdAt: '2025-11-10', updatedAt: '2025-12-01' },
-    { id: 'u4', name: 'Priya Patel', email: 'priya.patel@edtech.io', roleId: 'r4', status: 'active', createdAt: '2025-11-12', updatedAt: '2025-12-01' },
-    { id: 'u5', name: 'James Wilson', email: 'james.wilson@edtech.io', roleId: 'r2', status: 'inactive', createdAt: '2025-11-15', updatedAt: '2025-12-01' },
-    { id: 'u6', name: 'Emily Zhang', email: 'emily.zhang@edtech.io', roleId: 'r5', status: 'active', createdAt: '2025-11-20', updatedAt: '2025-12-01' },
+    { id: 'u1', name: 'Marcus Chen', email: 'marcus.chen@cognifyiq.com', roleId: 'r1', status: 'active', createdAt: '2025-11-01', updatedAt: '2025-12-01' },
+    { id: 'u2', name: 'Sarah Johnson', email: 'sarah.johnson@cognifyiq.com', roleId: 'r2', status: 'active', createdAt: '2025-11-05', updatedAt: '2025-12-01' },
+    { id: 'u3', name: 'Alex Rivera', email: 'alex.rivera@cognifyiq.com', roleId: 'r3', status: 'active', createdAt: '2025-11-10', updatedAt: '2025-12-01' },
+    { id: 'u4', name: 'Priya Patel', email: 'priya.patel@cognifyiq.com', roleId: 'r4', status: 'active', createdAt: '2025-11-12', updatedAt: '2025-12-01' },
+    { id: 'u5', name: 'James Wilson', email: 'james.wilson@cognifyiq.com', roleId: 'r2', status: 'inactive', createdAt: '2025-11-15', updatedAt: '2025-12-01' },
+    { id: 'u6', name: 'Emily Zhang', email: 'emily.zhang@cognifyiq.com', roleId: 'r5', status: 'active', createdAt: '2025-11-20', updatedAt: '2025-12-01' },
 ];
 
 // ─── User → Direct Permission Map ──────────────────────────
@@ -78,7 +78,7 @@ export const MOCK_USER_PERMISSION_MAP: UserPermissionMap = {
 
 // ─── Simulated Personas for Permission Testing ──────────────
 export const MOCK_SIMULATED_USERS: SimulatedUser[] = [
-    { id: 'u1', name: 'Marcus Chen', email: 'marcus.chen@edtech.io', roleId: 'r1', roleName: 'Super Admin', directPermissions: [] },
-    { id: 'u2', name: 'Sarah Johnson', email: 'sarah.johnson@edtech.io', roleId: 'r2', roleName: 'Admin', directPermissions: ['p4'] },
-    { id: 'u3', name: 'Alex Rivera', email: 'alex.rivera@edtech.io', roleId: 'r3', roleName: 'Viewer', directPermissions: ['p20'] },
+    { id: 'u1', name: 'Marcus Chen', email: 'marcus.chen@cognifyiq.com', roleId: 'r1', roleName: 'Super Admin', directPermissions: [] },
+    { id: 'u2', name: 'Sarah Johnson', email: 'sarah.johnson@cognifyiq.com', roleId: 'r2', roleName: 'Admin', directPermissions: ['p4'] },
+    { id: 'u3', name: 'Alex Rivera', email: 'alex.rivera@cognifyiq.com', roleId: 'r3', roleName: 'Viewer', directPermissions: ['p20'] },
 ];

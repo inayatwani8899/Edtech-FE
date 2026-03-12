@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,900;1,900&display=swap');
+
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 */
@@ -137,5 +139,9 @@ All colors MUST be HSL.
     /* Glassmorphism Utilities */
     .glass-card {
         @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.04)];
+    }
+
+    .logo-serif {
+        font-family: 'Playfair Display', serif;
     }
 }

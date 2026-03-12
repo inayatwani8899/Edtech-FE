@@ -110,9 +110,9 @@ export function CounselorSidebar() {
 
                         {!isCollapsed && (
                             <div className="flex flex-col min-w-0 animate-in fade-in slide-in-from-left-2 duration-300">
-                                <div className="flex items-baseline font-black tracking-tight text-[18px] leading-[1.1]">
-                                    <span className={theme === "dark" ? "text-white" : "text-emerald-950"}>EDtech</span>
-                                    <span className="text-emerald-500 ml-0.5 font-extrabold uppercase tracking-tighter italic">Pro</span>
+                                <div className="flex items-baseline font-black tracking-tight text-[18px] leading-[1.1] logo-serif">
+                                    <span className={theme === "dark" ? "text-white" : "text-emerald-950"}>Cognify</span>
+                                    <span className="text-emerald-500 ml-0.5 font-extrabold uppercase tracking-tighter italic">IQ</span>
                                 </div>
                                 <div className="flex items-center gap-1.5 mt-0.5">
                                     <div className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-emerald-500 shadow-glow shadow-emerald-500/50 animate-pulse" />
