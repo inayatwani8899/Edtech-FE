@@ -16,7 +16,7 @@ import {
 export const AIAssessmentMockup = () => (
   <div className="ai-assess-mock">
     <div className="mock-question">
-      <div className="mock-q-label">Question 4 of 25 • CHC Cognitive</div>
+      <div className="mock-q-label">Question 4 of 25 • Ability Theory</div>
       <div className="mock-q-text">
         If all Zorbs are Tilps, and some Tilps are Wubs, which conclusion must be true?
       </div>
@@ -217,9 +217,10 @@ export const HowStep1Visual = () => (
   <div className="how-step-visual">
     <div className="how-integration-row">
       {[
-        { label: "CHC Theory", bg: "#eef2ff", color: "#6366f1", fields: ["Verbal", "Spatial"] },
-        { label: "Big Five", bg: "#fef3c7", color: "#f59e0b", fields: ["OCEAN", "EQ"] },
-        { label: "RIASEC", bg: "#f0fdf4", color: "#22c55e", fields: ["Interest", "Career"] },
+        { label: "Holland's", bg: "#eef2ff", color: "#6366f1", fields: ["RIASEC", "Interests"] },
+        { label: "Ability Theory", bg: "#f0fdf4", color: "#22c55e", fields: ["Cognitive", "Aptitude"] },
+        { label: "Big Five", bg: "#fef3c7", color: "#f59e0b", fields: ["OCEAN", "Personality"] },
+        { label: "Bloom's", bg: "#fce7f3", color: "#ec4899", fields: ["Knowledge", "Depth"] },
       ].map((item) => (
         <div key={item.label} className="how-integration">
           <div className="how-int-icon" style={{ background: item.bg, color: item.color }}>

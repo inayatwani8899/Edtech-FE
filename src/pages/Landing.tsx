@@ -35,7 +35,9 @@ export const Landing = () => {
 
         {/* ═══════════ NAVBAR ═══════════ */}
         <nav className="lp-nav">
-          <div className="nav-logo">Path<span>Grad</span></div>
+          <div className="nav-logo">
+            <img src="https://www.pathgrad.com/logo/pathgrad_logo.png" alt="PathGrad" style={{ height: "35px", width: "auto" }} />
+          </div>
           <div className="nav-links">
             <Link to="/tests">Assessments</Link>
             <Link to="/counselors">Counselors</Link>
@@ -153,9 +155,9 @@ export const Landing = () => {
 
         {/* ═══════════ LOGOS ═══════════ */}
         <section className="logos-section">
-          <div className="logos-label">Trusted by leading institutions</div>
+          <div className="logos-label">Empowering various educational sectors</div>
           <div className="logos-row">
-            {["DPS Schools", "CBSE Board", "ICSE Council", "IIT Prep", "Ashoka University", "NIT Alliance"].map((name) => (
+            {["Schools", "Universities", "Coaching Institutes", "Junior Colleges", "Career Centers", "Educational NGOs"].map((name) => (
               <div key={name} className="logo-item">
                 <Award size={18} />
                 {name}
@@ -173,7 +175,7 @@ export const Landing = () => {
                 Everything you need to assess<br />any individual
               </h2>
               <p className="section-subtitle">
-                Powered by CHC, Big Five, RIASEC and IRT theories — our platform
+                Powered by Holland's Theory, Big Five, Bloom's Taxonomy and Ability theories — our platform
                 covers every dimension of psychometric evaluation.
               </p>
             </div>
@@ -265,8 +267,8 @@ export const Landing = () => {
                 <div className="how-step-num">1</div>
                 <div className="how-step-title">Choose a Framework</div>
                 <div className="how-step-desc">
-                  Select from our library of psychometric theories — CHC for cognitive,
-                  Big Five for personality, or RIASEC for career interests.
+                  Select from our library of psychometric theories — Holland's for career interests,
+                  Big Five for personality, Ability Theory for cognitive, or Bloom's for knowledge.
                 </div>
                 <HowStep1Visual />
               </div>
@@ -298,23 +300,23 @@ export const Landing = () => {
         <section className="stats-section">
           <div className="stats-container">
             <div className="stat-item">
-              <div className="stat-num">50,000+</div>
+              <div className="stat-num">300+</div>
               <div className="stat-label">Assessments completed</div>
             </div>
             <div className="stat-divider" />
             <div className="stat-item">
-              <div className="stat-num">95%</div>
-              <div className="stat-label">Accuracy rate</div>
+              <div className="stat-num">2</div>
+              <div className="stat-label">Pilot Institutions Active</div>
             </div>
             <div className="stat-divider" />
             <div className="stat-item">
-              <div className="stat-num">24 min</div>
-              <div className="stat-label">Average completion</div>
+              <div className="stat-num">10+</div>
+              <div className="stat-label">Counsellors Onboard</div>
             </div>
             <div className="stat-divider" />
             <div className="stat-item">
-              <div className="stat-num">4.9/5</div>
-              <div className="stat-label">User satisfaction</div>
+              <div className="stat-num">99.9%</div>
+              <div className="stat-label">Cloud Uptime Guaranteed</div>
             </div>
           </div>
         </section>
@@ -466,7 +468,9 @@ export const Landing = () => {
         {/* ═══════════ FOOTER ═══════════ */}
         <footer className="lp-footer">
           <div className="footer-inner">
-            <div className="footer-logo">Path<span>Grad</span></div>
+            <div className="footer-logo">
+              <img src="https://www.pathgrad.com/logo/pathgrad_logo.png" alt="PathGrad" style={{ height: "30px", width: "auto" }} />
+            </div>
             <div className="footer-links">
               <Link to="/tests">Assessments</Link>
               <Link to="/counselors">Counselors</Link>
