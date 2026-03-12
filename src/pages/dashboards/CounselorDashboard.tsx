@@ -117,10 +117,10 @@ export const CounselorDashboard = () => {
       <div className="absolute top-[-5%] right-[-5%] w-[35%] h-[35%] bg-emerald-500/5 rounded-full blur-[100px] -z-10 animate-pulse"></div>
       <div className="absolute bottom-[-5%] left-[-5%] w-[35%] h-[35%] bg-sky-500/5 rounded-full blur-[100px] -z-10 animate-pulse" style={{ animationDelay: '2s' }}></div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8  relative z-10">
 
         {/* Professional Header Section */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2 mb-1">
               <Badge variant="outline" className="bg-emerald-50 text-emerald-600 border-emerald-100 px-3 py-1 font-bold text-[10px] tracking-widest uppercase">
@@ -134,7 +134,7 @@ export const CounselorDashboard = () => {
                 {greeting},
               </span>
               <span className="ml-3">
-                {user?.firstName || user?.name?.split(' ')[0] || 'Counselor'}! 🎯
+                {user?.firstName || user?.name?.split(' ')[0] || 'Counselor'}!
               </span>
             </h1>
             <p className="text-lg text-slate-500 font-medium max-w-2xl">

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -16,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { GraduationCap, ArrowLeft, User, Mail, Lock, Calendar, Phone, ChevronRight } from "lucide-react";
+import { GraduationCap, ArrowLeft, User, Mail, Lock, Calendar, Phone, ChevronRight, Sparkles, ArrowRight, CheckCircle2, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuthStore } from "@/store/useAuthStore";
 import Swal from "sweetalert2";
@@ -33,12 +34,14 @@ const StudentRegister = () => {
     password: "",
     confirmPassword: "",
     dateOfBirth: "",
-    gradeLevel: "",
+    educationLevel: "",
+    gender: "",
     phone: "",
   });
 
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   useEffect(() => {
     window.scroll(0, 0);
@@ -61,24 +64,35 @@ const StudentRegister = () => {
       const { confirmPassword, ...payload } = formData;
       const result = await registerStudent(payload);
 
-      const { isAuthenticated } = useAuthStore.getState();
-      if (isAuthenticated) {
-        return navigate("/student/dashboard");
+      if (result.success) {
+        setIsSuccess(true);
+        Swal.fire({
+          toast: true,
+          icon: "success",
+          title: "Registration Successful",
+          text: "Welcome! Your account has been created.",
+          position: "top-end",
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+        });
+
+        setTimeout(() => {
+          navigate("/login");
+        }, 3000);
+      } else {
+        toast({
+          title: "Error",
+          description: result.error?.message || "Registration failed",
+          variant: "destructive",
+        });
       }
-
-      Swal.fire({
-        toast: true,
-        icon: "success",
-        title: "Registration Successful",
-        text: "Please log in to continue.",
-        position: "top-end",
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-      });
-
-      navigate("/login");
     } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -89,245 +103,298 @@ const StudentRegister = () => {
   };
 
   return (
-    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-gradient-to-br from-blue-500 to-cyan-500 relative overflow-hidden">
-      {/* Decorative shapes */}
-      <div className="hidden lg:block absolute -left-24 -top-24 w-96 h-96 rounded-full bg-white/10 blur-3xl pointer-events-none" />
-      <div className="hidden lg:block absolute -right-24 -bottom-24 w-96 h-96 rounded-full bg-white/5 blur-2xl pointer-events-none" />
-
-      {/* LEFT BRANDING SECTION */}
-      <div className="hidden lg:flex flex-col justify-center px-12 py-12 text-white z-10">
-        <h1 className="text-3xl font-extrabold mb-2 leading-tight drop-shadow-lg">
-          Start Your Journey
-        </h1>
-        <p className="text-sm text-white/85 max-w-lg mb-4">
-          Create your student account and unlock personalized assessments,
-          and career guidance tailored to your goals.
-        </p>
-
-        <div className="mt-4 flex items-center gap-4 text-xs text-white/80">
-          <div className="h-px w-8 bg-white/30" />
-          Trusted • Secure • Smart
-        </div>
-
-        <div className="mt-6 flex items-center gap-4">
-          <div className="bg-white/10 p-3 rounded-xl flex items-center gap-2">
-            <GraduationCap className="w-4 h-4 text-white/90" />
-            <div>
-              <div className="text-xs font-semibold">For Students</div>
-              <div className="text-[10px] text-white/75">Personalized learning</div>
-            </div>
-          </div>
-
-          <div className="bg-white/10 p-3 rounded-xl flex items-center gap-2">
-            <div className="w-4 h-4 rounded-md bg-gradient-to-r from-pink-500 to-yellow-400 flex items-center justify-center text-white text-[10px]">★</div>
-            <div>
-              <div className="text-xs font-semibold">Interactive Tests</div>
-              <div className="text-[10px] text-white/75">Instant feedback</div>
-            </div>
-          </div>
-        </div>
+    <div className="h-screen w-full bg-[#0a0c10] relative flex items-center justify-center overflow-hidden select-none">
+      {/* 🏠 Top-Left Navigation */}
+      <div className="absolute top-6 left-6 md:left-12 z-50">
+        <Button
+          variant="ghost"
+          onClick={() => navigate("/get-started")}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-[0.3em] text-white/30 hover:text-white hover:bg-white/5 border border-white/5 hover:border-white/10 backdrop-blur-3xl transition-all duration-300 group"
+        >
+          <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
+          Back
+        </Button>
       </div>
 
-      {/* RIGHT FORM SECTION */}
-      <div className="flex items-center justify-center px-4 py-6 z-20">
-        <div className="w-full max-w-md"> {/* Reduced max-width for tighter feel */}
-          <Card className="bg-white/95 shadow-2xl border-0 rounded-2xl overflow-hidden">
-            <div className="relative">
-              <div className="absolute -top-10 right-6 w-32 h-32 rounded-full bg-gradient-to-tr from-blue-500 to-cyan-500 opacity-20 transform rotate-45" />
+      {/* 🌌 ULTRA-FLUID DYNAMIC BACKDROP */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-indigo-600/20 rounded-full blur-[160px] animate-pulse mix-blend-screen transition-opacity duration-1000"></div>
+        <div className="absolute bottom-[-20%] right-[-10%] w-[70%] h-[70%] bg-sky-600/20 rounded-full blur-[160px] animate-pulse mix-blend-screen" style={{ animationDelay: '3s' }}></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-blue-500/10 rounded-full blur-[180px] animate-pulse mix-blend-overlay" style={{ animationDelay: '1.5s' }}></div>
+      </div>
 
-              <CardHeader className="text-center space-y-1 pt-6 pb-2">
-                <div className="bg-gradient-to-r from-blue-500 to-cyan-500 w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-1 shadow-lg">
-                  <GraduationCap className="w-5 h-5 text-white" />
+      <div className="max-w-7xl mx-auto px-4 lg:px-8 relative z-10 w-full">
+        <div className="grid lg:grid-cols-2 gap-8 items-center">
+          {/* 🎭 LEFT BRAND UNIVERSE */}
+          <div className="hidden lg:flex flex-col justify-center space-y-4 animate-in fade-in slide-in-from-left-12 duration-1000 ease-out">
+            <div className="space-y-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-3xl shadow-2xl">
+                <Sparkles className="h-3 w-3 text-indigo-400 animate-spin-slow" />
+                <span className="text-[9px] font-black tracking-[0.3em] uppercase text-white/70">Next-gen learning portal</span>
+              </div>
+              <h1 className="text-4xl font-black leading-[1.05] tracking-tighter text-white">
+                Begin Your <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-blue-400 to-sky-400">Academic Journey.</span>
+              </h1>
+              <p className="text-base text-slate-400 font-medium max-w-lg leading-relaxed antialiased">
+                Access premium courses, personalized mentorship, and a global community of curious minds.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-4 text-[9px] font-black text-white/20 uppercase tracking-[0.4em]">
+              <div className="h-px w-10 bg-white/5" />
+              Secure • Personalized • Global
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 max-w-md">
+              <div className="p-3 rounded-[1.25rem] bg-white/[0.03] border border-white/10 backdrop-blur-2xl shadow-elegant group hover:bg-white/[0.06] transition-all duration-500">
+                <Shield className="h-4 w-4 text-indigo-400 mb-1.5" />
+                <p className="text-[8px] font-black text-white/40 uppercase tracking-widest mb-0.5">Community Trusted</p>
+                <p className="text-xs font-black text-white tracking-tighter">Secure Access</p>
+              </div>
+              <div className="p-3 rounded-[1.25rem] bg-white/[0.03] border border-white/10 backdrop-blur-2xl shadow-elegant group hover:bg-white/[0.06] transition-all duration-500">
+                <div className="h-4 w-4 rounded-md bg-gradient-to-r from-indigo-400 to-sky-500 flex items-center justify-center text-white text-[10px] mb-1.5">✓</div>
+                <p className="text-[8px] font-black text-white/40 uppercase tracking-widest mb-0.5">Top Ratings</p>
+                <p className="text-xs font-black text-white tracking-tighter">Quality Content</p>
+              </div>
+            </div>
+          </div>
+
+          {/* 🚀 RIGHT FORM ARCHITECTURE */}
+          <div className="flex items-center justify-center perspective-1000 animate-in fade-in zoom-in duration-1000 delay-100">
+            <Card className="w-full max-w-[440px] relative z-10 bg-white/[0.03] border border-white/10 backdrop-blur-[40px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)] rounded-[2rem] overflow-hidden group/card transition-all duration-700 ease-out">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/[0.05] via-transparent to-transparent pointer-events-none"></div>
+
+              <CardHeader className="p-5 pb-1 text-center relative z-10">
+                <div className="mx-auto bg-gradient-to-tr from-indigo-500 to-sky-500 h-11 w-11 rounded-xl flex items-center justify-center mb-3 shadow-[0_12px_24px_-8px_rgba(99,102,241,0.6)] transform group-hover/card:scale-105 group-hover/card:rotate-6 transition-all duration-500">
+                  <GraduationCap className="h-6 w-6 text-white" />
                 </div>
-                <CardTitle className="text-xl font-bold">
+                <CardTitle className="text-xl font-black text-white tracking-tighter leading-none mb-1.5">
                   Student Registration
                 </CardTitle>
-                <div className="flex items-center justify-center gap-2 mt-2">
-                  <div className={`h-1.5 w-8 rounded-full transition-colors ${step === 1 ? 'bg-blue-500' : 'bg-slate-200'}`} />
-                  <div className={`h-1.5 w-8 rounded-full transition-colors ${step === 2 ? 'bg-blue-500' : 'bg-slate-200'}`} />
+                <div className="flex items-center justify-center gap-1.5 mb-1.5">
+                  <div className={`h-1 w-5 rounded-full transition-all duration-500 ${step >= 1 ? 'bg-indigo-400 shadow-[0_0_8px_rgba(129,140,248,0.8)]' : 'bg-white/10'}`} />
+                  <div className={`h-1 w-5 rounded-full transition-all duration-500 ${step >= 2 ? 'bg-indigo-400 shadow-[0_0_8px_rgba(129,140,248,0.8)]' : 'bg-white/10'}`} />
                 </div>
-                <p className="text-xs text-slate-500 mt-1">
-                  Step {step} of 2: {step === 1 ? 'Account Details' : 'Personal Profile'}
-                </p>
+                <CardDescription className="text-[8px] font-black text-white/30 uppercase tracking-[0.25em]">
+                  Step {step} of 2: {step === 1 ? 'Personal Information' : 'Profile Detail'}
+                </CardDescription>
               </CardHeader>
 
-              <CardContent className="px-6 pb-6">
-                <form onSubmit={handleSubmit} className="space-y-4">
-
-                  {step === 1 && (
-                    <div className="space-y-3 animate-in fade-in slide-in-from-right-4 duration-300">
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="space-y-1">
-                          <Label className="text-xs">First Name</Label>
-                          <div className="relative">
-                            <Input
-                              value={formData.firstName}
-                              onChange={(e) => handleInputChange("firstName", e.target.value)}
-                              placeholder="John"
-                              required
-                              className="h-8 rounded-lg pl-8 text-xs focus:ring-2 focus:ring-blue-300"
-                            />
-                            <User className="w-3 h-3 absolute left-2.5 top-2.5 text-slate-400" />
-                          </div>
-                        </div>
-                        <div className="space-y-1">
-                          <Label className="text-xs">Last Name</Label>
-                          <div className="relative">
-                            <Input
-                              value={formData.lastName}
-                              onChange={(e) => handleInputChange("lastName", e.target.value)}
-                              placeholder="Doe"
-                              required
-                              className="h-8 rounded-lg pl-8 text-xs focus:ring-2 focus:ring-blue-300"
-                            />
-                            <User className="w-3 h-3 absolute left-2.5 top-2.5 text-slate-400" />
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="space-y-1">
-                        <Label className="text-xs">Email Address</Label>
-                        <div className="relative">
-                          <Input
-                            type="email"
-                            value={formData.email}
-                            onChange={(e) => handleInputChange("email", e.target.value)}
-                            placeholder="you@example.com"
-                            required
-                            className="h-8 rounded-lg pl-8 text-xs focus:ring-2 focus:ring-blue-300"
-                          />
-                          <Mail className="w-3 h-3 absolute left-2.5 top-2.5 text-slate-400" />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="space-y-1">
-                          <Label className="text-xs">Password</Label>
-                          <div className="relative">
-                            <Input
-                              type="password"
-                              value={formData.password}
-                              onChange={(e) => handleInputChange("password", e.target.value)}
-                              placeholder="Create password"
-                              required
-                              className="h-8 rounded-lg pl-8 text-xs focus:ring-2 focus:ring-blue-300"
-                            />
-                            <Lock className="w-3 h-3 absolute left-2.5 top-2.5 text-slate-400" />
-                          </div>
-                        </div>
-                        <div className="space-y-1">
-                          <Label className="text-xs">Confirm Password</Label>
-                          <div className="relative">
-                            <Input
-                              type="password"
-                              value={formData.confirmPassword}
-                              onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
-                              placeholder="Confirm"
-                              required
-                              className="h-8 rounded-lg pl-8 text-xs focus:ring-2 focus:ring-blue-300"
-                            />
-                            <Lock className="w-3 h-3 absolute left-2.5 top-2.5 text-slate-400" />
-                          </div>
-                        </div>
-                      </div>
+              <CardContent className="p-6 pt-2 relative z-10">
+                {isSuccess ? (
+                  <div className="py-6 text-center space-y-4 animate-in fade-in zoom-in duration-500">
+                    <div className="w-16 h-16 bg-indigo-500/10 rounded-full flex items-center justify-center mx-auto mb-3 border border-indigo-500/20 shadow-[0_0_20px_rgba(99,102,241,0.2)]">
+                      <CheckCircle2 className="w-8 h-8 text-indigo-400 animate-bounce" />
                     </div>
-                  )}
-
-                  {step === 2 && (
-                    <div className="space-y-3 animate-in fade-in slide-in-from-right-4 duration-300">
-                      <div className="space-y-1">
-                        <Label className="text-xs">Date of Birth</Label>
-                        <div className="relative">
-                          <Input
-                            type="date"
-                            value={formData.dateOfBirth}
-                            onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
-                            required
-                            className="h-8 rounded-lg pl-8 text-xs focus:ring-2 focus:ring-blue-300"
-                          />
-                          <Calendar className="w-3 h-3 absolute left-2.5 top-2.5 text-slate-400" />
-                        </div>
-                      </div>
-
-                      <div className="space-y-1">
-                        <Label className="text-xs">Grade Level</Label>
-                        <Select onValueChange={(value) => handleInputChange("gradeLevel", value)}>
-                          <SelectTrigger className="h-8 rounded-lg text-xs">
-                            <SelectValue placeholder="Select grade" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {[...Array(12)].map((_, i) => (
-                              <SelectItem key={i + 1} value={`${i + 1}`}>
-                                {i + 1}th Grade
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-1">
-                        <Label className="text-xs">Phone Number (Optional)</Label>
-                        <div className="relative">
-                          <Input
-                            type="tel"
-                            value={formData.phone}
-                            onChange={(e) => handleInputChange("phone", e.target.value)}
-                            placeholder="+91 XXXXX XXXXX"
-                            className="h-8 rounded-lg pl-8 text-xs focus:ring-2 focus:ring-blue-300"
-                          />
-                          <Phone className="w-3 h-3 absolute left-2.5 top-2.5 text-slate-400" />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="flex flex-col gap-2 pt-2">
-                    {step === 1 ? (
+                    <h2 className="text-xl font-black text-white tracking-tighter">Registration Success</h2>
+                    <p className="text-white/30 text-[9px] font-black uppercase tracking-widest max-w-[200px] mx-auto">
+                      Profile created successfully. Redirecting to login...
+                    </p>
+                    <div className="pt-2">
                       <Button
-                        type="button"
-                        onClick={() => setStep(2)}
-                        className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold h-9 rounded-lg shadow-md hover:shadow-lg transition-all"
+                        onClick={() => navigate("/login")}
+                        className="h-11 w-full rounded-xl bg-white text-slate-900 font-black text-[9px] uppercase tracking-widest shadow-[0_12px_24px_-8px_rgba(255,255,255,0.3)] transition-all"
                       >
-                        Next
-                        <ChevronRight className="w-4 h-4 ml-1" />
+                        Login Now
                       </Button>
-                    ) : (
-                      <div className="flex gap-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => setStep(1)}
-                          className="flex-1 h-9 rounded-lg"
-                        >
-                          Back
-                        </Button>
-                        <Button
-                          type="submit"
-                          disabled={isLoading}
-                          className="flex-[2] bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold h-9 rounded-lg shadow-md hover:shadow-lg transition-all"
-                        >
-                          {isLoading ? "Creating..." : "Create Account"}
-                        </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSubmit} className="space-y-3">
+                    {step === 1 && (
+                      <div className="space-y-3 animate-in fade-in slide-in-from-right-4 duration-500">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1.5">
+                            <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">First Name</Label>
+                            <div className="relative group/input">
+                              <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-white/10 group-focus-within/input:text-indigo-400 transition-colors" />
+                              <Input
+                                value={formData.firstName}
+                                onChange={(e) => handleInputChange("firstName", e.target.value)}
+                                placeholder="First Name"
+                                required
+                                className="h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-indigo-500/20 focus:bg-white/[0.08] transition-all duration-300"
+                              />
+                            </div>
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Last Name</Label>
+                            <div className="relative group/input">
+                              <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-white/10 group-focus-within/input:text-indigo-400 transition-colors" />
+                              <Input
+                                value={formData.lastName}
+                                onChange={(e) => handleInputChange("lastName", e.target.value)}
+                                placeholder="Last Name"
+                                required
+                                className="h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-indigo-500/20 focus:bg-white/[0.08] transition-all duration-300"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Email Address</Label>
+                          <div className="relative group/input">
+                            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-white/10 group-focus-within/input:text-indigo-400 transition-colors" />
+                            <Input
+                              type="email"
+                              value={formData.email}
+                              onChange={(e) => handleInputChange("email", e.target.value)}
+                              placeholder="email@example.com"
+                              required
+                              className="h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-indigo-500/20 focus:bg-white/[0.08] transition-all duration-300"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1.5">
+                            <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Password</Label>
+                            <div className="relative group/input">
+                              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-white/10 group-focus-within/input:text-indigo-400 transition-colors" />
+                              <Input
+                                type="password"
+                                value={formData.password}
+                                onChange={(e) => handleInputChange("password", e.target.value)}
+                                placeholder="••••••••"
+                                required
+                                className="h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-indigo-500/20 focus:bg-white/[0.08] transition-all duration-300"
+                              />
+                            </div>
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Confirm</Label>
+                            <div className="relative group/input">
+                              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-white/10 group-focus-within/input:text-indigo-400 transition-colors" />
+                              <Input
+                                type="password"
+                                value={formData.confirmPassword}
+                                onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
+                                placeholder="••••••••"
+                                required
+                                className="h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-indigo-500/20 focus:bg-white/[0.08] transition-all duration-300"
+                              />
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     )}
 
-                    <div className="flex items-center justify-center w-full text-xs mt-2">
-                      <div className="text-slate-600">
-                        Already have an account?{' '}
+                    {step === 2 && (
+                      <div className="space-y-3 animate-in fade-in slide-in-from-right-4 duration-500">
+                        <div className="space-y-1.5">
+                          <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Phone Number</Label>
+                          <div className="relative group/input">
+                            <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-white/10 group-focus-within/input:text-indigo-400 transition-colors" />
+                            <Input
+                              type="tel"
+                              value={formData.phone}
+                              onChange={(e) => handleInputChange("phone", e.target.value)}
+                              placeholder="+91 XXXXX XXXXX"
+                              required
+                              className="h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-indigo-500/20 focus:bg-white/[0.08] transition-all duration-300"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1.5">
+                            <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Gender</Label>
+                            <Select onValueChange={(value) => handleInputChange("gender", value)}>
+                              <SelectTrigger className="h-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] focus:ring-4 focus:ring-indigo-500/20 transition-all px-3">
+                                <SelectValue placeholder="Select" />
+                              </SelectTrigger>
+                              <SelectContent className="bg-[#12141c] border-white/10 text-white font-bold text-[11px] rounded-lg">
+                                <SelectItem value="male" className="focus:bg-indigo-500 rounded-md">Male</SelectItem>
+                                <SelectItem value="female" className="focus:bg-indigo-500 rounded-md">Female</SelectItem>
+                                <SelectItem value="other" className="focus:bg-indigo-500 rounded-md">Other</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Date of Birth</Label>
+                            <Input
+                              type="date"
+                              onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
+                              required
+                              className="h-9 px-3 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] focus:ring-4 focus:ring-indigo-500/20 focus:bg-white/[0.08] transition-all duration-300"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Education Level</Label>
+                          <Select onValueChange={(value) => handleInputChange("educationLevel", value)}>
+                            <SelectTrigger className="h-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] focus:ring-4 focus:ring-indigo-500/20 transition-all px-3">
+                              <SelectValue placeholder="Current Level" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-[#12141c] border-white/10 text-white font-bold text-[11px] rounded-lg">
+                              <SelectItem value="high-school" className="focus:bg-indigo-500 rounded-md">High School</SelectItem>
+                              <SelectItem value="undergraduate" className="focus:bg-indigo-500 rounded-md">Undergraduate</SelectItem>
+                              <SelectItem value="graduate" className="focus:bg-indigo-500 rounded-md">Graduate</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex flex-col gap-2.5 pt-2">
+                      {step === 1 ? (
+                        <Button
+                          type="button"
+                          onClick={() => setStep(2)}
+                          className="w-full h-11 rounded-xl bg-white text-slate-900 shadow-[0_12px_24px_-8px_rgba(255,255,255,0.3)] hover:shadow-[0_16px_32px_-8px_rgba(255,255,255,0.4)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-500 group/btn"
+                        >
+                          <span className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.25em]">
+                            Next Step <ChevronRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
+                          </span>
+                        </Button>
+                      ) : (
+                        <div className="flex gap-2.5">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={() => setStep(1)}
+                            className="flex-1 h-11 rounded-xl text-white/40 hover:text-white hover:bg-white/5 font-black text-[8px] uppercase tracking-widest transition-all"
+                          >
+                            Back
+                          </Button>
+                          <Button
+                            type="submit"
+                            disabled={isLoading}
+                            className="flex-[2] h-11 rounded-xl bg-white text-slate-900 shadow-[0_12px_24px_-8px_rgba(255,255,255,0.3)] hover:shadow-[0_16px_32px_-8px_rgba(255,255,255,0.4)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-500 group/btn"
+                          >
+                            {isLoading ? (
+                              <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 border-2 border-slate-900 border-t-transparent rounded-full animate-spin" />
+                                <span className="text-[8px] font-black uppercase tracking-widest">Processing...</span>
+                              </div>
+                            ) : (
+                              <span className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.25em]">
+                                Register <ArrowRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
+                              </span>
+                            )}
+                          </Button>
+                        </div>
+                      )}
+
+                      <p className="text-[8px] font-black text-white/20 uppercase tracking-[0.2em] text-center mt-2.5">
+                        Already have account?
                         <button
                           type="button"
-                          className="text-blue-600 font-bold hover:underline"
+                          className="text-white hover:text-indigo-400 transition-all font-black ml-2"
                           onClick={() => navigate('/login')}
                         >
-                          Sign in
+                          Sign In
                         </button>
-                      </div>
+                      </p>
                     </div>
-                  </div>
-                </form>
+                  </form>
+                )}
               </CardContent>
-            </div>
-          </Card>
+            </Card>
+          </div>
         </div>
       </div>
     </div>

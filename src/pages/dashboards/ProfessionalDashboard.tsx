@@ -5,13 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/contexts/AuthContext";
-import { 
-  Brain, 
-  Clock, 
-  Award, 
-  TrendingUp, 
-  Users, 
-  Target, 
+import {
+  Brain,
+  Clock,
+  Award,
+  TrendingUp,
+  Users,
+  Target,
   BookOpen,
   Play,
   BarChart3,
@@ -39,7 +39,7 @@ const professionalTests = [
     color: "bg-primary"
   },
   {
-    id: "2", 
+    id: "2",
     title: "Professional Skills Evaluation",
     description: "Assess your technical and soft skills for career advancement",
     type: "skills",
@@ -56,7 +56,7 @@ const professionalTests = [
     description: "Discover opportunities for professional growth in your field",
     type: "career",
     duration: 30,
-    difficulty: "beginner", 
+    difficulty: "beginner",
     completed: false,
     progress: 70,
     icon: TrendingUp,
@@ -259,8 +259,8 @@ export const ProfessionalDashboard = () => {
                               <Progress value={test.progress} className="w-20" />
                             </div>
                           )}
-                          <Button 
-                            size="sm" 
+                          <Button
+                            size="sm"
                             variant={test.completed ? "outline" : "default"}
                             asChild
                           >
@@ -368,8 +368,8 @@ export const ProfessionalDashboard = () => {
                   <p className="text-sm opacity-90">
                     Skills improved this quarter
                   </p>
-                  <Progress 
-                    value={(professionalStats.skillsImproved / 10) * 100} 
+                  <Progress
+                    value={(professionalStats.skillsImproved / 10) * 100}
                     className="bg-primary-foreground/20 [&>div]:bg-primary-foreground"
                   />
                   <p className="text-xs opacity-75">

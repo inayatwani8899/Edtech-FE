@@ -65,7 +65,7 @@ export const RoleSelection = () => {
   ];
 
   return (
-    <div className="min-h-screen w-full bg-[#0a0c10] relative flex items-center justify-center overflow-hidden select-none">
+    <div className="h-screen w-full bg-[#0a0c10] relative flex items-center justify-center overflow-hidden select-none">
       {/* 🌌 ULTRA-FLUID DYNAMIC BACKDROP (Parity with Login) */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-primary/20 rounded-full blur-[160px] animate-pulse mix-blend-screen transition-opacity duration-1000"></div>
@@ -73,7 +73,7 @@ export const RoleSelection = () => {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-indigo-500/10 rounded-full blur-[180px] animate-pulse mix-blend-overlay" style={{ animationDelay: '1.5s' }}></div>
       </div>
 
-      <div className="container mx-auto px-4 lg:px-6 relative z-10 w-full max-w-6xl animate-in fade-in duration-1000 py-4">
+      <div className="container mx-auto px-4 lg:px-6 relative z-10 w-full max-w-5xl animate-in fade-in duration-1000">
 
         {/* 🏠 Top-Left Navigation */}
         <div className="absolute top-6 left-6 md:left-12 z-50">
@@ -87,21 +87,21 @@ export const RoleSelection = () => {
         </div>
 
         {/* Header - Matching Login Parity */}
-        <div className="text-center mb-6 space-y-3">
-          <div className="flex justify-center mb-2">
+        <div className="text-center mb-6 space-y-2">
+          <div className="flex justify-center mb-1">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-3xl shadow-2xl">
               <Sparkles className="h-3 w-3 text-warning animate-spin-slow" />
               <span className="text-[9px] font-black tracking-[0.3em] uppercase text-white/70">identity gateway</span>
             </div>
           </div>
 
-          <h1 className="text-3xl md:text-4xl font-black leading-[1.05] tracking-tighter text-white">
-            Define Your <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-primary">Ecosystem Role.</span>
+          <h1 className="text-3xl font-black leading-none tracking-tighter text-white">
+            Select Your <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-primary">Preferred Role.</span>
           </h1>
 
-          <p className="text-[11px] md:text-xs text-slate-400 font-medium max-w-md mx-auto leading-relaxed antialiased">
-            Choose your interaction model to initialize your experience.
+          <p className="text-[10px] text-slate-400 font-medium max-w-md mx-auto leading-relaxed antialiased">
+            Pick an account type to begin your journey.
           </p>
 
           <div className="pt-2">
@@ -109,48 +109,45 @@ export const RoleSelection = () => {
               Already have an account?
               <Link
                 to="/login"
-                className="text-white hover:text-primary underline underline-offset-4 decoration-white/10 transition-all font-black"
+                className="text-white hover:text-primary transition-all font-black ml-1"
               >
-                Login
+                Sign In
               </Link>
             </p>
           </div>
         </div>
 
         {/* Role Cards - Optimized for screen fit */}
-        <div className="grid md:grid-cols-3 gap-4 lg:gap-6 w-full max-w-5xl mx-auto mb-6 perspective-1000">
+        <div className="grid md:grid-cols-3 gap-6 w-full max-w-5xl mx-auto perspective-1000">
           {roles.map((role) => {
             const Icon = role.icon;
             const IconAlt = role.iconAlt;
             return (
               <Card
                 key={role.id}
-                className="group relative cursor-pointer bg-white/[0.03] border border-white/10 backdrop-blur-[40px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)] rounded-[2.2rem] overflow-hidden hover:translate-y-[-8px] hover:rotate-x-2 transition-all duration-700 ease-out flex flex-col h-full"
+                className="group relative cursor-pointer bg-white/[0.03] border border-white/10 backdrop-blur-[40px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)] rounded-[2rem] overflow-hidden hover:translate-y-[-8px] transition-all duration-700 ease-out flex flex-col h-full"
               >
                 {/* Radiant Halo Effect (Parity with Login) */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${role.bgGradient} opacity-0 group-hover:opacity-40 transition-opacity duration-700 pointer-events-none z-0`} />
                 <div className="absolute inset-0 bg-gradient-to-br from-white/[0.05] via-transparent to-transparent pointer-events-none z-0"></div>
 
-                <CardHeader className="text-center pb-2 pt-6 relative z-10 space-y-2">
-                  <div className={`mx-auto bg-gradient-to-tr ${role.gradient} h-14 w-14 rounded-2xl flex items-center justify-center mb-1 shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-500`}>
-                    <Icon className="h-7 w-7 text-white" />
+                <CardHeader className="text-center pb-2 pt-6 relative z-10">
+                  <div className={`mx-auto bg-gradient-to-tr ${role.gradient} h-12 w-12 rounded-xl flex items-center justify-center mb-3 shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-500`}>
+                    <Icon className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <div className="flex items-center justify-center gap-2 mb-0.5">
-                      <span className={`text-[8px] font-black uppercase tracking-[0.3em] ${role.statsColor}`}>{role.badgeText}</span>
-                    </div>
-                    <CardTitle className="text-xl font-black text-white tracking-tighter leading-none mb-1">
+                    <CardTitle className="text-xl font-black text-white tracking-tighter leading-none mb-1.5 uppercase">
                       {role.title}
                     </CardTitle>
-                    <CardDescription className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em]">
-                      {role.subtitle}
+                    <CardDescription className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em]">
+                      {role.badgeText}
                     </CardDescription>
                   </div>
                 </CardHeader>
 
-                <CardContent className="space-y-4 relative z-10 px-6 pb-8 flex-1 flex flex-col justify-between">
+                <CardContent className="space-y-4 relative z-10 px-6 pb-6 flex-1 flex flex-col justify-between">
                   <div>
-                    <p className="text-center text-slate-400 text-[11px] font-medium leading-relaxed mb-4 line-clamp-2">
+                    <p className="text-center text-slate-400 text-[10px] font-medium leading-relaxed mb-4">
                       {role.description}
                     </p>
 
@@ -166,9 +163,9 @@ export const RoleSelection = () => {
 
                   <Link to={`/register/${role.id}`}>
                     <Button
-                      className={`w-full h-12 rounded-2xl font-black text-[9px] uppercase tracking-[0.25em] transition-all duration-500 bg-white text-slate-900 shadow-[0_12px_24px_-8px_rgba(255,255,255,0.2)] hover:shadow-[0_16px_32px_-8px_rgba(255,255,255,0.3)] hover:scale-[1.02] active:scale-[0.98]`}
+                      className={`w-full h-11 rounded-xl font-black text-[9px] uppercase tracking-[0.25em] transition-all duration-500 bg-white text-slate-900 shadow-[0_12px_24px_-8px_rgba(255,255,255,0.2)] hover:shadow-[0_16px_32px_-8px_rgba(255,255,255,0.3)] hover:scale-[1.01] active:scale-[0.99]`}
                     >
-                      Initialize <ChevronRight className="h-3.5 w-3.5 ml-1 group-hover:translate-x-1 transition-transform" />
+                      Register <ChevronRight className="h-3.5 w-3.5 ml-1 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </Link>
                 </CardContent>
@@ -182,5 +179,3 @@ export const RoleSelection = () => {
 };
 
 export default RoleSelection;
-
-
