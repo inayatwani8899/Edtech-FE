@@ -137,7 +137,7 @@ export const StudentDashboard = () => {
                       const active = i === reachedIndex;
                       return (
                         <div key={i} className="flex flex-col items-center gap-1.5 relative z-10 w-full md:w-auto">
-                          <div className={`h-9 w-9 rounded-xl flex items-center justify-center transition-all duration-500 ${active ? 'bg-primary ring-2 ring-primary/30 animate-pulse' : completed ? 'bg-emerald-500' : 'bg-slate-800'}`}>
+                          <div className={`h-9 w-9 rounded-xl flex items-center justify-center transition-all duration-500 ${active ? 'bg-emerald-500 ring-2 ring-emerald-500/30 animate-pulse' : completed ? 'bg-emerald-500' : 'bg-slate-800'}`}>
                             {completed ? <CheckCircle2 className="h-4 w-4 text-white" /> : <span className="text-xs font-black text-white">{i + 1}</span>}
                           </div>
                           <div className="text-center">

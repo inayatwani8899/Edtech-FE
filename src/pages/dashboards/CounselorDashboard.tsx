@@ -26,7 +26,8 @@ import {
   ArrowUpRight,
   Activity,
   Sparkles,
-  Target
+  Target,
+  Compass
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -119,80 +120,89 @@ export const CounselorDashboard = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8  relative z-10">
 
-        {/* Professional Header Section */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 mb-1">
-              <Badge variant="outline" className="bg-emerald-50 text-emerald-600 border-emerald-100 px-3 py-1 font-bold text-[10px] tracking-widest uppercase">
-                Professional Dashboard
-              </Badge>
-              <span className="h-1 w-1 rounded-full bg-slate-300"></span>
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-tighter">Verified Counselor</span>
-            </div>
-            <h1 className="text-4xl font-black tracking-tight text-slate-900 leading-none">
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-sky-600">
-                {greeting},
-              </span>
-              <span className="ml-3">
-                {user?.firstName || user?.name?.split(' ')[0] || 'Counselor'}!
-              </span>
+        {/* 1. Compact Greeting Header */}
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-xl md:text-2xl font-black tracking-tight text-slate-900">
+              {greeting}, <span className="text-emerald-600">{user?.firstName || user?.name?.split(' ')[0] || 'Counselor'}!</span>
             </h1>
-            <p className="text-lg text-slate-500 font-medium max-w-2xl">
+            <p className="text-[11px] text-slate-500 font-medium -mt-1">
               Elevate student success through precision guidance and data-driven insights.
             </p>
           </div>
-
           <div className="flex items-center gap-3">
-            <Button className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-6 rounded-2xl shadow-lg shadow-emerald-500/20 group transition-all" asChild>
+            <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 rounded-xl shadow-lg shadow-emerald-500/20 group transition-all" asChild>
               <Link to="/counselor/search">
-                <Search className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
-                Student Lookup
+                <Search className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
+                Look Up
               </Link>
             </Button>
-            <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 hidden sm:flex items-center gap-3">
-              <div className="bg-amber-100 p-2 rounded-xl">
-                <Activity className="h-5 w-5 text-amber-600" />
-              </div>
-              <div className="pr-4">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Queue Status</p>
-                <p className="text-sm font-black text-slate-700 flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                  High Engagement
-                </p>
-              </div>
+          </div>
+        </div>
+        {/* 2. Professional Roadmap (Top-aligned and compact) */}
+        <div className="mb-8 p-4 md:p-5 rounded-[1.5rem] bg-slate-900 shadow-xl relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-4 opacity-10 rotate-12 pointer-events-none">
+            <Compass className="h-24 w-24 text-white" />
+          </div>
+          <div className="relative z-10">
+            <h3 className="text-sm font-bold text-white mb-5 flex items-center gap-2">
+              <Compass className="h-4 w-4 text-emerald-400" /> Professional Flow
+            </h3>
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 relative">
+              {(() => {
+                const steps = [
+                  { step: 'Queue', title: 'Consultations', status: 'completed' },
+                  { step: 'Assessment', title: 'Diagnostics', status: 'completed' },
+                  { step: 'Insight', title: 'Data Review', status: 'active' },
+                  { step: 'Goal', title: 'Roadmap Lock', status: 'pending' }
+                ];
+                return (
+                  <>
+                    <div className="absolute top-[18px] left-0 w-full h-0.5 hidden md:block bg-white/10 rounded-full">
+                      <div className="absolute left-0 top-0 h-full bg-emerald-500 transition-all duration-1000" style={{ width: `66%` }} />
+                    </div>
+                    {steps.map((item, i) => {
+                      const completed = item.status === 'completed';
+                      const active = item.status === 'active';
+                      return (
+                        <div key={i} className="flex flex-col items-center gap-1.5 relative z-10 w-full md:w-auto">
+                          <div className={`h-9 w-9 rounded-xl flex items-center justify-center transition-all duration-500 ${active ? 'bg-emerald-500 ring-2 ring-emerald-500/30 animate-pulse' : completed ? 'bg-emerald-500' : 'bg-slate-800'}`}>
+                            {completed ? <CheckCircle2 className="h-4 w-4 text-white" /> : <span className="text-xs font-black text-white">{i + 1}</span>}
+                          </div>
+                          <div className="text-center">
+                            <p className="text-[8px] font-bold uppercase tracking-widest text-slate-500 mb-0.5">{item.step}</p>
+                            <p className={`text-[11px] font-bold ${completed || active ? 'text-white' : 'text-slate-600'}`}>{item.title}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </>
+                );
+              })()}
             </div>
           </div>
         </div>
-
         {/* Dynamic Analytics Overview */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {counselorStats.map((stat, i) => (
-            <Card key={i} className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white/80 backdrop-blur-sm group hover:translate-y-[-6px] transition-all duration-500 overflow-hidden relative">
+            <Card key={i} className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white/80 backdrop-blur-sm group hover:translate-y-[-4px] transition-all duration-300 overflow-hidden relative rounded-2xl">
               <div className={`absolute top-0 left-0 w-1 h-full ${stat.bg.replace('/10', '')} opacity-0 group-hover:opacity-100 transition-opacity`}></div>
-              <CardContent className="p-7">
-                <div className="flex justify-between items-start mb-5">
-                  <div className={`${stat.bg} p-3 rounded-2xl transition-transform group-hover:scale-110 group-hover:rotate-3 duration-500 shadow-sm`}>
-                    <stat.icon className={`h-6 w-6 ${stat.color} stroke-[2.5]`} />
+              <CardContent className="p-4">
+                <div className="flex justify-between items-start mb-3">
+                  <div className={`${stat.bg} p-2 rounded-xl transition-transform group-hover:scale-110 shadow-sm`}>
+                    <stat.icon className={`h-4 w-4 ${stat.color} stroke-[2.5]`} />
                   </div>
-                  <div className="bg-slate-50 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
-                    <ArrowUpRight className="h-4 w-4 text-slate-400" />
+                  <div className="bg-slate-50 p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                    <ArrowUpRight className="h-3 w-3 text-slate-400" />
                   </div>
                 </div>
                 <div>
-                  <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1.5">{stat.label}</p>
-                  <p className="text-3xl font-black text-slate-800 tracking-tighter">{stat.value}</p>
-                  <div className="flex items-center gap-1.5 mt-3">
-                    <div className="flex -space-x-1.5">
-                      {[1, 2, 3].map(x => (
-                        <div key={x} className="h-4 w-4 rounded-full border-2 border-white bg-slate-200 overflow-hidden text-[6px] flex items-center justify-center font-bold text-slate-500">
-                          {x}
-                        </div>
-                      ))}
-                    </div>
-                    <p className="text-[10px] font-bold text-slate-500 flex items-center gap-1">
-                      {stat.sub}
-                    </p>
-                  </div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight mb-0.5">{stat.label}</p>
+                  <p className="text-xl font-black text-slate-800 tracking-tighter">{stat.value}</p>
+                  <p className="text-[9px] font-bold text-slate-500 mt-1 uppercase tracking-tighter flex items-center gap-1">
+                    <Sparkles className="h-2.5 w-2.5 text-amber-500" />
+                    {stat.sub}
+                  </p>
                 </div>
               </CardContent>
             </Card>

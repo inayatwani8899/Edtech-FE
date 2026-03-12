@@ -48,7 +48,18 @@ const CounsellorRegister = () => {
 
     setIsLoading(true);
     try {
-      await createCounselor(formData);
+      // Create a payload that matches exactly what the backend expects
+      const { confirmPassword, ...payload } = formData;
+      
+      // Ensure numeric and boolean fields are correctly typed
+      const backendPayload = {
+        ...payload,
+        yearsOfExperience: Number(formData.yearsOfExperience),
+        isVerified: true, // As specified in the schema
+        createdBy: 0     // As specified in the schema
+      };
+
+      await createCounselor(backendPayload);
       setIsSuccess(true);
 
       // Navigate to login after a brief delay so they see the success state
@@ -57,6 +68,11 @@ const CounsellorRegister = () => {
       }, 3000);
     } catch (err: any) {
       // Error handled by axios interceptor
+      toast({
+        title: "Error",
+        description: err.response?.data?.message || "Something went wrong during registration.",
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }
@@ -319,17 +335,32 @@ const CounsellorRegister = () => {
                           </Select>
                         </div>
 
-                        <div className="space-y-1.5">
-                          <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Current Organization</Label>
-                          <div className="relative group/input">
-                            <Briefcase className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-white/10 group-focus-within/input:text-emerald-400 transition-colors" />
-                            <Input
-                              value={formData.currentOrganization}
-                              onChange={(e) => handleInputChange("currentOrganization", e.target.value)}
-                              placeholder="Organization Name"
-                              required
-                              className="h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-emerald-500/20 focus:bg-white/[0.08] transition-all duration-300"
-                            />
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1.5">
+                            <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Organization</Label>
+                            <div className="relative group/input">
+                              <Briefcase className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-white/10 group-focus-within/input:text-emerald-400 transition-colors" />
+                              <Input
+                                value={formData.currentOrganization}
+                                onChange={(e) => handleInputChange("currentOrganization", e.target.value)}
+                                placeholder="Organization"
+                                required
+                                className="h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-emerald-500/20 focus:bg-white/[0.08] transition-all duration-300"
+                              />
+                            </div>
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">License Number</Label>
+                            <div className="relative group/input">
+                              <FileText className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-white/10 group-focus-within/input:text-emerald-400 transition-colors" />
+                              <Input
+                                value={formData.licenseNumber}
+                                onChange={(e) => handleInputChange("licenseNumber", e.target.value)}
+                                placeholder="License #"
+                                required
+                                className="h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-emerald-500/20 focus:bg-white/[0.08] transition-all duration-300"
+                              />
+                            </div>
                           </div>
                         </div>
 
