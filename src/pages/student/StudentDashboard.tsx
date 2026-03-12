@@ -95,14 +95,62 @@ export const StudentDashboard = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         
-        {/* 1. Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
-          <div className="space-y-1">
-            <h1 className="text-3xl md:text-5xl font-black tracking-tight text-slate-900 leading-tight">
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600">{greeting},</span>
-              <span className="ml-2">{user?.firstName?.split(' ')[0] || 'Scholar'}!</span>
+        {/* 1. Compact Greeting Header */}
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-xl md:text-2xl font-black tracking-tight text-slate-900">
+              {greeting}, <span className="text-primary">{user?.firstName?.split(' ')[0] || 'Scholar'}!</span>
             </h1>
-            <p className="text-slate-500 font-medium">Your psychometric profile is currently <span className="text-primary font-bold">85% Complete</span>.</p>
+            <p className="text-[11px] text-slate-500 font-medium -mt-1">
+              Your psychometric profile is currently <span className="text-primary font-bold">85% Complete</span>
+            </p>
+          </div>
+        </div>
+
+        {/* 3. Career Roadmap (Now on top and smaller) */}
+        <div className="mb-8 p-4 md:p-5 rounded-[1.5rem] bg-slate-900 shadow-xl relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-4 opacity-10 rotate-12 pointer-events-none">
+            <Compass className="h-24 w-24 text-white" />
+          </div>
+          <div className="relative z-10">
+            <h3 className="text-sm font-bold text-white mb-5 flex items-center gap-2">
+              <Compass className="h-4 w-4 text-primary" /> Your Career Journey
+            </h3>
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 relative">
+              {(() => {
+                const steps = [
+                  { step: 'Start', title: 'Onboarding' },
+                  { step: 'Evaluation', title: 'Psychometric' },
+                  { step: 'Insight', title: 'Skill Profile' },
+                  { step: 'Goal', title: 'Career Path' }
+                ];
+                const reachedIndex = Math.min(testsCompleted + 1, steps.length - 1);
+                const widthPercent = (reachedIndex / (steps.length - 1)) * 100;
+
+                return (
+                  <>
+                    <div className="absolute top-[18px] left-0 w-full h-0.5 hidden md:block bg-white/10 rounded-full">
+                      <div className="absolute left-0 top-0 h-full bg-emerald-500 transition-all duration-1000" style={{ width: `${widthPercent}%` }} />
+                    </div>
+                    {steps.map((item, i) => {
+                      const completed = i < reachedIndex;
+                      const active = i === reachedIndex;
+                      return (
+                        <div key={i} className="flex flex-col items-center gap-1.5 relative z-10 w-full md:w-auto">
+                          <div className={`h-9 w-9 rounded-xl flex items-center justify-center transition-all duration-500 ${active ? 'bg-primary ring-2 ring-primary/30 animate-pulse' : completed ? 'bg-emerald-500' : 'bg-slate-800'}`}>
+                            {completed ? <CheckCircle2 className="h-4 w-4 text-white" /> : <span className="text-xs font-black text-white">{i + 1}</span>}
+                          </div>
+                          <div className="text-center">
+                            <p className="text-[8px] font-bold uppercase tracking-widest text-slate-500 mb-0.5">{item.step}</p>
+                            <p className={`text-[11px] font-bold ${completed || active ? 'text-white' : 'text-slate-600'}`}>{item.title}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </>
+                );
+              })()}
+            </div>
           </div>
         </div>
 
@@ -130,53 +178,6 @@ export const StudentDashboard = () => {
               </CardContent>
             </Card>
           ))}
-        </div>
-
-        {/* 3. Career Roadmap (Now placed below Top 4 cards) */}
-        <div className="mb-10 p-6 md:p-8 rounded-[2rem] bg-slate-900 shadow-2xl relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12 pointer-events-none">
-            <Compass className="h-40 w-40 text-white" />
-          </div>
-          <div className="relative z-10">
-            <h3 className="text-lg font-bold text-white mb-8 flex items-center gap-2">
-              <Compass className="h-5 w-5 text-primary" /> Your Career Journey
-            </h3>
-            <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative">
-              {(() => {
-                const steps = [
-                  { step: 'Start', title: 'Onboarding' },
-                  { step: 'Evaluation', title: 'Psychometric' },
-                  { step: 'Insight', title: 'Skill Profile' },
-                  { step: 'Goal', title: 'Career Path' }
-                ];
-                const reachedIndex = Math.min(testsCompleted + 1, steps.length - 1);
-                const widthPercent = (reachedIndex / (steps.length - 1)) * 100;
-
-                return (
-                  <>
-                    <div className="absolute top-6 left-0 w-full h-1 hidden md:block bg-white/10 rounded-full">
-                      <div className="absolute left-0 top-0 h-full bg-emerald-500 transition-all duration-1000" style={{ width: `${widthPercent}%` }} />
-                    </div>
-                    {steps.map((item, i) => {
-                      const completed = i < reachedIndex;
-                      const active = i === reachedIndex;
-                      return (
-                        <div key={i} className="flex flex-col items-center gap-3 relative z-10 w-full md:w-auto">
-                          <div className={`h-12 w-12 rounded-2xl flex items-center justify-center transition-all duration-500 ${active ? 'bg-primary ring-4 ring-primary/30 animate-pulse' : completed ? 'bg-emerald-500' : 'bg-slate-800'}`}>
-                            {completed ? <CheckCircle2 className="h-6 w-6 text-white" /> : <span className="text-sm font-black text-white">{i + 1}</span>}
-                          </div>
-                          <div className="text-center">
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">{item.step}</p>
-                            <p className={`text-sm font-bold ${completed || active ? 'text-white' : 'text-slate-600'}`}>{item.title}</p>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </>
-                );
-              })()}
-            </div>
-          </div>
         </div>
 
         {/* 4. Deep Visualizations (Radar & Area Charts) */}
