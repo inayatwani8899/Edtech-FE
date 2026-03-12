@@ -507,7 +507,7 @@ export const Landing = () => {
               <Link to="/privacy">Privacy</Link>
               <Link to="/terms">Terms</Link>
             </div>
-            <div className="footer-copy">© 2026 PathGrad. All rights reserved.</div>
+            <div className="footer-copy">© 2026  Cognify<span>IQ</span>. All rights reserved.</div>
           </div>
         </footer>
 

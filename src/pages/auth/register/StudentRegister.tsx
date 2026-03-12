@@ -34,8 +34,7 @@ const StudentRegister = () => {
     password: "",
     confirmPassword: "",
     dateOfBirth: "",
-    educationLevel: "",
-    gender: "",
+    gradeLevel: "",
     phone: "",
   });
 
@@ -62,7 +61,14 @@ const StudentRegister = () => {
     setIsLoading(true);
     try {
       const { confirmPassword, ...payload } = formData;
-      const result = await registerStudent(payload);
+
+      // Format dateOfBirth to ISO string if it exists
+      const formattedPayload = {
+        ...payload,
+        dateOfBirth: formData.dateOfBirth ? new Date(formData.dateOfBirth).toISOString() : null,
+      };
+
+      const result = await registerStudent(formattedPayload);
 
       if (result.success) {
         setIsSuccess(true);
@@ -184,7 +190,7 @@ const StudentRegister = () => {
                   <div className={`h-1 w-5 rounded-full transition-all duration-500 ${step >= 2 ? 'bg-indigo-400 shadow-[0_0_8px_rgba(129,140,248,0.8)]' : 'bg-white/10'}`} />
                 </div>
                 <CardDescription className="text-[8px] font-black text-white/30 uppercase tracking-[0.25em]">
-                  Step {step} of 2: {step === 1 ? 'Personal Information' : 'Profile Detail'}
+                  Step {step} of 2: {step === 1 ? 'Personal Information' : 'Academic Detail'}
                 </CardDescription>
               </CardHeader>
 
@@ -307,42 +313,34 @@ const StudentRegister = () => {
 
                         <div className="grid grid-cols-2 gap-3">
                           <div className="space-y-1.5">
-                            <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Gender</Label>
-                            <Select onValueChange={(value) => handleInputChange("gender", value)}>
+                            <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Date of Birth</Label>
+                            <div className="relative group/input">
+                              <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-white/10 group-focus-within/input:text-indigo-400 transition-colors" />
+                              <Input
+                                type="date"
+                                value={formData.dateOfBirth}
+                                onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
+                                required
+                                className="h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-indigo-500/20 focus:bg-white/[0.08] transition-all duration-300"
+                              />
+                            </div>
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Grade Level</Label>
+                            <Select onValueChange={(value) => handleInputChange("gradeLevel", value)}>
                               <SelectTrigger className="h-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] focus:ring-4 focus:ring-indigo-500/20 transition-all px-3">
-                                <SelectValue placeholder="Select" />
+                                <SelectValue placeholder="Grade" />
                               </SelectTrigger>
                               <SelectContent className="bg-[#12141c] border-white/10 text-white font-bold text-[11px] rounded-lg">
-                                <SelectItem value="male" className="focus:bg-indigo-500 rounded-md">Male</SelectItem>
-                                <SelectItem value="female" className="focus:bg-indigo-500 rounded-md">Female</SelectItem>
-                                <SelectItem value="other" className="focus:bg-indigo-500 rounded-md">Other</SelectItem>
+                                <SelectItem value="high-school" className="focus:bg-indigo-500 rounded-md">High School</SelectItem>
+                                <SelectItem value="undergraduate" className="focus:bg-indigo-500 rounded-md">Undergraduate</SelectItem>
+                                <SelectItem value="graduate" className="focus:bg-indigo-500 rounded-md">Graduate</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
-                          <div className="space-y-1.5">
-                            <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Date of Birth</Label>
-                            <Input
-                              type="date"
-                              onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
-                              required
-                              className="h-9 px-3 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] focus:ring-4 focus:ring-indigo-500/20 focus:bg-white/[0.08] transition-all duration-300"
-                            />
-                          </div>
                         </div>
 
-                        <div className="space-y-1.5">
-                          <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Education Level</Label>
-                          <Select onValueChange={(value) => handleInputChange("educationLevel", value)}>
-                            <SelectTrigger className="h-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] focus:ring-4 focus:ring-indigo-500/20 transition-all px-3">
-                              <SelectValue placeholder="Current Level" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-[#12141c] border-white/10 text-white font-bold text-[11px] rounded-lg">
-                              <SelectItem value="high-school" className="focus:bg-indigo-500 rounded-md">High School</SelectItem>
-                              <SelectItem value="undergraduate" className="focus:bg-indigo-500 rounded-md">Undergraduate</SelectItem>
-                              <SelectItem value="graduate" className="focus:bg-indigo-500 rounded-md">Graduate</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
+
                       </div>
                     )}
 

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import {
-  CheckCircle2, TrendingUp, Clock, Award, ArrowRight, BarChart3, Users, 
+  CheckCircle2, TrendingUp, Clock, Award, ArrowRight, BarChart3, Users,
   Sparkles, Target, Zap, Flag, Trophy, Compass, Brain, Microscope, Lightbulb
 } from "lucide-react";
 import {
@@ -36,7 +36,7 @@ const performanceTrend = [
   { name: 'Feb', score: 52, projected: 52 },
   { name: 'Mar', score: 68, projected: 68 },
   { name: 'Apr', score: 75, projected: 75 },
-  { name: 'May', score: null, projected: 85 }, 
+  { name: 'May', score: null, projected: 85 },
 ];
 
 export const StudentDashboard = () => {
@@ -94,7 +94,7 @@ export const StudentDashboard = () => {
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] -z-10 animate-pulse" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
-        
+
         {/* 1. Compact Greeting Header */}
         <div className="mb-6 flex items-center justify-between">
           <div>
@@ -193,22 +193,22 @@ export const StudentDashboard = () => {
               <Badge className="bg-emerald-50 text-emerald-600 border-none font-bold">+12% Target</Badge>
             </CardHeader>
             <CardContent className="h-[280px] w-full pt-4">
-               <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={performanceTrend}>
-                    <defs>
-                      <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1}/>
-                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} />
-                    <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} />
-                    <Tooltip contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)'}} />
-                    <Area type="monotone" dataKey="score" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" />
-                    <Area type="monotone" dataKey="projected" stroke="#10b981" strokeWidth={2} strokeDasharray="5 5" fill="none" />
-                  </AreaChart>
-               </ResponsiveContainer>
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={performanceTrend}>
+                  <defs>
+                    <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1} />
+                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
+                  <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
+                  <Area type="monotone" dataKey="score" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" />
+                  <Area type="monotone" dataKey="projected" stroke="#10b981" strokeWidth={2} strokeDasharray="5 5" fill="none" />
+                </AreaChart>
+              </ResponsiveContainer>
             </CardContent>
           </Card>
 
@@ -220,13 +220,13 @@ export const StudentDashboard = () => {
               <CardDescription>Cognitive Strengths Mapping</CardDescription>
             </CardHeader>
             <CardContent className="flex-1 min-h-[300px] w-full">
-               <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart cx="50%" cy="50%" outerRadius="75%" data={neuralSkillsData}>
-                    <PolarGrid stroke="#e2e8f0" />
-                    <PolarAngleAxis dataKey="subject" tick={{fill: '#64748b', fontSize: 10, fontWeight: 700}} />
-                    <Radar name="Student" dataKey="A" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.5} />
-                  </RadarChart>
-               </ResponsiveContainer>
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart cx="50%" cy="50%" outerRadius="75%" data={neuralSkillsData}>
+                  <PolarGrid stroke="#e2e8f0" />
+                  <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 10, fontWeight: 700 }} />
+                  <Radar name="Student" dataKey="A" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.5} />
+                </RadarChart>
+              </ResponsiveContainer>
             </CardContent>
           </Card>
         </div>
@@ -258,7 +258,7 @@ export const StudentDashboard = () => {
                           <Users className="h-3.5 w-3.5 mr-1" /> 12k+ Scholars Taken
                         </div>
                       </div>
-                      
+
                       <div className="flex-1 space-y-4">
                         <h3 className="text-3xl font-black text-slate-900 leading-tight group-hover:text-primary transition-colors">
                           {psychometricTest.title}
@@ -269,25 +269,25 @@ export const StudentDashboard = () => {
                       </div>
 
                       <div className="mt-10 flex flex-wrap items-center gap-6">
-                        <Button 
-                          onClick={() => !paidStatus[psychometricTest.id] ? handlePayment(psychometricTest) : navigate(`/test/${psychometricTest.id}`)} 
-                          size="lg" 
+                        <Button
+                          onClick={() => !paidStatus[psychometricTest.id] ? handlePayment(psychometricTest) : navigate(`/test/${psychometricTest.id}`)}
+                          size="lg"
                           className="rounded-2xl px-10 h-14 font-black shadow-xl shadow-primary/20 hover:shadow-primary/40 transition-all active:scale-95"
                         >
                           {paidStatus[psychometricTest.id] ? 'Begin Assessment' : `Unlock Access - ₹${psychometricTest.price}`}
                         </Button>
                         <div className="flex items-center gap-4 py-2">
-                           <div className="flex items-center text-slate-500 font-bold text-sm">
-                             <Clock className="mr-2 h-5 w-5 text-primary/60" /> {psychometricTest.timeDuration}m
-                           </div>
-                           <div className="h-4 w-px bg-slate-200" />
-                           <div className="flex items-center text-slate-500 font-bold text-sm">
-                             <Zap className="mr-2 h-5 w-5 text-primary/60" /> AI Insights
-                           </div>
+                          <div className="flex items-center text-slate-500 font-bold text-sm">
+                            <Clock className="mr-2 h-5 w-5 text-primary/60" /> {psychometricTest.timeDuration}m
+                          </div>
+                          <div className="h-4 w-px bg-slate-200" />
+                          <div className="flex items-center text-slate-500 font-bold text-sm">
+                            <Zap className="mr-2 h-5 w-5 text-primary/60" /> AI Insights
+                          </div>
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="hidden md:flex md:w-1/3 bg-slate-50/50 items-center justify-center border-l border-slate-100 group-hover:bg-primary/5 transition-colors duration-500">
                       <div className="relative">
                         <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-150 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
@@ -312,11 +312,11 @@ export const StudentDashboard = () => {
                   <Badge variant="outline" className="border-slate-100 text-slate-400 font-bold">Level 4</Badge>
                 </div>
                 <div className="space-y-4">
-                   <div className="flex justify-between items-end">
-                      <p className="text-sm font-black text-slate-800 tracking-tight">Certification Progress</p>
-                      <span className="text-xs font-bold text-primary">80%</span>
-                   </div>
-                   <Progress value={80} className="h-2.5 bg-slate-100 rounded-full" />
+                  <div className="flex justify-between items-end">
+                    <p className="text-sm font-black text-slate-800 tracking-tight">Certification Progress</p>
+                    <span className="text-xs font-bold text-primary">80%</span>
+                  </div>
+                  <Progress value={80} className="h-2.5 bg-slate-100 rounded-full" />
                 </div>
               </Card>
 
@@ -358,9 +358,9 @@ export const StudentDashboard = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-5 pt-0">
-                  <Button 
-                    onClick={() => !paidStatus[test.id] ? handlePayment(test) : navigate(`/test/${test.id}`)} 
-                    variant="outline" 
+                  <Button
+                    onClick={() => !paidStatus[test.id] ? handlePayment(test) : navigate(`/test/${test.id}`)}
+                    variant="outline"
                     className="w-full rounded-xl font-bold border-slate-200 hover:bg-primary hover:text-white hover:border-primary transition-all duration-300"
                   >
                     {paidStatus[test.id] ? 'Start Assessment' : `Unlock Test`}
