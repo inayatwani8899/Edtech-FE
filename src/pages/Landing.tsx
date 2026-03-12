@@ -17,6 +17,8 @@ import {
   InstantResultsMockup,
   CareerPathsMockup,
   SmartReportsMockup,
+  AdvancedAnalyticsMockup,
+  EnterpriseSecurityMockup,
   HowStep1Visual,
   HowStep2Visual,
   HowStep3Visual,
@@ -233,6 +235,19 @@ export const Landing = () => {
                 </div>
               </div>
 
+              {/* Card 6 — Regular: Analytics */}
+              <div className="bento-card">
+                <div className="bento-card-header">
+                  <div className="bento-card-title">Advanced Analytics</div>
+                  <div className="bento-card-desc">
+                    Comprehensive dashboards for schools to track cohorts and growth
+                  </div>
+                </div>
+                <div className="bento-visual">
+                  <AdvancedAnalyticsMockup />
+                </div>
+              </div>
+
               {/* Card 5 — Large: Career Guidance */}
               <div className="bento-card bento-lg">
                 <div className="bento-card-header">
@@ -244,6 +259,19 @@ export const Landing = () => {
                 <div className="bento-visual" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                   <CareerPathsMockup />
                   <SmartReportsMockup />
+                </div>
+              </div>
+
+              {/* Card 7 — Regular: Security */}
+              <div className="bento-card">
+                <div className="bento-card-header">
+                  <div className="bento-card-title">Enterprise Security</div>
+                  <div className="bento-card-desc">
+                    GDPR & FERPA compliant data protection for schools
+                  </div>
+                </div>
+                <div className="bento-visual">
+                  <EnterpriseSecurityMockup />
                 </div>
               </div>
             </div>

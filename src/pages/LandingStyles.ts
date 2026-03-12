@@ -628,7 +628,11 @@ a { text-decoration: none; color: inherit; }
   z-index: 0;
 }
 .how-step {
-  text-align: center; position: relative; z-index: 1;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  position: relative;
+  z-index: 1;
   padding: 0 24px;
 }
 .how-step-num {
@@ -639,6 +643,7 @@ a { text-decoration: none; color: inherit; }
   font-size: 1.2rem; font-weight: 800; color: var(--primary);
   margin: 0 auto 24px;
   box-shadow: 0 4px 12px rgba(99,102,241,0.15);
+  flex-shrink: 0;
 }
 .how-step-title {
   font-size: 1.05rem; font-weight: 700; color: var(--black);
@@ -650,7 +655,7 @@ a { text-decoration: none; color: inherit; }
 
 /* Step visual cards */
 .how-step-visual {
-  margin-top: 24px;
+  margin-top: auto;
   background: var(--gray-50);
   border: 1px solid var(--gray-200);
   border-radius: var(--radius);

@@ -348,3 +348,53 @@ export const enterpriseFeatures = [
   { icon: Cpu, title: "Scalable Compute", desc: "Handle thousands of concurrent assessments without slowdown" },
   { icon: Headphones, title: "Priority Support", desc: "Dedicated account manager for your institution's needs" },
 ];
+
+// ═══════════════════════════════════════
+// ADVANCED ANALYTICS MOCKUP — For Bento Grid
+// ═══════════════════════════════════════
+export const AdvancedAnalyticsMockup = () => (
+  <div className="results-mock">
+    <div style={{ padding: 10, background: 'white', borderRadius: 8, border: '1px solid #e4e4e7' }}>
+      <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#a0a0ab', marginBottom: 8, textTransform: 'uppercase' }}>Cohort Performance</div>
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height: 60, marginBottom: 12 }}>
+        {[40, 65, 45, 90, 55, 75, 60].map((h, i) => (
+          <div key={i} style={{ flex: 1, height: `${h}%`, background: 'var(--primary)', opacity: 0.6, borderRadius: '2px 2px 0 0' }} />
+        ))}
+      </div>
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <div className="psc-change psc-up" style={{ fontSize: '0.65rem' }}>
+          <TrendingUp size={10} /> +24% YoY
+        </div>
+        <div className="psc-change psc-up" style={{ fontSize: '0.65rem' }}>
+          <TrendingUp size={10} /> +12% Accuracy
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+// ═══════════════════════════════════════
+// ENTERPRISE SECURITY MOCKUP — For Bento Grid
+// ═══════════════════════════════════════
+export const EnterpriseSecurityMockup = () => (
+  <div className="report-mock">
+    <div className="report-section-mock" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px' }}>
+      <div style={{ width: 32, height: 32, borderRadius: 8, background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <Shield size={18} color="#22c55e" style={{ margin: "auto" }} />
+      </div>
+      <div>
+        <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0a0a0a' }}>AES-256 Encryption</div>
+        <div style={{ fontSize: '0.65rem', color: '#71717a' }}>Enterprise grade security</div>
+      </div>
+    </div>
+    <div className="report-section-mock" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px' }}>
+      <div style={{ width: 32, height: 32, borderRadius: 8, background: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <Lock size={18} color="#6366f1" style={{ margin: "auto" }} />
+      </div>
+      <div>
+        <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0a0a0a' }}>Data Privacy</div>
+        <div style={{ fontSize: '0.65rem', color: '#71717a' }}>GDPR & FERPA Compliant</div>
+      </div>
+    </div>
+  </div>
+);
