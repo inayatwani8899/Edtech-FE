@@ -27,11 +27,10 @@ export const useTestLogic = () => {
         currentSession,
     } = useTestStore();
 
-    const {
-        totalPages = 1,
-        hasNext = false,
-        hasPrevious = false,
-    } = questionPagination || {};
+    const questionsPerPage = currentTest?.totalQuestionsPerPage || 10;
+    const computedTotalPages = Math.max(1, Math.ceil((testQuestions?.length || 0) / questionsPerPage));
+    const hasNext = currentPage < computedTotalPages;
+    const hasPrevious = currentPage > 1;
 
     const { user } = useAuthStore();
     const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
@@ -256,16 +255,17 @@ export const useTestLogic = () => {
         }
     };
 
-    // Get current question from paginated questions array
-    const currentQuestion = testQuestions?.[0] || null;
+    // Get current set of questions for the current page (Frontend Pagination)
+    const paginatedQuestions = (testQuestions || []).slice(
+        (currentPage - 1) * questionsPerPage,
+        currentPage * questionsPerPage
+    );
+
+    const currentQuestion = paginatedQuestions[0] || null;
 
     const handleNextQuestion = async () => {
-        if (!testId || !questionPagination) return;
-        const nextPage = currentPage + 1;
-        const limit = currentTest?.totalQuestionsPerPage || 10;
-
-        if (questionPagination.hasNext) {
-            await fetchQuestions(nextPage, limit, currentSession?.id ?? null, currentTest?.testId ?? testId, currentTest?.grade ?? undefined);
+        if (hasNext) {
+            const nextPage = currentPage + 1;
             useTestStore.setState({ currentPage: nextPage });
 
             if (questionsContainerRef.current) {
@@ -275,13 +275,8 @@ export const useTestLogic = () => {
     };
 
     const handlePreviousQuestion = async () => {
-        if (!testId || !questionPagination) return;
-
-        const prevPage = currentPage - 1;
-        const limit = currentTest?.totalQuestionsPerPage || 10;
-
-        if (questionPagination.hasPrevious && prevPage >= 1) {
-            await fetchQuestions(prevPage, limit, currentSession?.id ?? null, currentTest?.testId ?? testId, currentTest?.grade ?? undefined);
+        if (hasPrevious) {
+            const prevPage = currentPage - 1;
             useTestStore.setState({ currentPage: prevPage });
 
             if (questionsContainerRef.current) {
@@ -291,10 +286,7 @@ export const useTestLogic = () => {
     };
 
     const handlePageNavigation = async (pageNumber: number) => {
-        if (!testId || pageNumber === currentPage) return;
-
-        const limit = currentTest?.totalQuestionsPerPage || 10;
-        await fetchQuestions(pageNumber, limit, currentSession?.id ?? null, currentTest?.testId ?? testId, currentTest?.grade ?? undefined);
+        if (pageNumber === currentPage || pageNumber < 1 || pageNumber > computedTotalPages) return;
         useTestStore.setState({ currentPage: pageNumber });
 
         if (questionsContainerRef.current) {
@@ -423,8 +415,8 @@ export const useTestLogic = () => {
         const pages = [];
         const maxVisiblePages = 10;
 
-        if (totalPages <= maxVisiblePages) {
-            for (let i = 1; i <= totalPages; i++) {
+        if (computedTotalPages <= maxVisiblePages) {
+            for (let i = 1; i <= computedTotalPages; i++) {
                 pages.push(i);
             }
         } else {
@@ -433,11 +425,11 @@ export const useTestLogic = () => {
                     pages.push(i);
                 }
                 pages.push('...');
-                pages.push(totalPages);
-            } else if (currentPage >= totalPages - 2) {
+                pages.push(computedTotalPages);
+            } else if (currentPage >= computedTotalPages - 2) {
                 pages.push(1);
                 pages.push('...');
-                for (let i = totalPages - 3; i <= totalPages; i++) {
+                for (let i = computedTotalPages - 3; i <= computedTotalPages; i++) {
                     pages.push(i);
                 }
             } else {
@@ -447,7 +439,7 @@ export const useTestLogic = () => {
                     pages.push(i);
                 }
                 pages.push('...');
-                pages.push(totalPages);
+                pages.push(computedTotalPages);
             }
         }
         return pages;
@@ -457,9 +449,9 @@ export const useTestLogic = () => {
         // State
         testId,
         currentTest,
-        testQuestions,
+        testQuestions: paginatedQuestions,
         currentPage,
-        totalPages,
+        totalPages: computedTotalPages,
         hasNext,
         hasPrevious,
         timeRemaining,

@@ -536,7 +536,7 @@ export const useTestStore = create<TestState>((set, get) => ({
                     testId: 1,
                     gradeId: 1,
                     page,
-                    pageSize: limit,
+                    pageSize: 100000,
                     sessionId: currentSessionId || undefined
                 }
             });
