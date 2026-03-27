@@ -1,439 +1,767 @@
-
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Brain,
   Clock,
   Users,
-  Target,
-  Lightbulb,
-  Briefcase,
   Search,
-  Filter,
-  Play,
-  CheckCircle2,
-  BarChart3,
   Star,
-  TrendingUp,
-  Heart,
   ArrowRight,
-  ChevronRight,
-  TrendingDown,
   LayoutGrid,
   Zap,
   Sparkles,
-  Award,
-  BookOpen
+  Lock,
+  BookOpen,
 } from "lucide-react";
 import { useTestStore } from "@/store/testStore";
 import { usePaymentStore } from "@/store/paymentStore";
 import { useAuthStore } from "@/store/useAuthStore";
 
-const allTests = [
-  {
-    id: "1",
-    title: "Cognitive Aptitude Assessment",
-    description: "Comprehensive evaluation of verbal, numerical, and logical reasoning abilities. Designed to measure your problem-solving skills and cognitive processing speed.",
-    type: "aptitude",
-    category: "Cognitive",
-    duration: 45,
-    questions: 60,
-    difficulty: "intermediate",
-    completed: false,
-    progress: 0,
-    icon: Brain,
-    color: "bg-primary",
-    rating: 4.8,
-    participants: 25420,
-    tags: ["Reasoning", "Problem Solving", "Logic"]
-  },
-  {
-    id: "2",
-    title: "Big Five Personality Assessment",
-    description: "Discover your personality across five key dimensions: Openness, Conscientiousness, Extraversion, Agreeableness, and Neuroticism.",
-    type: "personality",
-    category: "Personality",
-    duration: 30,
-    questions: 120,
-    difficulty: "beginner",
-    completed: true,
-    progress: 100,
-    icon: Users,
-    color: "bg-secondary",
-    rating: 4.9,
-    participants: 42150,
-    tags: ["Big Five", "Traits", "Behavior"]
-  },
-  {
-    id: "3",
-    title: "Career Interest Inventory (RIASEC)",
-    description: "Identify your professional interests using Holland's RIASEC model to find careers that match your preferences and motivations.",
-    type: "interest",
-    category: "Career",
-    duration: 25,
-    questions: 90,
-    difficulty: "beginner",
-    completed: false,
-    progress: 60,
-    icon: Target,
-    color: "bg-accent",
-    rating: 4.7,
-    participants: 31280,
-    tags: ["Career", "Interests", "RIASEC"]
-  },
-  {
-    id: "4",
-    title: "Emotional Intelligence Assessment",
-    description: "Measure your ability to recognize, understand, and manage emotions in yourself and others. Critical for leadership and interpersonal success.",
-    type: "emotional-intelligence",
-    category: "Emotional",
-    duration: 35,
-    questions: 75,
-    difficulty: "intermediate",
-    completed: false,
-    progress: 0,
-    icon: Heart,
-    color: "bg-warning",
-    rating: 4.6,
-    participants: 18970,
-    tags: ["EQ", "Emotions", "Leadership"]
-  },
-  {
-    id: "5",
-    title: "Professional Skills Assessment",
-    description: "Evaluate your workplace competencies including communication, teamwork, problem-solving, and technical skills for your industry.",
-    type: "professional",
-    category: "Professional",
-    duration: 40,
-    questions: 85,
-    difficulty: "advanced",
-    completed: false,
-    progress: 0,
-    icon: Briefcase,
-    color: "bg-destructive",
-    rating: 4.5,
-    participants: 12450,
-    tags: ["Skills", "Workplace", "Competency"]
-  },
-  {
-    id: "6",
-    title: "Creative Thinking Assessment",
-    description: "Assess your creative problem-solving abilities, innovative thinking patterns, and artistic/creative intelligence.",
-    type: "aptitude",
-    category: "Creative",
-    duration: 35,
-    questions: 50,
-    difficulty: "intermediate",
-    completed: false,
-    progress: 0,
-    icon: Lightbulb,
-    color: "bg-accent",
-    rating: 4.4,
-    participants: 8760,
-    tags: ["Creativity", "Innovation", "Art"]
+/* ─── helpers ─────────────────────────────────────────────── */
+const getDifficultyMeta = (d?: string) => {
+  switch (d?.toLowerCase()) {
+    case "beginner":
+      return { label: "Beginner", cls: "bg-emerald-50 text-emerald-600 border-emerald-200" };
+    case "intermediate":
+      return { label: "Intermediate", cls: "bg-amber-50 text-amber-600 border-amber-200" };
+    case "advanced":
+      return { label: "Advanced", cls: "bg-rose-50 text-rose-600 border-rose-200" };
+    default:
+      return { label: d || "Standard", cls: "bg-slate-50 text-slate-600 border-slate-200" };
   }
+};
+
+const TABS = [
+  { id: "all", label: "All" },
+  { id: "available", label: "Available" },
+  { id: "completed", label: "Completed" },
 ];
 
-const categories = ["All", "Cognitive", "Personality", "Career", "Emotional", "Professional", "Creative"];
-const difficulties = ["All", "beginner", "intermediate", "advanced"];
-
+/* ─── component ───────────────────────────────────────────── */
 export const Tests = () => {
-  const { handlePayment, loading, paidTests, isTestPaid } = usePaymentStore(); // Get handlePayment and loading state from store
+  const { handlePayment, isTestPaid } = usePaymentStore();
   const { user } = useAuthStore();
-  const [greeting, setGreeting] = useState("");
-  const [processingTestId, setProcessingTestId] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [selectedDifficulty, setSelectedDifficulty] = useState("All");
-  const [activeTab, setActiveTab] = useState("all");
-  const [paidStatus, setPaidStatus] = useState<Record<string, boolean>>({});
   const { getPublishedTests, publishedTests, fetchQuestions, testTakingLoading } = useTestStore();
   const navigate = useNavigate();
-  useEffect(() => {
-    const fetchPaidStatus = async () => {
-      if (!user?.id || !publishedTests?.length) return;
 
-      const statuses: Record<string, boolean> = {};
-      for (const test of publishedTests) {
-        const result = await isTestPaid(String(user.id), test.id);
-        statuses[test.id] = result;
-      }
-      setPaidStatus(statuses);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("all");
+  const [processingTestId, setProcessingTestId] = useState<string | null>(null);
+  const [paidStatus, setPaidStatus] = useState<Record<string, boolean>>({});
+  const [paidLoading, setPaidLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // fetch tests once on mount
+  useEffect(() => {
+    setMounted(true);
+    getPublishedTests();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // fetch paid statuses in parallel — the REAL fix for slow loading
+  useEffect(() => {
+    if (!user?.id || !publishedTests?.length) return;
+
+    const fetchAll = async () => {
+      setPaidLoading(true);
+      // Fire all requests simultaneously instead of one‑by‑one
+      const results = await Promise.all(
+        publishedTests.map((test) => isTestPaid(String(user.id), test.id))
+      );
+      const map: Record<string, boolean> = {};
+      publishedTests.forEach((test, i) => {
+        map[test.id] = results[i];
+      });
+      setPaidStatus(map);
+      setPaidLoading(false);
     };
 
-    fetchPaidStatus();
-  }, [user?.id, publishedTests]);
+    fetchAll();
+  }, [user?.id, publishedTests]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => {
-    getPublishedTests();
-  }, [getPublishedTests])
-  const filteredTests = allTests.filter(test => {
-    const matchesSearch = test.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      test.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      test.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filtered = publishedTests.filter((t) => {
+    const q = searchTerm.toLowerCase();
+    const matchSearch =
+      !q ||
+      t.title?.toLowerCase().includes(q) ||
+      t.description?.toLowerCase().includes(q) ||
+      t.category?.toLowerCase().includes(q);
 
-    const matchesCategory = selectedCategory === "All" || test.category === selectedCategory;
-    const matchesDifficulty = selectedDifficulty === "All" || test.difficulty === selectedDifficulty;
+    const matchTab =
+      activeTab === "all" ||
+      (activeTab === "completed" && (t as any).completed) ||
+      (activeTab === "available" && !(t as any).completed);
 
-    const matchesTab = activeTab === "all" ||
-      (activeTab === "completed" && test.completed) ||
-      (activeTab === "in-progress" && test.progress > 0 && !test.completed) ||
-      (activeTab === "available" && test.progress === 0);
-
-    return matchesSearch && matchesCategory && matchesDifficulty && matchesTab;
+    return matchSearch && matchTab;
   });
 
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case "beginner": return "bg-success/10 text-success border-success/20";
-      case "intermediate": return "bg-warning/10 text-warning border-warning/20";
-      case "advanced": return "bg-destructive/10 text-destructive border-destructive/20";
-      default: return "bg-muted/10 text-muted-foreground border-muted/20";
-    }
-  };
-
-  const getTestStats = () => {
-    const completed = allTests.filter(t => t.completed).length;
-    const inProgress = allTests.filter(t => t.progress > 0 && !t.completed).length;
-    const available = allTests.filter(t => t.progress === 0).length;
-    return { completed, inProgress, available, total: publishedTests.length };
-  };
-
-  const stats = getTestStats();
+  // Performance optimization: Don't block the whole UI for payment status
+  const isLoading = testTakingLoading;
+  const isSyncingData = paidLoading;
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-slate-50/50">
-      {/* Dynamic Background Elements */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] animate-pulse"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-400/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }}></div>
+    <div
+      style={{
+        position: "relative",
+        width: "100%",
+        height: "100%",
+        overflow: "hidden",
+        background: "#ffffff",
+        fontFamily: "'Inter', system-ui, sans-serif",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      {/* ── Ambient glows ─────────────────────────────────── */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          pointerEvents: "none",
+          zIndex: 0,
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            top: "-15%",
+            left: "-10%",
+            width: "55%",
+            height: "55%",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 70%)",
+            filter: "blur(40px)",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            bottom: "-20%",
+            right: "-10%",
+            width: "60%",
+            height: "60%",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(16,185,129,0.04) 0%, transparent 70%)",
+            filter: "blur(50px)",
+          }}
+        />
+        {/* Subtle radial center glow instead of grid */}
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "80%",
+            height: "80%",
+            background: "radial-gradient(circle, rgba(99,102,241,0.03) 0%, transparent 70%)",
+            filter: "blur(60px)",
+            pointerEvents: "none",
+          }}
+        />
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="h-px w-6 bg-primary/30"></div>
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/60">Educational Assessments</span>
+      {/* ── Scrollable inner ──────────────────────────────── */}
+      <div
+        style={{
+          position: "relative",
+          zIndex: 1,
+          width: "100%",
+          flex: 1,
+          overflowY: "auto",
+          overflowX: "hidden",
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+          boxSizing: "border-box",
+          padding: "32px 24px 48px",
+        }}
+        // hide webkit scrollbar via inline trick
+        className="hide-scrollbar"
+      >
+        <style>{`
+          .hide-scrollbar::-webkit-scrollbar { display: none !important; }
+          @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0);    }
+          }
+          @keyframes shimmer {
+            0%   { background-position: -400px 0; }
+            100% { background-position: 400px 0; }
+          }
+          .card-hover {
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+          }
+          .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(99,102,241,0.3);
+          }
+          .tab-btn {
+            transition: background 0.2s, color 0.2s;
+          }
+          .cta-btn {
+            transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+          }
+          .cta-btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+            opacity: 0.9;
+          }
+          .cta-btn:active:not(:disabled) { transform: scale(0.97); }
+          .cta-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        `}</style>
+
+        <div style={{ maxWidth: 960, margin: "0 auto" }}>
+
+          {/* ── Header ────────────────────────────────────── */}
+          <div style={{ marginBottom: 36, animation: "fadeUp 0.5s ease both" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  background: "rgba(99,102,241,0.12)",
+                  border: "1px solid rgba(99,102,241,0.25)",
+                  borderRadius: 999,
+                  padding: "3px 12px",
+                }}
+              >
+                <Sparkles size={11} color="#818cf8" />
+                <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.15em", color: "#818cf8", textTransform: "uppercase" }}>
+                  Assessment Hub
+                </span>
+              </div>
+            </div>
+            <h1
+              style={{
+                fontSize: "clamp(26px, 4vw, 38px)",
+                fontWeight: 800,
+                color: "#0f172a",
+                margin: 0,
+                lineHeight: 1.15,
+                letterSpacing: "-0.02em",
+              }}
+            >
+              Your&nbsp;
+              <span
+                style={{
+                  background: "linear-gradient(90deg, #6366f1,#8b5cf6, #06b6d4)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                Assessments
+              </span>
+            </h1>
+            <p style={{ fontSize: 13, color: "#64748b", marginTop: 8, maxWidth: 480, lineHeight: 1.6 }}>
+              Professional evaluations designed to map your natural strengths and align them with
+              high-growth career trajectories.
+            </p>
           </div>
-          <h1 className="text-3xl font-black tracking-tight text-slate-900 mb-3">
-            Assessment <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-600">Hub</span>
-          </h1>
-          <p className="text-slate-500 font-medium max-w-xl text-sm leading-relaxed">
-            Professional evaluations designed to map your natural strengths
-            and align them with high-growth career trajectories.
-          </p>
-        </div>
 
-        {/* Stats Overview */}
-        {/* <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <Card className="text-center">
-            <CardContent className="pt-6">
-              <div className="text-2xl font-bold text-primary">{stats.total}</div>
-              <p className="text-sm text-muted-foreground">Total Tests</p>
-            </CardContent>
-          </Card>
-          <Card className="text-center">
-            <CardContent className="pt-6">
-              <div className="text-2xl font-bold text-success">{stats.completed}</div>
-              <p className="text-sm text-muted-foreground">Completed</p>
-            </CardContent>
-          </Card>
-          <Card className="text-center">
-            <CardContent className="pt-6">
-              <div className="text-2xl font-bold text-warning">{stats.inProgress}</div>
-              <p className="text-sm text-muted-foreground">In Progress</p>
-            </CardContent>
-          </Card>
-          <Card className="text-center">
-            <CardContent className="pt-6">
-              <div className="text-2xl font-bold text-muted-foreground">{stats.available}</div>
-              <p className="text-sm text-muted-foreground">Available</p>
-            </CardContent>
-          </Card>
-        </div> */}
+          {/* ── Search + Tabs bar ─────────────────────────── */}
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "center",
+              gap: 12,
+              marginBottom: 28,
+              animation: "fadeUp 0.55s ease 0.05s both",
+            }}
+          >
+            {/* Search */}
+            <div style={{ position: "relative", flex: "1 1 220px", minWidth: 180 }}>
+              <Search
+                size={14}
+                color="#475569"
+                style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}
+              />
+              <input
+                type="text"
+                placeholder="Search assessments…"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{
+                  width: "100%",
+                  boxSizing: "border-box",
+                  background: "#f8fafc",
+                  border: "1px solid rgba(0,0,0,0.1)",
+                  borderRadius: 10,
+                  height: 38,
+                  paddingLeft: 36,
+                  paddingRight: 12,
+                  color: "#1e293b",
+                  fontSize: 13,
+                  outline: "none",
+                  fontFamily: "inherit",
+                }}
+                onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(99,102,241,0.5)")}
+                onBlur={(e) => (e.currentTarget.style.borderColor = "rgba(0,0,0,0.1)")}
+              />
+            </div>
 
-        {/* Filters */}
-        {publishedTests.length > 0 && (
-          <Card className="glass-card mb-8 border-none overflow-hidden rounded-xl">
-            <CardContent className="p-4">
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="flex-1 relative group">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-primary transition-colors" />
-                  <Input
-                    placeholder="Search assessments..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-11 h-11 bg-slate-50/50 border-slate-100 rounded-lg font-semibold text-slate-700 text-sm focus:ring-primary/20 transition-all placeholder:text-slate-400"
-                  />
-                </div>
-                <div className="flex gap-4">
-                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                    <SelectTrigger className="w-full md:w-[200px] h-11 bg-slate-50/50 border-slate-100 rounded-lg font-semibold text-slate-600 text-sm focus:ring-primary/20">
-                      <SelectValue placeholder="All Categories" />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl border-slate-100 bg-white/95 backdrop-blur-xl">
-                      {categories.map(category => (
-                        <SelectItem key={category} value={category} className="font-semibold text-sm py-2">{category}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+            {/* Tabs */}
+            <div
+              style={{
+                display: "flex",
+                background: "rgba(0,0,0,0.04)",
+                border: "1px solid rgba(0,0,0,0.07)",
+                borderRadius: 10,
+                padding: 3,
+                gap: 2,
+              }}
+            >
+              {TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  className="tab-btn"
+                  onClick={() => setActiveTab(tab.id)}
+                  style={{
+                    padding: "5px 16px",
+                    borderRadius: 7,
+                    border: "none",
+                    fontSize: 11,
+                    fontWeight: 700,
+                    letterSpacing: "0.05em",
+                    cursor: "pointer",
+                    background: activeTab === tab.id ? "rgba(99,102,241,0.12)" : "transparent",
+                    color: activeTab === tab.id ? "#6366f1" : "#64748b",
+                    fontFamily: "inherit",
+                  }}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
 
-        {/* Test Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8 font-slate-900 border-slate-200 focus-visible:ring-slate-950 focus-visible:outline-slate-950">
-          <div className="flex flex-col md:flex-row items-center justify-between mb-6 gap-4">
-            <TabsList className="bg-slate-100/50 p-1 rounded-xl backdrop-blur-sm border border-slate-200/50 w-full md:w-auto">
-              <TabsTrigger value="all" className="flex-1 md:flex-none rounded-lg px-6 font-bold text-[10px] uppercase tracking-wider data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">All Modules</TabsTrigger>
-              <TabsTrigger value="available" className="flex-1 md:flex-none rounded-lg px-6 font-bold text-[10px] uppercase tracking-wider data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">Available</TabsTrigger>
-              <TabsTrigger value="completed" className="flex-1 md:flex-none rounded-lg px-6 font-bold text-[10px] uppercase tracking-wider data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">Completed</TabsTrigger>
-            </TabsList>
-
-            <div className="flex items-center gap-4 self-end md:self-center">
-              <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse"></div>
-                Live
-              </div>
-              <div className="h-3 w-px bg-slate-200"></div>
-              <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-slate-600">
-                <span className="text-primary">{testTakingLoading ? "..." : filteredTests.length}</span> Assessments
-              </div>
+            {/* Count badge */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
+                marginLeft: "auto",
+                fontSize: 11,
+                color: "#475569",
+                fontWeight: 600,
+                letterSpacing: "0.05em",
+              }}
+            >
+              <div
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: "50%",
+                  background: isSyncingData ? "#94a3b8" : "#22d3ee",
+                  boxShadow: isSyncingData ? "none" : "0 0 8px rgba(34,211,238,0.6)",
+                  animation: isSyncingData ? "none" : "pulse 2s infinite",
+                }}
+              />
+              {isLoading ? "…" : filtered.length} tests {isSyncingData && "(syncing…)"}
             </div>
           </div>
 
+          {/* ── Content ───────────────────────────────────── */}
+          {isLoading ? (
+            /* Skeleton grid */
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+                gap: 20,
+                animation: "fadeUp 0.4s ease both",
+              }}
+            >
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={i}
+                  style={{
+                    background: "#f1f5f9",
+                    border: "1px solid rgba(0,0,0,0.07)",
+                    borderRadius: 16,
+                    padding: 22,
+                    height: 210,
+                    overflow: "hidden",
+                    position: "relative",
+                  }}
+                >
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      backgroundImage:
+                        "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.8) 50%, transparent 100%)",
+                      backgroundSize: "800px 100%",
+                      animation: "shimmer 1.6s infinite linear",
+                    }}
+                  />
+                  <div style={{ background: "rgba(0,0,0,0.08)", borderRadius: 8, height: 14, width: "40%", marginBottom: 10 }} />
+                  <div style={{ background: "rgba(0,0,0,0.08)", borderRadius: 8, height: 20, width: "70%", marginBottom: 8 }} />
+                  <div style={{ background: "rgba(0,0,0,0.05)", borderRadius: 8, height: 12, width: "90%", marginBottom: 6 }} />
+                  <div style={{ background: "rgba(0,0,0,0.05)", borderRadius: 8, height: 12, width: "60%", marginBottom: 24 }} />
+                  <div style={{ background: "rgba(0,0,0,0.08)", borderRadius: 8, height: 36, width: "100%" }} />
+                </div>
+              ))}
+            </div>
+          ) : publishedTests.length === 0 ? (
+            /* Empty state */
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "80px 20px",
+                animation: "fadeUp 0.4s ease both",
+              }}
+            >
+              <div
+                style={{
+                  width: 72,
+                  height: 72,
+                  borderRadius: 20,
+                  background: "rgba(99,102,241,0.1)",
+                  border: "1px solid rgba(99,102,241,0.2)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: 18,
+                }}
+              >
+                <LayoutGrid size={28} color="#6366f1" />
+              </div>
+              <h3 style={{ color: "#0f172a", fontWeight: 700, fontSize: 18, margin: 0, marginBottom: 6 }}>
+                No active assessments
+              </h3>
+              <p style={{ color: "#475569", fontSize: 13, margin: 0 }}>
+                Contact your administrator to get tests assigned.
+              </p>
+            </div>
+          ) : filtered.length === 0 ? (
+            /* No results */
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "80px 20px",
+                animation: "fadeUp 0.4s ease both",
+              }}
+            >
+              <div
+                style={{
+                  width: 72,
+                  height: 72,
+                  borderRadius: 20,
+                  background: "rgba(99,102,241,0.1)",
+                  border: "1px solid rgba(99,102,241,0.2)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: 18,
+                }}
+              >
+                <Search size={28} color="#6366f1" />
+              </div>
+              <h3 style={{ color: "#0f172a", fontWeight: 700, fontSize: 18, margin: 0, marginBottom: 6 }}>
+                No results found
+              </h3>
+              <p style={{ color: "#475569", fontSize: 13, margin: 0 }}>
+                Try a different search term or switch tabs.
+              </p>
+            </div>
+          ) : (
+            /* Test grid */
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(290px, 1fr))",
+                gap: 20,
+              }}
+            >
+              {filtered.map((test, i) => {
+                const diff = getDifficultyMeta(test.difficulty);
+                const isPaid = paidStatus[test.id];
 
-          <TabsContent value={activeTab} className="mt-0 outline-none">
-            {testTakingLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {Array.from({ length: 4 }).map((_, index) => (
-                  <Card key={index} className="glass-card border-none rounded-xl p-6">
-                    <div className="flex justify-between mb-4">
-                      <Skeleton className="h-5 w-24 rounded-md" />
-                      <Skeleton className="h-5 w-12 rounded-md" />
-                    </div>
-                    <Skeleton className="h-6 w-3/4 mb-3" />
-                    <Skeleton className="h-3 w-full mb-1.5" />
-                    <Skeleton className="h-3 w-2/3 mb-6" />
-                    <div className="flex gap-3 pt-4 border-t border-slate-50">
-                      <Skeleton className="h-10 flex-1 rounded-lg" />
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            ) : publishedTests.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 bg-white/40 backdrop-blur-sm rounded-xl border border-white/20">
-                <div className="bg-slate-100 p-6 rounded-full mb-4">
-                  <LayoutGrid className="h-8 w-8 text-slate-300" />
-                </div>
-                <h3 className="text-xl font-bold text-slate-800 mb-1">No active tests found</h3>
-                <p className="text-slate-500 text-xs font-medium">Contact your administrator for more information.</p>
-              </div>
-            ) : filteredTests.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 bg-white/40 backdrop-blur-sm rounded-xl border border-white/20">
-                <div className="bg-slate-100 p-6 rounded-full mb-4">
-                  <Search className="h-8 w-8 text-slate-300" />
-                </div>
-                <h3 className="text-xl font-bold text-slate-800 mb-1">No results found</h3>
-                <p className="text-slate-500 text-xs font-medium">Try adjusting your search terminology or category filters.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {publishedTests.map((test, i) => (
-                  <Card key={test.id} className="group relative glass-card border-none hover:shadow-soft transition-all duration-300 rounded-xl overflow-hidden">
-                    <CardHeader className="p-6 pb-2">
-                      <div className="flex justify-between items-start mb-4">
-                        <div className="flex items-center gap-1.5">
-                          <Badge variant="secondary" className={`${getDifficultyColor(test.difficulty as any)} border-none px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest`}>
-                            {test.difficulty || "Regular"}
-                          </Badge>
-                          {test.category && (
-                            <Badge variant="outline" className="border-slate-200 text-slate-500 text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md">
-                              {test.category}
-                            </Badge>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-1 px-2 py-1 bg-slate-100/50 rounded-md text-[9px] font-bold text-slate-500 backdrop-blur-sm">
-                          <Clock className="h-3 w-3 text-primary" />
+                return (
+                  <div
+                    key={test.id}
+                    className="card-hover"
+                    style={{
+                      background: "#ffffff",
+                      border: "1px solid rgba(0,0,0,0.06)",
+                      borderRadius: 18,
+                      padding: "24px 22px 20px",
+                      display: "flex",
+                      flexDirection: "column",
+                      animation: `fadeUp 0.45s ease ${i * 0.05}s both`,
+                      position: "relative",
+                      overflow: "hidden",
+                      boxShadow: "0 10px 15px -3px rgba(0,0,0,0.04), 0 4px 6px -2px rgba(0,0,0,0.02), 0 0 0 1px rgba(0,0,0,0.03)",
+                    }}
+                  >
+                    {/* Top accent line */}
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        height: 2,
+                        background: "linear-gradient(90deg, #6366f1, #06b6d4)",
+                        borderRadius: "18px 18px 0 0",
+                      }}
+                    />
+
+                    {/* Badges row */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12, flexWrap: "wrap" }}>
+                      <span
+                        style={{
+                          fontSize: 9,
+                          fontWeight: 800,
+                          letterSpacing: "0.14em",
+                          textTransform: "uppercase",
+                          padding: "3px 9px",
+                          borderRadius: 999,
+                          border: "1px solid",
+                        }}
+                        className={diff.cls}
+                      >
+                        {diff.label}
+                      </span>
+
+                      {test.category && (
+                        <span
+                          style={{
+                            fontSize: 9,
+                            fontWeight: 700,
+                            letterSpacing: "0.1em",
+                            textTransform: "uppercase",
+                            padding: "3px 9px",
+                            borderRadius: 999,
+                            background: "rgba(0,0,0,0.04)",
+                            border: "1px solid rgba(0,0,0,0.06)",
+                            color: "#64748b",
+                          }}
+                        >
+                          {test.category}
+                        </span>
+                      )}
+
+                      <div
+                        style={{
+                          marginLeft: "auto",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 4,
+                          background: "rgba(255,255,255,0.05)",
+                          border: "1px solid rgba(255,255,255,0.08)",
+                          borderRadius: 999,
+                          padding: "3px 8px",
+                        }}
+                      >
+                        <Clock size={10} color="#6366f1" />
+                        <span style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8" }}>
                           {test.timeDuration}m
-                        </div>
+                        </span>
                       </div>
+                    </div>
 
-                      <CardTitle className="text-lg font-bold text-slate-900 mb-2 group-hover:text-primary transition-colors duration-300">
-                        {test.title}
-                      </CardTitle>
+                    {/* Title */}
+                    <h3
+                      style={{
+                        color: "#0f172a",
+                        fontWeight: 700,
+                        fontSize: 15,
+                        margin: 0,
+                        marginBottom: 6,
+                        lineHeight: 1.35,
+                        letterSpacing: "-0.01em",
+                      }}
+                    >
+                      {test.title}
+                    </h3>
 
-                      <CardDescription className="text-slate-500 font-medium text-xs leading-relaxed line-clamp-2 min-h-[2.5rem]">
-                        {test.description}
-                      </CardDescription>
-                    </CardHeader>
+                    {/* Description */}
+                    <p
+                      style={{
+                        color: "#475569",
+                        fontSize: 12,
+                        lineHeight: 1.6,
+                        margin: 0,
+                        marginBottom: 16,
+                        flex: 1,
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                      }}
+                    >
+                      {test.description}
+                    </p>
 
-                    <CardContent className="p-6 pt-0">
-                      <div className="flex items-center gap-4 mb-5 py-3 border-y border-slate-50 mt-1">
-                        <div className="flex items-center gap-1.5">
-                          <Users className="h-3 w-3 text-slate-400" />
-                          <span className="text-[10px] font-bold text-slate-500">{test?.participants?.toLocaleString() || "1.2k+"}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <Star className="h-3 w-3 text-yellow-400 fill-yellow-400" />
-                          <span className="text-[10px] font-bold text-slate-500">{test?.rating || "4.8"}</span>
-                        </div>
+                    {/* Stats row */}
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 14,
+                        paddingTop: 12,
+                        borderTop: "1px solid rgba(0,0,0,0.07)",
+                        marginBottom: 14,
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                        <Users size={11} color="#475569" />
+                        <span style={{ fontSize: 10, fontWeight: 700, color: "#475569" }}>
+                          {test?.participants?.toLocaleString() || "1.2k+"}
+                        </span>
                       </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                        <Star size={11} color="#f59e0b" fill="#f59e0b" />
+                        <span style={{ fontSize: 10, fontWeight: 700, color: "#475569" }}>
+                          {test?.rating || "4.8"}
+                        </span>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                        <BookOpen size={11} color="#475569" />
+                        <span style={{ fontSize: 10, fontWeight: 700, color: "#475569" }}>
+                          {test.questionCount || "—"} Qs
+                        </span>
+                      </div>
+                    </div>
 
-                      <div className="flex items-center gap-3">
-                        {!user ? (
-                          <Button asChild size="sm" className="flex-1 rounded-lg font-bold text-[10px] uppercase tracking-widest h-10 bg-slate-900 shadow-sm">
-                            <Link to="/login" className="flex items-center justify-center">
-                              Login to Unlock
-                            </Link>
-                          </Button>
-                        ) : paidStatus[test.id] ? (
-                          <Button asChild size="sm" className="flex-1 rounded-lg font-bold text-[10px] uppercase tracking-widest h-10 bg-primary hover:bg-primary/90 shadow-sm shadow-primary/20">
-                            <Link to={`/test/${test.id}`} className="flex items-center justify-center">
-                              Start Now
-                              <ArrowRight className="ml-1.5 h-3 w-3" />
-                            </Link>
-                          </Button>
+                    {/* CTA */}
+                    {!user ? (
+                      <Link
+                        to="/login"
+                        className="cta-btn"
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: 6,
+                          background: "rgba(255,255,255,0.07)",
+                          border: "1px solid rgba(255,255,255,0.12)",
+                          borderRadius: 10,
+                          height: 38,
+                          color: "#94a3b8",
+                          fontSize: 10,
+                          fontWeight: 800,
+                          letterSpacing: "0.1em",
+                          textTransform: "uppercase",
+                          textDecoration: "none",
+                          fontFamily: "inherit",
+                        }}
+                      >
+                        <Lock size={12} />
+                        Login to Unlock
+                      </Link>
+                    ) : isPaid ? (
+                      <Link
+                        to={`/test/${test.id}`}
+                        className="cta-btn"
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: 6,
+                          background: "linear-gradient(135deg, #6366f1, #4f46e5)",
+                          border: "none",
+                          borderRadius: 10,
+                          height: 38,
+                          color: "#fff",
+                          fontSize: 10,
+                          fontWeight: 800,
+                          letterSpacing: "0.1em",
+                          textTransform: "uppercase",
+                          textDecoration: "none",
+                          fontFamily: "inherit",
+                          boxShadow: "0 4px 20px rgba(99,102,241,0.35)",
+                        }}
+                      >
+                        Start Now
+                        <ArrowRight size={12} />
+                      </Link>
+                    ) : (
+                      <button
+                        className="cta-btn"
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: 6,
+                          background:
+                            processingTestId === test.id
+                              ? "rgba(0,0,0,0.05)"
+                              : "linear-gradient(135deg, #1e293b, #334155)",
+                          border: "1px solid rgba(0,0,0,0.12)",
+                          borderRadius: 10,
+                          height: 38,
+                          color: processingTestId === test.id ? "#94a3b8" : "#f8fafc",
+                          fontSize: 10,
+                          fontWeight: 800,
+                          letterSpacing: "0.1em",
+                          textTransform: "uppercase",
+                          cursor: processingTestId === test.id ? "not-allowed" : "pointer",
+                          fontFamily: "inherit",
+                          width: "100%",
+                        }}
+                        disabled={processingTestId === test.id}
+                        onClick={async () => {
+                          setProcessingTestId(test.id);
+                          try {
+                            if (user?.grade) {
+                              await fetchQuestions(1, 10, null, test.id, user.grade);
+                              navigate(`/test/${test.id}`);
+                            } else {
+                              console.error("User grade not found");
+                            }
+                          } finally {
+                            setProcessingTestId(null);
+                          }
+                        }}
+                      >
+                        {processingTestId === test.id ? (
+                          <>
+                            <span
+                              style={{
+                                width: 12,
+                                height: 12,
+                                borderRadius: "50%",
+                                border: "2px solid rgba(255,255,255,0.2)",
+                                borderTopColor: "#6366f1",
+                                animation: "spin 0.7s linear infinite",
+                                display: "inline-block",
+                              }}
+                            />
+                            Starting…
+                          </>
                         ) : (
-                          <Button
-                            size="sm"
-                            className="flex-1 rounded-lg font-bold text-[10px] uppercase tracking-widest h-10 bg-slate-900 shadow-sm"
-                            onClick={async () => {
-                              setProcessingTestId(test.id);
-                              if (user?.grade) {
-                                await fetchQuestions(1, 10, null, test.id, user.grade);
-                                navigate(`/test/${test.id}`);
-                              } else {
-                                console.error("User grade not found");
-                              }
-                              setProcessingTestId(null);
-                            }}
-                            disabled={processingTestId === test.id}
-                          >
-                            {processingTestId === test.id
-                              ? "Starting..."
-                              : "Quick Start"}
-                          </Button>
+                          <>
+                            <Zap size={12} />
+                            Quick Start
+                          </>
                         )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
+
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50%       { opacity: 0.4; }
+        }
+      `}</style>
     </div>
   );
 };
