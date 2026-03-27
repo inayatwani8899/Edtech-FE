@@ -218,7 +218,6 @@ const AppRoutes = () => {
 
                 <Route path="/student/dashboard" element={<StudentDashboard />} />
                 <Route path="/tests" element={<Tests />} />
-                <Route path="/test/:id" element={<TestDetail />} />
                 <Route path="/results" element={<Results />} />
                 <Route path="/learning" element={<LearningPath />} />
                 <Route path="/career" element={<CareerGuidance />} />
@@ -230,6 +229,7 @@ const AppRoutes = () => {
                 <Route path="/settings" element={<Settings />} />
                 {/* <Route path="/manage" element={<Manage />} /> */}
             </Route>
+            <Route path="/test/:id" element={<TestDetail />} />
 
             {/* Counselor Routes */}
             <Route

@@ -228,6 +228,7 @@ export const TestDetail = () => {
       enterFullScreen={enterFullScreen}
       exitFullScreen={exitFullScreen}
       formatTime={formatTime}
+      testTakingLoading={testTakingLoading}
     />
   );
 };

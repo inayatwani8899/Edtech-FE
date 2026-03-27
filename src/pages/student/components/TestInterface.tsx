@@ -17,19 +17,19 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export interface Option {
-    option_Id: number;
+    option_Id: number | string;
     question_Id: number | string;
     option_Text: string;
-    score: number;
-    order_No: number;
+    score?: number;
+    order_No?: number;
 }
 
 export interface Question {
     question_Id: number | string;
     question_Text: string;
-    category: string;
-    theory: string;
-    tag: string;
+    category?: string;
+    theory?: string;
+    tag?: string;
     options: Option[];
     [key: string]: any;
 }
@@ -56,6 +56,7 @@ export interface TestInterfaceProps {
     enterFullScreen: () => void;
     exitFullScreen: () => void;
     formatTime: (seconds: number) => string;
+    testTakingLoading?: boolean;
 }
 
 export const TestInterface = ({
@@ -80,6 +81,7 @@ export const TestInterface = ({
     enterFullScreen,
     exitFullScreen,
     formatTime,
+    testTakingLoading,
 }: TestInterfaceProps) => {
 
     const [focusScore, setFocusScore] = useState(100);
@@ -191,6 +193,23 @@ export const TestInterface = ({
                 onMouseLeave={() => setIsHoveringQuestions(false)}
             >
                 <div className="flex-1 min-h-0 bg-white/80 backdrop-blur-md rounded-xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col relative">
+                    {/* Themed Loader Overlay */}
+                    {testTakingLoading && (
+                        <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/60 backdrop-blur-sm transition-all duration-300">
+                            <div className="flex flex-col items-center gap-4">
+                                <div className="relative w-16 h-16">
+                                    <div className="absolute inset-0 border-4 border-blue-500/20 rounded-full" />
+                                    <div className="absolute inset-0 border-4 border-t-blue-600 rounded-full animate-spin" />
+                                    <div className="absolute inset-2 border-4 border-t-emerald-500 rounded-full animate-[spin_1.5s_linear_infinite]" />
+                                    <div className="absolute inset-4 border-4 border-t-amber-500 rounded-full animate-[spin_2s_linear_infinite]" />
+                                </div>
+                                <div className="flex flex-col items-center">
+                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600">Neural Syncing</span>
+                                    <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1">Fetching Next Matrix Data</span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     <div className="flex-none grid grid-cols-[1fr_repeat(5,85px)] md:grid-cols-[1fr_repeat(5,110px)] bg-slate-900 text-white sticky top-0 z-30 shadow-md">
                         <div className="p-3 text-[10px] font-black uppercase tracking-widest pl-6 self-center text-blue-200">Matrix Parameter</div>
