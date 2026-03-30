@@ -38,8 +38,10 @@ export const TestDetail = () => {
     setAnswerLocally,
     navigate,
     mediaStreamRef,
-    stopCamera
+    stopCamera,
+    hasAnswers
   } = useTestLogic();
+
 
   // Loading state
   const isInitialLoading = (testTakingLoading || loading) && currentStep !== 2 && !isSubmitting;
@@ -235,6 +237,8 @@ export const TestDetail = () => {
       exitFullScreen={exitFullScreen}
       formatTime={formatTime}
       testTakingLoading={testTakingLoading}
+      hasAnswers={hasAnswers}
     />
+
   );
 };

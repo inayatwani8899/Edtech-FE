@@ -25,7 +25,9 @@ export const useTestLogic = () => {
         setAnswerLocally,
         resetTestState,
         currentSession,
+        userAnswers,
     } = useTestStore();
+
 
     const questionsPerPage = currentTest?.totalQuestionsPerPage || 10;
     const computedTotalPages = Math.max(1, Math.ceil((testQuestions?.length || 0) / questionsPerPage));
@@ -209,6 +211,26 @@ export const useTestLogic = () => {
     const handleExitTest = async () => {
         if (!testId || !user?.id) return;
 
+        const hasAnswers = userAnswers.size > 0;
+
+        if (!hasAnswers) {
+            // No answers, just exit
+            try {
+                await exitFullScreen();
+                stopCamera();
+                resetTestState();
+                toast({
+                    title: "Assessment Exited",
+                    description: "You have left the assessment without submitting any answers.",
+                });
+                navigate("/student/dashboard");
+            } catch (err) {
+                console.error("Exit error:", err);
+                navigate("/student/dashboard");
+            }
+            return;
+        }
+
         setIsSubmitting(true);
         setCurrentStep(0);
 
@@ -233,6 +255,7 @@ export const useTestLogic = () => {
             });
         }
     };
+
     const handleContinueToNextStep = () => {
         setCurrentStep((prev) => prev + 1);
     };
@@ -481,6 +504,8 @@ export const useTestLogic = () => {
         currentQuestion,
         testContainerRef,
         questionsContainerRef,
+        hasAnswers: userAnswers.size > 0,
+
 
         // Functions
         formatTime,

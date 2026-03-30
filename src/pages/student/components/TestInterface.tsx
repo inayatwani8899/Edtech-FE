@@ -58,7 +58,9 @@ export interface TestInterfaceProps {
     exitFullScreen: () => void;
     formatTime: (seconds: number) => string;
     testTakingLoading?: boolean;
+    hasAnswers: boolean;
 }
+
 
 export const TestInterface = ({
     testContainerRef,
@@ -83,7 +85,9 @@ export const TestInterface = ({
     exitFullScreen,
     formatTime,
     testTakingLoading,
+    hasAnswers,
 }: TestInterfaceProps) => {
+
 
     const [focusScore, setFocusScore] = useState(100);
     const [isHoveringQuestions, setIsHoveringQuestions] = useState(true);
@@ -324,17 +328,22 @@ export const TestInterface = ({
             <AlertDialog open={showExitModal} onOpenChange={setShowExitModal}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Are you sure you want to exit?</AlertDialogTitle>
+                        <AlertDialogTitle>
+                            {hasAnswers ? "Are you sure you want to exit and submit?" : "Are you sure you want to leave?"}
+                        </AlertDialogTitle>
                         <AlertDialogDescription>
-                            All responses will be submitted and you won’t be able to resume.
+                            {hasAnswers 
+                                ? "All current responses will be submitted as your final assessment. You won't be able to resume later." 
+                                : "You haven't answered any questions yet. Do you really want to go back to the dashboard?"}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>No</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => {
+                        <AlertDialogCancel>No, Stay</AlertDialogCancel>
+                        <AlertDialogAction className={hasAnswers ? "bg-blue-600 hover:bg-blue-700" : "bg-slate-900 hover:bg-slate-800"} onClick={() => {
                             setShowExitModal(false);
                             handleExitTest();
-                        }}>Yes</AlertDialogAction>
+                        }}>{hasAnswers ? "Yes, Submit" : "Yes, Leave"}</AlertDialogAction>
+
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
