@@ -59,7 +59,7 @@ export const ConfirmationStep = ({
 
             <div className="w-full max-w-5xl bg-white rounded-3xl border border-slate-200 shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
 
-                
+
                 {/* Header - Minimal height to ensure visibility of footer */}
                 <div className="bg-slate-900 px-6 py-3 text-white flex flex-row items-center justify-between shrink-0">
                     <div className="flex flex-col">
@@ -86,7 +86,7 @@ export const ConfirmationStep = ({
 
                 {/* Content - Compacted for visibility */}
                 <div className="p-5 flex-1 space-y-5 flex flex-col justify-center overflow-hidden">
-                    
+
                     {/* Status Grid */}
                     <div className="grid grid-cols-3 gap-3">
                         <FeatureBadge icon={<Eye className="w-4 h-4" />} label="Gaze" data="Live Sync" />
@@ -108,11 +108,11 @@ export const ConfirmationStep = ({
 
                         {/* Note */}
                         <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 flex flex-col justify-center text-center">
-                           <BrainCircuit className="w-5 h-5 text-blue-600 mb-2 mx-auto opacity-50" />
-                           <h4 className="text-[10px] font-black text-slate-800 mb-0.5">Note</h4>
-                           <p className="text-[10px] text-slate-500 leading-tight">
-                               "Minimum movement recommended for calibration."
-                           </p>
+                            <BrainCircuit className="w-5 h-5 text-blue-600 mb-2 mx-auto opacity-50" />
+                            <h4 className="text-[10px] font-black text-slate-800 mb-0.5">Note</h4>
+                            <p className="text-[10px] text-slate-500 leading-tight">
+                                "Minimum movement recommended for calibration."
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -120,7 +120,7 @@ export const ConfirmationStep = ({
                 {/* Footer - Crucial Buttons */}
                 <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between shrink-0">
                     <Button onClick={onBack} variant="ghost" className="text-slate-500 text-xs h-10 px-4 font-black hover:bg-slate-200 transition-all rounded-lg">
-                        <ArrowLeft className="w-4 h-4 mr-2" /> 
+                        <ArrowLeft className="w-4 h-4 mr-2" />
                         Back
                     </Button>
 
@@ -135,9 +135,7 @@ export const ConfirmationStep = ({
                 </div>
             </div>
 
-            <p className="text-[9px] text-slate-400 mt-4 font-black tracking-widest opacity-60">
-                 SECURE SESSION // GUARD 31.5 
-            </p>
+
 
 
             <style>{`
@@ -172,4 +170,4 @@ const ProtocolItem = ({ title, desc, icon }: any) => (
     </div>
 );
 
-
+

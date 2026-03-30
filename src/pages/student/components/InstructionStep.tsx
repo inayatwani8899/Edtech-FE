@@ -23,18 +23,9 @@ export const InstructionStep = ({ currentTest, onContinue, onBack, stepNumber }:
     return (
         // Fixed screen height, no scrolling allowed on the body
         <div className="h-screen w-full bg-slate-50 flex flex-col items-center justify-center p-4 md:p-8 overflow-hidden">
-
-
-            {/* Progress Indicator - Minimal margin */}
-            <div className="mb-4 flex justify-center gap-2 shrink-0">
-                {[1, 2, 3].map((s) => (
-                    <div key={s} className={`h-1.5 rounded-full transition-all duration-300 ${s === stepNumber ? "w-12 bg-blue-600" : "w-6 bg-slate-200"}`} />
-                ))}
-            </div>
-
-
             {/* Main Container - max-h set to leave room for padding/progress */}
             <div className="w-full max-w-5xl bg-white rounded-3xl border border-slate-200 shadow-2xl flex flex-col max-h-[92vh] overflow-hidden">
+
 
 
                 {/* Header - Fixed Height */}
