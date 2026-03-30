@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import {
     ChevronLeft, ChevronRight, CheckCircle, Timer,
     Minimize, Maximize, BrainCircuit, Activity,
-    ShieldCheck, LogOut, Target, Fingerprint
+    ShieldCheck, LogOut, Target, Fingerprint, Brain
 } from "lucide-react";
+
 import {
     AlertDialog,
     AlertDialogAction,
@@ -154,17 +155,28 @@ export const TestInterface = ({
             {/* AI Top Bar */}
             <div className="flex-none bg-slate-900 text-white z-20 shadow-xl border-b border-blue-500/20">
                 <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center shadow-[0_0_15px_rgba(37,99,235,0.4)]">
-                            <BrainCircuit className="h-5 w-5 text-white" />
-                        </div>
-                        <div>
-                            <h1 className="text-xs font-black uppercase tracking-[0.2em] leading-none text-blue-50">Neural Assessment</h1>
-                            <p className="text-[10px] text-blue-400 font-bold opacity-90 leading-none mt-1 uppercase tracking-widest">
-                                {currentCategory} <span className="text-slate-600 mx-1">/</span> PHASE {currentPage}
-                            </p>
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-3 min-w-0 font-sans">
+                            {/* CognifyIQ Official Logo Style */}
+                            <div className="flex h-[38px] w-[38px] flex-shrink-0 items-center justify-center rounded-[12px] border bg-white/5 border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
+                                <Brain className="h-6 w-6 text-blue-500 stroke-[2]" />
+                            </div>
+                            
+                            <div className="flex flex-col min-w-0">
+                                <div className="flex items-baseline font-black tracking-tight text-[20px] leading-[1.1] font-sans">
+                                    <span className="text-white">Cognify</span>
+                                    <span className="text-blue-500 ml-0.5 italic">IQ</span>
+                                </div>
+                                <div className="flex items-center gap-1.5 mt-0.5">
+                                    <div className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-emerald-500 opacity-90 shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
+                                    <span className="text-[8px] font-black tracking-[0.2em] text-slate-400 uppercase whitespace-nowrap">
+                                        {currentCategory} <span className="text-slate-700 mx-0.5">//</span> PHASE {currentPage}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     </div>
+
 
                     <div className="flex items-center gap-6">
                         <div className="hidden sm:flex flex-col items-end gap-1 px-4 border-r border-white/10">
@@ -211,14 +223,18 @@ export const TestInterface = ({
                         </div>
                     )}
 
-                    <div className="flex-none grid grid-cols-[1fr_repeat(5,85px)] md:grid-cols-[1fr_repeat(5,110px)] bg-slate-900 text-white sticky top-0 z-30 shadow-md">
-                        <div className="p-3 text-[10px] font-black uppercase tracking-widest pl-6 self-center text-blue-200">Matrix Parameter</div>
+                    <div className="flex-none grid grid-cols-[1fr_repeat(5,85px)] md:grid-cols-[1fr_repeat(5,110px)] bg-slate-900 border-b border-white/5 text-white sticky top-0 z-30 shadow-md">
+                        <div className="p-4 text-[10px] font-black uppercase tracking-[0.3em] pl-10 self-center text-blue-400">
+                             {currentCategory}
+                        </div>
                         {testQuestions.length > 0 && testQuestions[0].options.map((option) => (
-                            <div key={option.option_Id} className="p-3 text-center font-black text-[8px] uppercase tracking-tighter border-l border-white/5 flex items-center justify-center opacity-80">
+                            <div key={option.option_Id} className="p-4 text-center font-black text-[10px] uppercase tracking-wider border-l border-white/5 flex items-center justify-center text-slate-100 font-sans">
                                 {option.option_Text}
                             </div>
                         ))}
                     </div>
+
+
 
                     <div ref={questionsContainerRef} className="flex-1 overflow-y-auto w-full no-scrollbar scroll-smooth">
                         <div className="min-w-[700px]">
