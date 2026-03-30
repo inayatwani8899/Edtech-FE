@@ -19,6 +19,7 @@ interface ConfirmationStepProps {
     onBack: () => void;
     isLoading: boolean;
     stepNumber: number;
+    mediaStreamRef?: React.MutableRefObject<MediaStream | null>;
 }
 
 export const ConfirmationStep = ({
@@ -26,7 +27,8 @@ export const ConfirmationStep = ({
     onStart,
     onBack,
     isLoading,
-    stepNumber
+    stepNumber,
+    mediaStreamRef
 }: ConfirmationStepProps) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [streamError, setStreamError] = useState(false);
@@ -37,6 +39,7 @@ export const ConfirmationStep = ({
                 const stream = await navigator.mediaDevices.getUserMedia({
                     video: { width: 160, height: 160, facingMode: "user" }
                 });
+                if (mediaStreamRef) mediaStreamRef.current = stream;
                 if (videoRef.current) videoRef.current.srcObject = stream;
             } catch (err) {
                 setStreamError(true);
@@ -44,12 +47,11 @@ export const ConfirmationStep = ({
         }
         enableCamera();
         return () => {
-            if (videoRef.current?.srcObject) {
-                const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-                tracks.forEach(track => track.stop());
-            }
+            // We NO LONGER stop tracks here because the parent (useTestLogic) 
+            // manages the stream lifecycle and will stop it when the test completes
+            if (videoRef.current) videoRef.current.srcObject = null;
         };
-    }, []);
+    }, [mediaStreamRef]);
 
     return (
         <div className="h-[100dvh] w-full bg-slate-50 flex flex-col items-center justify-center p-3 md:p-6 overflow-hidden font-sans">

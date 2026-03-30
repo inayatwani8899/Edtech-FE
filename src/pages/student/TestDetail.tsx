@@ -37,6 +37,8 @@ export const TestDetail = () => {
     getCurrentAnswer,
     setAnswerLocally,
     navigate,
+    mediaStreamRef,
+    stopCamera
   } = useTestLogic();
 
   // Loading state
@@ -166,9 +168,13 @@ export const TestDetail = () => {
       <ConfirmationStep
         currentTest={currentTest}
         onStart={handleStartTest}
-        onBack={handleBackToPrevStep}
+        onBack={() => {
+          stopCamera();
+          handleBackToPrevStep();
+        }}
         isLoading={testTakingLoading}
         stepNumber={1}
+        mediaStreamRef={mediaStreamRef}
       />
     );
   }

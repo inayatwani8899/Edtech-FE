@@ -39,11 +39,24 @@ export const useTestLogic = () => {
     const [currentStep, setCurrentStep] = useState(0); // 0: Instructions, 1: Ready, 2: Test
     const testContainerRef = useRef<HTMLDivElement>(null);
     const questionsContainerRef = useRef<HTMLDivElement>(null);
+    const mediaStreamRef = useRef<MediaStream | null>(null);
+
+    const stopCamera = useCallback(() => {
+        if (mediaStreamRef.current) {
+            mediaStreamRef.current.getTracks().forEach(track => track.stop());
+            mediaStreamRef.current = null;
+        }
+    }, []);
 
     // Fetch test details on mount
     useEffect(() => {
         if (testId) fetchTestById(testId);
     }, [testId, fetchTestById]);
+
+    // Cleanup camera on page unmount
+    useEffect(() => {
+        return () => stopCamera();
+    }, [stopCamera]);
 
     // Timer logic
     useEffect(() => {
@@ -110,6 +123,7 @@ export const useTestLogic = () => {
                 title: "Test Auto-Submitted",
                 description: "Time's up! Your test has been automatically submitted.",
             });
+            stopCamera();
             resetTestState();
             navigate("/results");
         } catch (err: any) {
@@ -201,6 +215,7 @@ export const useTestLogic = () => {
         try {
             await exitFullScreen();
             await submitTest(testId, String(user.id));
+            stopCamera();
             resetTestState();
             toast({
                 title: "Test Submitted",
@@ -316,6 +331,7 @@ export const useTestLogic = () => {
                 description: "Thank you for completing the test!"
             });
 
+            stopCamera();
             resetTestState();
             navigate("/results");
 
@@ -354,6 +370,7 @@ export const useTestLogic = () => {
                     if (success) {
                         setCurrentStep(0);
                         await exitFullScreen();
+                        stopCamera();
                         resetTestState();
                     }
                     return success;
@@ -481,5 +498,7 @@ export const useTestLogic = () => {
         getCurrentAnswer,
         setAnswerLocally,
         navigate,
+        mediaStreamRef,
+        stopCamera
     };
 };
