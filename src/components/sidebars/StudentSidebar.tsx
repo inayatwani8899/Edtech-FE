@@ -116,10 +116,12 @@ export function StudentSidebar() {
                 )}
             >
                 {/* Fixed Header - Scaled Down */}
+                {/* Slimmed Header */}
                 <div className={cn(
-                    "flex px-3.5 py-5 transition-all duration-300",
+                    "flex px-3.5 py-3 transition-all duration-300",
                     isCollapsed ? "flex-col items-center gap-4" : "justify-between items-center"
                 )}>
+
                     <div className="flex items-center gap-2.5 min-w-0">
                         {/* Scaled Logo Container */}
                         <div className={cn(
@@ -164,8 +166,11 @@ export function StudentSidebar() {
                     </button>
                 </div>
 
-                {/* Navigation Section */}
-                <SidebarGroup className="flex-1">
+                {/* Navigation Menu Area - Ultra Compact */}
+                <div className="flex-1 flex flex-col min-h-0 pt-0 px-0 overflow-hidden">
+                    <SidebarGroup className="flex-none py-1">
+
+
                     {!isCollapsed && (
                         <div className="px-4 mb-4 flex items-center gap-4">
                             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-600 whitespace-nowrap">
@@ -178,12 +183,12 @@ export function StudentSidebar() {
                         </div>
                     )}
                     <SidebarGroupContent>
-                        <SidebarMenu className="space-y-1 px-1 py-2">
+                        <SidebarMenu className="space-y-0.5 px-1 py-0">
                             {studentMenuItems.map((item) => (
                                 <SidebarMenuItem key={item.title}>
-                                    <SidebarMenuButton asChild isActive={isActive(item.url)} className={`transition-all duration-200 rounded-lg ${theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"} group`}>
-                                        <NavLink to={item.url} title={item.title} className={`flex items-center gap-3 px-3 py-2.5 ${isCollapsed ? "justify-center" : ""} w-full`}>
-                                            <item.icon className={`h-5 w-5 ${isActive(item.url) ? item.color : theme === "dark" ? "text-slate-300" : "text-slate-500"} group-hover:scale-110 transition-transform duration-200`} />
+                                    <SidebarMenuButton asChild isActive={isActive(item.url)} className={`transition-all duration-200 rounded-lg ${theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"} group h-9`}>
+                                        <NavLink to={item.url} title={item.title} className={`flex items-center gap-3 px-3 py-1.5 ${isCollapsed ? "justify-center" : ""} w-full`}>
+                                            <item.icon className={`h-5 w-5 ${isActive(item.url) ? item.color : theme === "dark" ? "text-slate-300" : "text-slate-500"} group-hover:scale-105 transition-transform duration-200`} />
                                             <span className={`${isCollapsed ? "hidden" : "text-sm font-medium"}`}>{item.title}</span>
                                         </NavLink>
                                     </SidebarMenuButton>
@@ -191,7 +196,10 @@ export function StudentSidebar() {
                             ))}
                         </SidebarMenu>
                     </SidebarGroupContent>
+
                 </SidebarGroup>
+                </div>
+
 
                 {/* Footer Section */}
                 <div className={`px-3 py-3 border-t ${theme === "dark" ? "border-slate-700" : "border-slate-100"}`}>

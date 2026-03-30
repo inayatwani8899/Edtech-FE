@@ -125,11 +125,12 @@ export function AdminSidebar() {
                     theme === "dark" ? "bg-[#0b0d11] text-slate-100" : "bg-white text-slate-900 shadow-sm"
                 )}
             >
-                {/* Fixed Header - Scaled Down */}
+                {/* Fixed Header - Slimmed Down */}
                 <div className={cn(
-                    "flex px-3.5 py-5 transition-all duration-300",
+                    "flex px-3.5 py-3 transition-all duration-300",
                     isCollapsed ? "justify-center" : "justify-between items-center"
                 )}>
+
                     <div className="flex items-center gap-2.5 min-w-0">
                         {/* Scaled Logo Container */}
                         <div className={cn(
@@ -173,8 +174,12 @@ export function AdminSidebar() {
                     )}
                 </div>
 
-                {/* Navigation Section - REVERTED TO PREVIOUS BODY STYLE */}
-                <SidebarGroup className="flex-1">
+                {/* Navigation Menu Area - Ultra Compact */}
+                <div className="flex-1 flex flex-col min-h-0 pt-0 px-0 overflow-hidden">
+                    {/* Navigation Section */}
+                    <SidebarGroup className="py-1 flex-none">
+
+
                     {!isCollapsed && (
                         <div className="px-4 mb-4 flex items-center gap-4">
                             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-600 whitespace-nowrap">
@@ -186,23 +191,24 @@ export function AdminSidebar() {
                             )} />
                         </div>
                     )}
-                    <SidebarGroupContent>
-                        <SidebarMenu className="space-y-1 px-1 py-2">
-                            {adminMenuItems.map((item) => {
-                                const Icon = item.icon;
-                                return (
-                                    <SidebarMenuItem key={item.title}>
-                                        <SidebarMenuButton asChild isActive={isActive(item.url)} className={`transition-all duration-200 rounded-lg ${theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"} group`}>
-                                            <NavLink to={item.url} title={item.title} className={`flex items-center gap-3 px-3 py-2.5 ${isCollapsed ? "justify-center" : ""} w-full`}>
-                                                <Icon className={`h-5 w-5 ${isActive(item.url) ? item.color : theme === "dark" ? "text-slate-300" : "text-slate-500"} group-hover:scale-110 transition-transform duration-200`} />
-                                                <span className={`${isCollapsed ? "hidden" : "text-sm font-medium"}`}>{item.title}</span>
-                                            </NavLink>
-                                        </SidebarMenuButton>
-                                    </SidebarMenuItem>
-                                );
-                            })}
-                        </SidebarMenu>
-                    </SidebarGroupContent>
+                        <SidebarGroupContent>
+                            <SidebarMenu className="space-y-0.5 px-1 py-0">
+                                {adminMenuItems.map((item) => {
+                                    const Icon = item.icon;
+                                    return (
+                                        <SidebarMenuItem key={item.title}>
+                                            <SidebarMenuButton asChild isActive={isActive(item.url)} className={`transition-all duration-200 rounded-lg ${theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"} group h-8`}>
+                                                <NavLink to={item.url} title={item.title} className={`flex items-center gap-3 px-3 py-1.5 ${isCollapsed ? "justify-center" : ""} w-full`}>
+                                                    <Icon className={`h-4.5 w-4.5 ${isActive(item.url) ? item.color : theme === "dark" ? "text-slate-300" : "text-slate-500"} group-hover:scale-105 transition-transform duration-200`} />
+                                                    <span className={`${isCollapsed ? "hidden" : "text-sm font-medium"}`}>{item.title}</span>
+                                                </NavLink>
+                                            </SidebarMenuButton>
+                                        </SidebarMenuItem>
+                                    );
+                                })}
+                            </SidebarMenu>
+                        </SidebarGroupContent>
+
                 </SidebarGroup>
 
                 {/* Access Control Section */}
@@ -219,14 +225,14 @@ export function AdminSidebar() {
                         </div>
                     )}
                     <SidebarGroupContent>
-                        <SidebarMenu className="space-y-1 px-1 py-1">
+                        <SidebarMenu className="space-y-0.5 px-1 py-0">
                             {rbacMenuItems.map((item) => {
                                 const Icon = item.icon;
                                 return (
                                     <SidebarMenuItem key={item.title}>
-                                        <SidebarMenuButton asChild isActive={isActive(item.url)} className={`transition-all duration-200 rounded-lg ${theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"} group`}>
-                                            <NavLink to={item.url} title={item.title} className={`flex items-center gap-3 px-3 py-2 ${isCollapsed ? "justify-center" : ""} w-full`}>
-                                                <Icon className={`h-4.5 w-4.5 ${isActive(item.url) ? item.color : theme === "dark" ? "text-slate-300" : "text-slate-500"} group-hover:scale-110 transition-transform duration-200`} />
+                                        <SidebarMenuButton asChild isActive={isActive(item.url)} className={`transition-all duration-200 rounded-lg ${theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"} group h-8`}>
+                                            <NavLink to={item.url} title={item.title} className={`flex items-center gap-3 px-3 py-1 ${isCollapsed ? "justify-center" : ""} w-full`}>
+                                                <Icon className={`h-4.5 w-4.5 ${isActive(item.url) ? item.color : theme === "dark" ? "text-slate-300" : "text-slate-500"} group-hover:scale-105 transition-transform duration-200`} />
                                                 <span className={`${isCollapsed ? "hidden" : "text-sm font-medium"}`}>{item.title}</span>
                                             </NavLink>
                                         </SidebarMenuButton>
@@ -236,6 +242,9 @@ export function AdminSidebar() {
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
+                </div>
+
+
 
                 {/* Footer Section - REVERTED TO PREVIOUS FOOTER STYLE */}
                 <div className={`px-3 py-3 border-t ${theme === "dark" ? "border-slate-700" : "border-slate-100"}`}>
