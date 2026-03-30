@@ -18,8 +18,12 @@ import {
     UserCircle,
     Settings,
     Clock,
-    TrendingUp
+    TrendingUp,
+    User
 } from "lucide-react";
+
+import Swal from 'sweetalert2';
+
 import {
     Sidebar,
     SidebarContent,
@@ -77,9 +81,25 @@ export function CounselorSidebar() {
     const isActive = (path: string) => currentPath === path || currentPath.startsWith(`${path}/`);
 
     const handleLogout = () => {
-        logout();
-        navigate("/login");
+        Swal.fire({
+            title: 'Sign Out?',
+            text: 'Are you sure you want to end your professional session?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#94a3b8',
+            confirmButtonText: 'Yes, sign out',
+            cancelButtonText: 'Cancel',
+            background: theme === 'dark' ? '#0b0e14' : '#fff',
+            color: theme === 'dark' ? '#fff' : '#000',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                logout();
+                navigate("/login");
+            }
+        });
     };
+
 
     return (
         <Sidebar collapsible="icon" className="transition-all duration-300 border-none">
@@ -271,6 +291,16 @@ export function CounselorSidebar() {
                                     {theme === "dark" ? <Sun className="h-4 w-4 text-emerald-400 shadow-emerald-400" /> : <Moon className="h-4 w-4 text-emerald-600" />}
                                 </button>
                                 <button
+                                    onClick={() => navigate("/profile")}
+                                    title="Profile Settings"
+                                    className={cn(
+                                        "p-2 rounded-xl transition-all hover:scale-110 active:scale-90",
+                                        theme === "dark" ? "hover:bg-white/10" : "hover:bg-white shadow-sm"
+                                    )}
+                                >
+                                    <User className="h-4 w-4" />
+                                </button>
+                                <button
                                     onClick={handleLogout}
                                     className={cn(
                                         "p-2 rounded-xl transition-all hover:scale-110 active:scale-90 GROUP",
@@ -282,6 +312,14 @@ export function CounselorSidebar() {
                                 </button>
                             </div>
                         )}
+                        {isCollapsed && (
+                            <div className="flex flex-col gap-3 mt-4 items-center">
+                                <button onClick={handleLogout} title="Sign out" className="p-2 rounded-xl hover:bg-white/10 transition-all text-red-500">
+                                    <LogOut className="h-5 w-5" />
+                                </button>
+                            </div>
+                        )}
+
                     </div>
                 </div>
             </SidebarContent>

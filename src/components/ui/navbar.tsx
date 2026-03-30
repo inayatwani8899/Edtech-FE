@@ -44,52 +44,20 @@ export const Navbar = () => {
             </Link>
           </div>
 
-          {/* User Menu */}
+          {/* User Menu - Static Avatar Only (Options moved to Sidebar) */}
           <div className="flex items-center space-x-4">
             {isAuthenticated ? (
-              <>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={user?.avatar} />
-                        <AvatarFallback className="bg-primary text-primary-foreground">
-                          {user?.firstName?.charAt(0)?.toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56" align="end">
-                    <div className="flex items-center justify-start gap-2 p-2">
-                      <div className="flex flex-col space-y-1 leading-none">
-                        <p className="font-medium">{`${user?.firstName} ${user?.lastName}`}</p>
-                        <p className="w-[200px] truncate text-sm text-muted-foreground">
-                          {user?.email}
-                        </p>
-                      </div>
-                    </div>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link to="/profile">
-                        <User className="mr-2 h-4 w-4" />
-                        Profile
-                      </Link>
-                    </DropdownMenuItem>
-                    {user?.role === "Admin" && <DropdownMenuItem asChild>
-                      <Link to="/settings">
-                        <Settings className="mr-2 h-4 w-4" />
-                        Settings
-                      </Link>
-                    </DropdownMenuItem>}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={logout}>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Log out
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </>
+              <div className="relative h-8 w-8 rounded-full border-2 border-primary/10 p-0.5">
+                <Avatar className="h-full w-full">
+                  <AvatarImage src={user?.avatar} />
+                  <AvatarFallback className="bg-primary text-primary-foreground text-[10px] font-bold">
+                    {user?.firstName?.charAt(0)?.toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-white" />
+              </div>
             ) : (
+
               <div className="flex items-center space-x-2">
                 <Button variant="ghost" asChild>
                   <Link to="/login">Login</Link>

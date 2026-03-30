@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
+
 import {
     LayoutDashboard,
     Users,
@@ -26,7 +27,10 @@ import {
     Key,
     UserCog,
     UserCheck,
+    User,
 } from "lucide-react";
+import Swal from 'sweetalert2';
+
 import {
     Sidebar,
     SidebarContent,
@@ -64,8 +68,10 @@ export function AdminSidebar() {
     const { state, toggleSidebar } = useSidebar();
     const isCollapsed = state === "collapsed";
     const location = useLocation();
+    const navigate = useNavigate();
     const currentPath = location.pathname;
-    const { user } = useAuthStore();
+    const { user, logout } = useAuthStore();
+
 
     const [theme, setTheme] = useState<"dark" | "light">(() => {
         try {
@@ -89,6 +95,27 @@ export function AdminSidebar() {
     }, [theme]);
 
     const isActive = (path: string) => currentPath === path || currentPath.startsWith(`${path}/`);
+
+    const handleLogout = () => {
+        Swal.fire({
+            title: 'Sign Out?',
+            text: 'Are you sure you want to end your executive session?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#4f46e5',
+            cancelButtonColor: '#94a3b8',
+            confirmButtonText: 'Yes, sign out',
+            cancelButtonText: 'Cancel',
+            background: theme === 'dark' ? '#1e293b' : '#fff',
+            color: theme === 'dark' ? '#fff' : '#000',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                logout();
+                navigate("/login");
+            }
+        });
+    };
+
 
     return (
         <Sidebar collapsible="icon" className="transition-all duration-300 border-none">
@@ -235,13 +262,28 @@ export function AdminSidebar() {
                                     className={`p-1 rounded-md transition-colors ${theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"}`}
                                     title="Toggle Theme"
                                 >
-                                    {theme === "dark" ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4" />}
+                                    {theme === "dark" ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4 text-indigo-400" />}
                                 </button>
-                                <button onClick={() => { }} title="Sign out" className={`p-1 rounded-md ${theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"}`}>
-                                    <LogOut className="h-4 w-4" />
+                                <button
+                                    onClick={() => navigate("/profile")}
+                                    title="Admin Profile"
+                                    className={`p-1 rounded-md transition-colors ${theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"}`}
+                                >
+                                    <User className="h-4 w-4" />
+                                </button>
+                                <button onClick={handleLogout} title="Sign out" className={`p-1 rounded-md transition-colors ${theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"}`}>
+                                    <LogOut className="h-4 w-4 text-red-500" />
                                 </button>
                             </div>
                         )}
+                        {isCollapsed && (
+                            <div className="flex flex-col gap-2 mt-4">
+                                <button onClick={handleLogout} title="Sign out" className="p-1 rounded-md hover:bg-slate-800 transition-colors">
+                                    <LogOut className="h-4 w-4 text-red-500" />
+                                </button>
+                            </div>
+                        )}
+
                     </div>
                 </div>
             </SidebarContent>

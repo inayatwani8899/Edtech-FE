@@ -23,8 +23,11 @@ import {
     Award,
     Calendar,
     TrendingUp,
-    MessageCircle
+    MessageCircle,
+    User
 } from "lucide-react";
+import Swal from 'sweetalert2';
+
 import {
     Sidebar,
     SidebarContent,
@@ -84,9 +87,25 @@ export function StudentSidebar() {
     const isActive = (path: string) => currentPath === path || currentPath.startsWith(`${path}/`);
 
     const handleLogout = () => {
-        logout();
-        navigate("/login");
+        Swal.fire({
+            title: 'Sign Out?',
+            text: 'Are you sure you want to end your session?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#4f46e5',
+            cancelButtonColor: '#94a3b8',
+            confirmButtonText: 'Yes, sign out',
+            cancelButtonText: 'Cancel',
+            background: theme === 'dark' ? '#1e293b' : '#fff',
+            color: theme === 'dark' ? '#fff' : '#000',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                logout();
+                navigate("/login");
+            }
+        });
     };
+
 
     return (
         <Sidebar collapsible="icon" className="transition-all duration-300 border-none">
@@ -201,11 +220,26 @@ export function StudentSidebar() {
                                 >
                                     {theme === "dark" ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4" />}
                                 </button>
-                                <button onClick={handleLogout} title="Sign out" className={`p-1 rounded-md ${theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"}`}>
-                                    <LogOut className="h-4 w-4" />
+                                <button
+                                    onClick={() => navigate("/profile")}
+                                    title="Profile Settings"
+                                    className={`p-1 rounded-md transition-colors ${theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"}`}
+                                >
+                                    <User className="h-4 w-4" />
+                                </button>
+                                <button onClick={handleLogout} title="Sign out" className={`p-1 rounded-md transition-colors ${theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"}`}>
+                                    <LogOut className="h-4 w-4 text-red-500" />
                                 </button>
                             </div>
                         )}
+                        {isCollapsed && (
+                            <div className="flex flex-col gap-2 mt-4">
+                                <button onClick={handleLogout} title="Sign out" className="p-1 rounded-md hover:bg-slate-800 transition-colors">
+                                    <LogOut className="h-4 w-4 text-red-500" />
+                                </button>
+                            </div>
+                        )}
+
                     </div>
                 </div>
             </SidebarContent>
