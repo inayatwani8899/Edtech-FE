@@ -70,7 +70,7 @@ export const StudentLayout = () => {
         <StudentSidebar />
         <div className="flex-1 flex flex-col">
           {/* Header */}
-          <Navbar />
+          {/* <Navbar /> */}
 
           {/* Main Content */}
           <main className="flex-1 overflow-auto">
