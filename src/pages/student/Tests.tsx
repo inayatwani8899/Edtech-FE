@@ -708,19 +708,11 @@ export const Tests = () => {
                           width: "100%",
                         }}
                         disabled={processingTestId === test.id}
-                        onClick={async () => {
+                        onClick={() => {
                           setProcessingTestId(test.id);
-                          try {
-                            if (user?.grade) {
-                              await fetchQuestions(1, 10, null, test.id, user.grade);
-                              navigate(`/test/${test.id}`);
-                            } else {
-                              console.error("User grade not found");
-                            }
-                          } finally {
-                            setProcessingTestId(null);
-                          }
+                          navigate(`/test/${test.id}`);
                         }}
+
                       >
                         {processingTestId === test.id ? (
                           <>

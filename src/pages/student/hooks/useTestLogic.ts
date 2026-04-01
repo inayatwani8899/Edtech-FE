@@ -55,6 +55,14 @@ export const useTestLogic = () => {
         if (testId) fetchTestById(testId);
     }, [testId, fetchTestById]);
 
+    // Single source of truth for fetching questions when entering the interface
+    useEffect(() => {
+        if (testId && user?.grade && testQuestions.length === 0) {
+            fetchQuestions(1, 10, null, testId, user.grade);
+        }
+    }, [testId, user?.grade, fetchQuestions, testQuestions.length]);
+
+
     // Cleanup camera on page unmount
     useEffect(() => {
         return () => stopCamera();
@@ -267,15 +275,14 @@ export const useTestLogic = () => {
     const handleStartTest = async () => {
         if (!testId) return;
         try {
-            const limit = currentTest?.totalQuestionsPerPage ?? 10;
-            // reset to first page when starting
+            // Reset to first page when starting — data should already be in store from mount effect
             useTestStore.setState({ currentPage: 1 });
             setCurrentStep(2);
-            await fetchQuestions(1, limit, currentSession?.id ?? null, currentTest?.testId ?? testId, currentTest?.grade ?? undefined);
 
             if (currentTest?.timeDuration) {
                 setTimeRemaining(currentTest?.timeDuration * 60);
             }
+
 
             toast({
                 title: "Test Started",
