@@ -22,6 +22,11 @@ import { useTestStore } from "@/store/testStore";
 import { usePaymentStore } from "@/store/paymentStore";
 import { useTestConfigurationStore } from "@/store/testConfigurationStore";
 
+// Import API and Types
+import api from "@/api/axios";
+import { StudentDashboardStats, StudentDashboardResponse } from "@/types/types";
+
+
 // Mock AI Data
 const neuralSkillsData = [
   { subject: 'Logic', A: 85, fullMark: 100 },
@@ -49,20 +54,86 @@ export const StudentDashboard = () => {
   const [paidStatus, setPaidStatus] = useState<Record<string, boolean>>({});
   const [greeting, setGreeting] = useState("");
   const [testsCompleted, setTestsCompleted] = useState(0);
+  const [dashboardStats, setDashboardStats] = useState<StudentDashboardStats | null>(null);
 
-  const statsSummary = useMemo(() => [
-    { label: 'Tests Taken', value: testsCompleted, icon: CheckCircle2, color: 'text-emerald-500', accent: 'bg-emerald-500', bg: 'bg-emerald-500/10', progress: (testsCompleted / 12) * 100, route: '/results' },
-    { label: 'Avg Score', value: `75%`, icon: TrendingUp, color: 'text-primary', accent: 'bg-primary', bg: 'bg-primary/10', sub: 'Top 15%', route: '/results' },
-    { label: 'Points', value: '2,450', icon: Trophy, color: 'text-amber-500', accent: 'bg-amber-500', bg: 'bg-amber-500/10', sub: 'Lvl 4 Scholar', route: '/profile' },
-    { label: 'AI Readiness', value: 'High', icon: Zap, color: 'text-violet-500', accent: 'bg-violet-500', bg: 'bg-violet-500/10', sub: 'Ready for Tech', route: '/learning' },
-  ], [testsCompleted]);
+  const statsSummary = useMemo(() => {
+    // Exact mapping from Dashboard API response
+    const stats = {
+      testsTaken: dashboardStats?.testsTaken ?? testsCompleted,
+      avgScore: dashboardStats?.avgScore ?? 0,
+      points: dashboardStats?.points ?? 0,
+      highScore: dashboardStats?.highScore ?? 0,
+      attempts: dashboardStats?.attempts ?? 0
+    };
+
+    return [
+      { 
+        label: 'Tests Taken', 
+        value: stats.testsTaken, 
+        icon: CheckCircle2, 
+        color: 'text-emerald-500', 
+        accent: 'bg-emerald-500', 
+        bg: 'bg-emerald-500/10', 
+        progress: (stats.testsTaken / 5) * 100, 
+        route: '/results' 
+      },
+      { 
+        label: 'Avg Score', 
+        value: `${stats.avgScore}%`, 
+        icon: TrendingUp, 
+        color: stats.avgScore >= 70 ? 'text-primary' : stats.avgScore >= 40 ? 'text-amber-500' : 'text-slate-500', 
+        accent: 'bg-primary', 
+        bg: 'bg-primary/10', 
+        sub: `High: ${stats.highScore}%`, // Integrates high score accurately
+        route: '/results' 
+      },
+      { 
+        label: 'Points', 
+        value: stats.points.toLocaleString(), 
+        icon: Trophy, 
+        color: 'text-amber-500', 
+        accent: 'bg-amber-500', 
+        bg: 'bg-amber-500/10', 
+        sub: stats.points >= 2000 ? 'Lvl 4 Scholar' : stats.points >= 500 ? 'Lvl 2 Scholar' : 'Lvl 1 Scholar', 
+        route: '/profile' 
+      },
+      { 
+        label: 'Attempts', 
+        value: stats.attempts, 
+        icon: Target, // Changed to Target for attempts mapping
+        color: 'text-violet-500', 
+        accent: 'bg-violet-500', 
+        bg: 'bg-violet-500/10', 
+        sub: 'Total Engagement', 
+        route: '/learning' 
+      },
+    ];
+  }, [testsCompleted, dashboardStats]);
+
+
+
 
   useEffect(() => {
     getPublishedTests();
     fetchUserSubmissions({ pageNumber: 1, pageSize: 100 });
     const hour = new Date().getHours();
     setGreeting(hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening");
+
+    // Fetch dashboard stats from API
+    const fetchDashboardData = async () => {
+      try {
+        const response = await api.get<StudentDashboardResponse>("/StudentDashboard");
+        if (response.data.code === 200) {
+          setDashboardStats(response.data.data);
+          setTestsCompleted(response.data.data.testsTaken);
+        }
+      } catch (err) {
+        console.error("Failed to fetch student dashboard data:", err);
+      }
+    };
+    fetchDashboardData();
   }, [getPublishedTests, fetchUserSubmissions]);
+
 
   useEffect(() => {
     if (userSubmissions?.data) {

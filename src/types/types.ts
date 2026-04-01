@@ -199,3 +199,14 @@ export interface CategoryResponse {
     limit: number;
   };
 }
+
+// ---------- Student Dashboard Type ----------
+export interface StudentDashboardStats {
+  testsTaken: number;
+  attempts: number;
+  avgScore: number;
+  points: number;
+  highScore: number;
+}
+
+export interface StudentDashboardResponse extends GenericResponse<StudentDashboardStats> { }
