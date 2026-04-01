@@ -531,10 +531,10 @@ export const useTestStore = create<TestState>((set, get) => ({
             const response = await api.get(`/QuestionBank/GetQuestions`, {
                 params: {
                     // Prefer explicit params passed in; fall back to currentTest values
-                    // testId: testIdParam ?? get().currentTest?.testId ?? undefined,
-                    // gradeId: gradeIdParam ?? get().currentTest?.grade ?? undefined,
-                    testId: 1,
-                    gradeId: 1,
+                    testId: testIdParam ?? get().currentTest?.testId ?? undefined,
+                    gradeId: gradeIdParam ?? get().currentTest?.grade ?? undefined,
+                    // testId: 1,
+                    // gradeId: 1,
                     page,
                     pageSize: 100000,
                     sessionId: currentSessionId || undefined

@@ -21,6 +21,8 @@ import { GraduationCap, ArrowLeft, User, Mail, Lock, Calendar, Phone, ChevronRig
 import { useToast } from "@/hooks/use-toast";
 import { useAuthStore } from "@/store/useAuthStore";
 import Swal from "sweetalert2";
+import api from "@/api/axios";
+
 
 const StudentRegister = () => {
   const navigate = useNavigate();
@@ -41,6 +43,24 @@ const StudentRegister = () => {
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [grades, setGrades] = useState<{ id: number; name: string }[]>([]);
+
+  useEffect(() => {
+    const fetchGrades = async () => {
+      try {
+        const response = await api.get("/Grade", {
+          params: { page: 1, limit: 100, sortDirection: "asc" }
+        });
+        if (response.data.code === 200) {
+          setGrades(response.data.data.grades);
+        }
+      } catch (err) {
+        console.error("Failed to fetch grades:", err);
+      }
+    };
+    fetchGrades();
+  }, []);
+
 
   useEffect(() => {
     window.scroll(0, 0);
@@ -332,10 +352,20 @@ const StudentRegister = () => {
                                 <SelectValue placeholder="Grade" />
                               </SelectTrigger>
                               <SelectContent className="bg-[#12141c] border-white/10 text-white font-bold text-[11px] rounded-lg">
-                                <SelectItem value="high-school" className="focus:bg-indigo-500 rounded-md">High School</SelectItem>
-                                <SelectItem value="undergraduate" className="focus:bg-indigo-500 rounded-md">Undergraduate</SelectItem>
-                                <SelectItem value="graduate" className="focus:bg-indigo-500 rounded-md">Graduate</SelectItem>
+                                {grades.length > 0 ? (
+                                  grades.map((grade) => (
+                                    <SelectItem key={grade.id} value={grade.id.toString()} className="focus:bg-indigo-500 rounded-md">
+                                      {grade.name}
+                                    </SelectItem>
+                                  ))
+                                ) : (
+                                  <div className="p-2 text-center text-white/30 text-[9px] uppercase tracking-widest">
+                                    Loading grades...
+                                  </div>
+                                )}
+
                               </SelectContent>
+
                             </Select>
                           </div>
                         </div>
