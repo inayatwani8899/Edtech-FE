@@ -61,19 +61,20 @@ export const ConfirmationStep = ({
 
 
                 {/* Header - Minimal height to ensure visibility of footer */}
-                <div className="bg-slate-900 px-6 py-3 text-white flex flex-row items-center justify-between shrink-0">
-                    <div className="flex flex-col">
-                        <span className="text-blue-400 text-[9px] font-black uppercase tracking-widest font-sans opacity-70">Module 03 // Biometric Setup</span>
-                        <h1 className="text-xl md:text-2xl font-black tracking-tight font-sans leading-none">
-                            Psychometric Validation
+                {/* Header - Stacks camera on mobile if needed or keeps it compact */}
+                <div className="bg-slate-900 px-5 md:px-6 py-4 text-white flex flex-row items-center justify-between shrink-0 gap-4">
+                    <div className="flex flex-col min-w-0">
+                        <span className="text-blue-400 text-[8px] md:text-[9px] font-black uppercase tracking-widest font-sans opacity-70">Module 03 // Biometric Setup</span>
+                        <h1 className="text-lg md:text-2xl font-black tracking-tight font-sans leading-tight">
+                            Psychometric <br className="block md:hidden" /> Validation
                         </h1>
                     </div>
-
+-
                     {/* Camera Preview - Compact */}
                     <div className="relative shrink-0">
-                        <div className="w-16 h-16 md:w-20 md:h-20 rounded-xl border border-white/10 overflow-hidden bg-slate-800 relative flex items-center justify-center">
+                        <div className="w-14 h-14 md:w-20 md:h-20 rounded-xl border border-white/10 overflow-hidden bg-slate-800 relative flex items-center justify-center">
                             {streamError ? (
-                                <CameraOff className="w-5 h-5 text-red-500/50" />
+                                <CameraOff className="w-4 h-4 md:w-5 md:h-5 text-red-500/50" />
                             ) : (
                                 <>
                                     <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover scale-x-[-1]" />
@@ -88,10 +89,11 @@ export const ConfirmationStep = ({
                 <div className="p-5 flex-1 space-y-5 flex flex-col justify-center overflow-hidden">
 
                     {/* Status Grid */}
-                    <div className="grid grid-cols-3 gap-3">
+                    {/* Status Grid - Partial wrap on mobile */}
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                         <FeatureBadge icon={<Eye className="w-4 h-4" />} label="Gaze" data="Live Sync" />
                         <FeatureBadge icon={<MessageSquare className="w-4 h-4" />} label="Sentiment" data="Calibrated" />
-                        <FeatureBadge icon={<Sparkles className="w-4 h-4" />} label="Logic" data="Monitoring" />
+                        <FeatureBadge icon={<Sparkles className="w-4 h-4 md:hidden lg:block" />} label="Logic" data="Monitoring" className="col-span-2 md:col-span-1" />
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-4">
@@ -118,19 +120,20 @@ export const ConfirmationStep = ({
                 </div>
 
                 {/* Footer - Crucial Buttons */}
-                <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between shrink-0">
-                    <Button onClick={onBack} variant="ghost" className="text-slate-500 text-xs h-10 px-4 font-black hover:bg-slate-200 transition-all rounded-lg">
-                        <ArrowLeft className="w-4 h-4 mr-2" />
-                        Back
+                {/* Footer - Crucial Buttons */}
+                <div className="px-5 md:px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between shrink-0 gap-3 font-sans">
+                    <Button onClick={onBack} variant="ghost" className="text-slate-500 text-[10px] h-10 px-4 font-black hover:bg-slate-200 transition-all rounded-lg">
+                        <ArrowLeft className="w-3.5 h-3.5 mr-2" />
+                        PREV
                     </Button>
 
                     <Button
                         onClick={onStart}
                         disabled={isLoading || streamError}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-8 h-11 text-xs font-black rounded-lg shadow-lg shadow-blue-200 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2"
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 md:px-8 h-11 text-[10px] font-black rounded-lg shadow-lg shadow-blue-200 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2"
                     >
-                        START ASSESSMENT
-                        <ArrowRight className="w-4 h-4" />
+                        START TEST
+                        <ArrowRight className="w-3.5 h-3.5" />
                     </Button>
                 </div>
             </div>

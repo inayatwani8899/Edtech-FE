@@ -96,7 +96,7 @@ a { text-decoration: none; color: inherit; }
    HERO — Centered, bold, clean
 ═══════════════════════════════════════ */
 .hero-section {
-  padding: 160px 32px 80px;
+  padding: 120px 16px 60px;
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -959,5 +959,28 @@ a { text-decoration: none; color: inherit; }
   .ai-radar { margin: 0 auto; }
   .dept-mock { grid-template-columns: 1fr; }
   .report-score-row { flex-direction: column; gap: 8px; }
+}
+
+@media (max-width: 480px) {
+  .lp-nav { padding: 12px 16px; }
+  .hero-section { padding: 90px 12px 40px; }
+  .hero-h1 { font-size: 2rem; }
+  .hero-sub { font-size: 0.9rem; }
+  .hero-preview { margin-top: 32px; }
+  .preview-body { padding: 12px; gap: 10px; }
+  .logos-section { padding: 24px 12px; }
+  .logos-row { gap: 16px; }
+  .logo-item { font-size: 0.85rem; }
+  .features-section, .how-section, .usecases-section, .enterprise-section, .cta-section { padding: 48px 12px; }
+  .proof-section { padding: 40px 12px; }
+  .stats-section { padding: 32px 12px; }
+  .bento-card { padding: 16px; }
+  .lp-footer { padding: 28px 12px 20px; }
+  .footer-links { flex-wrap: wrap; gap: 10px; justify-content: center; }
+  .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
+  .hero-ctas { width: 100%; padding: 0 4px; gap: 8px; }
+  .section-title { font-size: 1.5rem; }
+  .nav-actions .btn-nav-ghost { display: none; }
+  .proof-grid { grid-template-columns: 1fr; gap: 12px; }
 }
 `;

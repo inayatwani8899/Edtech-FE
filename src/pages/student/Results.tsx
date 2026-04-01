@@ -399,8 +399,8 @@ export const Results = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="p-0">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left">
+                  <div className="overflow-x-auto w-full">
+                    <table className="min-w-[800px] md:min-w-full text-sm text-left">
                       <thead className="bg-slate-50/80 text-slate-500 font-bold uppercase text-[10px] tracking-wider">
                         <tr>
                           <th

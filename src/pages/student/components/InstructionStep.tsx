@@ -28,22 +28,22 @@ export const InstructionStep = ({ currentTest, onContinue, onBack, stepNumber }:
 
 
 
-                {/* Header - Fixed Height */}
-                <div className="bg-slate-900 px-8 py-6 text-white flex flex-row items-center justify-between shrink-0">
-                    <div className="flex flex-col">
-                        <span className="text-blue-400 text-xs font-bold uppercase tracking-widest mb-1">Assessment Module</span>
-                        <h1 className="text-2xl font-black truncate max-w-[300px] md:max-w-none">
+                {/* Header - Stacks on mobile */}
+                <div className="bg-slate-900 px-6 md:px-8 py-5 md:py-6 text-white flex flex-col md:flex-row items-start md:items-center justify-between shrink-0 gap-4">
+                    <div className="flex flex-col min-w-0">
+                        <span className="text-blue-400 text-[10px] md:text-xs font-bold uppercase tracking-widest mb-1">Assessment Module</span>
+                        <h1 className="text-xl md:text-2xl font-black truncate w-full">
                             {currentTest?.title || "Technical Evaluation"}
                         </h1>
                     </div>
-                    <div className="flex gap-8 border-l border-white/10 pl-8 shrink-0">
-                        <div className="text-right">
-                            <p className="text-slate-400 text-[10px] uppercase font-black tracking-tighter">TOTAL TIME</p>
-                            <p className="text-xl font-black">{currentTest?.timeDuration || 60}m</p>
+                    <div className="flex gap-6 md:gap-8 border-t md:border-t-0 md:border-l border-white/10 pt-4 md:pt-0 md:pl-8 w-full md:w-auto shrink-0">
+                        <div className="flex-1 md:text-right">
+                            <p className="text-slate-400 text-[9px] uppercase font-black tracking-tighter">TOTAL TIME</p>
+                            <p className="text-lg md:text-xl font-black">{currentTest?.timeDuration || 60}m</p>
                         </div>
-                        <div className="text-right">
-                            <p className="text-slate-400 text-[10px] uppercase font-black tracking-tighter">TOTAL ITEMS</p>
-                            <p className="text-xl font-black">{currentTest?.questionCount || currentTest?.totalQuestions || "N/A"}</p>
+                        <div className="flex-1 md:text-right">
+                            <p className="text-slate-400 text-[9px] uppercase font-black tracking-tighter">TOTAL ITEMS</p>
+                            <p className="text-lg md:text-xl font-black">{currentTest?.questionCount || currentTest?.totalQuestions || "N/A"}</p>
                         </div>
                     </div>
                 </div>
@@ -52,8 +52,8 @@ export const InstructionStep = ({ currentTest, onContinue, onBack, stepNumber }:
                 {/* Scrollable Content Area - ONLY this part scrolls if screen is tiny */}
                 <div className="p-8 flex-1 overflow-y-auto min-h-0 custom-scrollbar">
 
-                    {/* Quick Specs Grid */}
-                    <div className="grid grid-cols-3 gap-4 mb-8">
+                    {/* Quick Specs Grid - Stacks on mobile */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-8">
                         <SmallSpecCard icon={<Clock className="w-5 h-5 text-blue-600" />} label="Limit" value={`${currentTest?.timeDuration || 60}m`} />
                         <SmallSpecCard icon={<Zap className="w-5 h-5 text-amber-500" />} label="Save" value="Auto" />
                         <SmallSpecCard icon={<FileText className="w-5 h-5 text-emerald-500" />} label="Type" value="MCQ" />
@@ -103,14 +103,14 @@ export const InstructionStep = ({ currentTest, onContinue, onBack, stepNumber }:
 
 
                 {/* Footer - Fixed Height */}
-                <div className="px-8 py-5 bg-slate-50 border-t border-slate-100 flex items-center justify-between shrink-0">
-                    <Button onClick={onBack} variant="ghost" className="text-slate-500 text-sm h-11 px-6 hover:bg-slate-100 rounded-xl transition-all">
+                <div className="px-6 md:px-8 py-5 md:py-5 bg-slate-50 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between shrink-0 gap-3">
+                    <Button onClick={onBack} variant="ghost" className="text-slate-500 text-xs h-10 px-4 hover:bg-slate-100 rounded-xl transition-all order-2 md:order-1 w-full md:w-auto">
                         <LayoutDashboard className="w-4 h-4 mr-2" />
-                        Back to Dashboard
+                        Dashboard
                     </Button>
-
-                    <Button onClick={onContinue} className="bg-blue-600 hover:bg-blue-700 text-white px-8 h-12 text-sm font-bold rounded-xl shadow-lg shadow-blue-200 transition-all flex items-center gap-2">
-                        Continue to System Check
+                    
+                    <Button onClick={onContinue} className="bg-blue-600 hover:bg-blue-700 text-white px-8 h-12 text-sm font-bold rounded-xl shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2 order-1 md:order-2 w-full md:w-auto">
+                        Continue
                         <ArrowRight className="w-4 h-4" />
                     </Button>
                 </div>

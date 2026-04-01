@@ -259,17 +259,13 @@ export const Tests = () => {
 
           {/* ── Search + Tabs bar ─────────────────────────── */}
           <div
+            className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 mb-8"
             style={{
-              display: "flex",
-              flexWrap: "wrap",
-              alignItems: "center",
-              gap: 12,
-              marginBottom: 28,
               animation: "fadeUp 0.55s ease 0.05s both",
             }}
           >
             {/* Search */}
-            <div style={{ position: "relative", flex: "1 1 220px", minWidth: 180 }}>
+            <div className="relative w-full sm:w-[280px]">
               <Search
                 size={14}
                 color="#475569"
@@ -285,14 +281,15 @@ export const Tests = () => {
                   boxSizing: "border-box",
                   background: "#f8fafc",
                   border: "1px solid rgba(0,0,0,0.1)",
-                  borderRadius: 10,
-                  height: 38,
-                  paddingLeft: 36,
+                  borderRadius: 12,
+                  height: 42,
+                  paddingLeft: 40,
                   paddingRight: 12,
                   color: "#1e293b",
                   fontSize: 13,
                   outline: "none",
                   fontFamily: "inherit",
+                  boxShadow: "0 1px 2px rgba(0,0,0,0.02)",
                 }}
                 onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(99,102,241,0.5)")}
                 onBlur={(e) => (e.currentTarget.style.borderColor = "rgba(0,0,0,0.1)")}
@@ -301,31 +298,26 @@ export const Tests = () => {
 
             {/* Tabs */}
             <div
-              style={{
-                display: "flex",
-                background: "rgba(0,0,0,0.04)",
-                border: "1px solid rgba(0,0,0,0.07)",
-                borderRadius: 10,
-                padding: 3,
-                gap: 2,
-              }}
+              className="flex items-center bg-slate-100/80 p-1 rounded-xl border border-slate-200/50 w-full sm:w-auto overflow-x-auto no-scrollbar"
             >
               {TABS.map((tab) => (
                 <button
                   key={tab.id}
-                  className="tab-btn"
+                  className="tab-btn whitespace-nowrap"
                   onClick={() => setActiveTab(tab.id)}
                   style={{
-                    padding: "5px 16px",
-                    borderRadius: 7,
+                    padding: "6px 16px",
+                    borderRadius: 9,
                     border: "none",
                     fontSize: 11,
-                    fontWeight: 700,
-                    letterSpacing: "0.05em",
+                    fontWeight: 800,
+                    letterSpacing: "0.03em",
                     cursor: "pointer",
-                    background: activeTab === tab.id ? "rgba(99,102,241,0.12)" : "transparent",
+                    background: activeTab === tab.id ? "#fff" : "transparent",
                     color: activeTab === tab.id ? "#6366f1" : "#64748b",
                     fontFamily: "inherit",
+                    boxShadow: activeTab === tab.id ? "0 2px 4px rgba(0,0,0,0.05)" : "none",
+                    transition: "all 0.2s ease",
                   }}
                 >
                   {tab.label}
@@ -335,28 +327,19 @@ export const Tests = () => {
 
             {/* Count badge */}
             <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 5,
-                marginLeft: "auto",
-                fontSize: 11,
-                color: "#475569",
-                fontWeight: 600,
-                letterSpacing: "0.05em",
-              }}
+              className="hidden md:flex items-center gap-2 ml-auto text-[11px] font-bold text-slate-500 uppercase tracking-widest"
             >
               <div
                 style={{
                   width: 6,
                   height: 6,
                   borderRadius: "50%",
-                  background: isSyncingData ? "#94a3b8" : "#22d3ee",
-                  boxShadow: isSyncingData ? "none" : "0 0 8px rgba(34,211,238,0.6)",
+                  background: isSyncingData ? "#cbd5e1" : "#22d3ee",
+                  boxShadow: isSyncingData ? "none" : "0 0 8px rgba(34,211,238,0.5)",
                   animation: isSyncingData ? "none" : "pulse 2s infinite",
                 }}
               />
-              {isLoading ? "…" : filtered.length} tests {isSyncingData && "(syncing…)"}
+              {isLoading ? "Synchronizing…" : `${filtered.length} Assessments Active`}
             </div>
           </div>
 
@@ -473,11 +456,7 @@ export const Tests = () => {
           ) : (
             /* Test grid */
             <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(290px, 1fr))",
-                gap: 20,
-              }}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6"
             >
               {filtered.map((test, i) => {
                 const diff = getDifficultyMeta(test.difficulty);

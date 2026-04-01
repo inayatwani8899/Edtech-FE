@@ -226,7 +226,7 @@ export const StudentDashboard = () => {
         </div>
 
         {/* 2. Top 4 Compact Stats Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {statsSummary.map((stat, i) => (
             <Card key={i} className="group relative border-none shadow-sm bg-white/90 backdrop-blur-md hover:shadow-md transition-all duration-300 cursor-pointer overflow-hidden rounded-2xl" onClick={() => navigate(stat.route)}>
               <div className={`absolute top-0 left-0 w-1 h-full opacity-0 group-hover:opacity-100 transition-all duration-300 ${stat.accent}`} />
@@ -412,7 +412,7 @@ export const StudentDashboard = () => {
           </div>
 
           {/* Secondary Assessment Grid */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
             {otherTests?.slice(0, 4).map((test) => (
               <Card key={test.id} className="group border-none shadow-sm bg-white/60 backdrop-blur-sm rounded-3xl hover:shadow-xl hover:-translate-y-2 transition-all duration-500 overflow-hidden">
                 <CardHeader className="p-5 pb-3">

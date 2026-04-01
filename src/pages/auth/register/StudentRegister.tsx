@@ -129,7 +129,7 @@ const StudentRegister = () => {
   };
 
   return (
-    <div className="h-screen w-full bg-[#0a0c10] relative flex items-center justify-center overflow-hidden select-none">
+    <div className="min-h-screen w-full bg-[#0a0c10] relative flex items-center justify-center overflow-y-auto py-12 md:py-20 lg:py-0 select-none">
       {/* 🏠 Top-Left Navigation */}
       <div className="absolute top-6 left-6 md:left-12 z-50 flex items-center gap-3">
         <Link
