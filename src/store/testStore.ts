@@ -665,23 +665,9 @@ export const useTestStore = create<TestState>((set, get) => ({
             };
 
             // Specify responseType as blob because the backend returns the generated report
-            const response = await api.post(`/tests/submit`, payload, {
+            await api.post(`/tests/submit`, payload, {
                 responseType: 'blob'
             });
-
-            // Trigger file download if a blob was returned
-            if (response.data instanceof Blob && response.data.size > 0) {
-                const blob = new Blob([response.data], { type: 'text/html' });
-                const url = window.URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                const testTitle = get().currentTest?.title?.replace(/\s+/g, "_") || "Report";
-                link.download = `${testTitle}_${testId}.html`;
-                document.body.appendChild(link);
-                link.click();
-                link.remove();
-                window.URL.revokeObjectURL(url);
-            }
 
             usePaymentStore.getState().clearPaidTest(userId, testId);
         } catch (err) {
