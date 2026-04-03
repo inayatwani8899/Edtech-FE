@@ -164,41 +164,34 @@ export const TestInterface = ({
             `}</style>
 
 
-            {/* AI Top Bar */}
+            {/* AI Top Bar - Compact on Mobile */}
             <div className="flex-none bg-slate-900 text-white z-20 shadow-xl border-b border-blue-500/20">
-                <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-                    <div className="flex items-center gap-6">
-                        <div className="flex items-center gap-3 min-w-0 font-sans">
-                            {/* CognifyIQ Official Logo Style */}
-                            <div className="flex h-[38px] w-[38px] flex-shrink-0 items-center justify-center rounded-[12px] border bg-white/5 border-white/10">
-                                <Brain className="h-6 w-6 text-blue-500 stroke-[2]" />
+                <div className="max-w-7xl mx-auto px-4 py-2 md:py-3 flex items-center justify-between">
+                    <div className="flex items-center gap-3 md:gap-6 min-w-0">
+                        <div className="flex items-center gap-2 md:gap-3 min-w-0 font-sans">
+                            <div className="flex h-8 w-8 md:h-[38px] md:w-[38px] flex-shrink-0 items-center justify-center rounded-lg md:rounded-[12px] border bg-white/5 border-white/10">
+                                <Brain className="h-4 w-4 md:h-6 md:w-6 text-blue-500 stroke-[2]" />
                             </div>
                             <div className="flex flex-col min-w-0">
-                                <div className="flex items-baseline font-black tracking-tight text-[18px] leading-[1.1] font-sans">
+                                <div className="flex items-baseline font-black tracking-tight text-sm md:text-lg leading-none font-sans">
                                     <span className="text-white">Cognify</span>
                                     <span className="text-blue-500 ml-0.5 italic">IQ</span>
                                 </div>
-                                {/* <div className="flex items-center gap-1.5 mt-0.5">
-                                    <div className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-emerald-500 opacity-90 animate-pulse" />
-                                    <span className="text-[8px] font-black tracking-[0.2em] text-slate-400 uppercase">
-                                        {currentCategory} <span className="text-slate-700 mx-0.5">//</span> PHASE {currentPage}
-                                    </span>
-                                </div> */}
                             </div>
                         </div>
 
-                        {/* Moved Timer to Top */}
-                        <div className="flex items-center gap-2 px-6 border-l border-white/10">
-                            <Timer className={`h-4 w-4 ${timeRemaining && timeRemaining < 300 ? 'text-red-500 animate-pulse' : 'text-blue-400'}`} />
-                            <span className="text-sm font-mono font-black tracking-widest text-blue-100">
+                        {/* Timer - Compact on mobile */}
+                        <div className="flex items-center gap-1.5 md:gap-2 px-3 md:px-6 border-l border-white/10">
+                            <Timer className={`h-3.5 w-3.5 md:h-4 md:w-4 ${timeRemaining && timeRemaining < 300 ? 'text-red-500 animate-pulse' : 'text-blue-400'}`} />
+                            <span className="text-xs md:text-sm font-mono font-black tracking-widest text-blue-100">
                                 {timeRemaining ? formatTime(timeRemaining) : '--:--'}
                             </span>
                         </div>
                     </div>
 
                     {/* Restored Focus Indicator to Top Right */}
-                    <div className="flex items-center gap-6">
-                        <div className="hidden sm:flex flex-col items-end gap-1 px-6 border-r border-white/10 overflow-hidden">
+                    <div className="flex items-center gap-2 md:gap-6">
+                        <div className="hidden lg:flex flex-col items-end gap-1 px-6 border-r border-white/10 overflow-hidden">
                             <div className="flex items-center gap-2">
                                 <Target className={`w-3 h-3 ${focusScore < 50 ? 'text-red-400 animate-pulse' : 'text-blue-400'}`} />
                                 <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Focus Index</span>
@@ -208,17 +201,17 @@ export const TestInterface = ({
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-4">
-
-                            <button onClick={isFullScreen ? exitFullScreen : enterFullScreen} className="p-2 hover:bg-white/5 rounded-lg transition-colors text-slate-400 hover:text-white" title="Toggle Fullscreen">
+                        <div className="flex items-center gap-2 md:gap-4">
+                            <button onClick={isFullScreen ? exitFullScreen : enterFullScreen} className="p-1.5 md:p-2 hover:bg-white/5 rounded-lg transition-colors text-slate-400 hover:text-white hidden sm:block" title="Toggle Fullscreen">
                                 {isFullScreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
                             </button>
 
-                            <div className="h-6 w-px bg-white/10" />
+                            <div className="h-5 w-px bg-white/10 hidden sm:block" />
 
-                            <button onClick={() => setShowExitModal(true)} className="flex items-center gap-2 bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all border border-red-600/20">
-                                <LogOut className="w-3.5 h-3.5" />
-                                Terminate
+                            <button onClick={() => setShowExitModal(true)} className="flex items-center gap-1.5 bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white px-2 py-1 md:px-3 md:py-1.5 rounded-lg text-[8px] md:text-[10px] font-black uppercase transition-all border border-red-600/20">
+                                <LogOut className="w-3 md:w-3.5 h-3 md:h-3.5" />
+                                <span className="hidden xs:inline">Terminate</span>
+                                <span className="xs:hidden">End</span>
                             </button>
                         </div>
                     </div>
@@ -251,12 +244,12 @@ export const TestInterface = ({
                         </div>
                     )}
 
-                    <div className="flex-none grid grid-cols-[1fr_repeat(5,85px)] md:grid-cols-[1fr_repeat(5,110px)] bg-slate-900 border-b border-white/5 text-white sticky top-0 z-30 shadow-md">
-                        <div className="p-4 text-[10px] font-black uppercase tracking-[0.3em] pl-10 self-center text-blue-400">
+                    <div className="flex-none grid grid-cols-[1fr_repeat(5,65px)] sm:grid-cols-[1fr_repeat(5,85px)] md:grid-cols-[1fr_repeat(5,110px)] bg-slate-900 border-b border-white/5 text-white sticky top-0 z-30 shadow-md min-w-[500px] sm:min-w-[700px] md:min-w-0">
+                        <div className="p-3 md:p-4 text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] pl-6 md:pl-10 self-center text-blue-400 truncate">
                             {currentCategory}
                         </div>
                         {testQuestions.length > 0 && testQuestions[0].options.map((option) => (
-                            <div key={option.option_Id} className="p-2.5 text-center font-black text-[9px] uppercase tracking-wider border-l border-white/5 flex items-center justify-center text-slate-100 font-sans">
+                            <div key={option.option_Id} className="p-1 px-1.5 md:p-2.5 text-center font-black text-[7px] md:text-[9px] uppercase tracking-wider border-l border-white/5 flex items-center justify-center text-slate-100 font-sans">
                                 {option.option_Text}
                             </div>
                         ))}
@@ -267,11 +260,11 @@ export const TestInterface = ({
 
                     <div ref={questionsContainerRef} className="flex-1 overflow-y-auto w-full custom-scrollbar scroll-smooth">
 
-                        <div className={`min-w-[700px] ${isFullScreen ? 'h-full flex flex-col' : ''}`}>
+                        <div className={`min-w-[500px] sm:min-w-[700px] md:min-w-0 ${isFullScreen ? 'h-full flex flex-col' : ''}`}>
                             {testQuestions.map((question, qIdx) => (
                                 <div
                                     key={question.question_Id}
-                                    className={`grid grid-cols-[1fr_repeat(5,85px)] md:grid-cols-[1fr_repeat(5,110px)] items-center border-b border-slate-100 transition-all hover:bg-blue-50/60 group relative ${qIdx % 2 === 1 ? 'bg-slate-50/40' : 'bg-white'} ${isFullScreen ? 'flex-1' : ''}`}
+                                    className={`grid grid-cols-[1fr_repeat(5,65px)] sm:grid-cols-[1fr_repeat(5,85px)] md:grid-cols-[1fr_repeat(5,110px)] items-center border-b border-slate-100 transition-all hover:bg-blue-50/60 group relative ${qIdx % 2 === 1 ? 'bg-slate-50/40' : 'bg-white'} ${isFullScreen ? 'flex-1' : ''}`}
                                 >
                                     {/* VISIBLE Scan Sweep */}
                                     <div className="ai-scan-line opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -306,21 +299,21 @@ export const TestInterface = ({
                 </div>
             </main>
 
-            {/* Bottom Section - More Compact Footer */}
+            {/* Bottom Section - Responsive Footer */}
             <div className="flex-none bg-white border-t border-slate-100 z-40 pb-2 shadow-[0_-4px_12px_rgba(0,0,0,0.02)]">
-                <div className="max-w-7xl mx-auto px-6 py-2 flex justify-between items-center">
-                    <Button variant="ghost" onClick={handlePreviousQuestion} disabled={!hasPrevious} className="h-8 text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 transition-all">
-                        <ChevronLeft className="h-3.5 w-3.5 mr-1" /> Previous Analysis
+                <div className="max-w-7xl mx-auto px-4 md:px-6 py-2 flex justify-between items-center gap-2">
+                    <Button variant="ghost" onClick={handlePreviousQuestion} disabled={!hasPrevious} className="h-8 px-2 md:px-4 text-[8px] md:text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 transition-all">
+                        <ChevronLeft className="h-3.5 w-3.5 md:mr-1" /> <span className="hidden xs:inline">Previous Analysis</span>
                     </Button>
 
-                    <div className="flex items-center gap-2 mt-1">
+                    <div className="hidden xs:flex items-center gap-1.5 md:gap-2 mt-1">
                         {Array.from({ length: totalPages }).map((_, i) => (
-                            <div key={i} className={`h-1 rounded-full transition-all duration-500 ${i + 1 === currentPage ? 'w-8 bg-blue-600' : 'w-1.5 bg-slate-200'}`} />
+                            <div key={i} className={`h-1 rounded-full transition-all duration-500 ${i + 1 === currentPage ? 'w-4 md:w-8 bg-blue-600' : 'w-1 md:w-1.5 bg-slate-200'}`} />
                         ))}
                     </div>
 
-                    <Button onClick={hasNext ? handleNextQuestion : () => setShowSubmitModal(true)} className={`h-9 px-6 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all active:scale-95 shadow-md ${hasNext ? 'bg-slate-900 text-white hover:bg-black' : 'bg-blue-600 text-white shadow-blue-500/20 hover:bg-blue-700'}`}>
-                        {hasNext ? "Next Page" : "Submit Results"} {hasNext && <ChevronRight className="h-3.5 w-3.5 ml-1" />}
+                    <Button onClick={hasNext ? handleNextQuestion : () => setShowSubmitModal(true)} className={`h-8 md:h-9 px-4 md:px-6 text-[8px] md:text-[9px] font-black uppercase tracking-widest rounded-lg transition-all active:scale-95 shadow-md ${hasNext ? 'bg-slate-900 text-white hover:bg-black' : 'bg-blue-600 text-white shadow-blue-500/20 hover:bg-blue-700'}`}>
+                        {hasNext ? (<><span className="hidden xs:inline">Next Page</span><span className="xs:hidden">Next</span></>) : "Submit"} {hasNext && <ChevronRight className="h-3.5 w-3.5 ml-1" />}
                     </Button>
                 </div>
             </div>
