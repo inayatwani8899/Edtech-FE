@@ -238,6 +238,7 @@ interface TestState {
     userSubmissionsLoading: boolean;
     userSubmissionsError: string | null;
     searchTerm: string | null;
+    isSubmitting: boolean;
     deleteId: string | null;
 
 
@@ -318,6 +319,7 @@ export const useTestStore = create<TestState>((set, get) => ({
     error: null,
     filters: defaultFilters,
     currentPage: 1,
+    isSubmitting: false,
     totalPages: 1,
     totalCount: 0,
     limit: 5,
@@ -647,6 +649,7 @@ export const useTestStore = create<TestState>((set, get) => ({
     //     }
     // },
     submitTest: async (testId, userId) => {
+        set({ isSubmitting: true });
         const { userAnswers } = get();
         try {
             // Convert Map into required array format with numeric IDs
@@ -681,7 +684,6 @@ export const useTestStore = create<TestState>((set, get) => ({
             }
 
             usePaymentStore.getState().clearPaidTest(userId, testId);
-            get().resetTestState();
         } catch (err) {
             console.error("Test submission error:", err);
             throw err;
@@ -744,7 +746,8 @@ export const useTestStore = create<TestState>((set, get) => ({
             answers: 0
         },
         testTakingError: null,
-        testTakingLoading: false
+        testTakingLoading: false,
+        isSubmitting: false
     }),
     getCurrentQuestion: () => {
         const { testQuestions, questionPagination } = get();

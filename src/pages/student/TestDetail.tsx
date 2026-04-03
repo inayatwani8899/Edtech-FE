@@ -125,11 +125,22 @@ export const TestDetail = () => {
               </div>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-6 pt-4">
               <p className="text-slate-400 text-sm leading-relaxed max-w-[280px] mx-auto font-medium">
                 Generating your <span className="text-blue-400 font-bold">AI-powered report</span>.
                 This may take a few moments.
               </p>
+              
+              <div className="grid grid-cols-2 gap-4 max-w-[240px] mx-auto opacity-50">
+                <div className="flex flex-col items-start gap-1">
+                  <span className="text-[7px] font-black text-slate-500 uppercase tracking-widest">Logic Hub</span>
+                  <span className="text-[8px] font-bold text-blue-300 animate-pulse">Synchronizing</span>
+                </div>
+                <div className="flex flex-col items-end gap-1">
+                  <span className="text-[7px] font-black text-slate-500 uppercase tracking-widest">Neural Map</span>
+                  <span className="text-[8px] font-bold text-emerald-400 animate-pulse">Synthesizing</span>
+                </div>
+              </div>
 
               <div className="space-y-2">
                 <div className="flex justify-between text-[9px] font-black text-blue-500/60 uppercase tracking-widest mb-1">
@@ -137,13 +148,13 @@ export const TestDetail = () => {
                   <span className="animate-pulse">Active</span>
                 </div>
                 <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden relative border border-white/5">
-                  <div className="h-full bg-blue-600 rounded-full transition-all duration-1000 w-[65%] shadow-[0_0_10px_rgba(37,99,235,0.5)]" />
+                  <div className="h-full bg-blue-600 rounded-full transition-all duration-[3000ms] w-[85%] shadow-[0_0_15px_rgba(37,99,235,0.7)]" />
                   <div className="absolute inset-0 shimmer-bar" />
                 </div>
               </div>
             </div>
 
-            <p className="text-[9px] text-slate-600 font-mono uppercase tracking-tighter">
+            <p className="text-[9px] text-slate-600 font-mono uppercase tracking-tighter pt-4 border-t border-white/5">
               Secure Neural Uplink Established • Node_0x{testId?.slice(-4) || "7C1"}
             </p>
           </CardContent>

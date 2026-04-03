@@ -26,6 +26,7 @@ export const useTestLogic = () => {
         resetTestState,
         currentSession,
         userAnswers,
+        isSubmitting,
     } = useTestStore();
 
 
@@ -36,7 +37,6 @@ export const useTestLogic = () => {
 
     const { user } = useAuthStore();
     const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const [isFullScreen, setIsFullScreen] = useState(false);
     const [currentStep, setCurrentStep] = useState(0); // 0: Instructions, 1: Ready, 2: Test
     const testContainerRef = useRef<HTMLDivElement>(null);
@@ -124,9 +124,8 @@ export const useTestLogic = () => {
 
     // Auto submit when timer ends
     const handleAutoSubmit = async () => {
-        if (!testId || !user?.id) return;
-
-        setIsSubmitting(true);
+        if (!testId || !user?.id || isSubmitting) return;
+        useTestStore.setState({ isSubmitting: true });
         try {
             await submitTest(testId, String(user.id));
             toast({
@@ -148,8 +147,8 @@ export const useTestLogic = () => {
 
     // Submit test on exit
     const submitTestOnExit = async () => {
-        if (!testId || !user?.id) return false;
-
+        if (!testId || !user?.id || isSubmitting) return false;
+        useTestStore.setState({ isSubmitting: true });
         try {
             await submitTest(testId, String(user.id));
             return true;
@@ -217,7 +216,7 @@ export const useTestLogic = () => {
     }, [currentStep, timeRemaining]);
 
     const handleExitTest = async () => {
-        if (!testId || !user?.id) return;
+        if (!testId || !user?.id || isSubmitting) return;
 
         const hasAnswers = userAnswers.size > 0;
 
@@ -239,7 +238,7 @@ export const useTestLogic = () => {
             return;
         }
 
-        setIsSubmitting(true);
+        useTestStore.setState({ isSubmitting: true });
         setCurrentStep(0);
 
         try {
@@ -254,7 +253,7 @@ export const useTestLogic = () => {
             navigate("/results");
         } catch (err) {
             console.error("Exit submission error:", err);
-            setIsSubmitting(false);
+            useTestStore.setState({ isSubmitting: false });
             setCurrentStep(2);
             toast({
                 variant: "destructive",
@@ -349,8 +348,15 @@ export const useTestLogic = () => {
             return;
         }
 
-        setIsSubmitting(true);
+        // Use the store's current state to check if already submitting
+        if (useTestStore.getState().isSubmitting) return;
+
+        // Set state to show loader
+        useTestStore.setState({ isSubmitting: true });
         setCurrentStep(0);
+        
+        // Small delay to ensure React cycles and shows the premium loader in TestDetail
+        await new Promise(resolve => setTimeout(resolve, 800));
 
         try {
             await exitFullScreen();
@@ -362,8 +368,8 @@ export const useTestLogic = () => {
             });
 
             stopCamera();
-            resetTestState();
             navigate("/results");
+            resetTestState();
 
         } catch (err: any) {
             console.error("Test submission error:", err);
@@ -374,7 +380,7 @@ export const useTestLogic = () => {
                 description: err.message || "Please try again. Your answers are saved locally."
             });
 
-            setIsSubmitting(false);
+            useTestStore.setState({ isSubmitting: false });
             setCurrentStep(2);
             await enterFullScreen();
         }

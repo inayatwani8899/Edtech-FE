@@ -312,7 +312,11 @@ export const TestInterface = ({
                         ))}
                     </div>
 
-                    <Button onClick={hasNext ? handleNextQuestion : () => setShowSubmitModal(true)} className={`h-8 md:h-9 px-4 md:px-6 text-[8px] md:text-[9px] font-black uppercase tracking-widest rounded-lg transition-all active:scale-95 shadow-md ${hasNext ? 'bg-slate-900 text-white hover:bg-black' : 'bg-blue-600 text-white shadow-blue-500/20 hover:bg-blue-700'}`}>
+                    <Button
+                        onClick={hasNext ? handleNextQuestion : () => setShowSubmitModal(true)}
+                        disabled={isSubmitting}
+                        className={`h-8 md:h-9 px-4 md:px-6 text-[8px] md:text-[9px] font-black uppercase tracking-widest rounded-lg transition-all active:scale-95 shadow-md ${hasNext ? 'bg-slate-900 text-white hover:bg-black' : 'bg-blue-600 text-white shadow-blue-500/20 hover:bg-blue-700'}`}
+                    >
                         {hasNext ? (<><span className="hidden xs:inline">Next Page</span><span className="xs:hidden">Next</span></>) : "Submit"} {hasNext && <ChevronRight className="h-3.5 w-3.5 ml-1" />}
                     </Button>
                 </div>
