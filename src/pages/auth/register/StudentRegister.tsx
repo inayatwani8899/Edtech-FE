@@ -40,9 +40,50 @@ const StudentRegister = () => {
     phone: "",
   });
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+
+  const validateStep = (currentStep: number) => {
+    const newErrors: Record<string, string> = {};
+    
+    if (currentStep === 1) {
+      if (!formData.firstName.trim()) newErrors.firstName = "Required";
+      if (!formData.lastName.trim()) newErrors.lastName = "Required";
+      
+      if (!formData.email) newErrors.email = "Required";
+      else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Invalid email";
+      
+      if (!formData.password) newErrors.password = "Required";
+      else if (formData.password.length < 6) newErrors.password = "Min 6 characters";
+      
+      if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = "Mismatch";
+    }
+    
+    if (currentStep === 2) {
+      if (!formData.phone) newErrors.phone = "Required";
+      else if (!/^\d{10}$/.test(formData.phone)) newErrors.phone = "Must be 10 digits";
+      
+      if (!formData.dateOfBirth) newErrors.dateOfBirth = "Required";
+      if (!formData.gradeLevel) newErrors.gradeLevel = "Required";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleNext = () => {
+    if (validateStep(step)) {
+      setStep(step + 1);
+    } else {
+      toast({
+        title: "Validation Error",
+        description: "Please check all required fields.",
+        variant: "destructive"
+      });
+    }
+  };
   const [grades, setGrades] = useState<{ id: number; name: string }[]>([]);
 
   useEffect(() => {
@@ -68,15 +109,7 @@ const StudentRegister = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (formData.password !== formData.confirmPassword) {
-      toast({
-        title: "Error",
-        description: "Passwords do not match",
-        variant: "destructive",
-      });
-      return;
-    }
+    if (!validateStep(step)) return;
 
     setIsLoading(true);
     try {
@@ -125,7 +158,20 @@ const StudentRegister = () => {
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (field === "phone") {
+      const cleaned = value.replace(/\D/g, '').slice(0, 10);
+      setFormData(prev => ({ ...prev, [field]: cleaned }));
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }));
+    }
+
+    if (errors[field]) {
+      setErrors(prev => {
+        const up = { ...prev };
+        delete up[field];
+        return up;
+      });
+    }
   };
 
   return (
@@ -247,9 +293,10 @@ const StudentRegister = () => {
                                 onChange={(e) => handleInputChange("firstName", e.target.value)}
                                 placeholder="First Name"
                                 required
-                                className="h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-indigo-500/20 focus:bg-white/[0.08] transition-all duration-300"
+                                className={`h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-indigo-500/20 focus:bg-white/[0.08] transition-all duration-300 ${errors.firstName ? 'ring-2 ring-rose-500/50' : ''}`}
                               />
                             </div>
+                            {errors.firstName && <p className="text-[7px] text-rose-400 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.firstName}</p>}
                           </div>
                           <div className="space-y-1.5">
                             <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Last Name</Label>
@@ -260,9 +307,10 @@ const StudentRegister = () => {
                                 onChange={(e) => handleInputChange("lastName", e.target.value)}
                                 placeholder="Last Name"
                                 required
-                                className="h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-indigo-500/20 focus:bg-white/[0.08] transition-all duration-300"
+                                className={`h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-indigo-500/20 focus:bg-white/[0.08] transition-all duration-300 ${errors.lastName ? 'ring-2 ring-rose-500/50' : ''}`}
                               />
                             </div>
+                            {errors.lastName && <p className="text-[7px] text-rose-400 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.lastName}</p>}
                           </div>
                         </div>
 
@@ -276,9 +324,10 @@ const StudentRegister = () => {
                               onChange={(e) => handleInputChange("email", e.target.value)}
                               placeholder="email@example.com"
                               required
-                              className="h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-indigo-500/20 focus:bg-white/[0.08] transition-all duration-300"
+                              className={`h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-indigo-500/20 focus:bg-white/[0.08] transition-all duration-300 ${errors.email ? 'ring-2 ring-rose-500/50' : ''}`}
                             />
                           </div>
+                          {errors.email && <p className="text-[7px] text-rose-400 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.email}</p>}
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">
@@ -292,9 +341,10 @@ const StudentRegister = () => {
                                 onChange={(e) => handleInputChange("password", e.target.value)}
                                 placeholder="••••••••"
                                 required
-                                className="h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-indigo-500/20 focus:bg-white/[0.08] transition-all duration-300"
+                                className={`h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-indigo-500/20 focus:bg-white/[0.08] transition-all duration-300 ${errors.password ? 'ring-2 ring-rose-500/50' : ''}`}
                               />
                             </div>
+                            {errors.password && <p className="text-[7px] text-rose-400 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.password}</p>}
                           </div>
                           <div className="space-y-1.5">
                             <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Confirm</Label>
@@ -306,9 +356,10 @@ const StudentRegister = () => {
                                 onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
                                 placeholder="••••••••"
                                 required
-                                className="h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-indigo-500/20 focus:bg-white/[0.08] transition-all duration-300"
+                                className={`h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-indigo-500/20 focus:bg-white/[0.08] transition-all duration-300 ${errors.confirmPassword ? 'ring-2 ring-rose-500/50' : ''}`}
                               />
                             </div>
+                            {errors.confirmPassword && <p className="text-[7px] text-rose-400 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.confirmPassword}</p>}
                           </div>
                         </div>
                       </div>
@@ -316,41 +367,42 @@ const StudentRegister = () => {
 
                     {step === 2 && (
                       <div className="space-y-3 animate-in fade-in slide-in-from-right-4 duration-500">
-                        <div className="space-y-1.5">
-                          <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Phone Number</Label>
-                          <div className="relative group/input">
-                            <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-white/10 group-focus-within/input:text-indigo-400 transition-colors" />
-                            <Input
-                              type="tel"
-                              value={formData.phone}
-                              onChange={(e) => handleInputChange("phone", e.target.value)}
-                              placeholder="+91 XXXXX XXXXX"
-                              required
-                              className="h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-indigo-500/20 focus:bg-white/[0.08] transition-all duration-300"
-                            />
-                          </div>
-                        </div>
+                         <div className="space-y-1.5">
+                           <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Phone Number</Label>
+                           <div className="relative group/input">
+                             <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-white/10 group-focus-within/input:text-indigo-400 transition-colors" />
+                             <Input
+                               type="tel"
+                               value={formData.phone}
+                               onChange={(e) => handleInputChange("phone", e.target.value)}
+                               placeholder="10-digit mobile number"
+                               required
+                               className={`h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-indigo-500/20 focus:bg-white/[0.08] transition-all duration-300 ${errors.phone ? 'ring-2 ring-rose-500/50' : ''}`}
+                             />
+                           </div>
+                           {errors.phone && <p className="text-[7px] text-rose-400 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.phone}</p>}
+                         </div>
 
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="space-y-1.5">
-                            <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Date of Birth</Label>
-                            <div className="relative group/input">
-                              <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-white/10 group-focus-within/input:text-indigo-400 transition-colors" />
-                              <Input
-                                type="date"
-                                value={formData.dateOfBirth}
-                                onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
-                                required
-                                className="h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-indigo-500/20 focus:bg-white/[0.08] transition-all duration-300"
-                              />
-                            </div>
-                          </div>
-                          <div className="space-y-1.5">
-                            <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Grade Level</Label>
-                            <Select onValueChange={(value) => handleInputChange("gradeLevel", value)}>
-                              <SelectTrigger className="h-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] focus:ring-4 focus:ring-indigo-500/20 transition-all px-3">
-                                <SelectValue placeholder="Grade" />
-                              </SelectTrigger>
+                           <div className="space-y-1.5">
+                             <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Date of Birth</Label>
+                             <div className="relative group/input">
+                               <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-white/10 group-focus-within/input:text-indigo-400 transition-colors" />
+                               <Input
+                                 type="date"
+                                 value={formData.dateOfBirth}
+                                 onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
+                                 required
+                                 className={`h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-indigo-500/20 focus:bg-white/[0.08] transition-all duration-300 ${errors.dateOfBirth ? 'ring-2 ring-rose-500/50' : ''}`}
+                               />
+                             </div>
+                             {errors.dateOfBirth && <p className="text-[7px] text-rose-400 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.dateOfBirth}</p>}
+                           </div>
+                           <div className="space-y-1.5">
+                             <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Grade Level</Label>
+                             <Select onValueChange={(value) => handleInputChange("gradeLevel", value)}>
+                               <SelectTrigger className={`h-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] focus:ring-4 focus:ring-indigo-500/20 transition-all px-3 ${errors.gradeLevel ? 'ring-2 ring-rose-500/50' : ''}`}>
+                                 <SelectValue placeholder="Grade" />
+                               </SelectTrigger>
                               <SelectContent className="bg-[#12141c] border-white/10 text-white font-bold text-[11px] rounded-lg">
                                 {grades.length > 0 ? (
                                   grades.map((grade) => (
@@ -367,8 +419,8 @@ const StudentRegister = () => {
                               </SelectContent>
 
                             </Select>
+                            {errors.gradeLevel && <p className="text-[7px] text-rose-400 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.gradeLevel}</p>}
                           </div>
-                        </div>
 
 
                       </div>
@@ -378,7 +430,7 @@ const StudentRegister = () => {
                       {step === 1 ? (
                         <Button
                           type="button"
-                          onClick={() => setStep(2)}
+                          onClick={handleNext}
                           className="w-full h-11 rounded-xl bg-white text-slate-900 shadow-[0_12px_24px_-8px_rgba(255,255,255,0.3)] hover:shadow-[0_16px_32px_-8px_rgba(255,255,255,0.4)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-500 group/btn"
                         >
                           <span className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.25em]">

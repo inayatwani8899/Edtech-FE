@@ -17,8 +17,10 @@ export const StudentLayout = () => {
       <div className="min-h-screen flex w-full">
         <StudentSidebar />
         <div className="flex-1 flex flex-col">
-          {/* Header */}
-          {/* <Navbar /> */}
+          {/* Header - Mobile Only */}
+          <div className="md:hidden">
+            <Navbar />
+          </div>
 
           {/* Main Content */}
           <main className="flex-1 overflow-auto">

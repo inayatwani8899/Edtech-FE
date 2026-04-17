@@ -270,14 +270,18 @@ export const useAuthStore = create<AuthState>(
         set({ isLoading: false });
       }
     },
-    registerSchool: async (payload: any) => {
+    registerSchool: async (formData: FormData) => {
       set({ isLoading: true });
       try {
-        const response = await api.post("/School/register", payload);
-        if (response.data.code === 201) {
+        const response = await api.post("Organization/create", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        if (response.data.code === 201 || response.status === 201) {
           return {
             success: true,
-            message: "Registration completed successfully",
+            message: response.data.message || "Registration completed successfully",
             data: response.data
           };
         }

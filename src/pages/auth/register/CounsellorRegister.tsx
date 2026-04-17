@@ -31,26 +31,62 @@ const CounsellorRegister = () => {
     createdBy: 0
   });
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
+  const validateStep = (currentStep: number) => {
+    const newErrors: Record<string, string> = {};
+
+    if (currentStep === 1) {
+      if (!formData.firstName.trim()) newErrors.firstName = "Required";
+      if (!formData.lastName.trim()) newErrors.lastName = "Required";
+
+      if (!formData.email) newErrors.email = "Required";
+      else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Invalid email";
+
+      if (!formData.password) newErrors.password = "Required";
+      else if (formData.password.length < 6) newErrors.password = "Min 6 characters";
+
+      if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = "Mismatch";
+
+      if (!formData.phone) newErrors.phone = "Required";
+      else if (!/^\d{10}$/.test(formData.phone)) newErrors.phone = "Must be 10 digits";
+    }
+
+    if (currentStep === 2) {
+      if (!formData.highestQualification) newErrors.highestQualification = "Required";
+      if (!formData.areaOfSpecialization) newErrors.areaOfSpecialization = "Required";
+      if (!formData.currentOrganization.trim()) newErrors.currentOrganization = "Required";
+      if (!formData.licenseNumber.trim()) newErrors.licenseNumber = "Required";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleNext = () => {
+    if (validateStep(step)) {
+      setStep(step + 1);
+    } else {
       toast({
-        title: "Registration Failed",
-        description: "Passwords do not match. Please try again.",
+        title: "Validation Error",
+        description: "Please check all required fields.",
         variant: "destructive"
       });
-      return;
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateStep(step)) return;
 
     setIsLoading(true);
     try {
       // Create a payload that matches exactly what the backend expects
       const { confirmPassword, ...payload } = formData;
-      
+
       // Ensure numeric and boolean fields are correctly typed
       const backendPayload = {
         ...payload,
@@ -79,7 +115,20 @@ const CounsellorRegister = () => {
   };
 
   const handleInputChange = (field: string, value: string | number | boolean) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    if (field === "phone") {
+      const cleaned = value.toString().replace(/\D/g, '').slice(0, 10);
+      setFormData(prev => ({ ...prev, [field]: cleaned }));
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }));
+    }
+
+    if (errors[field]) {
+      setErrors(prev => {
+        const up = { ...prev };
+        delete up[field];
+        return up;
+      });
+    }
   };
 
   useEffect(() => {
@@ -205,9 +254,10 @@ const CounsellorRegister = () => {
                                 onChange={(e) => handleInputChange("firstName", e.target.value)}
                                 placeholder="First Name"
                                 required
-                                className="h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-emerald-500/20 focus:bg-white/[0.08] transition-all duration-300"
+                                className={`h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-emerald-500/20 focus:bg-white/[0.08] transition-all duration-300 ${errors.firstName ? 'ring-2 ring-rose-500/50' : ''}`}
                               />
                             </div>
+                            {errors.firstName && <p className="text-[7px] text-rose-400 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.firstName}</p>}
                           </div>
                           <div className="space-y-1.5">
                             <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Last Name</Label>
@@ -218,9 +268,10 @@ const CounsellorRegister = () => {
                                 onChange={(e) => handleInputChange("lastName", e.target.value)}
                                 placeholder="Last Name"
                                 required
-                                className="h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-emerald-500/20 focus:bg-white/[0.08] transition-all duration-300"
+                                className={`h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-emerald-500/20 focus:bg-white/[0.08] transition-all duration-300 ${errors.lastName ? 'ring-2 ring-rose-500/50' : ''}`}
                               />
                             </div>
+                            {errors.lastName && <p className="text-[7px] text-rose-400 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.lastName}</p>}
                           </div>
                         </div>
 
@@ -234,9 +285,10 @@ const CounsellorRegister = () => {
                               onChange={(e) => handleInputChange("email", e.target.value)}
                               placeholder="Email@domain.com"
                               required
-                              className="h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-emerald-500/20 focus:bg-white/[0.08] transition-all duration-300"
+                              className={`h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-emerald-500/20 focus:bg-white/[0.08] transition-all duration-300 ${errors.email ? 'ring-2 ring-rose-500/50' : ''}`}
                             />
                           </div>
+                          {errors.email && <p className="text-[7px] text-rose-400 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.email}</p>}
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">
@@ -250,9 +302,10 @@ const CounsellorRegister = () => {
                                 onChange={(e) => handleInputChange("password", e.target.value)}
                                 placeholder="••••••••"
                                 required
-                                className="h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-emerald-500/20 focus:bg-white/[0.08] transition-all duration-300"
+                                className={`h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-emerald-500/20 focus:bg-white/[0.08] transition-all duration-300 ${errors.password ? 'ring-2 ring-rose-500/50' : ''}`}
                               />
                             </div>
+                            {errors.password && <p className="text-[7px] text-rose-400 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.password}</p>}
                           </div>
                           <div className="space-y-1.5">
                             <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Confirm</Label>
@@ -264,9 +317,10 @@ const CounsellorRegister = () => {
                                 onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
                                 placeholder="••••••••"
                                 required
-                                className="h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-emerald-500/20 focus:bg-white/[0.08] transition-all duration-300"
+                                className={`h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-emerald-500/20 focus:bg-white/[0.08] transition-all duration-300 ${errors.confirmPassword ? 'ring-2 ring-rose-500/50' : ''}`}
                               />
                             </div>
+                            {errors.confirmPassword && <p className="text-[7px] text-rose-400 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.confirmPassword}</p>}
                           </div>
                         </div>
 
@@ -278,11 +332,12 @@ const CounsellorRegister = () => {
                               type="tel"
                               value={formData.phone}
                               onChange={(e) => handleInputChange("phone", e.target.value)}
-                              placeholder="+91 XXXXX XXXXX"
+                              placeholder="10-digit mobile number"
                               required
-                              className="h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-emerald-500/20 focus:bg-white/[0.08] transition-all duration-300"
+                              className={`h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-emerald-500/20 focus:bg-white/[0.08] transition-all duration-300 ${errors.phone ? 'ring-2 ring-rose-500/50' : ''}`}
                             />
                           </div>
+                          {errors.phone && <p className="text-[7px] text-rose-400 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.phone}</p>}
                         </div>
                       </div>
                     )}
@@ -293,7 +348,7 @@ const CounsellorRegister = () => {
                           <div className="space-y-1.5">
                             <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Qualification</Label>
                             <Select onValueChange={(value) => handleInputChange("highestQualification", value)}>
-                              <SelectTrigger className="h-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] focus:ring-4 focus:ring-emerald-500/20 transition-all px-3">
+                              <SelectTrigger className={`h-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] focus:ring-4 focus:ring-emerald-500/20 transition-all px-3 ${errors.highestQualification ? 'ring-2 ring-rose-500/50' : ''}`}>
                                 <SelectValue placeholder="Degree" />
                               </SelectTrigger>
                               <SelectContent className="bg-[#12141c] border-white/10 text-white font-bold text-[11px] rounded-lg">
@@ -303,6 +358,7 @@ const CounsellorRegister = () => {
                                 <SelectItem value="diploma" className="focus:bg-emerald-500 rounded-md">Diploma</SelectItem>
                               </SelectContent>
                             </Select>
+                            {errors.highestQualification && <p className="text-[7px] text-rose-400 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.highestQualification}</p>}
                           </div>
                           <div className="space-y-1.5">
                             <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Experience</Label>
@@ -323,7 +379,7 @@ const CounsellorRegister = () => {
                         <div className="space-y-1.5">
                           <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Specialization</Label>
                           <Select onValueChange={(value) => handleInputChange("areaOfSpecialization", value)}>
-                            <SelectTrigger className="h-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] focus:ring-4 focus:ring-emerald-500/20 transition-all px-3">
+                            <SelectTrigger className={`h-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] focus:ring-4 focus:ring-emerald-500/20 transition-all px-3 ${errors.areaOfSpecialization ? 'ring-2 ring-rose-500/50' : ''}`}>
                               <SelectValue placeholder="Select Domain" />
                             </SelectTrigger>
                             <SelectContent className="bg-[#12141c] border-white/10 text-white font-bold text-[11px] rounded-lg">
@@ -333,6 +389,7 @@ const CounsellorRegister = () => {
                               <SelectItem value="college-admission" className="focus:bg-emerald-500 rounded-md">College Admission</SelectItem>
                             </SelectContent>
                           </Select>
+                          {errors.areaOfSpecialization && <p className="text-[7px] text-rose-400 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.areaOfSpecialization}</p>}
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">
@@ -345,9 +402,10 @@ const CounsellorRegister = () => {
                                 onChange={(e) => handleInputChange("currentOrganization", e.target.value)}
                                 placeholder="Organization"
                                 required
-                                className="h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-emerald-500/20 focus:bg-white/[0.08] transition-all duration-300"
+                                className={`h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-emerald-500/20 focus:bg-white/[0.08] transition-all duration-300 ${errors.currentOrganization ? 'ring-2 ring-rose-500/50' : ''}`}
                               />
                             </div>
+                            {errors.currentOrganization && <p className="text-[7px] text-rose-400 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.currentOrganization}</p>}
                           </div>
                           <div className="space-y-1.5">
                             <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">License Number</Label>
@@ -358,9 +416,10 @@ const CounsellorRegister = () => {
                                 onChange={(e) => handleInputChange("licenseNumber", e.target.value)}
                                 placeholder="License #"
                                 required
-                                className="h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-emerald-500/20 focus:bg-white/[0.08] transition-all duration-300"
+                                className={`h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-emerald-500/20 focus:bg-white/[0.08] transition-all duration-300 ${errors.licenseNumber ? 'ring-2 ring-rose-500/50' : ''}`}
                               />
                             </div>
+                            {errors.licenseNumber && <p className="text-[7px] text-rose-400 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.licenseNumber}</p>}
                           </div>
                         </div>
 
@@ -380,7 +439,7 @@ const CounsellorRegister = () => {
                       {step === 1 ? (
                         <Button
                           type="button"
-                          onClick={() => setStep(2)}
+                          onClick={handleNext}
                           className="w-full h-11 rounded-xl bg-white text-slate-900 shadow-[0_12px_24px_-8px_rgba(255,255,255,0.3)] hover:shadow-[0_16px_32px_-8px_rgba(255,255,255,0.4)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-500 group/btn"
                         >
                           <span className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.25em]">

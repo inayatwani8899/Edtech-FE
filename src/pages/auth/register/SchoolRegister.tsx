@@ -14,44 +14,98 @@ const SchoolRegister = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [formData, setFormData] = useState({
-    institutionName: "",
-    adminName: "",
+    instituteName: "",
     email: "",
+    // Keeping password for UI, though API response didn't show it 
+    // - usually needed for initial registration
     password: "",
     confirmPassword: "",
-    institutionType: "",
+    organizationType: "",
     contactNumber: "",
     address: "",
     city: "",
     state: "",
     country: "",
+    postalCode: "",
     approxStudentCount: 0,
     website: "",
   });
+  const [document, setDocument] = useState<File | null>(null);
 
   const { registerSchool } = useAuthStore();
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
+  const validateStep = (currentStep: number) => {
+    const newErrors: Record<string, string> = {};
+    
+    if (currentStep === 1) {
+      if (!formData.instituteName) newErrors.instituteName = "Required";
+      if (!formData.organizationType) newErrors.organizationType = "Required";
+      if (formData.approxStudentCount <= 0) newErrors.approxStudentCount = "Enter valid count";
+      if (!document) newErrors.document = "Document required";
+    }
+    
+    if (currentStep === 2) {
+      if (!formData.contactNumber) newErrors.contactNumber = "Required";
+      else if (!/^\d{10}$/.test(formData.contactNumber)) newErrors.contactNumber = "Must be 10 digits";
+      
+      if (!formData.email) newErrors.email = "Required";
+      else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Invalid email";
+      
+      if (!formData.password) newErrors.password = "Required";
+      else if (formData.password.length < 6) newErrors.password = "Min 6 characters";
+      
+      if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = "Passwords mismatch";
+    }
+    
+    if (currentStep === 3) {
+      if (!formData.country) newErrors.country = "Required";
+      if (!formData.state) newErrors.state = "Required";
+      if (!formData.city) newErrors.city = "Required";
+      if (!formData.address) newErrors.address = "Required";
+      if (!formData.postalCode) newErrors.postalCode = "Required";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleNext = () => {
+    if (validateStep(step)) {
+      setStep(step + 1);
+    } else {
       toast({
-        title: "Error",
-        description: "Passwords do not match",
+        title: "Validation Error",
+        description: "Please check the highlighted fields",
         variant: "destructive"
       });
-      return;
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateStep(step)) return;
 
     setIsLoading(true);
     try {
-      const { confirmPassword, ...payload } = formData;
-      // Map back to what the store might expect if needed, 
-      // but assuming we should update the store or this is the new standard.
-      // For now, making it syntactically correct.
-      const result = await registerSchool(payload);
+      const data = new FormData();
+
+      // Append all form fields
+      Object.entries(formData).forEach(([key, value]) => {
+        if (key !== "confirmPassword") {
+          data.append(key, value.toString());
+        }
+      });
+
+      // Append the file
+      if (document) {
+        data.append("Document", document);
+      }
+
+      const result = await registerSchool(data);
 
       if (result.success) {
         setIsSuccess(true);
@@ -79,7 +133,22 @@ const SchoolRegister = () => {
   };
 
   const handleInputChange = (field: string, value: string | number) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    // Basic formatting for phone
+    if (field === "contactNumber") {
+      const cleaned = value.toString().replace(/\D/g, '').slice(0, 10);
+      setFormData(prev => ({ ...prev, [field]: cleaned }));
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }));
+    }
+    
+    // Clear error for this field
+    if (errors[field]) {
+      setErrors(prev => {
+        const updated = { ...prev };
+        delete updated[field];
+        return updated;
+      });
+    }
   };
 
   useEffect(() => {
@@ -169,7 +238,7 @@ const SchoolRegister = () => {
                   <div className={`h-1 w-5 rounded-full transition-all duration-500 ${step >= 3 ? 'bg-purple-400 shadow-[0_0_8px_rgba(192,132,252,0.8)]' : 'bg-white/10'}`} />
                 </div>
                 <CardDescription className="text-[8px] font-black text-white/30 uppercase tracking-[0.25em]">
-                  Step {step} of 3: {step === 1 ? 'Admin Information' : step === 2 ? 'School Details' : 'Location'}
+                  Step {step} of 3: {step === 1 ? 'School Details' : step === 2 ? 'Contact Credentials' : 'Location'}
                 </CardDescription>
               </CardHeader>
 
@@ -198,30 +267,116 @@ const SchoolRegister = () => {
                       <div className="space-y-3 animate-in fade-in slide-in-from-right-4 duration-500">
                         <div className="grid grid-cols-2 gap-3">
                           <div className="space-y-1.5">
-                            <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Admin Name</Label>
+                            <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Institute Name</Label>
                             <div className="relative group/input">
-                              <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-white/10 group-focus-within/input:text-purple-400 transition-colors" />
+                              <Home className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-white/10 group-focus-within/input:text-purple-400 transition-colors" />
                               <Input
-                                value={formData.adminName}
-                                onChange={(e) => handleInputChange("adminName", e.target.value)}
-                                placeholder="Admin Name"
+                                value={formData.instituteName}
+                                onChange={(e) => handleInputChange("instituteName", e.target.value)}
+                                placeholder="Full School Name"
                                 required
-                                className="h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-purple-500/20 focus:bg-white/[0.08] transition-all duration-300"
+                                className={`h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-purple-500/20 focus:bg-white/[0.08] transition-all duration-300 ${errors.instituteName ? 'ring-2 ring-rose-500/50' : ''}`}
                               />
                             </div>
+                            {errors.instituteName && <p className="text-[7px] text-rose-400 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.instituteName}</p>}
                           </div>
                           <div className="space-y-1.5">
-                            <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Phone</Label>
+                            <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Students</Label>
+                            <div className="relative group/input">
+                              <BarChart3 className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-white/10 group-focus-within/input:text-purple-400 transition-colors" />
+                              <Input
+                                type="number"
+                                min="1"
+                                value={formData.approxStudentCount || ""}
+                                onChange={(e) => handleInputChange("approxStudentCount", Number(e.target.value))}
+                                placeholder="Total Count"
+                                className={`h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] focus:ring-4 focus:ring-purple-500/20 focus:bg-white/[0.08] transition-all duration-300 ${errors.approxStudentCount ? 'ring-2 ring-rose-500/50' : ''}`}
+                              />
+                            </div>
+                            {errors.approxStudentCount && <p className="text-[7px] text-rose-400 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.approxStudentCount}</p>}
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1.5">
+                            <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Type</Label>
+                            <Select onValueChange={(value) => handleInputChange("organizationType", value)}>
+                              <SelectTrigger className={`h-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] focus:ring-4 focus:ring-purple-500/20 px-3 ${errors.organizationType ? 'ring-2 ring-rose-500/50' : ''}`}>
+                                <SelectValue placeholder="Select" />
+                              </SelectTrigger>
+                              <SelectContent className="bg-[#12141c] border-white/10 text-white font-bold text-[11px] rounded-lg">
+                                <SelectItem value="school" className="focus:bg-purple-500 rounded-md">School</SelectItem>
+                                <SelectItem value="college" className="focus:bg-purple-500 rounded-md">College</SelectItem>
+                                <SelectItem value="university" className="focus:bg-purple-500 rounded-md">University</SelectItem>
+                                <SelectItem value="coaching" className="focus:bg-purple-500 rounded-md">Coaching</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            {errors.organizationType && <p className="text-[7px] text-rose-400 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.organizationType}</p>}
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Document (Proof)</Label>
+                            <div className="relative group/input">
+                              <Input
+                                type="file"
+                                id="org-doc"
+                                onChange={(e) => {
+                                  setDocument(e.target.files?.[0] || null);
+                                  if (errors.document) setErrors(prev => {
+                                    const up = { ...prev };
+                                    delete up.document;
+                                    return up;
+                                  });
+                                }}
+                                required
+                                className={`hidden h-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[9px] focus:ring-4 focus:ring-purple-500/20 ${errors.document ? 'ring-2 ring-rose-500/50' : ''}`}
+                              />
+                              <Label 
+                                htmlFor="org-doc"
+                                className="flex items-center gap-2 h-9 px-3 bg-white/[0.04] hover:bg-white/[0.08] border border-white/5 rounded-lg cursor-pointer transition-all duration-300 group/file"
+                              >
+                                <div className="h-5 w-5 rounded bg-purple-500/20 flex items-center justify-center group-hover/file:bg-purple-500/30 transition-colors">
+                                  <ChevronRight className="h-3 w-3 text-purple-400 rotate-90" />
+                                </div>
+                                <span className="text-[10px] font-bold text-white/50 group-hover/file:text-white/80 transition-colors truncate">
+                                  {document ? document.name : "Select Proof"}
+                                </span>
+                              </Label>
+                            </div>
+                            {errors.document && <p className="text-[7px] text-rose-400 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.document}</p>}
+                          </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Official Website</Label>
+                          <div className="relative group/input">
+                            <Globe className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-white/10 group-focus-within/input:text-purple-400 transition-colors" />
+                            <Input
+                              value={formData.website}
+                              onChange={(e) => handleInputChange("website", e.target.value)}
+                              placeholder="https://www.institute.com"
+                              className="h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-purple-500/20 focus:bg-white/[0.08] transition-all duration-300"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {step === 2 && (
+                      <div className="space-y-3 animate-in fade-in slide-in-from-right-4 duration-500">
+                        <div className="grid grid-cols-1 gap-3">
+                          <div className="space-y-1.5">
+                            <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Contact Number</Label>
                             <div className="relative group/input">
                               <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-white/10 group-focus-within/input:text-purple-400 transition-colors" />
                               <Input
                                 value={formData.contactNumber}
                                 onChange={(e) => handleInputChange("contactNumber", e.target.value)}
-                                placeholder="+91 XXXXX XXXXX"
+                                placeholder="10-digit mobile number"
                                 required
-                                className="h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-purple-500/20 focus:bg-white/[0.08] transition-all duration-300"
+                                className={`h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-purple-500/20 focus:bg-white/[0.08] transition-all duration-300 ${errors.contactNumber ? 'ring-2 ring-rose-500/50' : ''}`}
                               />
                             </div>
+                            {errors.contactNumber && <p className="text-[7px] text-rose-400 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.contactNumber}</p>}
                           </div>
                         </div>
 
@@ -235,9 +390,10 @@ const SchoolRegister = () => {
                               onChange={(e) => handleInputChange("email", e.target.value)}
                               placeholder="school@example.com"
                               required
-                              className="h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-purple-500/20 focus:bg-white/[0.08] transition-all duration-300"
+                              className={`h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-purple-500/20 focus:bg-white/[0.08] transition-all duration-300 ${errors.email ? 'ring-2 ring-rose-500/50' : ''}`}
                             />
                           </div>
+                          {errors.email && <p className="text-[7px] text-rose-400 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.email}</p>}
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">
@@ -251,9 +407,10 @@ const SchoolRegister = () => {
                                 onChange={(e) => handleInputChange("password", e.target.value)}
                                 placeholder="••••••••"
                                 required
-                                className="h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-purple-500/20 focus:bg-white/[0.08] transition-all duration-300"
+                                className={`h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-purple-500/20 focus:bg-white/[0.08] transition-all duration-300 ${errors.password ? 'ring-2 ring-rose-500/50' : ''}`}
                               />
                             </div>
+                            {errors.password && <p className="text-[7px] text-rose-400 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.password}</p>}
                           </div>
                           <div className="space-y-1.5">
                             <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Confirm</Label>
@@ -265,65 +422,10 @@ const SchoolRegister = () => {
                                 onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
                                 placeholder="••••••••"
                                 required
-                                className="h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-purple-500/20 focus:bg-white/[0.08] transition-all duration-300"
+                                className={`h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-purple-500/20 focus:bg-white/[0.08] transition-all duration-300 ${errors.confirmPassword ? 'ring-2 ring-rose-500/50' : ''}`}
                               />
                             </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {step === 2 && (
-                      <div className="space-y-3 animate-in fade-in slide-in-from-right-4 duration-500">
-                        <div className="space-y-1.5">
-                          <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Institution Name</Label>
-                          <div className="relative group/input">
-                            <Home className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-white/10 group-focus-within/input:text-purple-400 transition-colors" />
-                            <Input
-                              value={formData.institutionName}
-                              onChange={(e) => handleInputChange("institutionName", e.target.value)}
-                              placeholder="Full School Name"
-                              required
-                              className="h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-purple-500/20 focus:bg-white/[0.08] transition-all duration-300"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="space-y-1.5">
-                            <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Type</Label>
-                            <Select onValueChange={(value) => handleInputChange("institutionType", value)}>
-                              <SelectTrigger className="h-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] focus:ring-4 focus:ring-purple-500/20 px-3">
-                                <SelectValue placeholder="Select" />
-                              </SelectTrigger>
-                              <SelectContent className="bg-[#12141c] border-white/10 text-white font-bold text-[11px] rounded-lg">
-                                <SelectItem value="private" className="focus:bg-purple-500 rounded-md">Private</SelectItem>
-                                <SelectItem value="government" className="focus:bg-purple-500 rounded-md">Government</SelectItem>
-                                <SelectItem value="semi-government" className="focus:bg-purple-500 rounded-md">Semi-Gov</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="space-y-1.5">
-                            <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Students</Label>
-                            <Input
-                              type="number"
-                              onChange={(e) => handleInputChange("approxStudentCount", Number(e.target.value))}
-                              placeholder="Total"
-                              className="h-9 px-3 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] focus:ring-4 focus:ring-purple-500/20 focus:bg-white/[0.08] transition-all duration-300"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="space-y-1.5">
-                          <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Website (Optional)</Label>
-                          <div className="relative group/input">
-                            <Globe className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-white/10 group-focus-within/input:text-purple-400 transition-colors" />
-                            <Input
-                              value={formData.website}
-                              onChange={(e) => handleInputChange("website", e.target.value)}
-                              placeholder="https://www.school.com"
-                              className="h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-purple-500/20 focus:bg-white/[0.08] transition-all duration-300"
-                            />
+                            {errors.confirmPassword && <p className="text-[7px] text-rose-400 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.confirmPassword}</p>}
                           </div>
                         </div>
                       </div>
@@ -353,15 +455,27 @@ const SchoolRegister = () => {
                             />
                           </div>
                         </div>
-                        <div className="space-y-1.5">
-                          <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">City</Label>
-                          <Input
-                            value={formData.city}
-                            onChange={(e) => handleInputChange("city", e.target.value)}
-                            placeholder="City"
-                            required
-                            className="h-9 px-3 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] focus:ring-4 focus:ring-purple-500/20 focus:bg-white/[0.08] transition-all duration-300"
-                          />
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1.5">
+                            <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">City</Label>
+                            <Input
+                              value={formData.city}
+                              onChange={(e) => handleInputChange("city", e.target.value)}
+                              placeholder="City"
+                              required
+                              className="h-9 px-3 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] focus:ring-4 focus:ring-purple-500/20 focus:bg-white/[0.08] transition-all duration-300"
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Postal Code</Label>
+                            <Input
+                              value={formData.postalCode}
+                              onChange={(e) => handleInputChange("postalCode", e.target.value)}
+                              placeholder="Zip Code"
+                              required
+                              className="h-9 px-3 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] focus:ring-4 focus:ring-purple-500/20 focus:bg-white/[0.08] transition-all duration-300"
+                            />
+                          </div>
                         </div>
                         <div className="space-y-1.5">
                           <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Address</Label>
@@ -390,7 +504,7 @@ const SchoolRegister = () => {
                         )}
                         <Button
                           type={step === 3 ? "submit" : "button"}
-                          onClick={() => step < 3 && setStep(step + 1)}
+                          onClick={() => step < 3 ? handleNext() : undefined}
                           disabled={isLoading}
                           className="flex-[2] h-11 rounded-xl bg-white text-slate-900 shadow-[0_12px_24px_-8px_rgba(255,255,255,0.3)] hover:shadow-[0_16px_32px_-8px_rgba(255,255,255,0.4)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-500 group/btn"
                         >
