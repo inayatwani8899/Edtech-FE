@@ -64,6 +64,9 @@ import RBACUserForm from "./modules/rbac/pages/RBACUserForm";
 import RBACUserDetail from "./modules/rbac/pages/RBACUserDetail";
 import RolePermissionMapping from "./modules/rbac/pages/RolePermissionMapping";
 import UserPermissionMapping from "./modules/rbac/pages/UserPermissionMapping";
+import { ForgotPassword } from "./pages/auth/ForgotPassword";
+import { ResetPassword } from "./pages/auth/ResetPassword";
+
 
 // 🔒 Protected Route
 interface ProtectedRouteProps {
@@ -149,6 +152,9 @@ const AppRoutes = () => {
             <Route path="/register/student" element={<StudentRegister />} />
             <Route path="/register/counsellor" element={<CounsellorRegister />} />
             <Route path="/register/school" element={<SchoolRegister />} />
+            <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
+            <Route path="/reset-password" element={<PublicRoute><ResetPassword /></PublicRoute>} />
+
 
             {/* Public Themed Layout for subpages */}
             <Route element={<PublicLayout />}>
