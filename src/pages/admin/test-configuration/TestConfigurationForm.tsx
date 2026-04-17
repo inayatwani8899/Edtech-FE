@@ -1,17 +1,44 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTestStore } from "@/store/testStore";
+import { useUserStore } from "@/store/userStore";
+import { useTestConfigurationStore } from "@/store/testConfigurationStore";
+import { 
+    Plus, 
+    Trash2, 
+    Save, 
+    X, 
+    Settings2, 
+    Sliders, 
+    DollarSign, 
+    ScrollText, 
+    Loader2, 
+    PlayCircle, 
+    Hash,
+    ArrowLeft,
+    Shield,
+    Sparkles,
+    CheckCircle2,
+    Activity,
+    Layers,
+    LayoutDashboard,
+    Coins
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useUserStore } from "@/store/userStore";
-import { Plus, Trash2, Save, X, Settings2, Sliders, DollarSign, ScrollText, Loader2, PlayCircle, Hash } from "lucide-react";
-import { useTestConfigurationStore } from "@/store/testConfigurationStore";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-
-type Message = { text: string; type: "success" | "error" | "info" } | null;
+import { toast } from "sonner";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 
 type RolePrice = {
   roleId: string;
@@ -19,7 +46,7 @@ type RolePrice = {
 };
 
 const defaultFormData = {
-  rolePrices: [{ roleId: "", price: 0 }] as RolePrice[], // Default one row
+  rolePrices: [{ roleId: "", price: 0 }] as RolePrice[],
   testId: "",
   questionsPerPage: 5,
   submitType: "PerPage" as "PerPage" | "OneGo",
@@ -30,17 +57,13 @@ const defaultFormData = {
 
 export const TestConfigurationForm: React.FC<{ configId?: string }> = ({ configId }) => {
   const [formData, setFormData] = useState(defaultFormData);
-  const [message, setMessage] = useState<Message>(null);
   const [isEditMode, setIsEditMode] = useState(false);
 
   const navigate = useNavigate();
   const { id: paramId } = useParams();
   const actualConfigId = configId || paramId;
 
-  const {
-    tests,
-    fetchTests,
-  } = useTestStore();
+  const { tests, fetchTests } = useTestStore();
   const {
     loading,
     currentConfiguration,
@@ -51,31 +74,28 @@ export const TestConfigurationForm: React.FC<{ configId?: string }> = ({ configI
   } = useTestConfigurationStore();
   const { roles, fetchRoles } = useUserStore();
 
-  // Load configuration when editing
+  useEffect(() => {
+    fetchTests();
+    fetchRoles();
+  }, [fetchTests, fetchRoles]);
+
   useEffect(() => {
     if (actualConfigId) {
       fetchConfigurationById(actualConfigId);
       setIsEditMode(true);
     } else {
       clearCurrentConfiguration();
-      setIsEditMode(false);
       setFormData(defaultFormData);
+      setIsEditMode(false);
     }
-  }, [actualConfigId]);
+  }, [actualConfigId, fetchConfigurationById, clearCurrentConfiguration]);
 
-  // Fetch roles and tests on component mount
-  useEffect(() => {
-    fetchTests();
-    fetchRoles();
-  }, []);
-
-  // When store updates currentConfiguration, sync to local form
   useEffect(() => {
     if (currentConfiguration && isEditMode) {
       setFormData({
         rolePrices: currentConfiguration.rolePrices?.length > 0
           ? currentConfiguration.rolePrices
-          : [{ roleId: "", price: 0 }], // Ensure at least one row
+          : [{ roleId: "", price: 0 }],
         testId: currentConfiguration.testId,
         questionsPerPage: currentConfiguration.questionsPerPage,
         submitType: currentConfiguration.submitType,
@@ -84,26 +104,13 @@ export const TestConfigurationForm: React.FC<{ configId?: string }> = ({ configI
         testInstructions: currentConfiguration.testInstructions,
       });
     }
-  }, [currentConfiguration]);
+  }, [currentConfiguration, isEditMode]);
 
-  const showMessage = (text: string, type: "success" | "error" | "info") => {
-    setMessage({ text, type });
-    setTimeout(() => setMessage(null), 3000);
+  const handleChange = (name: string, value: any) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const target = e.target as HTMLInputElement;
-    const value =
-      target.type === "checkbox"
-        ? target.checked
-        : target.type === "number"
-          ? parseFloat(target.value)
-          : target.value;
-
-    setFormData((prev) => ({ ...prev, [target.name]: value }));
-  };
-
-  const handleRolePriceChange = (index: number, field: keyof RolePrice, value: string | number) => {
+  const handleRolePriceChange = (index: number, field: keyof RolePrice, value: any) => {
     setFormData(prev => ({
       ...prev,
       rolePrices: prev.rolePrices.map((item, i) =>
@@ -134,50 +141,37 @@ export const TestConfigurationForm: React.FC<{ configId?: string }> = ({ configI
     });
   };
 
+  const validateForm = () => {
+    if (!formData.testId) {
+      toast.error("Resource designation required (Select Test)");
+      return false;
+    }
+    if (formData.rolePrices.some(rp => !rp.roleId || rp.price < 0)) {
+      toast.error("Invalid matrix segments identified");
+      return false;
+    }
+    if (formData.questionsPerPage <= 0) {
+      toast.error("Pagination value must be positive");
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Validation
-    if (formData.rolePrices.length === 0) {
-      showMessage("At least one role and price is required.", "error");
-      return;
-    }
-
-    if (!formData.testId) {
-      showMessage("Test is required.", "error");
-      return;
-    }
-
-    if (formData.questionsPerPage <= 0) {
-      showMessage("Questions per page must be valid values.", "error");
-      return;
-    }
-
-    // Validate all role prices
-    const invalidRolePrice = formData.rolePrices.find(rp =>
-      !rp.roleId || rp.price < 0
-    );
-
-    if (invalidRolePrice) {
-      showMessage("All roles must be selected and prices must be non-negative.", "error");
-      return;
-    }
+    if (!validateForm()) return;
 
     try {
       if (isEditMode && actualConfigId) {
         await updateConfiguration(actualConfigId, formData);
-        showMessage(`Configuration updated successfully!`, "success");
+        toast.success("Deployment rule synchronized");
       } else {
         await createConfiguration(formData);
-        showMessage(`Configuration created successfully!`, "success");
+        toast.success("New distribution protocol initialized");
       }
-
       setTimeout(() => navigate("/manage/test-configurations"), 1000);
-    } catch (err) {
-      showMessage(
-        `Failed to ${isEditMode ? "update" : "create"} configuration. Please try again.`,
-        "error"
-      );
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Sync protocol rejected");
     }
   };
 
@@ -185,259 +179,246 @@ export const TestConfigurationForm: React.FC<{ configId?: string }> = ({ configI
     return (
       <div className="min-h-screen w-full bg-[#FAFAFA] flex flex-col items-center justify-center">
         <div className="relative">
-          <div className="h-16 w-16 rounded-full border-t-4 border-cyan-500 animate-spin"></div>
-          <Loader2 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-cyan-500 animate-pulse" />
+          <Loader2 className="h-12 w-12 animate-spin text-cyan-600" />
+          <div className="absolute inset-0 h-12 w-12 rounded-full border-4 border-cyan-100 border-t-transparent animate-pulse"></div>
         </div>
-        <p className="mt-4 text-sm font-semibold text-slate-400">Loading Configuration...</p>
+        <p className="mt-4 text-slate-500 font-bold uppercase tracking-widest text-[10px]">Accessing Rule Parameters...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen w-full bg-[#F8FAFC] py-8 px-4 sm:px-6">
-      {/* Dynamic Background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] bg-cyan-500/5 rounded-full blur-[120px] animate-pulse"></div>
-        <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] bg-sky-500/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }}></div>
-      </div>
-
-      <div className="max-w-6xl mx-auto relative z-10">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 mb-1">
-              <Badge variant="outline" className="bg-white/50 backdrop-blur-md border-slate-200 text-slate-500 text-[10px] uppercase tracking-widest font-bold px-2 py-0.5">
-                Deployment
-              </Badge>
+    <div className="min-h-screen w-full bg-[#FAFAFA] px-4 overflow-x-hidden">
+      <div className="max-w-5xl mx-auto relative z-10">
+        {/* CONDENSED HEADER */}
+        <div className="flex items-center justify-between gap-3 mb-3 border-b border-slate-200 pb-3">
+            <div className="flex items-center gap-3">
+                <div className="p-1.5 bg-white rounded-lg shadow-sm cursor-pointer hover:bg-slate-50 border border-slate-100" onClick={() => navigate("/manage/test-configurations")}>
+                    <ArrowLeft className="h-3.5 w-3.5 text-slate-400" />
+                </div>
+                <div>
+                    <h1 className="text-lg font-black text-slate-900 tracking-tight leading-none">
+                        {isEditMode ? "Update Strategic Rule" : "Define Deployment"}
+                    </h1>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Distribution & Revenue Strategy</p>
+                </div>
             </div>
-            <h1 className="text-3xl font-black tracking-tight text-slate-900 flex items-center gap-2">
-              {isEditMode ? "Edit Config" : "New Config"}
-              <span className="text-slate-300">/</span>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-sky-600">Distribution Rule</span>
-            </h1>
-          </div>
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              onClick={() => navigate("/manage/test-configurations")}
-              className="bg-transparent hover:bg-slate-100 text-slate-500 hover:text-slate-700 font-semibold h-10 px-5 transition-all"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              disabled={loading}
-              className="bg-slate-900 text-white font-bold h-10 px-6 shadow-xl shadow-slate-900/20 hover:bg-slate-800 transition-all hover:scale-105 active:scale-95 rounded-xl"
-            >
-              {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
-              Save Rule
-            </Button>
-          </div>
+
+            <div className="flex items-center gap-2">
+                <Button variant="ghost" onClick={() => navigate("/manage/test-configurations")} className="text-slate-500 hover:bg-slate-100 font-bold text-[10px] h-7 px-3 rounded-lg">
+                    Abort
+                </Button>
+                <Button onClick={handleSubmit} className="bg-slate-900 text-white font-bold text-[10px] h-7 px-4 rounded-lg shadow-md hover:bg-slate-800 transition-all flex items-center gap-1.5">
+                    {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
+                    {isEditMode ? "Sync Rule" : "Initialize"}
+                </Button>
+            </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-min">
-
-          {/* CARD 1: IDENTITY (Hero) - Spans 8 cols */}
-          <Card className="md:col-span-8 border-none shadow-elegant bg-white/80 backdrop-blur-xl rounded-[2rem] overflow-hidden group hover:shadow-2xl transition-all duration-500">
-            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-500"></div>
-            <CardContent className="p-8">
-              <div className="flex flex-col sm:flex-row gap-8 items-start">
-                {/* Visual Icon Section */}
-                <div className="flex-shrink-0 flex flex-col items-center gap-3">
-                  <div className="h-24 w-24 rounded-[2rem] bg-gradient-to-br from-cyan-50 to-sky-50 flex items-center justify-center border-4 border-white shadow-lg relative overflow-hidden group-hover:scale-105 transition-transform duration-500">
-                    <Settings2 className="h-10 w-10 text-cyan-300" />
-                    <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  </div>
-                  <div className="text-center">
-                    <Badge className="bg-cyan-100 text-cyan-600 border-none">Active Rule</Badge>
-                  </div>
-                </div>
-
-                {/* Identity Inputs */}
-                <div className="flex-grow space-y-4 w-full">
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Target Assessment</Label>
-                    <select
-                      name="testId"
-                      value={formData.testId}
-                      onChange={handleChange}
-                      className="w-full h-11 px-3 bg-slate-50 border-transparent hover:border-slate-200 focus:bg-white focus:border-cyan-200 transition-all rounded-xl font-bold text-slate-700 outline-none"
-                      disabled={loading}
-                    >
-                      <option value="">Select Assessment...</option>
-                      {tests.map(test => (
-                        <option key={test?.id} value={test?.id}>{test.title}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Page Pagination</Label>
-                      <div className="relative">
-                        <Hash className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                        <Input
-                          name="questionsPerPage"
-                          type="number"
-                          value={formData.questionsPerPage}
-                          onChange={handleChange}
-                          className="h-11 pl-10 bg-slate-50 border-transparent hover:border-slate-200 focus:bg-white focus:border-cyan-200 transition-all rounded-xl font-bold text-slate-700"
-                          min={1}
-                        />
-                      </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-12">
+            {/* LEFT COLUMN: STRATEGY SUMMARY */}
+            <div className="lg:col-span-3">
+                <Card className="border-none shadow-elegant bg-white rounded-3xl overflow-hidden border border-slate-100/50 flex flex-col h-full">
+                    <div className="h-16 bg-slate-900 relative">
+                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
                     </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Mode</Label>
-                      <select
-                        name="submitType"
-                        value={formData.submitType}
-                        onChange={handleChange}
-                        className="w-full h-11 px-3 bg-slate-50 border-transparent hover:border-slate-200 focus:bg-white focus:border-cyan-200 transition-all rounded-xl font-bold text-slate-700 outline-none"
-                      >
-                        <option value="PerPage">Paginated</option>
-                        <option value="OneGo">Full Exam</option>
-                      </select>
+                    <CardContent className="px-4 pb-4 -mt-8 relative z-10 text-center flex-grow">
+                        <div className="h-16 w-16 rounded-2xl bg-white p-1 shadow-lg border border-slate-50 mx-auto mb-3">
+                            <div className="h-full w-full rounded-xl bg-slate-50 flex items-center justify-center">
+                                <LayoutDashboard className="h-8 w-8 text-cyan-300" />
+                            </div>
+                        </div>
+                        <h2 className="text-base font-black text-slate-900 truncate mb-1 px-2">
+                            {tests.find(t => String(t.id) === formData.testId)?.title || "Deployment Rule"}
+                        </h2>
+                        <Badge variant="secondary" className="bg-cyan-50 text-cyan-600 font-bold uppercase tracking-widest text-[8px] mb-6 border-none">
+                            Active Distribution
+                        </Badge>
+
+                        <div className="space-y-3 pt-4 border-t border-slate-50 text-left">
+                            <Label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1 block">Behavioral Policy</Label>
+                            
+                            <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100 transition-all">
+                                <span className="text-[10px] font-black text-slate-500 uppercase">Suspend Ability</span>
+                                <Switch 
+                                    checked={formData.canResume} 
+                                    onCheckedChange={(checked) => handleChange("canResume", checked)} 
+                                    className="data-[state=checked]:bg-cyan-500"
+                                />
+                            </div>
+
+                            <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100 transition-all">
+                                <span className="text-[10px] font-black text-slate-500 uppercase">Cyclic Attempts</span>
+                                <Switch 
+                                    checked={formData.allowMultiplePurchases} 
+                                    onCheckedChange={(checked) => handleChange("allowMultiplePurchases", checked)} 
+                                    className="data-[state=checked]:bg-cyan-500"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="mt-8 space-y-1.5 text-left">
+                            <Label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1 block">Target Resource</Label>
+                            <Select value={formData.testId} onValueChange={(val) => handleChange("testId", val)}>
+                                <SelectTrigger className="w-full h-9 bg-slate-100/50 border-transparent rounded-xl px-3 text-[10px] font-bold text-slate-600 focus:ring-0">
+                                    <SelectValue placeholder="Link Assessment..." />
+                                </SelectTrigger>
+                                <SelectContent className="rounded-xl border-slate-200 shadow-xl">
+                                    {tests.map(test => (
+                                        <SelectItem key={test?.id} value={String(test?.id)} className="text-[10px] font-bold">{test.title}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* RIGHT COLUMN: REVENUE & CONFIGURATION */}
+            <div className="lg:col-span-9 space-y-6">
+                {/* PRICING MATRIX TABLE */}
+                <Card className="border-none shadow-elegant bg-white rounded-3xl border border-slate-100/50 overflow-hidden">
+                    <div className="px-6 py-4 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
+                        <div className="flex items-center gap-2.5">
+                            <Coins className="h-4 w-4 text-emerald-500" />
+                            <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest">Revenue Allocation Matrix</h3>
+                        </div>
+                        <Button 
+                            type="button" 
+                            onClick={addRolePrice} 
+                            className="bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border-none font-black text-[9px] uppercase h-7 px-3 rounded-lg flex items-center gap-1.5 transition-all active:scale-95"
+                        >
+                            <Plus className="h-3 w-3" /> Insert Segment
+                        </Button>
                     </div>
-                  </div>
+                    <CardContent className="p-0">
+                        <table className="w-full">
+                            <thead className="bg-[#FAFAFA] border-b border-slate-50">
+                                <tr>
+                                    <th className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-left px-6 py-3 whitespace-nowrap">Participant Role</th>
+                                    <th className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-left px-6 py-3 whitespace-nowrap">Acquisition Price (₹)</th>
+                                    <th className="px-6 py-3"></th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-50">
+                                {formData.rolePrices.map((rolePrice, index) => (
+                                    <tr key={index} className="group hover:bg-slate-50/50 transition-colors">
+                                        <td className="px-6 py-3">
+                                            <Select 
+                                                value={rolePrice.roleId} 
+                                                onValueChange={(val) => handleRolePriceChange(index, "roleId", val)}
+                                            >
+                                                <SelectTrigger className="h-10 bg-slate-100/30 border-transparent hover:bg-white hover:border-slate-200 transition-all rounded-xl text-xs font-bold text-slate-700 w-full focus:ring-0">
+                                                    <SelectValue placeholder="Identify Role..." />
+                                                </SelectTrigger>
+                                                <SelectContent className="rounded-xl">
+                                                    {getAvailableRoles(index).map(role => (
+                                                        <SelectItem key={role.id} value={String(role.id)} className="text-xs font-bold">{role.name}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </td>
+                                        <td className="px-6 py-3">
+                                            <div className="relative group/price">
+                                                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300 group-focus-within/price:text-emerald-500 transition-colors" />
+                                                <Input 
+                                                    type="number"
+                                                    value={rolePrice.price}
+                                                    onChange={(e) => handleRolePriceChange(index, "price", parseFloat(e.target.value) || 0)}
+                                                    className="h-10 pl-9 bg-slate-100/30 border-transparent focus:bg-white focus:ring-2 focus:ring-emerald-100 rounded-xl font-black text-sm transition-all"
+                                                    placeholder="0.00"
+                                                />
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-3 text-right">
+                                            {formData.rolePrices.length > 1 && (
+                                                <button 
+                                                    type="button" 
+                                                    onClick={() => removeRolePrice(index)}
+                                                    className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </button>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                        {formData.rolePrices.length === 0 && (
+                            <div className="p-8 text-center bg-slate-50/30 border-t border-slate-50">
+                                <Sparkles className="h-8 w-8 text-slate-200 mx-auto mb-2" />
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">No segments initialized</p>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+
+                {/* DISTRIBUTION PARAMETERS */}
+                <Card className="border-none shadow-elegant bg-white rounded-3xl border border-slate-100/50 overflow-hidden">
+                    <div className="px-6 py-4 border-b border-slate-50 flex items-center gap-2.5 bg-slate-50/30">
+                        <Settings2 className="h-4 w-4 text-cyan-500" />
+                        <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest">Protocol Engine Parameters</h3>
+                    </div>
+                    <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-1.5">
+                            <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">Distribution Mode</Label>
+                            <Select value={formData.submitType} onValueChange={(val: any) => handleChange("submitType", val)}>
+                                <SelectTrigger className="h-10 bg-slate-100/30 border-transparent rounded-xl px-4 text-xs font-bold text-slate-700 focus:ring-0">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent className="rounded-xl">
+                                    <SelectItem value="PerPage" className="text-xs font-bold">Paginated Stream (Per Page)</SelectItem>
+                                    <SelectItem value="OneGo" className="text-xs font-bold">Holistic Execution (One Go)</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-1.5">
+                            <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">Pagination Stratum</Label>
+                            <div className="relative group">
+                                <Hash className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300 group-focus-within:text-cyan-500 transition-colors" />
+                                <Input 
+                                    type="number"
+                                    value={formData.questionsPerPage}
+                                    onChange={(e) => handleChange("questionsPerPage", parseInt(e.target.value) || 5)}
+                                    className="h-10 pl-9 bg-slate-100/30 border-transparent focus:bg-white focus:ring-2 focus:ring-cyan-100 rounded-xl font-black text-sm"
+                                    min={1}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-1.5 col-span-full">
+                            <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block">Candidate Directive (Instructions)</Label>
+                            <div className="relative group">
+                                <ScrollText className="absolute left-4 top-4 h-4 w-4 text-slate-300 group-focus-within:text-cyan-500 transition-colors" />
+                                <Textarea 
+                                    value={formData.testInstructions}
+                                    onChange={(e) => handleChange("testInstructions", e.target.value)}
+                                    className="w-full min-h-[120px] pl-10 bg-slate-100/30 border-transparent rounded-2xl p-4 text-sm font-medium leading-relaxed resize-none transition-all focus:bg-white focus:ring-2 focus:ring-cyan-100"
+                                    placeholder="Outline the operational guidelines for participants..."
+                                />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* GLOBAL SYNC STRIP */}
+                <div className="p-4 rounded-3xl bg-cyan-600 text-white flex items-center justify-between shadow-xl shadow-cyan-600/20 group">
+                    <div className="flex items-center gap-4">
+                        <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center border border-white/10 backdrop-blur-sm group-hover:scale-110 transition-transform">
+                            <Sparkles className="h-5 w-5 text-cyan-100" />
+                        </div>
+                        <div>
+                            <h4 className="text-sm font-black tracking-tight leading-none mb-1">Strategic Sync Matrix</h4>
+                            <p className="text-[9px] font-bold uppercase tracking-widest opacity-60">Rule defined for global deployment</p>
+                        </div>
+                    </div>
+                    <Button onClick={handleSubmit} className="bg-white text-cyan-600 font-black text-[10px] uppercase tracking-widest h-9 px-6 rounded-xl hover:bg-slate-50 transition-all shadow-lg active:scale-95">
+                        Push Strategy
+                    </Button>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* CARD 2: BEHAVIOR TOGGLES - Spans 4 cols */}
-          <Card className="md:col-span-4 border-none shadow-elegant bg-slate-900 text-white rounded-[2rem] overflow-hidden relative group">
-            <CardHeader className="p-6 pb-2 relative z-10">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-white/10 rounded-lg backdrop-blur-md">
-                  <Sliders className="h-5 w-5 text-cyan-300" />
-                </div>
-                <h3 className="text-lg font-bold">Policy</h3>
-              </div>
-            </CardHeader>
-            <CardContent className="p-6 relative z-10 space-y-4">
-              <label className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors cursor-pointer group/item">
-                <span className="text-sm font-bold text-slate-300 group-hover/item:text-white transition-colors">Resume Capability</span>
-                <div className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    name="canResume"
-                    checked={formData.canResume}
-                    onChange={handleChange}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
-                </div>
-              </label>
-
-              <label className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors cursor-pointer group/item">
-                <span className="text-sm font-bold text-slate-300 group-hover/item:text-white transition-colors">Multiple Attempts</span>
-                <div className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    name="allowMultiplePurchases"
-                    checked={formData.allowMultiplePurchases}
-                    onChange={handleChange}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
-                </div>
-              </label>
-            </CardContent>
-          </Card>
-
-          {/* CARD 3: PRICING MATRIX - Spans 12 cols */}
-          <Card className="md:col-span-12 border-none shadow-elegant bg-white/60 backdrop-blur-xl rounded-[2rem] overflow-hidden">
-            <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
-              <div className="flex items-center gap-2">
-                <DollarSign className="h-5 w-5 text-emerald-600" />
-                <h3 className="text-lg font-bold text-slate-900">Access & Pricing Matrix</h3>
-              </div>
-              <Button
-                type="button"
-                onClick={addRolePrice}
-                variant="outline"
-                className="bg-white border-slate-200 hover:bg-emerald-50 hover:text-emerald-600 text-xs font-bold h-8"
-              >
-                <Plus className="w-3 h-3 mr-1" />
-                Add Segment
-              </Button>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="overflow-hidden rounded-xl border border-slate-200">
-                <table className="w-full text-sm text-left">
-                  <thead className="text-xs text-slate-500 uppercase bg-slate-50/50">
-                    <tr>
-                      <th scope="col" className="px-6 py-3 font-bold">Target Role</th>
-                      <th scope="col" className="px-6 py-3 font-bold">Price (₹)</th>
-                      <th scope="col" className="px-6 py-3 font-bold text-right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {formData.rolePrices.map((rolePrice, index) => (
-                      <tr key={index} className="bg-white border-b border-slate-100 last:border-none hover:bg-slate-50/50 transition-colors">
-                        <td className="px-6 py-3">
-                          <select
-                            value={rolePrice.roleId}
-                            onChange={(e) => handleRolePriceChange(index, 'roleId', e.target.value)}
-                            className="w-full h-10 px-3 bg-slate-50 border-transparent hover:border-slate-200 focus:bg-white focus:border-cyan-200 transition-all rounded-lg font-bold text-slate-700 outline-none"
-                          >
-                            <option value="">Select Role...</option>
-                            {getAvailableRoles(index).map(role => (
-                              <option key={role.id} value={role.id}>{role.name}</option>
-                            ))}
-                          </select>
-                        </td>
-                        <td className="px-6 py-3">
-                          <div className="relative max-w-[150px]">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">₹</span>
-                            <Input
-                              type="number"
-                              value={rolePrice.price}
-                              onChange={(e) => handleRolePriceChange(index, 'price', e.target.value === "" ? "" : parseFloat(e.target.value))}
-                              min={0}
-                              className="h-10 pl-7 bg-slate-50 border-transparent hover:border-slate-200 focus:bg-white focus:border-emerald-200 rounded-lg font-bold text-slate-900"
-                            />
-                          </div>
-                        </td>
-                        <td className="px-6 py-3 text-right">
-                          {formData.rolePrices.length > 1 && (
-                            <Button
-                              type="button"
-                              onClick={() => removeRolePrice(index)}
-                              variant="ghost"
-                              className="h-8 w-8 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* CARD 4: Instructions - Spans 12 cols */}
-          <Card className="md:col-span-12 border-none shadow-elegant bg-white/60 backdrop-blur-xl rounded-[2rem] overflow-hidden">
-            <CardHeader className="p-6 pb-2">
-              <div className="flex items-center gap-2">
-                <ScrollText className="h-5 w-5 text-indigo-600" />
-                <h3 className="text-lg font-bold text-slate-900">Candidate Instructions</h3>
-              </div>
-            </CardHeader>
-            <CardContent className="p-6">
-              <Textarea
-                name="testInstructions"
-                value={formData.testInstructions}
-                onChange={handleChange}
-                placeholder="Detailed guidelines for the exam..."
-                className="w-full min-h-[140px] bg-white/50 border-slate-200/50 hover:border-indigo-200 focus:bg-white rounded-xl resize-none text-slate-700 font-medium leading-relaxed p-4 outline-none transition-all"
-              />
-            </CardContent>
-          </Card>
-
-        </form>
+            </div>
+        </div>
       </div>
     </div>
   );

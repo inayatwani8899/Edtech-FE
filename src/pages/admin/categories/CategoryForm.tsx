@@ -1,15 +1,30 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useCategoryStore } from "@/store/categoryStore";
+import { 
+    Save, 
+    X, 
+    FolderOpen, 
+    AlertCircle, 
+    Loader2, 
+    Sparkles, 
+    Tag, 
+    Layers,
+    ArrowLeft,
+    Shield,
+    CheckCircle2,
+    Activity,
+    Settings2,
+    Palette
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Save, X, FolderOpen, AlertCircle, Loader2, Sparkles, Tag, Layers } from "lucide-react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-// import { Label } from "@/components/ui/label"; // Assuming shadcn Label exists or we use standard label
-
-type Message = { text: string; type: "success" | "error" | "info" } | null;
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
 
 const defaultFormData = {
     categoryName: "",
@@ -19,10 +34,7 @@ const defaultFormData = {
 
 export const CategoryForm: React.FC<{ categoryId?: string }> = ({ categoryId }) => {
     const [formData, setFormData] = useState(defaultFormData);
-    const [errors, setErrors] = useState<{ categoryName?: string; description?: string }>({});
-    const [message, setMessage] = useState<Message>(null);
     const [isEditMode, setIsEditMode] = useState(false);
-    const [touched, setTouched] = useState<{ categoryName?: boolean; description?: boolean }>({});
 
     const navigate = useNavigate();
     const { id: paramId } = useParams();
@@ -37,61 +49,6 @@ export const CategoryForm: React.FC<{ categoryId?: string }> = ({ categoryId }) 
         clearCurrentCategory,
     } = useCategoryStore();
 
-    // Validation function
-    const validateField = (name: string, value: string) => {
-        const newErrors = { ...errors };
-
-        switch (name) {
-            case 'categoryName':
-                if (!value.trim()) {
-                    newErrors.categoryName = "Category name is required.";
-                } else if (value.trim().length < 2) {
-                    newErrors.categoryName = "Category name must be at least 2 characters long.";
-                } else {
-                    delete newErrors.categoryName;
-                }
-                break;
-
-            case 'description':
-                if (!value.trim()) {
-                    newErrors.description = "Description is required.";
-                } else if (value.trim().length < 10) {
-                    newErrors.description = "Description must be at least 10 characters long.";
-                } else {
-                    delete newErrors.description;
-                }
-                break;
-
-            default:
-                break;
-        }
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-
-    // Validate form
-    const validateForm = () => {
-        const newErrors: { categoryName?: string; description?: string } = {};
-
-        if (!formData.categoryName.trim()) {
-            newErrors.categoryName = "Category name is required.";
-        } else if (formData.categoryName.trim().length < 2) {
-            newErrors.categoryName = "Category name must be at least 2 characters long.";
-        }
-
-        if (!formData.description.trim()) {
-            newErrors.description = "Description is required.";
-        } else if (formData.description.trim().length < 10) {
-            newErrors.description = "Description must be at least 10 characters long.";
-        }
-
-        setErrors(newErrors);
-        setTouched({ categoryName: true, description: true });
-        return Object.keys(newErrors).length === 0;
-    };
-
-    // Load category when editing
     useEffect(() => {
         if (actualCategoryId) {
             fetchCategoryById(actualCategoryId);
@@ -100,12 +57,9 @@ export const CategoryForm: React.FC<{ categoryId?: string }> = ({ categoryId }) 
             clearCurrentCategory();
             setIsEditMode(false);
             setFormData(defaultFormData);
-            setErrors({});
-            setTouched({});
         }
-    }, [actualCategoryId]);
+    }, [actualCategoryId, fetchCategoryById, clearCurrentCategory]);
 
-    // When store updates currentCategory, sync to local form
     useEffect(() => {
         if (currentCategory && isEditMode) {
             setFormData({
@@ -116,51 +70,37 @@ export const CategoryForm: React.FC<{ categoryId?: string }> = ({ categoryId }) 
         }
     }, [currentCategory, isEditMode]);
 
-    const showMessage = (text: string, type: "success" | "error" | "info") => {
-        setMessage({ text, type });
-        setTimeout(() => setMessage(null), 3000);
+    const handleChange = (name: string, value: any) => {
+        setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const target = e.target as HTMLInputElement;
-        const value = target.type === "checkbox" ? target.checked : target.value;
-
-        setFormData((prev) => ({ ...prev, [target.name]: value }));
-
-        // Validate field on change if it's been touched
-        if (touched[target.name as keyof typeof touched]) {
-            validateField(target.name, value.toString());
+    const validateForm = () => {
+        if (!formData.categoryName.trim() || formData.categoryName.length < 2) {
+            toast.error("Valid classification label required");
+            return false;
         }
-    };
-
-    const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
-        setTouched(prev => ({ ...prev, [name]: true }));
-        validateField(name, value);
+        if (!formData.description.trim() || formData.description.length < 10) {
+            toast.error("Contextual protocol (description) must be at least 10 chars");
+            return false;
+        }
+        return true;
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        if (!validateForm()) {
-            return;
-        }
+        if (!validateForm()) return;
 
         try {
             if (isEditMode && actualCategoryId) {
                 await updateCategory(actualCategoryId, formData);
-                showMessage(`Category updated successfully!`, "success");
+                toast.success("Classification synchronized");
             } else {
                 await createCategory(formData);
-                showMessage(`Category created successfully!`, "success");
+                toast.success("New asset classification initialized");
             }
-
             setTimeout(() => navigate("/manage/categories"), 1000);
         } catch (err: any) {
-            showMessage(
-                err.response?.data?.message || `Failed to ${isEditMode ? "update" : "create"} category. Please try again.`,
-                "error"
-            );
+            toast.error(err.response?.data?.message || "Protocol synchronization failed");
         }
     };
 
@@ -168,168 +108,184 @@ export const CategoryForm: React.FC<{ categoryId?: string }> = ({ categoryId }) 
         return (
             <div className="min-h-screen w-full bg-[#FAFAFA] flex flex-col items-center justify-center">
                 <div className="relative">
-                    <div className="h-16 w-16 rounded-full border-t-4 border-fuchsia-500 animate-spin"></div>
-                    <Loader2 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-fuchsia-500 animate-pulse" />
+                    <Loader2 className="h-12 w-12 animate-spin text-fuchsia-600" />
+                    <div className="absolute inset-0 h-12 w-12 rounded-full border-4 border-fuchsia-100 border-t-transparent animate-pulse"></div>
                 </div>
-                <p className="mt-4 text-sm font-semibold text-slate-400">Loading Classification...</p>
+                <p className="mt-4 text-slate-500 font-bold uppercase tracking-widest text-[10px]">Accessing Classification Matrix...</p>
             </div>
         );
     }
 
-    const inputClasses = (hasError: boolean) =>
-        `w-full h-11 bg-slate-50 border-transparent hover:border-slate-200 focus:bg-white focus:border-fuchsia-200 transition-all rounded-xl font-bold text-slate-700 ${hasError ? 'border-red-300 focus:border-red-500 focus:ring-red-200' : ''
-        }`;
-
     return (
-        <div className="min-h-screen w-full bg-[#F8FAFC] py-8 px-4 sm:px-6">
-            {/* Dynamic Background */}
-            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-                <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] bg-fuchsia-500/5 rounded-full blur-[120px] animate-pulse"></div>
-                <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] bg-pink-500/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }}></div>
-            </div>
-
+        <div className="min-h-screen w-full bg-[#FAFAFA] px-4 overflow-x-hidden">
             <div className="max-w-5xl mx-auto relative z-10">
-                {/* Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-                    <div className="space-y-1">
-                        <div className="flex items-center gap-2 mb-1">
-                            <Badge variant="outline" className="bg-white/50 backdrop-blur-md border-slate-200 text-slate-500 text-[10px] uppercase tracking-widest font-bold px-2 py-0.5">
-                                Content Management
-                            </Badge>
-                        </div>
-                        <h1 className="text-3xl font-black tracking-tight text-slate-900 flex items-center gap-2">
-                            {isEditMode ? "Modify Category" : "New Category"}
-                            <span className="text-slate-300">/</span>
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-600 to-pink-600">Classification</span>
-                        </h1>
-                    </div>
+                {/* CONDENSED HEADER */}
+                <div className="flex items-center justify-between gap-3 mb-3 border-b border-slate-200 pb-3">
                     <div className="flex items-center gap-3">
+                        <div className="p-1.5 bg-white rounded-lg shadow-sm cursor-pointer hover:bg-slate-50 border border-slate-100" onClick={() => navigate("/manage/categories")}>
+                            <ArrowLeft className="h-3.5 w-3.5 text-slate-400" />
+                        </div>
+                        <div>
+                            <h1 className="text-lg font-black text-slate-900 tracking-tight leading-none">
+                                {isEditMode ? "Modify Asset" : "New Classification"}
+                            </h1>
+                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Content & Metadata Orchestration</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
                         <Button
                             variant="ghost"
                             onClick={() => navigate("/manage/categories")}
-                            className="bg-transparent hover:bg-slate-100 text-slate-500 hover:text-slate-700 font-semibold h-10 px-5 transition-all"
+                            className="text-slate-500 hover:bg-slate-100 font-bold text-[10px] h-7 px-3 rounded-lg"
                         >
-                            Cancel
+                            Abort
                         </Button>
                         <Button
                             onClick={handleSubmit}
                             disabled={loading}
-                            className="bg-slate-900 text-white font-bold h-10 px-6 shadow-xl shadow-slate-900/20 hover:bg-slate-800 transition-all hover:scale-105 active:scale-95 rounded-xl"
+                            className="bg-slate-900 text-white font-bold text-[10px] h-7 px-4 rounded-lg shadow-md hover:bg-slate-800 transition-all flex items-center gap-1.5"
                         >
-                            {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
-                            Save Asset
+                            {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
+                            {isEditMode ? "Sync Asset" : "Initialize"}
                         </Button>
                     </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-min">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    {/* LEFT COLUMN: ASSET STATUS */}
+                    <div className="lg:col-span-3">
+                        <Card className="border-none shadow-elegant bg-white rounded-3xl overflow-hidden border border-slate-100/50">
+                            <div className="h-16 bg-slate-900 relative">
+                                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
+                            </div>
+                            <CardContent className="px-4 pb-4 -mt-8 relative z-10 text-center">
+                                <div className="h-16 w-16 rounded-2xl bg-white p-1 shadow-lg border border-slate-50 mx-auto mb-3">
+                                    <div className="h-full w-full rounded-xl bg-slate-50 flex items-center justify-center">
+                                        <Palette className="h-8 w-8 text-fuchsia-300" />
+                                    </div>
+                                </div>
+                                <h2 className="text-base font-black text-slate-900 truncate mb-1 px-2">
+                                    {formData.categoryName || "Unlabeled"}
+                                </h2>
+                                <Badge variant="secondary" className="bg-fuchsia-50 text-fuchsia-600 font-bold uppercase tracking-widest text-[8px] mb-4 border-none">
+                                    Classification Asset
+                                </Badge>
 
-                    {/* CARD 1: IDENTITY (Hero) - Spans 8 cols */}
-                    <Card className="md:col-span-8 border-none shadow-elegant bg-white/80 backdrop-blur-xl rounded-[2rem] overflow-hidden group hover:shadow-2xl transition-all duration-500">
-                        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-fuchsia-500 via-pink-500 to-rose-500"></div>
-                        <CardContent className="p-8">
-                            <div className="flex flex-col sm:flex-row gap-8 items-start">
-                                {/* Visual Icon Section */}
-                                <div className="flex-shrink-0 flex flex-col items-center gap-3">
-                                    <div className="h-24 w-24 rounded-[2rem] bg-gradient-to-br from-fuchsia-50 to-pink-50 flex items-center justify-center border-4 border-white shadow-lg relative overflow-hidden group-hover:scale-105 transition-transform duration-500">
-                                        <FolderOpen className="h-10 w-10 text-fuchsia-300" />
-                                        <div className="absolute inset-0 bg-gradient-to-tr from-fuchsia-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                <div className="grid grid-cols-1 gap-2 pt-2 border-t border-slate-50">
+                                    <div className={`p-2.5 rounded-xl border transition-all duration-300 ${formData.isActive ? 'bg-emerald-50 border-emerald-100 shadow-sm shadow-emerald-500/5' : 'bg-slate-50 border-slate-100'}`}>
+                                        <span className="text-[8px] font-black text-slate-400 uppercase block tracking-widest mb-1 text-center">Stream Status</span>
+                                        <div className="flex items-center justify-center gap-2">
+                                            {formData.isActive ? <CheckCircle2 className="h-3 w-3 text-emerald-500" /> : <Activity className="h-3 w-3 text-slate-300" />}
+                                            <span className={`text-[10px] font-black uppercase ${formData.isActive ? "text-emerald-600" : "text-slate-400"}`}>
+                                                {formData.isActive ? "Active Feed" : "Passive Archive"}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
 
-                                {/* Identity Inputs */}
-                                <div className="flex-grow space-y-4 w-full">
-                                    <div className="space-y-1.5">
-                                        <div className="flex items-center justify-between">
-                                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Category Name</label>
-                                            {errors.categoryName && <span className="text-xs font-bold text-red-500">{errors.categoryName}</span>}
-                                        </div>
-                                        <Input
-                                            name="categoryName"
-                                            value={formData.categoryName}
-                                            onChange={handleChange}
-                                            onBlur={handleBlur}
-                                            className={inputClasses(!!errors.categoryName)}
-                                            placeholder="e.g. Mathematics"
+                                <div className="mt-4 space-y-1.5 text-left">
+                                    <Label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1 block">Quick Switch</Label>
+                                    <div className="flex items-center justify-between p-2.5 bg-slate-50/50 rounded-xl border border-slate-100 hover:bg-slate-50 transition-all group cursor-pointer" onClick={() => handleChange("isActive", !formData.isActive)}>
+                                        <span className="text-[10px] font-black text-slate-500 uppercase">Live Visibility</span>
+                                        <Switch 
+                                            checked={formData.isActive} 
+                                            onCheckedChange={(checked) => handleChange("isActive", checked)} 
+                                            className="data-[state=checked]:bg-fuchsia-500"
                                         />
                                     </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
 
-                                    <div className="space-y-1.5">
-                                        <div className="flex items-center justify-between">
-                                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Identifier Tag</label>
+                    {/* RIGHT COLUMN: CLASSIFICATION CORE */}
+                    <div className="lg:col-span-9">
+                        <Card className="border-none shadow-elegant bg-white rounded-3xl border border-slate-100/50 overflow-hidden h-full">
+                            <div className="px-6 py-4 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
+                                <div className="flex items-center gap-2.5">
+                                    <Settings2 className="h-4 w-4 text-fuchsia-600" />
+                                    <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest">Asset Parameters & Context</h3>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="h-1.5 w-1.5 rounded-full bg-fuchsia-500 animate-pulse"></div>
+                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Protocol Active</span>
+                                </div>
+                            </div>
+                            <CardContent className="p-6 space-y-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                                    <div className="space-y-1.5 col-span-full">
+                                        <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">Classification Label (Name)</Label>
+                                        <div className="relative group">
+                                            <FolderOpen className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300 group-focus-within:text-fuchsia-500 transition-colors" />
+                                            <Input 
+                                                name="categoryName"
+                                                value={formData.categoryName} 
+                                                onChange={(e) => handleChange("categoryName", e.target.value)} 
+                                                className="h-10 pl-9 bg-slate-50/50 border-slate-200/50 focus:bg-white focus:ring-2 focus:ring-fuchsia-100 rounded-xl font-bold text-sm transition-all shadow-sm" 
+                                                placeholder="e.g. Cognitive Psychology" 
+                                            />
                                         </div>
-                                        <div className="relative">
-                                            <Tag className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                    </div>
+
+                                    <div className="space-y-1.5 pt-2">
+                                        <Label className="text-[10px] font-bold text-fuchsia-600 uppercase tracking-tight ml-1">Resource Slug (Auto)</Label>
+                                        <div className="relative group/slug">
+                                            <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-fuchsia-300 group-focus-within/slug:text-fuchsia-600 transition-colors" />
                                             <Input
                                                 disabled
-                                                value={formData.categoryName ? formData.categoryName.toLowerCase().replace(/\s+/g, '-') : 'auto-generated-slug'}
-                                                className="h-11 pl-10 bg-slate-100 border-transparent rounded-xl font-mono text-xs text-slate-500"
+                                                value={formData.categoryName ? formData.categoryName.toLowerCase().replace(/\s+/g, '-') : 'pending-initialization'}
+                                                className="h-10 pl-9 bg-fuchsia-50/30 border-fuchsia-100/50 rounded-xl font-mono text-[10px] font-black text-fuchsia-400 uppercase tracking-widest cursor-not-allowed"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-1.5 pt-2">
+                                        <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">Asset Security</Label>
+                                        <div className="h-10 bg-slate-50/50 border border-slate-200/50 rounded-xl flex items-center justify-between px-4">
+                                            <span className="text-[10px] font-black text-slate-400 tracking-widest uppercase">Registry Locked</span>
+                                            <Shield className="h-3.5 w-3.5 text-slate-300" />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-1.5 col-span-full pt-2">
+                                        <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block">Contextual Manifest (Description)</Label>
+                                        <div className="relative group">
+                                            <Sparkles className="absolute left-4 top-4 h-4 w-4 text-slate-300 group-focus-within:text-fuchsia-500 transition-colors" />
+                                            <Textarea 
+                                                name="description" 
+                                                value={formData.description} 
+                                                onChange={(e) => handleChange("description", e.target.value)} 
+                                                className="w-full min-h-[140px] pl-10 bg-slate-50/50 border-slate-200/50 rounded-2xl p-4 text-sm font-medium leading-relaxed resize-none transition-all focus:bg-white focus:ring-2 focus:ring-fuchsia-100 shadow-sm" 
+                                                placeholder="Define the scope and objectives for this classification segment..." 
                                             />
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </CardContent>
-                    </Card>
+                            </CardContent>
+                        </Card>
 
-                    {/* CARD 2: STATUS Widget - Spans 4 cols */}
-                    <Card className={`md:col-span-4 border-none shadow-elegant rounded-[2rem] overflow-hidden relative group transition-all duration-500 ${formData.isActive ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white' : 'bg-gradient-to-br from-slate-200 to-slate-300 text-slate-500'}`}>
-                        <CardHeader className="p-6 pb-2 relative z-10">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-white/20 rounded-lg backdrop-blur-md">
-                                    <Layers className="h-5 w-5 text-white" />
+                        {/* SYNC STRIP */}
+                        {isEditMode && (
+                            <div className="mt-6 p-4 rounded-3xl bg-fuchsia-600 text-white flex items-center justify-between shadow-xl shadow-fuchsia-600/20 group animate-in slide-in-from-bottom-5 duration-500">
+                                <div className="flex items-center gap-4">
+                                    <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center border border-white/10 backdrop-blur-sm group-hover:scale-110 transition-transform">
+                                        <Layers className="h-5 w-5 text-fuchsia-100" />
+                                    </div>
+                                    <div>
+                                        <h4 className="text-sm font-black tracking-tight leading-none mb-1">Asset Hierarchy Sync</h4>
+                                        <p className="text-[9px] font-bold uppercase tracking-widest opacity-60">Classification valid for global indexing</p>
+                                    </div>
                                 </div>
-                                <h3 className="text-lg font-bold text-white">Visibility Status</h3>
+                                <Button onClick={handleSubmit} className="bg-white text-fuchsia-600 font-black text-[10px] uppercase tracking-widest h-9 px-6 rounded-xl hover:bg-slate-50 transition-all shadow-lg active:scale-95">
+                                    Push Asset
+                                </Button>
                             </div>
-                        </CardHeader>
-                        <CardContent className="p-6 relative z-10 flex flex-col items-center justify-center h-[160px] gap-4">
-                            <div className="text-center">
-                                <span className={`text-4xl font-black tracking-tight ${formData.isActive ? 'text-white' : 'text-slate-400'}`}>
-                                    {formData.isActive ? "ACTIVE" : "DRAFT"}
-                                </span>
-                                <p className={`text-xs font-bold uppercase tracking-widest mt-2 ${formData.isActive ? 'text-white/70' : 'text-slate-400'}`}>
-                                    {formData.isActive ? "Visible to Students" : "Hidden from Catalog"}
-                                </p>
-                            </div>
-
-                            <label className="relative inline-flex items-center cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    name="isActive"
-                                    checked={formData.isActive}
-                                    onChange={handleChange}
-                                    className="sr-only peer"
-                                />
-                                <div className="w-14 h-7 bg-black/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-white/40"></div>
-                            </label>
-                        </CardContent>
-                    </Card>
-
-                    {/* CARD 3: Description - Spans 12 cols */}
-                    <Card className="md:col-span-12 border-none shadow-elegant bg-white/60 backdrop-blur-xl rounded-[2rem] overflow-hidden">
-                        <CardHeader className="p-6 pb-2">
-                            <div className="flex items-center gap-2">
-                                <Sparkles className="h-5 w-5 text-fuchsia-600" />
-                                <h3 className="text-lg font-bold text-slate-900">Description & Metadata</h3>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="p-6">
-                            <div className="space-y-1.5">
-                                {errors.description && <span className="text-xs font-bold text-red-500 float-right">{errors.description}</span>}
-                                <Textarea
-                                    name="description"
-                                    value={formData.description}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    placeholder="Describe the learning objectives and scope of this category..."
-                                    className={`w-full min-h-[140px] bg-white/50 border-slate-200/50 hover:border-fuchsia-200 focus:bg-white rounded-xl resize-none text-slate-700 font-medium leading-relaxed p-4 outline-none transition-all ${errors.description ? 'border-red-300' : ''}`}
-                                />
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                </form>
+                        )}
+                    </div>
+                </div>
             </div>
+            <div className="h-16"></div>
         </div>
     );
 };

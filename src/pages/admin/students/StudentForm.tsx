@@ -1,24 +1,34 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useStudentStore, Student } from "../../../store/studentStore";
-import {
-    Loader2,
-    Save,
-    User,
-    Mail,
-    Phone,
-    GraduationCap,
-    Calendar as CalendarIcon,
-    Sparkles,
+import { 
+    Loader2, 
+    Save, 
+    User, 
+    Mail, 
+    Phone, 
+    GraduationCap, 
+    Calendar as CalendarIcon, 
+    Sparkles, 
+    ArrowLeft,
+    Shield,
+    Fingerprint,
+    CheckCircle2,
     BookOpen
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { toast } from "sonner";
+import { useStudentStore } from "../../../store/studentStore";
 
 interface StudentFormData {
     firstName: string;
@@ -37,8 +47,7 @@ const gradeOptions = [
 const StudentForm: React.FC = () => {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
-    const { student, loading, error, fetchStudent, createStudent, updateStudent, clearStudent } = useStudentStore();
-    const { toast } = useToast();
+    const { student, loading, fetchStudent, createStudent, updateStudent, clearStudent } = useStudentStore();
 
     const [formData, setFormData] = useState<StudentFormData>({
         firstName: "",
@@ -73,25 +82,43 @@ const StudentForm: React.FC = () => {
         }
     }, [student, id]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+    const handleInputChange = (field: string, value: string) => {
+        setFormData(prev => ({ ...prev, [field]: value }));
+    };
+
+    const validateForm = () => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!formData.firstName.trim() || !formData.lastName.trim()) {
+            toast.error("Student identity fields are required");
+            return false;
+        }
+        if (!emailRegex.test(formData.email)) {
+            toast.error("Valid student email required");
+            return false;
+        }
+        if (!formData.gradeLevel) {
+            toast.error("Academic grade must be assigned");
+            return false;
+        }
+        return true;
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsSubmitting(true);
+        if (!validateForm()) return;
 
+        setIsSubmitting(true);
         try {
             if (id) {
                 await updateStudent(id, formData);
+                toast.success("Scholar record synchronized successfully");
             } else {
                 await createStudent(formData);
+                toast.success("New scholar successfully enrolled");
             }
             navigate("/manage/students");
-        } catch (err) {
-            console.error("Failed to save student:", err);
-            toast({ variant: "destructive", description: "Failed to save student record." });
+        } catch (err: any) {
+            toast.error(err.response?.data?.message || "Enrollment protocol failed");
         } finally {
             setIsSubmitting(false);
         }
@@ -101,194 +128,186 @@ const StudentForm: React.FC = () => {
         return (
             <div className="min-h-screen w-full bg-[#FAFAFA] flex flex-col items-center justify-center">
                 <div className="relative">
-                    <div className="h-16 w-16 rounded-full border-t-4 border-emerald-500 animate-spin"></div>
-                    <Loader2 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-emerald-500 animate-pulse" />
+                    <Loader2 className="h-12 w-12 animate-spin text-emerald-600" />
+                    <div className="absolute inset-0 h-12 w-12 rounded-full border-4 border-emerald-100 border-t-transparent animate-pulse"></div>
                 </div>
-                <p className="mt-4 text-sm font-semibold text-slate-400">Loading Student Record...</p>
+                <p className="mt-4 text-slate-500 font-bold uppercase tracking-widest text-[10px]">Retrieving Scholar Dossier...</p>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen w-full bg-[#F8FAFC] py-8 px-4 sm:px-6">
-            {/* Dynamic Background */}
-            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-                <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] bg-emerald-500/5 rounded-full blur-[120px] animate-pulse"></div>
-                <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] bg-teal-500/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '3s' }}></div>
-            </div>
-
-            <div className="max-w-6xl mx-auto relative z-10">
-                {/* Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-                    <div className="space-y-1">
-                        <div className="flex items-center gap-2 mb-1">
-                            <Badge variant="outline" className="bg-white/50 backdrop-blur-md border-slate-200 text-slate-500 text-[10px] uppercase tracking-widest font-bold px-2 py-0.5">
-                                Scholar Registry
-                            </Badge>
-                        </div>
-                        <h1 className="text-3xl font-black tracking-tight text-slate-900 flex items-center gap-2">
-                            {id ? "Edit Scholar" : "Enrol Scholar"}
-                            <span className="text-slate-300">/</span>
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">Academic Profile</span>
-                        </h1>
-                    </div>
+        <div className="min-h-screen w-full bg-[#FAFAFA] px-4 overflow-x-hidden">
+            <div className="max-w-5xl mx-auto relative z-10">
+                {/* CONDENSED HEADER */}
+                <div className="flex items-center justify-between gap-3 mb-3 border-b border-slate-200 pb-3">
                     <div className="flex items-center gap-3">
+                        <div className="p-1.5 bg-white rounded-lg shadow-sm cursor-pointer hover:bg-slate-50 border border-slate-100" onClick={() => navigate("/manage/students")}>
+                            <ArrowLeft className="h-3.5 w-3.5 text-slate-400" />
+                        </div>
+                        <div>
+                            <h1 className="text-lg font-black text-slate-900 tracking-tight leading-none">
+                                {id ? "Update Scholar" : "Enroll Scholar"}
+                            </h1>
+                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Academic Registry Module</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
                         <Button
                             variant="ghost"
                             onClick={() => navigate("/manage/students")}
-                            className="bg-transparent hover:bg-slate-100 text-slate-500 hover:text-slate-700 font-semibold h-10 px-5 transition-all"
+                            className="text-slate-500 hover:bg-slate-100 font-bold text-[10px] h-7 px-3 rounded-lg"
                         >
                             Cancel
                         </Button>
                         <Button
                             onClick={handleSubmit}
                             disabled={isSubmitting}
-                            className="bg-slate-900 text-white font-bold h-10 px-6 shadow-xl shadow-slate-900/20 hover:bg-slate-800 transition-all hover:scale-105 active:scale-95 rounded-xl"
+                            className="bg-slate-900 text-white font-bold text-[10px] h-7 px-4 rounded-lg shadow-md hover:bg-slate-800 transition-all flex items-center gap-1.5"
                         >
-                            {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
-                            Save Record
+                            {isSubmitting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
+                            {id ? "Sync Data" : "Enroll"}
                         </Button>
                     </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-min">
-
-                    {/* CARD 1: IDENTITY (Hero) - Spans 8 cols */}
-                    <Card className="md:col-span-8 border-none shadow-elegant bg-white/80 backdrop-blur-xl rounded-[2rem] overflow-hidden group hover:shadow-2xl transition-all duration-500">
-                        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500"></div>
-                        <CardContent className="p-8">
-                            <div className="flex flex-col md:flex-row gap-8">
-                                {/* Visual Avatar Section */}
-                                <div className="flex-shrink-0 flex flex-col items-center gap-3">
-                                    <div className="h-32 w-32 rounded-[2rem] bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center border-4 border-white shadow-lg relative overflow-hidden group-hover:scale-105 transition-transform duration-500">
-                                        <User className="h-12 w-12 text-slate-300" />
-                                        <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    {/* LEFT COLUMN: IDENTITY & GRADE */}
+                    <div className="lg:col-span-3">
+                        <Card className="border-none shadow-elegant bg-white rounded-3xl overflow-hidden border border-slate-100/50">
+                            <div className="h-16 bg-slate-900 relative">
+                                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
+                            </div>
+                            <CardContent className="px-4 pb-4 -mt-8 relative z-10 text-center">
+                                <div className="h-16 w-16 rounded-2xl bg-white p-1 shadow-lg border border-slate-50 mx-auto mb-3">
+                                    <div className="h-full w-full rounded-xl bg-slate-50 flex items-center justify-center">
+                                        <GraduationCap className="h-8 w-8 text-emerald-300" />
                                     </div>
-                                    <div className="text-center">
-                                        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Student Photo</p>
+                                </div>
+                                <h2 className="text-base font-black text-slate-900 truncate mb-1 px-2">
+                                    {formData.firstName || formData.lastName ? `${formData.firstName} ${formData.lastName}`.trim() : "Scholar ID"}
+                                </h2>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Academic Registry</p>
+
+                                <div className="grid grid-cols-1 gap-2 pt-2 border-t border-slate-50">
+                                    <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-left">
+                                        <span className="text-[8px] font-black text-slate-400 uppercase block tracking-widest mb-1 text-center">Assigned Grade</span>
+                                        <span className="text-sm font-black text-slate-800 block text-center">{formData.gradeLevel || "N/A"}</span>
                                     </div>
                                 </div>
 
-                                {/* Identity Inputs */}
-                                <div className="flex-grow grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                <div className="mt-4 space-y-1.5 text-left">
+                                    <Label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1 block">Level Selection</Label>
+                                    <Select
+                                        value={formData.gradeLevel}
+                                        onValueChange={(val) => handleInputChange("gradeLevel", val)}
+                                    >
+                                        <SelectTrigger className="w-full h-9 bg-slate-100/50 border-transparent rounded-xl px-3 text-[10px] font-bold text-slate-600 focus:ring-0">
+                                            <div className="flex items-center gap-2">
+                                                <BookOpen className="h-3 w-3 text-emerald-500" />
+                                                <span>Grade: {formData.gradeLevel || "Select"}</span>
+                                            </div>
+                                        </SelectTrigger>
+                                        <SelectContent className="rounded-xl border-slate-200 shadow-xl">
+                                            {gradeOptions.map((grade) => (
+                                                <SelectItem key={grade} value={grade} className="text-[10px] font-bold">{grade}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    {/* RIGHT COLUMN: PROFESSIONAL DETAILS & CONTACT */}
+                    <div className="lg:col-span-9">
+                        <Card className="border-none shadow-elegant bg-white rounded-3xl border border-slate-100/50 overflow-hidden">
+                            <div className="px-6 py-4 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
+                                <div className="flex items-center gap-2.5">
+                                    <Shield className="h-4 w-4 text-emerald-600" />
+                                    <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest">Scholar Profile & Credentials</h3>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Enrollment Active</span>
+                                </div>
+                            </div>
+                            <CardContent className="p-6 space-y-6">
+                                {/* PRIMARY IDENTITY & CONTACT GRID */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                                     <div className="space-y-1.5">
-                                        <Label className="text-xs font-bold text-slate-500">First Name</Label>
-                                        <Input
-                                            name="firstName"
-                                            value={formData.firstName}
-                                            onChange={handleChange}
-                                            className="h-11 bg-slate-50 border-transparent hover:border-slate-200 focus:bg-white focus:border-emerald-200 transition-all rounded-xl font-bold text-slate-700"
-                                            placeholder="Given Name"
-                                            required
-                                        />
+                                        <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">First Name</Label>
+                                        <div className="relative group">
+                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300 group-focus-within:text-emerald-500 transition-colors" />
+                                            <Input value={formData.firstName} onChange={(e) => handleInputChange("firstName", e.target.value)} className="h-10 pl-9 bg-slate-50/50 border-slate-200/50 focus:bg-white focus:ring-2 focus:ring-emerald-100 rounded-xl font-bold text-sm transition-all" placeholder="Given Name" />
+                                        </div>
                                     </div>
                                     <div className="space-y-1.5">
-                                        <Label className="text-xs font-bold text-slate-500">Last Name</Label>
-                                        <Input
-                                            name="lastName"
-                                            value={formData.lastName}
-                                            onChange={handleChange}
-                                            className="h-11 bg-slate-50 border-transparent hover:border-slate-200 focus:bg-white focus:border-emerald-200 transition-all rounded-xl font-bold text-slate-700"
-                                            placeholder="Family Name"
-                                            required
-                                        />
+                                        <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">Last Name</Label>
+                                        <div className="relative group">
+                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300 group-focus-within:text-emerald-500 transition-colors" />
+                                            <Input value={formData.lastName} onChange={(e) => handleInputChange("lastName", e.target.value)} className="h-10 pl-9 bg-slate-50/50 border-slate-200/50 focus:bg-white focus:ring-2 focus:ring-emerald-100 rounded-xl font-bold text-sm transition-all" placeholder="Family Name" />
+                                        </div>
                                     </div>
-                                    <div className="space-y-1.5 col-span-2">
-                                        <Label className="text-xs font-bold text-slate-500">Email Address</Label>
-                                        <div className="relative">
-                                            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+
+                                    <div className="space-y-1.5">
+                                        <Label className="text-[10px] font-bold text-emerald-600 uppercase tracking-tight ml-1">Academic Email</Label>
+                                        <div className="relative group">
+                                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-emerald-300 group-focus-within:text-emerald-600 transition-colors" />
                                             <Input
-                                                name="email"
-                                                type="email"
                                                 value={formData.email}
-                                                onChange={handleChange}
-                                                className="h-11 pl-10 bg-slate-50 border-transparent hover:border-slate-200 focus:bg-white focus:border-emerald-200 transition-all rounded-xl font-semibold text-slate-700"
+                                                onChange={(e) => handleInputChange("email", e.target.value)}
+                                                className="h-10 pl-9 bg-emerald-50/30 border-emerald-100/50 focus:bg-white focus:ring-2 focus:ring-emerald-100 rounded-xl font-bold text-sm transition-all"
                                                 placeholder="student@school.edu"
-                                                required
                                             />
                                         </div>
                                     </div>
                                     <div className="space-y-1.5">
-                                        <Label className="text-xs font-bold text-slate-500">Contact Number</Label>
-                                        <div className="relative">
-                                            <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                                            <Input
-                                                name="phone"
-                                                value={formData.phone}
-                                                onChange={handleChange}
-                                                className="h-11 pl-10 bg-slate-50 border-transparent hover:border-slate-200 focus:bg-white focus:border-emerald-200 transition-all rounded-xl font-semibold text-slate-700"
-                                                placeholder="+1 (555) 000-0000"
+                                        <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">Parent/Guardian Signal</Label>
+                                        <div className="relative group">
+                                            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300 group-focus-within:text-emerald-500 transition-colors" />
+                                            <Input value={formData.phone} onChange={(e) => handleInputChange("phone", e.target.value)} className="h-10 pl-9 bg-slate-50/50 border-slate-200/50 focus:bg-white focus:ring-2 focus:ring-emerald-100 rounded-xl font-bold text-sm transition-all" placeholder="+1 (000) 000-0000" />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-1.5 col-span-full">
+                                        <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">Date of Birth</Label>
+                                        <div className="relative group">
+                                            <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300 group-focus-within:text-emerald-500 transition-colors" />
+                                            <Input 
+                                                type="date" 
+                                                value={formData.dateOfBirth} 
+                                                onChange={(e) => handleInputChange("dateOfBirth", e.target.value)} 
+                                                className="h-10 pl-9 bg-slate-50/50 border-slate-200/50 focus:bg-white focus:ring-2 focus:ring-emerald-100 rounded-xl font-bold text-sm transition-all" 
                                             />
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </CardContent>
-                    </Card>
+                            </CardContent>
+                        </Card>
 
-                    {/* CARD 2: GRADE METRIC - Spans 4 cols */}
-                    <Card className="md:col-span-4 border-none shadow-elegant bg-gradient-to-br from-emerald-900 to-teal-900 text-white rounded-[2rem] overflow-hidden relative group">
-                        <div className="absolute top-0 right-0 w-[150%] h-[150%] bg-gradient-to-br from-white/10 to-transparent rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
-                        <CardHeader className="p-6 pb-2 relative z-10">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-white/10 rounded-lg backdrop-blur-md">
-                                    <GraduationCap className="h-5 w-5 text-emerald-300" />
-                                </div>
-                                <h3 className="text-lg font-bold">Academic Grade</h3>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="p-6 relative z-10 space-y-6">
-                            <div className="space-y-2">
-                                <div className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/70 tracking-tight leading-none text-center py-4">
-                                    {formData.gradeLevel || "Not Assigned"}
-                                </div>
-                                <Select
-                                    value={formData.gradeLevel}
-                                    onValueChange={(val) => setFormData(prev => ({ ...prev, gradeLevel: val }))}
-                                >
-                                    <SelectTrigger className="h-10 bg-white/10 border-white/5 text-white font-bold hover:bg-white/20 transition-all border-none focus:ring-0 rounded-xl">
-                                        <SelectValue placeholder="Select Grade" />
-                                    </SelectTrigger>
-                                    <SelectContent className="bg-slate-900 border-slate-800 text-white">
-                                        {gradeOptions.map((grade, idx) => (
-                                            <SelectItem key={idx} value={grade} className="focus:bg-slate-800 focus:text-white">{grade}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* CARD 3: ADDITIONAL DETAILS (Horizontal Strip) - Spans 12 cols */}
-                    <Card className="md:col-span-12 border-none shadow-elegant bg-white/60 backdrop-blur-xl rounded-[2rem] overflow-hidden">
-                        <CardHeader className="p-6 pb-2">
-                            <div className="flex items-center gap-2">
-                                <BookOpen className="h-5 w-5 text-blue-600" />
-                                <h3 className="text-lg font-bold text-slate-900">Student Particulars</h3>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="p-6">
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                                <div className="space-y-1.5">
-                                    <Label className="text-xs font-bold text-slate-500">Date of Birth</Label>
-                                    <div className="relative">
-                                        <CalendarIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                                        <Input
-                                            name="dateOfBirth"
-                                            type="date"
-                                            value={formData.dateOfBirth}
-                                            onChange={handleChange}
-                                            className="h-11 pl-10 bg-white border-slate-200/50 hover:border-blue-200 transition-all rounded-xl font-semibold text-slate-700"
-                                        />
+                        {/* ACTION STRIP */}
+                        {id && (
+                            <div className="mt-6 p-4 rounded-3xl bg-emerald-600 text-white flex items-center justify-between shadow-xl shadow-emerald-600/20 group">
+                                <div className="flex items-center gap-4">
+                                    <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center border border-white/10 backdrop-blur-sm group-hover:scale-110 transition-transform">
+                                        <Sparkles className="h-5 w-5 text-emerald-100" />
+                                    </div>
+                                    <div>
+                                        <h4 className="text-sm font-black tracking-tight leading-none mb-1">Scholar Synchronization Active</h4>
+                                        <p className="text-[9px] font-bold uppercase tracking-widest opacity-60">Identity verified for secure update</p>
                                     </div>
                                 </div>
-                                {/* Placeholder for more student info */}
+                                <Button onClick={handleSubmit} className="bg-white text-emerald-600 font-black text-[10px] uppercase tracking-widest h-9 px-6 rounded-xl hover:bg-slate-50 hover:scale-105 active:scale-95 transition-all shadow-lg">
+                                    Push Update
+                                </Button>
                             </div>
-                        </CardContent>
-                    </Card>
-
-                </form>
+                        )}
+                    </div>
+                </div>
             </div>
+            <div className="h-16"></div>
         </div>
     );
 };

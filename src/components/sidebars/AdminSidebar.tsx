@@ -53,8 +53,8 @@ const adminMenuItems = [
     { title: "Student Management", url: "/manage/students", icon: Users, color: "text-blue-600" },
     { title: "Test Management", url: "/manage/tests", icon: ClipboardList, color: "text-green-600" },
     { title: "Test Configuration Management", url: "/manage/configurations", icon: Cog, color: "text-green-600" },
-    { title: "AI Question Generation", url: "/ai-generation", icon: BookOpen, color: "text-yellow-600" },
-    { title: "Categories Management", url: "/manage/categories", icon: Book, color: "text-indigo-600" },
+    // { title: "AI Question Generation", url: "/ai-generation", icon: BookOpen, color: "text-yellow-600" },
+    // { title: "Categories Management", url: "/manage/categories", icon: Book, color: "text-indigo-600" },
 ];
 
 const rbacMenuItems = [
@@ -180,17 +180,17 @@ export function AdminSidebar() {
                     <SidebarGroup className="py-1 flex-none">
 
 
-                    {!isCollapsed && (
-                        <div className="px-4 mb-4 flex items-center gap-4">
-                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-600 whitespace-nowrap">
-                                Cognify Flow
-                            </span>
-                            <div className={cn(
-                                "h-[1px] w-full",
-                                theme === "dark" ? "bg-slate-800/50" : "bg-slate-100"
-                            )} />
-                        </div>
-                    )}
+                        {!isCollapsed && (
+                            <div className="px-4 mb-4 flex items-center gap-4">
+                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-600 whitespace-nowrap">
+                                    Cognify Flow
+                                </span>
+                                <div className={cn(
+                                    "h-[1px] w-full",
+                                    theme === "dark" ? "bg-slate-800/50" : "bg-slate-100"
+                                )} />
+                            </div>
+                        )}
                         <SidebarGroupContent>
                             <SidebarMenu className="space-y-0.5 px-1 py-0">
                                 {adminMenuItems.map((item) => {
@@ -209,39 +209,39 @@ export function AdminSidebar() {
                             </SidebarMenu>
                         </SidebarGroupContent>
 
-                </SidebarGroup>
+                    </SidebarGroup>
 
-                {/* Access Control Section */}
-                <SidebarGroup>
-                    {!isCollapsed && (
-                        <div className="px-4 mb-4 mt-2 flex items-center gap-4">
-                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-600 whitespace-nowrap">
-                                Access Control
-                            </span>
-                            <div className={cn(
-                                "h-[1px] w-full",
-                                theme === "dark" ? "bg-slate-800/50" : "bg-slate-100"
-                            )} />
-                        </div>
-                    )}
-                    <SidebarGroupContent>
-                        <SidebarMenu className="space-y-0.5 px-1 py-0">
-                            {rbacMenuItems.map((item) => {
-                                const Icon = item.icon;
-                                return (
-                                    <SidebarMenuItem key={item.title}>
-                                        <SidebarMenuButton asChild isActive={isActive(item.url)} className={`transition-all duration-200 rounded-lg ${theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"} group h-8`}>
-                                            <NavLink to={item.url} title={item.title} className={`flex items-center gap-3 px-3 py-1 ${isCollapsed ? "justify-center" : ""} w-full`}>
-                                                <Icon className={`h-4.5 w-4.5 ${isActive(item.url) ? item.color : theme === "dark" ? "text-slate-300" : "text-slate-500"} group-hover:scale-105 transition-transform duration-200`} />
-                                                <span className={`${isCollapsed ? "hidden" : "text-sm font-medium"}`}>{item.title}</span>
-                                            </NavLink>
-                                        </SidebarMenuButton>
-                                    </SidebarMenuItem>
-                                );
-                            })}
-                        </SidebarMenu>
-                    </SidebarGroupContent>
-                </SidebarGroup>
+                    {/* Access Control Section */}
+                    <SidebarGroup>
+                        {!isCollapsed && (
+                            <div className="px-4 mb-4 mt-2 flex items-center gap-4">
+                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-600 whitespace-nowrap">
+                                    Access Control
+                                </span>
+                                <div className={cn(
+                                    "h-[1px] w-full",
+                                    theme === "dark" ? "bg-slate-800/50" : "bg-slate-100"
+                                )} />
+                            </div>
+                        )}
+                        <SidebarGroupContent>
+                            <SidebarMenu className="space-y-0.5 px-1 py-0">
+                                {rbacMenuItems.map((item) => {
+                                    const Icon = item.icon;
+                                    return (
+                                        <SidebarMenuItem key={item.title}>
+                                            <SidebarMenuButton asChild isActive={isActive(item.url)} className={`transition-all duration-200 rounded-lg ${theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"} group h-8`}>
+                                                <NavLink to={item.url} title={item.title} className={`flex items-center gap-3 px-3 py-1 ${isCollapsed ? "justify-center" : ""} w-full`}>
+                                                    <Icon className={`h-4.5 w-4.5 ${isActive(item.url) ? item.color : theme === "dark" ? "text-slate-300" : "text-slate-500"} group-hover:scale-105 transition-transform duration-200`} />
+                                                    <span className={`${isCollapsed ? "hidden" : "text-sm font-medium"}`}>{item.title}</span>
+                                                </NavLink>
+                                            </SidebarMenuButton>
+                                        </SidebarMenuItem>
+                                    );
+                                })}
+                            </SidebarMenu>
+                        </SidebarGroupContent>
+                    </SidebarGroup>
                 </div>
 
 
