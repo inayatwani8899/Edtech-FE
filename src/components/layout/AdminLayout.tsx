@@ -87,7 +87,7 @@ export const AdminLayout = () => {
         {/* Content area */}
         <div className="flex-1 flex flex-col">
           {/* Navbar */}
-          <Navbar />
+          {/* <Navbar /> */}
 
           {/* Main Content */}
           <main className="flex-1 overflow-auto bg-muted/20 p-4 md:p-6">
