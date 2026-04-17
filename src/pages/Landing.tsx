@@ -41,13 +41,15 @@ export const Landing = () => {
             Cognify<span>IQ</span>
           </div>
           <div className="nav-links">
-            <Link to="/tests">Assessments</Link>
+            <Link to="/assessments">Assessments</Link>
             <Link to="/counselors">Counselors</Link>
             <Link to="/about">About</Link>
             <Link to="/pricing">Pricing</Link>
+            <Link to="/privacy">Privacy</Link>
+            <Link to="/terms">Terms</Link>
           </div>
           <div className="nav-actions">
-            <Link to="/login" className="btn-nav-ghost">Sign in</Link>
+            {/* <Link to="/login" className="btn-nav-ghost">Sign in</Link> */}
             <Link to="/login" className="btn-nav-primary">Get started</Link>
           </div>
         </nav>
@@ -500,7 +502,7 @@ export const Landing = () => {
               Cognify<span>IQ</span>
             </div>
             <div className="footer-links">
-              <Link to="/tests">Assessments</Link>
+              <Link to="/assessments">Assessments</Link>
               <Link to="/counselors">Counselors</Link>
               <Link to="/about">About</Link>
               <Link to="/pricing">Pricing</Link>

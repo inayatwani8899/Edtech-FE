@@ -45,6 +45,12 @@ import { ProgressTracking } from "./pages/student/ProgressTracking";
 import { Scholarships } from "./pages/student/Scholarships";
 import { Schedule } from "./pages/student/Schedule";
 import { Messages } from "./pages/student/Messages";
+import { PublicLayout } from "./components/layout/PublicLayout";
+import PublicAbout from "./pages/public/PublicAbout";
+import PublicPricing from "./pages/public/PublicPricing";
+import PublicAssessments from "./pages/public/PublicAssessments";
+import PublicPrivacy from "./pages/public/PublicPrivacy";
+import PublicTerms from "./pages/public/PublicTerms";
 
 // 🔐 RBAC Module Pages
 import RBACDashboard from "./modules/rbac/pages/RBACDashboard";
@@ -143,12 +149,17 @@ const AppRoutes = () => {
             <Route path="/register/student" element={<StudentRegister />} />
             <Route path="/register/counsellor" element={<CounsellorRegister />} />
             <Route path="/register/school" element={<SchoolRegister />} />
-            <Route element={<Layout />}>
 
-
-
-                <Route path="counselors" element={<ActiveCounselors />} />
+            {/* Public Themed Layout for subpages */}
+            <Route element={<PublicLayout />}>
+                <Route path="/about" element={<PublicAbout />} />
+                <Route path="/pricing" element={<PublicPricing />} />
+                <Route path="/assessments" element={<PublicAssessments />} />
+                <Route path="/counselors" element={<ActiveCounselors />} />
+                <Route path="/privacy" element={<PublicPrivacy />} />
+                <Route path="/terms" element={<PublicTerms />} />
             </Route>
+
 
             {/* Admin Routes */}
             <Route
