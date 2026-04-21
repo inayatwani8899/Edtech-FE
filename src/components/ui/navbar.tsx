@@ -34,7 +34,8 @@ export const Navbar = () => {
                 !isAuthenticated ? '/' :
                   user?.role === 'Admin' ? '/dashboard' :
                     (user?.role?.toLowerCase().includes('counsel') || user?.role?.toLowerCase() === 'professional') ? '/counselor/dashboard' :
-                      '/student/dashboard'
+                      (user?.role?.toLowerCase() === 'school' || user?.role?.toLowerCase() === 'organization') ? '/school/dashboard' :
+                        '/student/dashboard'
               }
               className="flex items-center gap-2.5 min-w-0 group"
             >
@@ -47,7 +48,7 @@ export const Navbar = () => {
                   <span className="text-indigo-600 italic ml-0.5">IQ</span>
                 </div>
                 <span className="text-[7.5px] font-bold tracking-[0.2em] text-slate-400 uppercase whitespace-nowrap">
-                  Student Hub
+                  {user?.role === 'School' ? 'Institution Hub' : 'Student Hub'}
                 </span>
               </div>
             </Link>
@@ -68,7 +69,7 @@ export const Navbar = () => {
                     <Avatar className="h-full w-full">
                       <AvatarImage src={user?.avatar} />
                       <AvatarFallback className="bg-indigo-600 text-white text-[10px] font-bold">
-                        {user?.firstName?.charAt(0)?.toUpperCase() || user?.name?.charAt(0)?.toUpperCase()}
+                        {user?.firstName?.charAt(0)?.toUpperCase() || user?.name?.charAt(0)?.toUpperCase() || "S"}
                       </AvatarFallback>
                     </Avatar>
                     <div className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-white" />
@@ -77,21 +78,25 @@ export const Navbar = () => {
                 <DropdownMenuContent align="end" className="w-56 mt-2 rounded-xl border-slate-100 p-2 shadow-xl animate-in fade-in zoom-in-95 duration-200">
                   <div className="flex items-center gap-3 p-2 px-3 mb-2 bg-slate-50 rounded-lg">
                     <div className="h-9 w-9 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold">
-                      {user?.firstName?.charAt(0)?.toUpperCase() || user?.name?.charAt(0)?.toUpperCase()}
+                        {user?.firstName?.charAt(0)?.toUpperCase() || user?.name?.charAt(0)?.toUpperCase() || "S"}
                     </div>
                     <div className="flex flex-col min-w-0">
-                      <span className="text-xs font-bold text-slate-900 truncate">{user?.firstName || user?.name || "Student"}</span>
+                      <span className="text-xs font-bold text-slate-900 truncate">
+                        {user?.firstName ? `${user.firstName} ${user.lastName || ''}` : user?.name || "School Portal"}
+                      </span>
                       <span className="text-[10px] text-slate-500 truncate lowercase">{user?.email}</span>
                     </div>
                   </div>
-                  <DropdownMenuItem onClick={() => navigate("/profile")} className="rounded-lg gap-2 cursor-pointer focus:bg-indigo-50 focus:text-indigo-600 py-2">
+                  <DropdownMenuItem onClick={() => navigate(user?.role === 'School' ? "/school/profile" : "/profile")} className="rounded-lg gap-2 cursor-pointer focus:bg-indigo-50 focus:text-indigo-600 py-2">
                     <User className="h-4 w-4" />
                     <span className="text-xs font-medium">Profile Settings</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/results")} className="rounded-lg gap-2 cursor-pointer focus:bg-indigo-50 focus:text-indigo-600 py-2">
-                    <Settings className="h-4 w-4" />
-                    <span className="text-xs font-medium">My Performance</span>
-                  </DropdownMenuItem>
+                  {user?.role !== 'School' && (
+                    <DropdownMenuItem onClick={() => navigate("/results")} className="rounded-lg gap-2 cursor-pointer focus:bg-indigo-50 focus:text-indigo-600 py-2">
+                      <Settings className="h-4 w-4" />
+                      <span className="text-xs font-medium">My Performance</span>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuSeparator className="my-2 bg-slate-100" />
                   <DropdownMenuItem onClick={logout} className="rounded-lg gap-2 cursor-pointer focus:bg-red-50 focus:text-red-600 py-2 text-red-500">
                     <LogOut className="h-4 w-4" />

@@ -24,6 +24,10 @@ import { Tests } from "./pages/student/Tests";
 import Students from "./pages/admin/students/Students";
 import StudentForm from "./pages/admin/students/StudentForm";
 import StudentView from "./pages/admin/students/StudentView";
+import { SchoolLayout } from "./components/layout/SchoolLayout";
+import { SchoolDashboard } from "./pages/dashboards/SchoolDashboard";
+import { SchoolStudents } from "./pages/school/SchoolStudents";
+import { SchoolStaff } from "./pages/school/SchoolStaff";
 import CreateTestPage from "./pages/admin/CreateTest";
 import { useAuthStore } from "./store/useAuthStore";
 import Users from "./pages/admin/users/Users";
@@ -82,6 +86,14 @@ const isCounselorRole = (user: any) => {
     return roleName.includes("counselor") || roleName.includes("counsellor") || roleName === "professional";
 };
 
+const isSchoolRole = (user: any) => {
+    if (!user) return false;
+    const roleId = Number(user.roleId);
+    if (roleId === 4 || roleId === 3) return true; // Common IDs for Organization/School
+    const roleName = (user.role || "").toLowerCase();
+    return roleName === "school" || roleName === "organization";
+};
+
 const ProtectedRoute = ({ children, role }: ProtectedRouteProps) => {
     const { user, isAuthenticated, isLoading } = useAuthStore();
 
@@ -100,11 +112,12 @@ const ProtectedRoute = ({ children, role }: ProtectedRouteProps) => {
     if (role && (
         (role === "Student" && user?.role !== "Student") ||
         (role === "Admin" && user?.role !== "Admin") ||
-        (role === "School" && user?.role !== "School") ||
+        (role === "School" && !isSchoolRole(user)) ||
         (role === "Counselor" && !isCounselorRole(user))
     )) {
         let redirectPath = "/student/dashboard";
         if (user?.role === "Admin") redirectPath = "/dashboard";
+        else if (isSchoolRole(user)) redirectPath = "/school/dashboard";
         else if (isCounselorRole(user)) redirectPath = "/counselor/dashboard";
 
         return (
@@ -134,6 +147,7 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
     if (isAuthenticated) {
         let redirectPath = "/student/dashboard";
         if (user?.role === "Admin") redirectPath = "/dashboard";
+        else if (isSchoolRole(user)) redirectPath = "/school/dashboard";
         else if (isCounselorRole(user)) redirectPath = "/counselor/dashboard";
 
         return <Navigate to={redirectPath} replace />;
@@ -264,6 +278,25 @@ const AppRoutes = () => {
                 <Route path="/counselor/reports" element={<div className="p-4">Reports Generator (Coming Soon)</div>} />
                 <Route path="/counselor/resources" element={<div className="p-4">Counseling Resources (Coming Soon)</div>} />
                 <Route path="/counselor/search" element={<div className="p-4">Search Students (Coming Soon)</div>} />
+            </Route>
+
+            {/* School/Organization Routes */}
+            <Route
+                element={
+                    <ProtectedRoute role="School">
+                        <SchoolLayout />
+                    </ProtectedRoute>
+                }
+            >
+                <Route path="/school/dashboard" element={<SchoolDashboard />} />
+                <Route path="/school/students" element={<SchoolStudents />} />
+                <Route path="/school/staff" element={<SchoolStaff />} />
+                <Route path="/school/calendar" element={<div className="p-8"><h2 className="text-2xl font-bold">Academic Calendar</h2><p className="text-slate-500 mt-2">Schedule and view important school events.</p></div>} />
+                <Route path="/school/assessments" element={<div className="p-8"><h2 className="text-2xl font-bold">Assessments</h2><p className="text-slate-500 mt-2">Track and manage student assessments.</p></div>} />
+                <Route path="/school/reports" element={<div className="p-8"><h2 className="text-2xl font-bold">Reports & Analytics</h2><p className="text-slate-500 mt-2">Generate detailed performance reports.</p></div>} />
+                <Route path="/school/messages" element={<div className="p-8"><h2 className="text-2xl font-bold">Message Center</h2><p className="text-slate-500 mt-2">Internal communication platform.</p></div>} />
+                <Route path="/school/profile" element={<div className="p-8"><h2 className="text-2xl font-bold">Organization Profile</h2><p className="text-slate-500 mt-2">Update your institution's public profile.</p></div>} />
+                <Route path="/school/settings" element={<div className="p-8"><h2 className="text-2xl font-bold">Portal Settings</h2><p className="text-slate-500 mt-2">Configure portal preferences.</p></div>} />
             </Route>
 
             {/* Global Catch-all 404 */}
