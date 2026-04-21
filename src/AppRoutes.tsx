@@ -28,6 +28,8 @@ import { SchoolLayout } from "./components/layout/SchoolLayout";
 import { SchoolDashboard } from "./pages/dashboards/SchoolDashboard";
 import { SchoolStudents } from "./pages/school/SchoolStudents";
 import { SchoolStaff } from "./pages/school/SchoolStaff";
+import { SchoolProfile } from "./pages/school/SchoolProfile";
+import { SchoolSettings } from "./pages/school/SchoolSettings";
 import CreateTestPage from "./pages/admin/CreateTest";
 import { useAuthStore } from "./store/useAuthStore";
 import Users from "./pages/admin/users/Users";
@@ -295,8 +297,8 @@ const AppRoutes = () => {
                 <Route path="/school/assessments" element={<div className="p-8"><h2 className="text-2xl font-bold">Assessments</h2><p className="text-slate-500 mt-2">Track and manage student assessments.</p></div>} />
                 <Route path="/school/reports" element={<div className="p-8"><h2 className="text-2xl font-bold">Reports & Analytics</h2><p className="text-slate-500 mt-2">Generate detailed performance reports.</p></div>} />
                 <Route path="/school/messages" element={<div className="p-8"><h2 className="text-2xl font-bold">Message Center</h2><p className="text-slate-500 mt-2">Internal communication platform.</p></div>} />
-                <Route path="/school/profile" element={<div className="p-8"><h2 className="text-2xl font-bold">Organization Profile</h2><p className="text-slate-500 mt-2">Update your institution's public profile.</p></div>} />
-                <Route path="/school/settings" element={<div className="p-8"><h2 className="text-2xl font-bold">Portal Settings</h2><p className="text-slate-500 mt-2">Configure portal preferences.</p></div>} />
+                <Route path="/school/profile" element={<SchoolProfile />} />
+                <Route path="/school/settings" element={<SchoolSettings />} />
             </Route>
 
             {/* Global Catch-all 404 */}
