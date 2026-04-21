@@ -5,6 +5,7 @@ import {
     Search, 
     Filter, 
     MoreVertical, 
+    MoreHorizontal,
     Mail, 
     Phone, 
     ShieldCheck, 
