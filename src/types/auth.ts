@@ -1,4 +1,4 @@
-export type UserRole = 'Student' | 'Professional' | 'Counselor' | 'Admin' | 'School';
+export type UserRole = 'Student' | 'Professional' | 'Counselor' | 'Admin' | 'School' | 'SuperAdmin';
 
 export interface User {
   id: number; // Changed from string to number
@@ -22,6 +22,19 @@ export interface User {
   testsCompleted?: number; // Made optional
   profile?: StudentProfile | ProfessionalProfile | CounselorProfile;
 }
+
+export interface Permission {
+  menuId: number;
+  title: string;
+  url: string;
+  icon: string;
+  color: string;
+  canView: boolean;
+  canCreate: boolean;
+  canEdit: boolean;
+  canDelete: boolean;
+}
+
 export interface LoginResponse {
   code: number;
   message: string;
@@ -29,6 +42,11 @@ export interface LoginResponse {
     access_Token: string;
     token_Type: string;
     user: User;
+    permissions?: Permission[];
+    tenant?: string | null;
+    loginUrl?: string | null;
+    isSuccess?: boolean;
+    errorMessage?: string | null;
   };
 }
 // Then your mock data would work with minor adjustments:

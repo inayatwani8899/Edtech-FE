@@ -3,7 +3,7 @@ import Swal from 'sweetalert2';
 import { useAuthStore } from "../store/useAuthStore";
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || "https://charming-bohr.180-179-213-167.plesk.page/api/",
+    baseURL: import.meta.env.VITE_API_BASE_URL || "https://nervous-dubinsky.180-179-213-167.plesk.page/api/" || "https://charming-bohr.180-179-213-167.plesk.page/api/",
 
     // baseURL: "https://18lh764q-5001.inc1.devtunnels.ms/api/",
     // timeout: 50000,
@@ -89,18 +89,21 @@ api.interceptors.response.use(
         const backendCode = response?.data?.code;
         const backendMessage = response?.data?.message;
         const method = response.config.method?.toLowerCase();
+        const isAuthRequest = response?.config?.url?.includes('/Auth/');
 
         // ✅ If backend sends code >= 400, treat it as error manually
         if (backendCode && backendCode >= 400) {
-            Swal.fire({
-                title: 'Error!',
-                text: backendMessage || 'Something went wrong on the server.',
-                icon: 'error',
-                timer: 5000,
-                showConfirmButton: true,
-                toast: true,
-                position: 'top-end',
-            });
+            if (!isAuthRequest) {
+                Swal.fire({
+                    title: 'Error!',
+                    text: backendMessage || 'Something went wrong on the server.',
+                    icon: 'error',
+                    timer: 5000,
+                    showConfirmButton: true,
+                    toast: true,
+                    position: 'top-end',
+                });
+            }
 
             // Reject promise to prevent "success" flow from continuing
             return Promise.reject({
@@ -112,7 +115,7 @@ api.interceptors.response.use(
         }
 
         // ✅ Show success message for non-GET requests
-        if (['post', 'put', 'patch', 'delete'].includes(method || '')) {
+        if (!isAuthRequest && ['post', 'put', 'patch', 'delete'].includes(method || '')) {
             const message = getSuccessMessage(method, response.status, backendMessage);
             if (message) {
                 Swal.fire({
@@ -133,9 +136,10 @@ api.interceptors.response.use(
         const { response } = error;
         const status = response?.status;
         const message = response?.data?.message || getErrorMessage(status);
+        const isAuthRequest = error?.config?.url?.includes('/Auth/') || response?.config?.url?.includes('/Auth/');
 
         // 🚨 Session Expiry Handling
-        if (status === 401 || response?.data?.code === 401) {
+        if (!isAuthRequest && (status === 401 || response?.data?.code === 401)) {
             Swal.fire({
                 title: 'Session Expired',
                 text: 'Your current session has ended. Please sign in again to continue.',
@@ -152,15 +156,17 @@ api.interceptors.response.use(
             return Promise.reject(error);
         }
 
-        Swal.fire({
-            title: 'Error!',
-            text: message,
-            icon: 'error',
-            timer: 5000,
-            showConfirmButton: true,
-            toast: true,
-            position: 'top-end',
-        });
+        if (!isAuthRequest) {
+            Swal.fire({
+                title: 'Error!',
+                text: message,
+                icon: 'error',
+                timer: 5000,
+                showConfirmButton: true,
+                toast: true,
+                position: 'top-end',
+            });
+        }
 
         return Promise.reject(error);
     }

@@ -112,23 +112,39 @@
 // }));
 import { create } from "zustand";
 import { persist } from 'zustand/middleware';
-import { LoginResponse, User } from "@/types/auth";
+import { LoginResponse, User, Permission } from "@/types/auth";
 import api from "@/api/axios";
 import { useTestStore } from "./testStore";
 
 import Swal from "sweetalert2";
 import { usePaymentStore } from "./paymentStore";
 
+const getTenantFromHostname = () => {
+  const hostname = window.location.hostname;
+  if (hostname === "localhost" || hostname === "127.0.0.1" || /^(\d{1,3}\.){3}\d{1,3}$/.test(hostname)) {
+    return null;
+  }
+  const parts = hostname.split('.');
+  if (parts.length > 2) {
+    const subdomain = parts[0].toLowerCase();
+    if (subdomain !== "www" && subdomain !== "nervous-dubinsky" && subdomain !== "charming-bohr") {
+      return subdomain;
+    }
+  }
+  return null;
+};
+
 interface AuthState {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  testId: string,
-  roleId: string,
+  testId: string | null;
+  roleId: string | null;
+  permissions: Permission[];
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  registerStudent: (payload) => Promise<{ success: boolean, error?: any }>;
+  registerStudent: (payload: any) => Promise<{ success: boolean, error?: any }>;
   registerCounsellor: (firstName: string, lastName: string, email: string, password: string, dateOfBirth: string, grade: string, phone: string, role: string) => Promise<void>;
   registerSchool: (payload: any) => Promise<{ success: boolean, error?: any }>;
 
@@ -144,14 +160,17 @@ export const useAuthStore = create<AuthState>(
     isLoading: true, // start loading
     testId: null,
     roleId: null,
+    permissions: [],
     loadFromStorage: () => {
       const token = localStorage.getItem("auth_token");
       const userData = localStorage.getItem("user_data");
+      const permissionsData = localStorage.getItem("user_permissions");
 
       if (token && userData) {
         set({
           token,
           user: JSON.parse(userData),
+          permissions: permissionsData ? JSON.parse(permissionsData) : [],
           isAuthenticated: true,
           isLoading: false,
         });
@@ -163,22 +182,32 @@ export const useAuthStore = create<AuthState>(
     login: async (email, password) => {
       set({ isLoading: true });
       try {
-        const { data } = await api.post<LoginResponse>("/Auth/login", { email, password });
+        const isSuperAdminEmail = email.toLowerCase().includes('superadmin');
+        const tenantName = isSuperAdminEmail ? null : getTenantFromHostname();
 
-        const { access_Token, user } = data.data;
+        const payload: any = { email, password };
+        if (tenantName) {
+          payload.tenant = tenantName;
+        }
+
+        const { data } = await api.post<LoginResponse>("/Auth/login", payload);
+
+        const { access_Token, user, permissions = [] } = data.data;
 
         localStorage.setItem("auth_token", access_Token);
-        localStorage.setItem("roleId", String(user.roleId))
+        localStorage.setItem("roleId", String(user.roleId));
         localStorage.setItem("user_data", JSON.stringify(user));
+        localStorage.setItem("user_permissions", JSON.stringify(permissions));
 
         set({
           user,
           token: access_Token,
+          permissions,
           isAuthenticated: true,
           isLoading: false,
         });
       } catch (err) {
-        set({ user: null, token: null, isAuthenticated: false, isLoading: false });
+        set({ user: null, token: null, permissions: [], isAuthenticated: false, isLoading: false });
         throw err;
       }
     },
@@ -295,7 +324,9 @@ export const useAuthStore = create<AuthState>(
     logout: () => {
       localStorage.removeItem("auth_token");
       localStorage.removeItem("user_data");
-      set({ user: null, token: null, isAuthenticated: false });
+      localStorage.removeItem("user_permissions");
+      localStorage.removeItem("roleId");
+      set({ user: null, token: null, permissions: [], isAuthenticated: false });
     },
   })
 );

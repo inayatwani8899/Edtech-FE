@@ -260,7 +260,7 @@ export function AdminSidebar() {
                                 <div className="text-xs">
                                     <div className="font-medium">{user?.name || "Super Admin"}</div>
                                     <div className={`${theme === "dark" ? "text-slate-300" : "text-muted-foreground"} text-[11px]`}>
-                                        {user?.role === "Admin" ? "SUPER ADMIN" : (user?.role?.toUpperCase() || "SUPER ADMIN")}
+                                        {user?.role === "Admin" || user?.role === "SuperAdmin" ? "SUPER ADMIN" : (user?.role?.toUpperCase() || "SUPER ADMIN")}
                                     </div>
                                 </div>
                             )}

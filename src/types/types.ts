@@ -1,5 +1,5 @@
 // ---------- Roles & Status ----------
-export type UserRole = "Student" | "Counselor" | "Admin" | "Professional" | "School" | "";
+export type UserRole = "Student" | "Counselor" | "Admin" | "Professional" | "School" | "SuperAdmin" | "";
 
 export enum UserStatus {
   Active = "Active",
@@ -83,6 +83,10 @@ export interface School extends User {
 
 export interface Admin extends User {
   role: "Admin";
+}
+
+export interface SuperAdmin extends User {
+  role: "SuperAdmin";
 }
 
 // ---------- Test-related Models ----------

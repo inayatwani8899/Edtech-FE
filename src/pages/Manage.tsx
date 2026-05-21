@@ -810,10 +810,11 @@ export const Manage: React.FC = () => {
   // Available roles
   const availableRoles: (UserRole | "all")[] = [
     "all",
-    "student",
-    "professional",
-    "counselor",
-    "admin",
+    "Student",
+    "Professional",
+    "Counselor",
+    "Admin",
+    "SuperAdmin",
   ];
 
   // Debounce effect
@@ -958,11 +959,11 @@ export const Manage: React.FC = () => {
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
                       <span
-                        className={`px-2 py-1 text-xs rounded-full font-semibold ${user.role === "admin"
+                        className={`px-2 py-1 text-xs rounded-full font-semibold ${user.role === "Admin" || user.role === "SuperAdmin"
                             ? "bg-red-100 text-red-800"
-                            : user.role === "counselor"
+                            : user.role === "Counselor"
                               ? "bg-indigo-100 text-indigo-800"
-                              : user.role === "professional"
+                              : user.role === "Professional"
                                 ? "bg-yellow-100 text-yellow-800"
                                 : "bg-green-100 text-green-800"
                           }`}

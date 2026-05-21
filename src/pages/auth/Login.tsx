@@ -38,7 +38,7 @@ export const Login = () => {
     try {
       await login(email, password);
     } catch (err: any) {
-      setError(err?.response?.data?.message || "Invalid email or password");
+      setError(err?.response?.data?.message || err?.response?.data?.errorMessage || "Invalid email or password");
     }
   };
 

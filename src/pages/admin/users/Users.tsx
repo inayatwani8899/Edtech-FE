@@ -57,7 +57,8 @@ const Users: React.FC = () => {
 
     const getRoleColor = (role: string) => {
         switch (role?.toLowerCase()) {
-            case "admin": return "bg-rose-500/10 text-rose-600 border-rose-200/50";
+            case "admin":
+            case "superadmin": return "bg-rose-500/10 text-rose-600 border-rose-200/50";
             case "counselor": return "bg-indigo-500/10 text-indigo-600 border-indigo-200/50";
             case "professional": return "bg-amber-500/10 text-amber-600 border-amber-200/50";
             case "student": return "bg-emerald-500/10 text-emerald-600 border-emerald-200/50";
@@ -212,7 +213,7 @@ const Users: React.FC = () => {
                                                                 variant="outline"
                                                                 className={`px-2 py-0.5 rounded-md font-bold text-[9px] uppercase tracking-wide border ${getRoleColor(user?.role)}`}
                                                             >
-                                                                {user?.role === "Admin" ? "Super Admin" : (user?.role?.charAt(0)?.toUpperCase() + user?.role?.slice(1))}
+                                                                {user?.role === "Admin" || user?.role === "SuperAdmin" ? "Super Admin" : (user?.role?.charAt(0)?.toUpperCase() + user?.role?.slice(1))}
                                                             </Badge>
                                                         </TableCell>
                                                         <TableCell className="px-4 py-2">
@@ -276,7 +277,7 @@ const Users: React.FC = () => {
                                                             variant="outline"
                                                             className={`px-2 py-0.5 rounded-md font-bold text-[10px] uppercase tracking-wide border ${getRoleColor(user?.role)}`}
                                                         >
-                                                            {user?.role === "Admin" ? "Super Admin" : user?.role}
+                                                            {user?.role === "Admin" || user?.role === "SuperAdmin" ? "Super Admin" : user?.role}
                                                         </Badge>
                                                     </div>
 

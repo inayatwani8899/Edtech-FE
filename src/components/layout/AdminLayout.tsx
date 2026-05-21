@@ -71,7 +71,7 @@ export const AdminLayout = () => {
   }
 
   // 2. Auth + Role check
-  if (!isAuthenticated || user?.role !== "Admin") {
+  if (!isAuthenticated || (user?.role !== "Admin" && user?.role !== "SuperAdmin")) {
     return <Navigate to="/login" replace />;
   }
 

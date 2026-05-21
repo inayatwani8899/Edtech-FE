@@ -156,7 +156,7 @@ const UserForm: React.FC = () => {
 
     const isStudent = selectedRole?.name.toLowerCase() === "student" || formData.role?.toLowerCase() === "student";
     const isCounselor = selectedRole?.name.toLowerCase() === "counsellor" || formData.role?.toLowerCase() === "counsellor";
-    const isAdminRole = selectedRole?.name.toLowerCase() === "admin" || formData.role?.toLowerCase() === "admin";
+    const isAdminRole = selectedRole?.name.toLowerCase() === "admin" || selectedRole?.name.toLowerCase() === "superadmin" || formData.role?.toLowerCase() === "admin" || formData.role?.toLowerCase() === "superadmin";
 
     return (
         <div className="min-h-screen w-full bg-[#FAFAFA] px-4 overflow-x-hidden">
@@ -211,7 +211,7 @@ const UserForm: React.FC = () => {
                                     {formData.firstName || formData.lastName ? `${formData.firstName} ${formData.lastName}`.trim() : "Identification"}
                                 </h2>
                                 <Badge variant="secondary" className="bg-slate-100 text-slate-500 font-bold uppercase tracking-widest text-[8px] mb-4 border-none">
-                                    {selectedRole?.name === "Admin" ? "Super Admin" : (selectedRole?.name || "Pending...")}
+                                    {selectedRole?.name === "Admin" || selectedRole?.name === "SuperAdmin" ? "Super Admin" : (selectedRole?.name || "Pending...")}
                                 </Badge>
 
                                 <div className="grid grid-cols-1 gap-2 pt-2 border-t border-slate-50 text-left">
@@ -238,7 +238,7 @@ const UserForm: React.FC = () => {
                                         <SelectContent className="rounded-xl border-slate-200">
                                             {roles.map((role) => (
                                                 <SelectItem key={role.id} value={String(role.id)} className="text-[10px] font-bold">
-                                                    {role.name === "Admin" ? "Super Admin" : role.name}
+                                                    {role.name === "Admin" || role.name === "SuperAdmin" ? "Super Admin" : role.name}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>

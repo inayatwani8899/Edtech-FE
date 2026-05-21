@@ -32,7 +32,7 @@ export const Navbar = () => {
             <Link
               to={
                 !isAuthenticated ? '/' :
-                  user?.role === 'Admin' ? '/dashboard' :
+                  user?.role === 'Admin' || user?.role === 'SuperAdmin' ? '/dashboard' :
                     (user?.role?.toLowerCase().includes('counsel') || user?.role?.toLowerCase() === 'professional') ? '/counselor/dashboard' :
                       (user?.role?.toLowerCase() === 'school' || user?.role?.toLowerCase() === 'organization') ? '/school/dashboard' :
                         '/student/dashboard'

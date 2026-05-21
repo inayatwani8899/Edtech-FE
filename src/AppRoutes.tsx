@@ -116,12 +116,12 @@ const ProtectedRoute = ({ children, role }: ProtectedRouteProps) => {
 
     if (role && (
         (role === "Student" && user?.role !== "Student") ||
-        (role === "Admin" && user?.role !== "Admin") ||
+        (role === "Admin" && user?.role !== "Admin" && user?.role !== "SuperAdmin") ||
         (role === "School" && !isSchoolRole(user)) ||
         (role === "Counselor" && !isCounselorRole(user))
     )) {
         let redirectPath = "/student/dashboard";
-        if (user?.role === "Admin") redirectPath = "/dashboard";
+        if (user?.role === "Admin" || user?.role === "SuperAdmin") redirectPath = "/dashboard";
         else if (isSchoolRole(user)) redirectPath = "/school/dashboard";
         else if (isCounselorRole(user)) redirectPath = "/counselor/dashboard";
 
@@ -151,7 +151,7 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 
     if (isAuthenticated) {
         let redirectPath = "/student/dashboard";
-        if (user?.role === "Admin") redirectPath = "/dashboard";
+        if (user?.role === "Admin" || user?.role === "SuperAdmin") redirectPath = "/dashboard";
         else if (isSchoolRole(user)) redirectPath = "/school/dashboard";
         else if (isCounselorRole(user)) redirectPath = "/counselor/dashboard";
 
