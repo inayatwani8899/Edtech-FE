@@ -123,7 +123,7 @@ export const AdminDashboard = () => {
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className="text-xl md:text-2xl font-black tracking-tight text-slate-900">
-              {greeting}, <span className="text-primary">{user?.name ? user.name.split(' ')[0] : 'Admin'}!</span>
+              {greeting}, <span className="text-primary">{user?.name ? user.name.split(' ')[0] : 'Super Admin'}!</span>
             </h1>
             <p className="text-[11px] text-slate-500 font-medium -mt-1">
               System overview and <span className="text-primary font-bold">Command Center</span>

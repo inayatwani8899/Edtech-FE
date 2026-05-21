@@ -211,7 +211,7 @@ const UserForm: React.FC = () => {
                                     {formData.firstName || formData.lastName ? `${formData.firstName} ${formData.lastName}`.trim() : "Identification"}
                                 </h2>
                                 <Badge variant="secondary" className="bg-slate-100 text-slate-500 font-bold uppercase tracking-widest text-[8px] mb-4 border-none">
-                                    {selectedRole?.name || "Pending..."}
+                                    {selectedRole?.name === "Admin" ? "Super Admin" : (selectedRole?.name || "Pending...")}
                                 </Badge>
 
                                 <div className="grid grid-cols-1 gap-2 pt-2 border-t border-slate-50 text-left">
@@ -220,7 +220,7 @@ const UserForm: React.FC = () => {
                                         <div className="flex items-center justify-center gap-2">
                                             <Shield className={`h-3 w-3 ${formData.isAdmin ? "text-emerald-500" : "text-slate-300"}`} />
                                             <span className={`text-[10px] font-black uppercase ${formData.isAdmin ? "text-emerald-600" : "text-slate-400"}`}>
-                                                {formData.isAdmin ? "Terminal Admin" : "Restricted"}
+                                                {formData.isAdmin ? "Terminal Super Admin" : "Restricted"}
                                             </span>
                                         </div>
                                     </div>
@@ -237,7 +237,9 @@ const UserForm: React.FC = () => {
                                         </SelectTrigger>
                                         <SelectContent className="rounded-xl border-slate-200">
                                             {roles.map((role) => (
-                                                <SelectItem key={role.id} value={String(role.id)} className="text-[10px] font-bold">{role.name}</SelectItem>
+                                                <SelectItem key={role.id} value={String(role.id)} className="text-[10px] font-bold">
+                                                    {role.name === "Admin" ? "Super Admin" : role.name}
+                                                </SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>

@@ -28,6 +28,7 @@ import {
     UserCog,
     UserCheck,
     User,
+    Building,
 } from "lucide-react";
 import Swal from 'sweetalert2';
 
@@ -48,13 +49,12 @@ import { cn } from "@/lib/utils";
 // Define navigation items specific to the Admin role
 const adminMenuItems = [
     { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, color: "text-red-600" },
+    { title: "Organization Management", url: "/manage/organizations", icon: Building, color: "text-purple-600" },
     { title: "User Management", url: "/manage/users", icon: Users, color: "text-blue-600" },
     { title: "Counselor Management", url: "/manage/counselors", icon: Users2, color: "text-yellow-600" },
     { title: "Student Management", url: "/manage/students", icon: Users, color: "text-blue-600" },
     { title: "Test Management", url: "/manage/tests", icon: ClipboardList, color: "text-green-600" },
     { title: "Test Configuration Management", url: "/manage/configurations", icon: Cog, color: "text-green-600" },
-    // { title: "AI Question Generation", url: "/ai-generation", icon: BookOpen, color: "text-yellow-600" },
-    // { title: "Categories Management", url: "/manage/categories", icon: Book, color: "text-indigo-600" },
 ];
 
 const rbacMenuItems = [
@@ -258,8 +258,10 @@ export function AdminSidebar() {
                             </div>
                             {!isCollapsed && (
                                 <div className="text-xs">
-                                    <div className="font-medium">{user?.name || "Admin"}</div>
-                                    <div className={`${theme === "dark" ? "text-slate-300" : "text-muted-foreground"} text-[11px]`}>{user?.role?.toUpperCase() || "ADMIN"}</div>
+                                    <div className="font-medium">{user?.name || "Super Admin"}</div>
+                                    <div className={`${theme === "dark" ? "text-slate-300" : "text-muted-foreground"} text-[11px]`}>
+                                        {user?.role === "Admin" ? "SUPER ADMIN" : (user?.role?.toUpperCase() || "SUPER ADMIN")}
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -275,7 +277,7 @@ export function AdminSidebar() {
                                 </button>
                                 <button
                                     onClick={() => navigate("/profile")}
-                                    title="Admin Profile"
+                                    title="Super Admin Profile"
                                     className={`p-1 rounded-md transition-colors ${theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"}`}
                                 >
                                     <User className="h-4 w-4" />

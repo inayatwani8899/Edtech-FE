@@ -41,6 +41,9 @@ import Counselors from "./pages/admin/counselors/Counselors";
 import ActiveCounselors from "./pages/public/ActiveCounselors";
 import CounselorForm from "./pages/admin/counselors/CounselorForm";
 import StudentProfile from "./pages/student/StudentProfile";
+import Organizations from "./pages/admin/organizations/Organizations";
+import OrganizationForm from "./pages/admin/organizations/OrganizationForm";
+import OrganizationView from "./pages/admin/organizations/OrganizationView";
 import { TestConfigurationsList } from "./pages/admin/test-configuration/TestConfigurationsList";
 import { TestConfigurationForm } from "./pages/admin/test-configuration/TestConfigurationForm";
 import { CategoryForm } from "./pages/admin/categories/CategoryForm";
@@ -203,6 +206,10 @@ const AppRoutes = () => {
                 <Route path="/manage/counselors" element={<Counselors />} />
                 <Route path="/manage/tests" element={<ManageTests />} />
                 <Route path="/manage/students" element={<Students />} />
+                <Route path="/manage/organizations" element={<Organizations />} />
+                <Route path="/organizations/add" element={<OrganizationForm />} />
+                <Route path="/organizations/edit/:id" element={<OrganizationForm />} />
+                <Route path="/organizations/view/:id" element={<OrganizationView />} />
                 <Route path="/students/add" element={<StudentForm />} />
                 <Route path="/students/edit/:id" element={<StudentForm />} />
                 <Route path="/students/view/:id" element={<StudentView />} />

@@ -1,7 +1,10 @@
 import axios from "axios";
 import Swal from 'sweetalert2';
+import { useAuthStore } from "../store/useAuthStore";
+
 const api = axios.create({
-    baseURL: "https://charming-bohr.180-179-213-167.plesk.page/api/",
+    baseURL: import.meta.env.VITE_API_BASE_URL || "https://charming-bohr.180-179-213-167.plesk.page/api/",
+
     // baseURL: "https://18lh764q-5001.inc1.devtunnels.ms/api/",
     // timeout: 50000,
     headers: {
@@ -130,6 +133,24 @@ api.interceptors.response.use(
         const { response } = error;
         const status = response?.status;
         const message = response?.data?.message || getErrorMessage(status);
+
+        // 🚨 Session Expiry Handling
+        if (status === 401 || response?.data?.code === 401) {
+            Swal.fire({
+                title: 'Session Expired',
+                text: 'Your current session has ended. Please sign in again to continue.',
+                icon: 'warning',
+                confirmButtonColor: '#3b82f6',
+                confirmButtonText: 'Re-authenticate',
+                allowOutsideClick: false,
+                background: '#0f172a',
+                color: '#fff',
+            }).then(() => {
+                useAuthStore.getState().logout();
+                window.location.href = "/login";
+            });
+            return Promise.reject(error);
+        }
 
         Swal.fire({
             title: 'Error!',

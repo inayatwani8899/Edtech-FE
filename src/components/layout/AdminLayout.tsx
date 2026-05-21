@@ -65,7 +65,7 @@ export const AdminLayout = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        Loading Admin Panel...
+        Loading Super Admin Panel...
       </div>
     );
   }
