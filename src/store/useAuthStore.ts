@@ -1,121 +1,6 @@
-// // src/store/useAuthStore.ts
-// import { create } from 'zustand';
-// import api from '@/api/axios';
-// import { User } from '@/types/auth';
-
-// export interface LoginResponse {
-//   code: number;
-//   message: string;
-//   data: {
-//     access_Token: string;
-//     token_Type: string;
-//     user: User;
-//   };
-// }
-
-// interface AuthState {
-//   loadFromStorage: any;
-//   user: User | null;
-//   token: string | null;
-//   isLoading: boolean;
-//   isAuthenticated: boolean;
-//   login: (email: string, password: string) => Promise<User>;
-//   register: (
-//     firstName: string,
-//     lastName: string,
-//     email: string,
-//     password: string,
-//     dateOfBirth: string,
-//     grade: string,
-//     phone: string,
-//     role: string
-//   ) => Promise<void>;
-//   logout: () => void;
-//   updateProfile: (updates: Partial<User>) => void;
-//   restoreSession: () => void;
-// }
-
-// export const useAuthStore = create<AuthState>((set, get) => ({
-//   user: null,
-//   token: null,
-//   isLoading: false,
-//   isAuthenticated: false,
-
-//   login: async (email, password) => {
-//     set({ isLoading: true });
-
-//     try {
-//       const response = await api.post<LoginResponse>('Auth/login', { email, password });
-//       const { access_Token, user } = response.data.data;
-
-//       localStorage.setItem('auth_token', access_Token);
-//       localStorage.setItem('user_data', JSON.stringify(user));
-
-//       set({ user, token: access_Token, isAuthenticated: true, isLoading: false });
-//       return user;
-//     } catch (err) {
-//       set({ isLoading: false, user: null, token: null, isAuthenticated: false });
-//       throw err;
-//     }
-//   },
-
-//   register: async (firstName, lastName, email, password, dateOfBirth, grade, phone, role) => {
-//     set({ isLoading: true });
-//     try {
-//       await api.post('Auth/register', {
-//         firstName,
-//         lastName,
-//         email,
-//         password,
-//         dateOfBirth,
-//         grade,
-//         phone,
-//         role,
-//       });
-
-//       // Auto login after registration
-//       await get().login(email, password);
-//     } finally {
-//       set({ isLoading: false });
-//     }
-//   },
-
-//   logout: () => {
-//     localStorage.removeItem('auth_token');
-//     localStorage.removeItem('user_data');
-//     set({ user: null, token: null, isAuthenticated: false });
-//   },
-
-//   updateProfile: (updates) => {
-//     const { user } = get();
-//     if (!user) return;
-
-//     const updatedUser = { ...user, ...updates };
-//     localStorage.setItem('user_data', JSON.stringify(updatedUser));
-//     set({ user: updatedUser });
-//   },
-
-//   restoreSession: () => {
-//     const token = localStorage.getItem('auth_token');
-//     const userData = localStorage.getItem('user_data');
-
-//     if (token && userData) {
-//       try {
-//         const user: User = JSON.parse(userData);
-//         set({ user, token, isAuthenticated: true });
-//       } catch {
-//         localStorage.removeItem('auth_token');
-//         localStorage.removeItem('user_data');
-//       }
-//     }
-//   },
-// }));
 import { create } from "zustand";
-import { persist } from 'zustand/middleware';
 import { LoginResponse, User, Permission } from "@/types/auth";
 import api from "@/api/axios";
-import { useTestStore } from "./testStore";
-
 import Swal from "sweetalert2";
 import { usePaymentStore } from "./paymentStore";
 
@@ -163,7 +48,7 @@ export const useAuthStore = create<AuthState>(
     user: null,
     token: null,
     isAuthenticated: false,
-    isLoading: true, // start loading
+    isLoading: true,
     testId: null,
     roleId: null,
     permissions: [],
@@ -172,8 +57,8 @@ export const useAuthStore = create<AuthState>(
     tenantError: null,
 
     loadFromStorage: () => {
-      const token = localStorage.getItem("auth_token");
-      const userData = localStorage.getItem("user_data");
+      const token = localStorage.getItem("accessToken") || localStorage.getItem("auth_token");
+      const userData = localStorage.getItem("userData") || localStorage.getItem("user_data");
       const permissionsData = localStorage.getItem("user_permissions");
       const storedTenantData = localStorage.getItem("organizationData");
 
@@ -190,13 +75,14 @@ export const useAuthStore = create<AuthState>(
     login: async (email, password, routeTenant?: string | null) => {
       set({ isLoading: true });
       try {
-        const isSuperAdminEmail = email.toLowerCase().includes('superadmin');
-        const resolvedTenant = isSuperAdminEmail ? null : (routeTenant || getTenantFromHostname());
+        const storedTenant = localStorage.getItem("tenantName");
+        // Resolve tenant dynamically: URL -> hostname -> localStorage -> default to superadmin
+        const resolvedTenant = routeTenant || getTenantFromHostname() || storedTenant || "superadmin";
 
         const payload: any = { 
           email, 
           password,
-          tenant: resolvedTenant || null
+          tenant: resolvedTenant
         };
 
         let loginSuccess = false;
@@ -222,8 +108,6 @@ export const useAuthStore = create<AuthState>(
             responseData = res.data;
             loginSuccess = true;
           } catch (fallbackErr: any) {
-            // Both failed. If the first attempt got a real validation error from the server,
-            // it is more meaningful than a network/CORS error from the fallback server.
             if (firstError && firstError.response) {
               throw firstError;
             }
@@ -233,14 +117,35 @@ export const useAuthStore = create<AuthState>(
 
         if (loginSuccess && responseData) {
           const { access_Token, user, permissions = [] } = responseData.data;
-          const tenant = responseData.data.tenant || routeTenant;
+          const tenant = responseData.data.tenant || resolvedTenant;
+          const loginUrl = responseData.data.loginUrl || `/login/${tenant}`;
+          
+          let organizationId = "";
+          const storedTenantData = localStorage.getItem("organizationData");
+          if (storedTenantData) {
+            try {
+              const org = JSON.parse(storedTenantData);
+              if (org && org.id) {
+                organizationId = String(org.id);
+              }
+            } catch (e) {
+              console.error("Error parsing stored organization data:", e);
+            }
+          }
 
-          localStorage.setItem("auth_token", access_Token);
+          // Save required session keys
+          localStorage.setItem("accessToken", access_Token);
+          localStorage.setItem("auth_token", access_Token); // fallback compatibility
+          localStorage.setItem("tenantName", tenant || "");
+          localStorage.setItem("userId", String(user.id));
+          localStorage.setItem("role", user.role || "");
           localStorage.setItem("roleId", String(user.roleId));
-          localStorage.setItem("user_data", JSON.stringify(user));
+          localStorage.setItem("userData", JSON.stringify(user));
+          localStorage.setItem("user_data", JSON.stringify(user)); // fallback compatibility
+          localStorage.setItem("loginUrl", loginUrl);
           localStorage.setItem("user_permissions", JSON.stringify(permissions));
-          if (tenant) {
-            localStorage.setItem("tenantName", tenant);
+          if (organizationId) {
+            localStorage.setItem("organizationId", organizationId);
           }
 
           set({
@@ -265,36 +170,7 @@ export const useAuthStore = create<AuthState>(
         localStorage.removeItem("testId");
       }
     },
-    // registerStudent: async (payload) => {
-    //   set({ isLoading: true });
-    //   try {
 
-    //     const response = await api.post("/Student/register", payload);
-    //     if (response.data.code === 201) {
-
-    //       const { testId } = get();
-    //       if (testId) {
-    //         // Fetch test details
-    //         // const testDetails = await useTestStore.getState().fetchTestById(testId);
-    //         const testDetails = await api.get(`/Test/${testId}`);
-    //         console.log(testDetails.data.data)
-
-
-    //         const paymentResult = await usePaymentStore.getState().handlePayment(testDetails.data.data);
-
-
-    //       } else {
-    //         // navigate('/dashboard');
-    //       }
-
-    //     }
-    //   } catch (error) {
-
-    //   } finally {
-    //     set({ isLoading: false });
-    //     await get().login(payload.email, payload.password);
-    //   }
-    // },
     registerStudent: async (payload) => {
       set({ isLoading: true });
       try {
@@ -322,6 +198,7 @@ export const useAuthStore = create<AuthState>(
       } finally {
         set({ isLoading: false });
       }
+      return { success: false, message: "Registration failed" };
     },
 
     registerCounsellor: async (firstName, lastName, email, password, dateOfBirth, grade, phone, role) => {
@@ -337,13 +214,11 @@ export const useAuthStore = create<AuthState>(
           phone,
           role,
         });
-
-        //   // Auto login after registration
-        //   await get().login(email, password);
       } finally {
         set({ isLoading: false });
       }
     },
+
     registerSchool: async (formData: FormData) => {
       set({ isLoading: true });
       try {
@@ -366,13 +241,23 @@ export const useAuthStore = create<AuthState>(
         set({ isLoading: false });
       }
     },
+
     logout: () => {
+      localStorage.removeItem("accessToken");
       localStorage.removeItem("auth_token");
+      localStorage.removeItem("userData");
       localStorage.removeItem("user_data");
       localStorage.removeItem("user_permissions");
       localStorage.removeItem("roleId");
-      set({ user: null, token: null, permissions: [], isAuthenticated: false });
+      localStorage.removeItem("userId");
+      localStorage.removeItem("role");
+      localStorage.removeItem("tenantName");
+      localStorage.removeItem("loginUrl");
+      localStorage.removeItem("organizationId");
+      localStorage.removeItem("organizationData");
+      set({ user: null, token: null, permissions: [], isAuthenticated: false, tenantData: null });
     },
+
     fetchTenantDetails: async (tenantName: string) => {
       set({ tenantLoading: true, tenantError: null });
       try {
@@ -416,6 +301,7 @@ export const useAuthStore = create<AuthState>(
         throw err;
       }
     },
+
     clearTenantDetails: () => {
       localStorage.removeItem("tenantName");
       localStorage.removeItem("organizationId");

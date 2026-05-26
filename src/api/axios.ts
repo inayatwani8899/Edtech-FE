@@ -28,9 +28,15 @@ api.interceptors.request.use(
             config.baseURL = import.meta.env.VITE_API_BASE_URL || "https://charming-bohr.180-179-213-167.plesk.page/api/";
         }
 
-        const token = localStorage.getItem("auth_token");
+        const token = localStorage.getItem("auth_token") || localStorage.getItem("accessToken");
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
+        }
+
+        const tenant = localStorage.getItem("tenantName");
+        if (tenant) {
+            config.headers["tenant"] = tenant;
+            config.headers["X-Tenant-Name"] = tenant;
         }
         return config;
     },

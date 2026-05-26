@@ -2,22 +2,14 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { 
     Loader2, 
-    Save, 
-    User, 
-    Mail, 
-    Phone, 
-    GraduationCap, 
-    Calendar as CalendarIcon, 
-    Sparkles, 
+    UserPlus, 
     ArrowLeft,
-    Shield,
-    Fingerprint,
-    CheckCircle2,
-    BookOpen
+    Info,
+    Eye,
+    EyeOff
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import api from "@/api/axios";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -36,14 +28,12 @@ interface StudentFormData {
     lastName: string;
     email: string;
     phone: string;
-    gradeLevel: string;
+    gender: string;
+    gradeId: string;
     dateOfBirth: string;
+    password?: string;
+    studentId?: string; // Optional student ID field
 }
-
-const gradeOptions = [
-    "Kindergarten", "1st Grade", "2nd Grade", "3rd Grade", "4th Grade", "5th Grade",
-    "6th Grade", "7th Grade", "8th Grade", "9th Grade", "10th Grade", "11th Grade", "12th Grade",
-];
 
 const StudentForm: React.FC = () => {
     const navigate = useNavigate();
@@ -59,16 +49,39 @@ const StudentForm: React.FC = () => {
 
     const redirectPath = isSchool ? "/school/students" : "/manage/students";
 
+    const [grades, setGrades] = useState<{ id: number; name: string }[]>([]);
+    const [countryCode, setCountryCode] = useState("+91");
+    const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState<StudentFormData>({
         firstName: "",
         lastName: "",
         email: "",
         phone: "",
-        gradeLevel: "",
-        dateOfBirth: ""
+        gender: "",
+        gradeId: "",
+        dateOfBirth: "",
+        password: "",
+        studentId: ""
     });
 
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Fetch grades list
+    useEffect(() => {
+        const fetchGrades = async () => {
+            try {
+                const response = await api.get("/Grade", {
+                    params: { page: 1, limit: 100, sortDirection: "asc" }
+                });
+                if (response.data && response.data.code === 200) {
+                    setGrades(response.data.data.grades || []);
+                }
+            } catch (err) {
+                console.error("Failed to fetch grades:", err);
+            }
+        };
+        fetchGrades();
+    }, []);
 
     useEffect(() => {
         if (id) {
@@ -81,16 +94,43 @@ const StudentForm: React.FC = () => {
 
     useEffect(() => {
         if (id && student) {
+            // Find matched gradeId if only gradeLevel is present
+            let selectedGradeId = student.gradeId?.toString() || "";
+            if (!selectedGradeId && student.gradeLevel && grades.length > 0) {
+                const matchedGrade = grades.find(g => g.name.toLowerCase() === student.gradeLevel?.toLowerCase());
+                if (matchedGrade) {
+                    selectedGradeId = matchedGrade.id.toString();
+                }
+            }
+
+            // Extract phone number and country code if combined
+            let rawPhone = student.phoneNumber || student.phone || "";
+            let matchedCode = "+91";
+            let parsedPhone = rawPhone;
+            
+            const codes = ["+91", "+1", "+44", "+971"];
+            for (const code of codes) {
+                if (rawPhone.startsWith(code)) {
+                    matchedCode = code;
+                    parsedPhone = rawPhone.slice(code.length);
+                    break;
+                }
+            }
+
+            setCountryCode(matchedCode);
             setFormData({
                 firstName: student.firstName || "",
                 lastName: student.lastName || "",
                 email: student.email || "",
-                phone: student.phone || "",
-                gradeLevel: student.gradeLevel || "",
-                dateOfBirth: student.dateOfBirth ? new Date(student.dateOfBirth).toISOString().split('T')[0] : ""
+                phone: parsedPhone || "",
+                gender: student.gender || "",
+                gradeId: selectedGradeId,
+                dateOfBirth: student.dateOfBirth ? new Date(student.dateOfBirth).toISOString().split('T')[0] : "",
+                password: "",
+                studentId: ""
             });
         }
-    }, [student, id]);
+    }, [student, id, grades]);
 
     const handleInputChange = (field: string, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -99,15 +139,31 @@ const StudentForm: React.FC = () => {
     const validateForm = () => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!formData.firstName.trim() || !formData.lastName.trim()) {
-            toast.error("Student identity fields are required");
+            toast.error("First Name and Last Name are required");
             return false;
         }
         if (!emailRegex.test(formData.email)) {
-            toast.error("Valid student email required");
+            toast.error("Valid email address is required");
             return false;
         }
-        if (!formData.gradeLevel) {
-            toast.error("Academic grade must be assigned");
+        if (!formData.phone.trim()) {
+            toast.error("Phone number is required");
+            return false;
+        }
+        if (!formData.dateOfBirth) {
+            toast.error("Date of birth is required");
+            return false;
+        }
+        if (!formData.gender) {
+            toast.error("Gender selection is required");
+            return false;
+        }
+        if (!formData.gradeId) {
+            toast.error("Grade selection is required");
+            return false;
+        }
+        if (!id && !formData.password?.trim()) {
+            toast.error("Password is required for registration");
             return false;
         }
         return true;
@@ -118,17 +174,33 @@ const StudentForm: React.FC = () => {
         if (!validateForm()) return;
 
         setIsSubmitting(true);
+        const selectedGrade = grades.find(g => g.id.toString() === formData.gradeId);
+        const formattedPhone = `${countryCode}${formData.phone.replace(/[^0-9]/g, "")}`;
+
+        const submitPayload = {
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+            phone: formattedPhone,
+            phoneNumber: formattedPhone,
+            gender: formData.gender,
+            gradeId: Number(formData.gradeId),
+            gradeLevel: selectedGrade ? selectedGrade.name : "",
+            dateOfBirth: formData.dateOfBirth,
+            password: formData.password
+        };
+
         try {
             if (id) {
-                await updateStudent(id, formData);
+                await updateStudent(id, submitPayload);
                 toast.success("Scholar record synchronized successfully");
             } else {
-                await createStudent(formData);
-                toast.success("New scholar successfully enrolled");
+                await createStudent(submitPayload);
+                toast.success("Student added successfully by organization.");
             }
             navigate(redirectPath);
         } catch (err: any) {
-            toast.error(err.response?.data?.message || "Enrollment protocol failed");
+            toast.error(err.response?.data?.message || "Student registration failed");
         } finally {
             setIsSubmitting(false);
         }
@@ -138,8 +210,8 @@ const StudentForm: React.FC = () => {
         return (
             <div className="min-h-screen w-full bg-[#FAFAFA] flex flex-col items-center justify-center">
                 <div className="relative">
-                    <Loader2 className="h-12 w-12 animate-spin text-emerald-600" />
-                    <div className="absolute inset-0 h-12 w-12 rounded-full border-4 border-emerald-100 border-t-transparent animate-pulse"></div>
+                    <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
+                    <div className="absolute inset-0 h-12 w-12 rounded-full border-4 border-blue-100 border-t-transparent animate-pulse"></div>
                 </div>
                 <p className="mt-4 text-slate-500 font-bold uppercase tracking-widest text-[10px]">Retrieving Scholar Dossier...</p>
             </div>
@@ -147,177 +219,261 @@ const StudentForm: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen w-full bg-[#FAFAFA] px-4 overflow-x-hidden">
-            <div className="max-w-5xl mx-auto relative z-10">
-                {/* CONDENSED HEADER */}
-                <div className="flex items-center justify-between gap-3 mb-3 border-b border-slate-200 pb-3">
-                    <div className="flex items-center gap-3">
-                        <div className="p-1.5 bg-white rounded-lg shadow-sm cursor-pointer hover:bg-slate-50 border border-slate-100" onClick={() => navigate(redirectPath)}>
-                            <ArrowLeft className="h-3.5 w-3.5 text-slate-400" />
-                        </div>
-                        <div>
-                            <h1 className="text-lg font-black text-slate-900 tracking-tight leading-none">
-                                {id ? "Update Scholar" : "Enroll Scholar"}
-                            </h1>
-                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Academic Registry Module</p>
+        <div className="min-h-screen w-full bg-[#FAFAFA] px-4 py-8 overflow-x-hidden flex items-start justify-center">
+            <div className="max-w-2xl w-full bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 rounded-2xl shadow-sm overflow-hidden">
+                {/* Header Section */}
+                <div className="p-6 border-b border-slate-100 dark:border-slate-800/60 flex items-center gap-4">
+                    <button 
+                        onClick={() => navigate(redirectPath)}
+                        className="p-2 bg-slate-50 dark:bg-slate-800 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                        title="Back to Students list"
+                        type="button"
+                    >
+                        <ArrowLeft className="h-4 w-4 text-slate-500 dark:text-slate-400" />
+                    </button>
+                    <div>
+                        <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                            {id ? "Modify Student Dossier" : "Register New Student"}
+                        </h2>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                            {id ? "Update student details in your organization" : "Add a new student to your organization"}
+                        </p>
+                    </div>
+                </div>
+
+                {/* Form Container */}
+                <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                    {/* Section 1: Basic Information */}
+                    <div>
+                        <h3 className="text-[11px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-4 border-b border-slate-100 dark:border-slate-800/60 pb-1.5">
+                            Student Basic Information
+                        </h3>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* First Name */}
+                            <div className="space-y-1">
+                                <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                    First Name <span className="text-red-500">*</span>
+                                </Label>
+                                <Input 
+                                    value={formData.firstName}
+                                    onChange={(e) => handleInputChange("firstName", e.target.value)}
+                                    placeholder="Enter first name"
+                                    className="h-9 text-xs border-slate-200 dark:border-slate-800 rounded-xl"
+                                    required
+                                />
+                            </div>
+                            
+                            {/* Last Name */}
+                            <div className="space-y-1">
+                                <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                    Last Name <span className="text-red-500">*</span>
+                                </Label>
+                                <Input 
+                                    value={formData.lastName}
+                                    onChange={(e) => handleInputChange("lastName", e.target.value)}
+                                    placeholder="Enter last name"
+                                    className="h-9 text-xs border-slate-200 dark:border-slate-800 rounded-xl"
+                                    required
+                                />
+                            </div>
+
+                            {/* Gender */}
+                            <div className="space-y-1">
+                                <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                    Gender <span className="text-red-500">*</span>
+                                </Label>
+                                <Select
+                                    value={formData.gender}
+                                    onValueChange={(val) => handleInputChange("gender", val)}
+                                >
+                                    <SelectTrigger className="w-full h-9 bg-transparent border-slate-200 dark:border-slate-800 rounded-xl px-3 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                        <SelectValue placeholder="Select gender" />
+                                    </SelectTrigger>
+                                    <SelectContent className="rounded-xl border-slate-200 dark:border-slate-800 shadow-xl">
+                                        <SelectItem value="Male" className="text-xs font-semibold">Male</SelectItem>
+                                        <SelectItem value="Female" className="text-xs font-semibold">Female</SelectItem>
+                                        <SelectItem value="Other" className="text-xs font-semibold">Other</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            {/* Date of Birth */}
+                            <div className="space-y-1">
+                                <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                    Date of Birth <span className="text-red-500">*</span>
+                                </Label>
+                                <Input 
+                                    type="date"
+                                    value={formData.dateOfBirth}
+                                    onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
+                                    className="h-9 text-xs border-slate-200 dark:border-slate-800 rounded-xl"
+                                    required
+                                />
+                            </div>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    {/* Section 2: Academic Information */}
+                    <div>
+                        <h3 className="text-[11px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-4 border-b border-slate-100 dark:border-slate-800/60 pb-1.5">
+                            Academic Information
+                        </h3>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Grade */}
+                            <div className="space-y-1">
+                                <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                    Grade <span className="text-red-500">*</span>
+                                </Label>
+                                <Select
+                                    value={formData.gradeId}
+                                    onValueChange={(val) => handleInputChange("gradeId", val)}
+                                >
+                                    <SelectTrigger className="w-full h-9 bg-transparent border-slate-200 dark:border-slate-800 rounded-xl px-3 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                        <SelectValue placeholder="Select grade" />
+                                    </SelectTrigger>
+                                    <SelectContent className="rounded-xl border-slate-200 dark:border-slate-800 shadow-xl max-h-56">
+                                        {grades.map((g) => (
+                                            <SelectItem key={g.id} value={g.id.toString()} className="text-xs font-semibold">
+                                                {g.name}
+                                            </SelectItem>
+                                        ))}
+                                        {grades.length === 0 && (
+                                            <SelectItem value="loading" disabled className="text-xs font-semibold">
+                                                Loading grades...
+                                            </SelectItem>
+                                        )}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            {/* Student ID (Optional future-ready field) */}
+                            <div className="space-y-1">
+                                <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                    Student ID <span className="text-slate-400 text-[10px]">(Optional)</span>
+                                </Label>
+                                <Input 
+                                    value={formData.studentId}
+                                    onChange={(e) => handleInputChange("studentId", e.target.value)}
+                                    placeholder="Enter student ID"
+                                    className="h-9 text-xs border-slate-200 dark:border-slate-800 rounded-xl"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Section 3: Contact & Credentials */}
+                    <div>
+                        <h3 className="text-[11px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-4 border-b border-slate-100 dark:border-slate-800/60 pb-1.5">
+                            Contact & Credentials
+                        </h3>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Email */}
+                            <div className="space-y-1">
+                                <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                    Email <span className="text-red-500">*</span>
+                                </Label>
+                                <Input 
+                                    type="email"
+                                    value={formData.email}
+                                    onChange={(e) => handleInputChange("email", e.target.value)}
+                                    placeholder="Enter email address"
+                                    className="h-9 text-xs border-slate-200 dark:border-slate-800 rounded-xl"
+                                    required
+                                />
+                            </div>
+
+                            {/* Phone Number */}
+                            <div className="space-y-1">
+                                <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                    Phone Number <span className="text-red-500">*</span>
+                                </Label>
+                                <div className="flex rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 overflow-hidden focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all">
+                                    <select 
+                                        value={countryCode} 
+                                        onChange={(e) => setCountryCode(e.target.value)}
+                                        className="bg-transparent pl-3 pr-2 text-xs font-semibold border-none outline-none cursor-pointer text-slate-700 dark:text-slate-300 h-9"
+                                    >
+                                        <option value="+91">🇮🇳 +91</option>
+                                        <option value="+1">🇺🇸 +1</option>
+                                        <option value="+44">🇬🇧 +44</option>
+                                        <option value="+971">🇦🇪 +971</option>
+                                    </select>
+                                    <div className="w-px bg-slate-200 dark:bg-slate-800 self-stretch my-2"></div>
+                                    <input 
+                                        type="tel"
+                                        value={formData.phone}
+                                        onChange={(e) => handleInputChange("phone", e.target.value)}
+                                        placeholder="Enter phone number" 
+                                        className="flex-1 bg-transparent px-3 text-xs font-semibold text-slate-800 dark:text-slate-100 placeholder:text-slate-400 outline-none border-none h-9"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Password - Only show/require on creation */}
+                            {!id && (
+                                <div className="space-y-1 md:col-span-2">
+                                    <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                        Password <span className="text-red-500">*</span>
+                                    </Label>
+                                    <div className="relative">
+                                        <Input 
+                                            type={showPassword ? "text" : "password"}
+                                            value={formData.password}
+                                            onChange={(e) => handleInputChange("password", e.target.value)}
+                                            placeholder="Enter login password"
+                                            className="h-9 pr-10 text-xs border-slate-200 dark:border-slate-800 rounded-xl"
+                                            required
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                                        >
+                                            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Info Banner */}
+                    <div className="bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100/50 dark:border-indigo-900/30 rounded-xl p-4 flex gap-3 items-start">
+                        <Info className="h-4 w-4 text-indigo-500 mt-0.5 flex-shrink-0" />
+                        <p className="text-[11px] font-semibold leading-relaxed text-indigo-600 dark:text-indigo-400">
+                            Students will be able to login and access their dashboard using the registered email and default password.
+                        </p>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2">
                         <Button
-                            variant="ghost"
+                            type="button"
+                            variant="outline"
                             onClick={() => navigate(redirectPath)}
-                            className="text-slate-500 hover:bg-slate-100 font-bold text-[10px] h-7 px-3 rounded-lg"
+                            className="h-9 px-4 rounded-xl border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-800"
                         >
                             Cancel
                         </Button>
                         <Button
-                            onClick={handleSubmit}
+                            type="submit"
                             disabled={isSubmitting}
-                            className="bg-slate-900 text-white font-bold text-[10px] h-7 px-4 rounded-lg shadow-md hover:bg-slate-800 transition-all flex items-center gap-1.5"
+                            className="h-9 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm flex items-center gap-2"
                         >
-                            {isSubmitting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
-                            {id ? "Sync Data" : "Enroll"}
+                            {isSubmitting ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                                <UserPlus className="h-3.5 w-3.5" />
+                            )}
+                            {id ? "Update Student" : "Register Student"}
                         </Button>
                     </div>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    {/* LEFT COLUMN: IDENTITY & GRADE */}
-                    <div className="lg:col-span-3">
-                        <Card className="border-none shadow-elegant bg-white rounded-3xl overflow-hidden border border-slate-100/50">
-                            <div className="h-16 bg-slate-900 relative">
-                                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
-                            </div>
-                            <CardContent className="px-4 pb-4 -mt-8 relative z-10 text-center">
-                                <div className="h-16 w-16 rounded-2xl bg-white p-1 shadow-lg border border-slate-50 mx-auto mb-3">
-                                    <div className="h-full w-full rounded-xl bg-slate-50 flex items-center justify-center">
-                                        <GraduationCap className="h-8 w-8 text-emerald-300" />
-                                    </div>
-                                </div>
-                                <h2 className="text-base font-black text-slate-900 truncate mb-1 px-2">
-                                    {formData.firstName || formData.lastName ? `${formData.firstName} ${formData.lastName}`.trim() : "Scholar ID"}
-                                </h2>
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Academic Registry</p>
-
-                                <div className="grid grid-cols-1 gap-2 pt-2 border-t border-slate-50">
-                                    <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-left">
-                                        <span className="text-[8px] font-black text-slate-400 uppercase block tracking-widest mb-1 text-center">Assigned Grade</span>
-                                        <span className="text-sm font-black text-slate-800 block text-center">{formData.gradeLevel || "N/A"}</span>
-                                    </div>
-                                </div>
-
-                                <div className="mt-4 space-y-1.5 text-left">
-                                    <Label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1 block">Level Selection</Label>
-                                    <Select
-                                        value={formData.gradeLevel}
-                                        onValueChange={(val) => handleInputChange("gradeLevel", val)}
-                                    >
-                                        <SelectTrigger className="w-full h-9 bg-slate-100/50 border-transparent rounded-xl px-3 text-[10px] font-bold text-slate-600 focus:ring-0">
-                                            <div className="flex items-center gap-2">
-                                                <BookOpen className="h-3 w-3 text-emerald-500" />
-                                                <span>Grade: {formData.gradeLevel || "Select"}</span>
-                                            </div>
-                                        </SelectTrigger>
-                                        <SelectContent className="rounded-xl border-slate-200 shadow-xl">
-                                            {gradeOptions.map((grade) => (
-                                                <SelectItem key={grade} value={grade} className="text-[10px] font-bold">{grade}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
-
-                    {/* RIGHT COLUMN: PROFESSIONAL DETAILS & CONTACT */}
-                    <div className="lg:col-span-9">
-                        <Card className="border-none shadow-elegant bg-white rounded-3xl border border-slate-100/50 overflow-hidden">
-                            <div className="px-6 py-4 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
-                                <div className="flex items-center gap-2.5">
-                                    <Shield className="h-4 w-4 text-emerald-600" />
-                                    <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest">Scholar Profile & Credentials</h3>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Enrollment Active</span>
-                                </div>
-                            </div>
-                            <CardContent className="p-6 space-y-6">
-                                {/* PRIMARY IDENTITY & CONTACT GRID */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                                    <div className="space-y-1.5">
-                                        <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">First Name</Label>
-                                        <div className="relative group">
-                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300 group-focus-within:text-emerald-500 transition-colors" />
-                                            <Input value={formData.firstName} onChange={(e) => handleInputChange("firstName", e.target.value)} className="h-10 pl-9 bg-slate-50/50 border-slate-200/50 focus:bg-white focus:ring-2 focus:ring-emerald-100 rounded-xl font-bold text-sm transition-all" placeholder="Given Name" />
-                                        </div>
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">Last Name</Label>
-                                        <div className="relative group">
-                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300 group-focus-within:text-emerald-500 transition-colors" />
-                                            <Input value={formData.lastName} onChange={(e) => handleInputChange("lastName", e.target.value)} className="h-10 pl-9 bg-slate-50/50 border-slate-200/50 focus:bg-white focus:ring-2 focus:ring-emerald-100 rounded-xl font-bold text-sm transition-all" placeholder="Family Name" />
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-1.5">
-                                        <Label className="text-[10px] font-bold text-emerald-600 uppercase tracking-tight ml-1">Academic Email</Label>
-                                        <div className="relative group">
-                                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-emerald-300 group-focus-within:text-emerald-600 transition-colors" />
-                                            <Input
-                                                value={formData.email}
-                                                onChange={(e) => handleInputChange("email", e.target.value)}
-                                                className="h-10 pl-9 bg-emerald-50/30 border-emerald-100/50 focus:bg-white focus:ring-2 focus:ring-emerald-100 rounded-xl font-bold text-sm transition-all"
-                                                placeholder="student@school.edu"
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">Parent/Guardian Signal</Label>
-                                        <div className="relative group">
-                                            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300 group-focus-within:text-emerald-500 transition-colors" />
-                                            <Input value={formData.phone} onChange={(e) => handleInputChange("phone", e.target.value)} className="h-10 pl-9 bg-slate-50/50 border-slate-200/50 focus:bg-white focus:ring-2 focus:ring-emerald-100 rounded-xl font-bold text-sm transition-all" placeholder="+1 (000) 000-0000" />
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-1.5 col-span-full">
-                                        <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">Date of Birth</Label>
-                                        <div className="relative group">
-                                            <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300 group-focus-within:text-emerald-500 transition-colors" />
-                                            <Input 
-                                                type="date" 
-                                                value={formData.dateOfBirth} 
-                                                onChange={(e) => handleInputChange("dateOfBirth", e.target.value)} 
-                                                className="h-10 pl-9 bg-slate-50/50 border-slate-200/50 focus:bg-white focus:ring-2 focus:ring-emerald-100 rounded-xl font-bold text-sm transition-all" 
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        {/* ACTION STRIP */}
-                        {id && (
-                            <div className="mt-6 p-4 rounded-3xl bg-emerald-600 text-white flex items-center justify-between shadow-xl shadow-emerald-600/20 group">
-                                <div className="flex items-center gap-4">
-                                    <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center border border-white/10 backdrop-blur-sm group-hover:scale-110 transition-transform">
-                                        <Sparkles className="h-5 w-5 text-emerald-100" />
-                                    </div>
-                                    <div>
-                                        <h4 className="text-sm font-black tracking-tight leading-none mb-1">Scholar Synchronization Active</h4>
-                                        <p className="text-[9px] font-bold uppercase tracking-widest opacity-60">Identity verified for secure update</p>
-                                    </div>
-                                </div>
-                                <Button onClick={handleSubmit} className="bg-white text-emerald-600 font-black text-[10px] uppercase tracking-widest h-9 px-6 rounded-xl hover:bg-slate-50 hover:scale-105 active:scale-95 transition-all shadow-lg">
-                                    Push Update
-                                </Button>
-                            </div>
-                        )}
-                    </div>
-                </div>
+                </form>
             </div>
-            <div className="h-16"></div>
         </div>
     );
 };

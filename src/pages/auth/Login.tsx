@@ -32,10 +32,13 @@ export const Login = () => {
 
   const navigate = useNavigate();
 
+  const { user, isAuthenticated } = useAuthStore();
+
   useEffect(() => {
     if (tenantName) {
       const currentUser = useAuthStore.getState().user;
       const storedTenant = localStorage.getItem("tenantName");
+      
       if (currentUser) {
         const isSuperAdmin = currentUser.role === "Admin" || currentUser.role === "SuperAdmin";
         if (isSuperAdmin || (storedTenant && storedTenant !== tenantName)) {
@@ -51,6 +54,33 @@ export const Login = () => {
     }
   }, [tenantName, fetchTenantDetails, clearTenantDetails]);
 
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      const storedTenant = localStorage.getItem("tenantName");
+      
+      // Mismatch check to prevent incorrect auto-redirects
+      if (tenantName && storedTenant !== tenantName) {
+        return;
+      }
+      
+      let redirectPath = "/student/dashboard";
+      const role = (user.role || "").toLowerCase();
+      
+      const isSchool = role === "school" || role === "organization" || role === "organizationadmin";
+      const isCounselor = role.includes("counselor") || role.includes("counsellor") || role === "professional";
+      const isSuperAdmin = role === "admin" || role === "superadmin";
+
+      if (isSuperAdmin) {
+        redirectPath = "/dashboard";
+      } else if (isSchool) {
+        redirectPath = "/school/dashboard";
+      } else if (isCounselor) {
+        redirectPath = "/counselor/dashboard";
+      }
+      navigate(redirectPath, { replace: true });
+    }
+  }, [isAuthenticated, user, tenantName, navigate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -64,6 +94,25 @@ export const Login = () => {
     try {
       await login(email, password, tenantName);
       toast.success("Login successful. Welcome back!");
+
+      const currentUser = useAuthStore.getState().user;
+      if (currentUser) {
+        let redirectPath = "/student/dashboard";
+        const role = (currentUser.role || "").toLowerCase();
+
+        const isSchool = role === "school" || role === "organization" || role === "organizationadmin";
+        const isCounselor = role.includes("counselor") || role.includes("counsellor") || role === "professional";
+        const isSuperAdmin = role === "admin" || role === "superadmin";
+
+        if (isSuperAdmin) {
+          redirectPath = "/dashboard";
+        } else if (isSchool) {
+          redirectPath = "/school/dashboard";
+        } else if (isCounselor) {
+          redirectPath = "/counselor/dashboard";
+        }
+        navigate(redirectPath, { replace: true });
+      }
     } catch (err: any) {
       const status = err?.response?.status;
       const message = err?.response?.data?.message || err?.response?.data?.errorMessage;

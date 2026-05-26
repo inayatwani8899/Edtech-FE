@@ -85,16 +85,12 @@ interface ProtectedRouteProps {
 
 const isCounselorRole = (user: any) => {
     if (!user) return false;
-    const roleId = Number(user.roleId);
-    if (roleId === 2) return true;
     const roleName = (user.role || "").toLowerCase();
     return roleName.includes("counselor") || roleName.includes("counsellor") || roleName === "professional";
 };
 
 const isSchoolRole = (user: any) => {
     if (!user) return false;
-    const roleId = Number(user.roleId);
-    if (roleId === 4 || roleId === 3) return true; // Common IDs for Organization/School
     const roleName = (user.role || "").toLowerCase();
     return roleName === "school" || roleName === "organization" || roleName === "organizationadmin";
 };
@@ -306,6 +302,7 @@ const AppRoutes = () => {
                 }
             >
                 <Route path="/school/dashboard" element={<SchoolDashboard />} />
+                <Route path="/organization/dashboard" element={<SchoolDashboard />} />
                 <Route path="/school/students" element={<SchoolStudents />} />
                 <Route path="/school/students/add" element={<StudentForm />} />
                 <Route path="/school/students/edit/:id" element={<StudentForm />} />

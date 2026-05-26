@@ -7,12 +7,16 @@ import { useAuthStore } from "./useAuthStore";
 export interface Student {
     id: number;
     userId: number;
-    gradeLevel: string;
+    gradeLevel?: string;
+    gradeId?: number;
+    gradeName?: string;
     dateOfBirth: string;
     firstName: string;
     lastName: string;
     email: string;
-    phone: string; // API uses 'phone' instead of 'phoneNumber'
+    phone?: string;
+    phoneNumber?: string;
+    gender?: string;
 }
 
 interface StudentResponseData {
@@ -39,8 +43,8 @@ interface StudentState {
   sortDirection: 'asc' | 'desc';
 
   // Actions
-  createStudent: (data: Partial<Student>) => Promise<void>;
-  updateStudent: (id: string, data: Partial<Student>) => Promise<void>;
+  createStudent: (data: any) => Promise<void>;
+  updateStudent: (id: string, data: any) => Promise<void>;
   clearStudent: () => void;
   deleteStudent: () => Promise<void>;
   fetchStudents: () => Promise<void>;
@@ -150,22 +154,32 @@ export const useStudentStore = create<StudentState>((set, get) => ({
                        user?.role?.toLowerCase() === "organization" ||
                        user?.role?.toLowerCase() === "organizationadmin";
 
-      // Transform the data to match the required API format
-      const transformedData = {
-        email: data.email,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        password: "defaultPassword123", // Default password for student creation
-        phone: data.phone,
-        gradeLevel: data.gradeLevel,
-        dateOfBirth: data.dateOfBirth,
-        isAdmin: false,
-        createdBy: 1
-      };
-      
       if (isSchool) {
-        await api.post("/Organization/students", transformedData);
+        const payload = {
+          email: data.email,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          password: data.password || "defaultPassword123",
+          phone: data.phone || data.phoneNumber,
+          phoneNumber: data.phone || data.phoneNumber,
+          gradeLevel: data.gradeLevel,
+          gradeId: data.gradeId ? Number(data.gradeId) : undefined,
+          dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString() : null,
+          gender: data.gender
+        };
+        await api.post("/Organization/students-added-through-organization", payload);
       } else {
+        const transformedData = {
+          email: data.email,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          password: "defaultPassword123",
+          phone: data.phone || data.phoneNumber,
+          gradeLevel: data.gradeLevel,
+          dateOfBirth: data.dateOfBirth,
+          isAdmin: false,
+          createdBy: 1
+        };
         await api.post("/Student/admin/create", transformedData);
       }
       await get().fetchStudents();
@@ -225,7 +239,19 @@ export const useStudentStore = create<StudentState>((set, get) => ({
                        user?.role?.toLowerCase() === "organizationadmin";
 
       if (isSchool) {
-        await api.put(`/Organization/students/${id}`, data);
+        const payload = {
+          id: Number(id),
+          email: data.email,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          phone: data.phone || data.phoneNumber,
+          phoneNumber: data.phone || data.phoneNumber,
+          gradeLevel: data.gradeLevel,
+          gradeId: data.gradeId ? Number(data.gradeId) : undefined,
+          dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString() : null,
+          gender: data.gender
+        };
+        await api.put(`/Organization/students/${id}`, payload);
       } else {
         await api.put(`/Student`, data);
       }
