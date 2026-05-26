@@ -144,9 +144,9 @@ interface AuthState {
   permissions: Permission[];
   login: (email: string, password: string, tenantName?: string | null) => Promise<void>;
   logout: () => void;
-  registerStudent: (payload: any) => Promise<{ success: boolean, error?: any }>;
+  registerStudent: (payload: any) => Promise<{ success: boolean, message?: string, error?: any }>;
   registerCounsellor: (firstName: string, lastName: string, email: string, password: string, dateOfBirth: string, grade: string, phone: string, role: string) => Promise<void>;
-  registerSchool: (payload: any) => Promise<{ success: boolean, error?: any }>;
+  registerSchool: (payload: any) => Promise<{ success: boolean, message?: string, error?: any }>;
 
   loadFromStorage: () => void;
   setTestId: (testId: string | null) => void;
@@ -335,12 +335,12 @@ export const useAuthStore = create<AuthState>(
     registerSchool: async (formData: FormData) => {
       set({ isLoading: true });
       try {
-        const response = await api.post("Organization/create", formData, {
+        const response = await api.post("Organization/register", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
         });
-        if (response.data.code === 201 || response.status === 201) {
+        if (response.data.code === 201 || response.status === 201 || response.data.success === true) {
           return {
             success: true,
             message: response.data.message || "Registration completed successfully",

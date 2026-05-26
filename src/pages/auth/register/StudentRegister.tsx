@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { GraduationCap, ArrowLeft, User, Mail, Lock, Calendar, Phone, ChevronRight, Sparkles, ArrowRight, CheckCircle2, Shield } from "lucide-react";
+import { GraduationCap, ArrowLeft, User, Mail, Lock, Calendar, Phone, ChevronRight, Sparkles, ArrowRight, CheckCircle2, Shield, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuthStore } from "@/store/useAuthStore";
 import Swal from "sweetalert2";
@@ -175,105 +175,112 @@ const StudentRegister = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#0a0c10] relative flex items-center justify-center overflow-y-auto py-12 md:py-20 lg:py-0 select-none">
+    <div className="min-h-screen w-full bg-[#f9fafb] text-zinc-900 relative flex items-center justify-center overflow-y-auto py-12 md:py-20 lg:py-0 select-none font-sans">
+      
+      {/* Subtle radial dot grid pattern from Landing Page */}
+      <div className="absolute inset-0 pointer-events-none z-0" style={{
+        backgroundImage: "radial-gradient(circle, #d1d1d6 1px, transparent 1px)",
+        backgroundSize: "24px 24px",
+        opacity: 0.4
+      }} />
+
       {/* 🏠 Top-Left Navigation */}
       <div className="absolute top-6 left-6 md:left-12 z-50 flex items-center gap-3">
         <Link
           to="/"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-[0.3em] text-white/30 hover:text-white hover:bg-white/5 border border-white/5 hover:border-white/10 backdrop-blur-3xl transition-all duration-300 group"
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.25em] text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 border border-zinc-200 backdrop-blur-md transition-all duration-300 group"
         >
-          <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
+          <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
           Home
         </Link>
-        <div className="h-4 w-px bg-white/5" />
+        <div className="h-4 w-px bg-zinc-200" />
         <Button
           variant="ghost"
           onClick={() => navigate("/get-started")}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-[0.3em] text-white/30 hover:text-white hover:bg-white/5 border border-white/5 hover:border-white/10 backdrop-blur-3xl transition-all duration-300 group"
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.25em] text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 border border-zinc-200 backdrop-blur-md transition-all duration-300 group"
         >
           Back
         </Button>
       </div>
 
-      {/* 🌌 ULTRA-FLUID DYNAMIC BACKDROP */}
+      {/* 🌌 Ambient Gradients */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-indigo-600/20 rounded-full blur-[160px] animate-pulse mix-blend-screen transition-opacity duration-1000"></div>
-        <div className="absolute bottom-[-20%] right-[-10%] w-[70%] h-[70%] bg-sky-600/20 rounded-full blur-[160px] animate-pulse mix-blend-screen" style={{ animationDelay: '3s' }}></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-blue-500/10 rounded-full blur-[180px] animate-pulse mix-blend-overlay" style={{ animationDelay: '1.5s' }}></div>
+        <div className="absolute top-[10%] left-[-10%] w-[50%] h-[50%] bg-indigo-500/5 rounded-full blur-[150px] animate-pulse mix-blend-multiply" />
+        <div className="absolute bottom-[20%] right-[-10%] w-[50%] h-[50%] bg-rose-500/5 rounded-full blur-[150px] animate-pulse mix-blend-multiply" />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 lg:px-8 relative z-10 w-full">
-        <div className="grid lg:grid-cols-2 gap-8 items-center">
+        <div className="grid lg:grid-cols-2 gap-8 items-center text-left">
+          
           {/* 🎭 LEFT BRAND UNIVERSE */}
-          <div className="hidden lg:flex flex-col justify-center space-y-4 animate-in fade-in slide-in-from-left-12 duration-1000 ease-out">
-            <div className="space-y-3">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-3xl shadow-2xl">
-                <Sparkles className="h-3 w-3 text-indigo-400 animate-spin-slow" />
-                <span className="text-[9px] font-black tracking-[0.3em] uppercase text-white/70">Next-gen learning portal</span>
+          <div className="hidden lg:flex flex-col justify-center space-y-5 animate-in fade-in slide-in-from-left-12 duration-1000 ease-out">
+            <div className="space-y-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#eef2ff] border border-indigo-100 self-start shadow-sm">
+                <Sparkles className="h-3 w-3 text-[#6366f1] animate-pulse" />
+                <span className="text-[9px] font-black tracking-[0.3em] uppercase text-[#6366f1]">Next-gen learning portal</span>
               </div>
-              <h1 className="text-4xl font-black leading-[1.05] tracking-tighter text-white">
+              <h1 className="text-4xl font-black leading-[1.1] tracking-tight text-zinc-900">
                 Begin Your <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-blue-400 to-sky-400">Academic Journey.</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 font-black">Academic Journey.</span>
               </h1>
-              <p className="text-base text-slate-400 font-medium max-w-lg leading-relaxed antialiased">
+              <p className="text-base text-zinc-500 font-medium max-w-lg leading-relaxed antialiased">
                 Access premium courses, personalized mentorship, and a global community of curious minds.
               </p>
             </div>
 
-            <div className="flex items-center gap-4 text-[9px] font-black text-white/20 uppercase tracking-[0.4em]">
-              <div className="h-px w-10 bg-white/5" />
+            <div className="flex items-center gap-4 text-[9px] font-black text-zinc-400 uppercase tracking-[0.4em]">
+              <div className="h-px w-10 bg-zinc-200" />
               Secure • Personalized • Global
             </div>
 
-            <div className="grid grid-cols-2 gap-3 max-w-md">
-              <div className="p-3 rounded-[1.25rem] bg-white/[0.03] border border-white/10 backdrop-blur-2xl shadow-elegant group hover:bg-white/[0.06] transition-all duration-500">
-                <Shield className="h-4 w-4 text-indigo-400 mb-1.5" />
-                <p className="text-[8px] font-black text-white/40 uppercase tracking-widest mb-0.5">Community Trusted</p>
-                <p className="text-xs font-black text-white tracking-tighter">Secure Access</p>
+            <div className="grid grid-cols-2 gap-3.5 max-w-md">
+              <div className="p-4 rounded-2xl bg-white border border-zinc-200 shadow-[0_8px_30px_rgba(0,0,0,0.04)] group hover:bg-zinc-50/50 transition-all duration-300">
+                <Shield className="h-4.5 w-4.5 text-[#6366f1] mb-1.5" />
+                <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest mb-0.5">Community Trusted</p>
+                <p className="text-xs font-black text-zinc-800 tracking-tight">Secure Access</p>
               </div>
-              <div className="p-3 rounded-[1.25rem] bg-white/[0.03] border border-white/10 backdrop-blur-2xl shadow-elegant group hover:bg-white/[0.06] transition-all duration-500">
-                <div className="h-4 w-4 rounded-md bg-gradient-to-r from-indigo-400 to-sky-500 flex items-center justify-center text-white text-[10px] mb-1.5">✓</div>
-                <p className="text-[8px] font-black text-white/40 uppercase tracking-widest mb-0.5">Top Ratings</p>
-                <p className="text-xs font-black text-white tracking-tighter">Quality Content</p>
+              <div className="p-4 rounded-2xl bg-white border border-zinc-200 shadow-[0_8px_30px_rgba(0,0,0,0.04)] group hover:bg-zinc-50/50 transition-all duration-300">
+                <div className="h-4.5 w-4.5 rounded bg-[#6366f1] flex items-center justify-center text-white text-[10px] mb-1.5">✓</div>
+                <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest mb-0.5">Top Ratings</p>
+                <p className="text-xs font-black text-zinc-800 tracking-tight">Quality Content</p>
               </div>
             </div>
           </div>
 
           {/* 🚀 RIGHT FORM ARCHITECTURE */}
           <div className="flex items-center justify-center perspective-1000 animate-in fade-in zoom-in duration-1000 delay-100">
-            <Card className="w-full max-w-[440px] relative z-10 bg-white/[0.03] border border-white/10 backdrop-blur-[40px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)] rounded-[2rem] overflow-hidden group/card transition-all duration-700 ease-out">
-              <div className="absolute inset-0 bg-gradient-to-br from-white/[0.05] via-transparent to-transparent pointer-events-none"></div>
-
+            <Card className="w-full max-w-[440px] relative z-10 bg-white border border-zinc-200 shadow-[0_8px_30px_rgba(0,0,0,0.04)] rounded-[2rem] overflow-hidden group/card transition-all duration-700 ease-out">
+              
               <CardHeader className="p-5 pb-1 text-center relative z-10">
-                <div className="mx-auto bg-gradient-to-tr from-indigo-500 to-sky-500 h-11 w-11 rounded-xl flex items-center justify-center mb-3 shadow-[0_12px_24px_-8px_rgba(99,102,241,0.6)] transform group-hover/card:scale-105 group-hover/card:rotate-6 transition-all duration-500">
+                <div className="mx-auto bg-gradient-to-tr from-indigo-500 to-purple-500 h-11 w-11 rounded-xl flex items-center justify-center mb-3 shadow-[0_4px_14px_rgba(99,102,241,0.35)] transform group-hover/card:scale-105 transition-all duration-500">
                   <GraduationCap className="h-6 w-6 text-white" />
                 </div>
-                <CardTitle className="text-xl font-black text-white tracking-tighter leading-none mb-1.5">
+                <CardTitle className="text-xl font-black text-zinc-900 tracking-tight leading-none mb-1.5">
                   Student Registration
                 </CardTitle>
                 <div className="flex items-center justify-center gap-1.5 mb-1.5">
-                  <div className={`h-1 w-5 rounded-full transition-all duration-500 ${step >= 1 ? 'bg-indigo-400 shadow-[0_0_8px_rgba(129,140,248,0.8)]' : 'bg-white/10'}`} />
-                  <div className={`h-1 w-5 rounded-full transition-all duration-500 ${step >= 2 ? 'bg-indigo-400 shadow-[0_0_8px_rgba(129,140,248,0.8)]' : 'bg-white/10'}`} />
+                  <div className={`h-1 w-5 rounded-full transition-all duration-500 ${step >= 1 ? 'bg-[#6366f1] shadow-[0_0_8px_rgba(99,102,241,0.5)]' : 'bg-zinc-200'}`} />
+                  <div className={`h-1 w-5 rounded-full transition-all duration-500 ${step >= 2 ? 'bg-[#6366f1] shadow-[0_0_8px_rgba(99,102,241,0.5)]' : 'bg-zinc-200'}`} />
                 </div>
-                <CardDescription className="text-[8px] font-black text-white/30 uppercase tracking-[0.25em]">
+                <CardDescription className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.25em]">
                   Step {step} of 2: {step === 1 ? 'Personal Information' : 'Academic Detail'}
                 </CardDescription>
               </CardHeader>
 
               <CardContent className="p-6 pt-2 relative z-10">
                 {isSuccess ? (
-                  <div className="py-6 text-center space-y-4 animate-in fade-in zoom-in duration-500">
-                    <div className="w-16 h-16 bg-indigo-500/10 rounded-full flex items-center justify-center mx-auto mb-3 border border-indigo-500/20 shadow-[0_0_20px_rgba(99,102,241,0.2)]">
-                      <CheckCircle2 className="w-8 h-8 text-indigo-400 animate-bounce" />
+                  <div className="py-6 text-center space-y-4 animate-in fade-in zoom-in duration-505">
+                    <div className="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-3 border border-indigo-100 shadow-[0_0_20px_rgba(99,102,241,0.15)]">
+                      <CheckCircle2 className="w-8 h-8 text-indigo-500 animate-bounce" />
                     </div>
-                    <h2 className="text-xl font-black text-white tracking-tighter">Registration Success</h2>
-                    <p className="text-white/30 text-[9px] font-black uppercase tracking-widest max-w-[200px] mx-auto">
+                    <h2 className="text-xl font-black text-zinc-900 tracking-tight">Registration Success</h2>
+                    <p className="text-zinc-500 text-[9px] font-black uppercase tracking-widest max-w-[200px] mx-auto">
                       Profile created successfully. Redirecting to login...
                     </p>
                     <div className="pt-2">
                       <Button
                         onClick={() => navigate("/login")}
-                        className="h-11 w-full rounded-xl bg-white text-slate-900 font-black text-[9px] uppercase tracking-widest shadow-[0_12px_24px_-8px_rgba(255,255,255,0.3)] transition-all"
+                        className="h-11 w-full rounded-xl bg-[#6366f1] hover:bg-[#4f46e5] text-white font-black text-[9px] uppercase tracking-widest shadow-[0_4px_14px_rgba(99,102,241,0.35)] transition-all border-none"
                       >
                         Login Now
                       </Button>
@@ -282,147 +289,143 @@ const StudentRegister = () => {
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-3">
                     {step === 1 && (
-                      <div className="space-y-3 animate-in fade-in slide-in-from-right-4 duration-500">
+                      <div className="space-y-3 animate-in fade-in slide-in-from-right-4 duration-500 text-left">
                         <div className="grid grid-cols-2 gap-3">
                           <div className="space-y-1.5">
-                            <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">First Name</Label>
+                            <Label className="text-[8px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-3">First Name</Label>
                             <div className="relative group/input">
-                              <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-white/10 group-focus-within/input:text-indigo-400 transition-colors" />
+                              <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-zinc-400 group-focus-within/input:text-[#6366f1] transition-colors" />
                               <Input
                                 value={formData.firstName}
                                 onChange={(e) => handleInputChange("firstName", e.target.value)}
                                 placeholder="First Name"
                                 required
-                                className={`h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-indigo-500/20 focus:bg-white/[0.08] transition-all duration-300 ${errors.firstName ? 'ring-2 ring-rose-500/50' : ''}`}
+                                className={`h-9 pl-9 bg-white border border-zinc-250 focus:border-[#6366f1] rounded-xl font-bold text-zinc-800 text-[11px] placeholder:text-zinc-300 focus:ring-4 focus:ring-indigo-500/10 focus:outline-none transition-all duration-300 ${errors.firstName ? 'ring-2 ring-rose-500/50' : ''}`}
                               />
                             </div>
-                            {errors.firstName && <p className="text-[7px] text-rose-400 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.firstName}</p>}
+                            {errors.firstName && <p className="text-[7px] text-rose-600 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.firstName}</p>}
                           </div>
                           <div className="space-y-1.5">
-                            <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Last Name</Label>
+                            <Label className="text-[8px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-3">Last Name</Label>
                             <div className="relative group/input">
-                              <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-white/10 group-focus-within/input:text-indigo-400 transition-colors" />
+                              <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-zinc-400 group-focus-within/input:text-[#6366f1] transition-colors" />
                               <Input
                                 value={formData.lastName}
                                 onChange={(e) => handleInputChange("lastName", e.target.value)}
                                 placeholder="Last Name"
                                 required
-                                className={`h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-indigo-500/20 focus:bg-white/[0.08] transition-all duration-300 ${errors.lastName ? 'ring-2 ring-rose-500/50' : ''}`}
+                                className={`h-9 pl-9 bg-white border border-zinc-250 focus:border-[#6366f1] rounded-xl font-bold text-zinc-800 text-[11px] placeholder:text-zinc-300 focus:ring-4 focus:ring-indigo-500/10 focus:outline-none transition-all duration-300 ${errors.lastName ? 'ring-2 ring-rose-500/50' : ''}`}
                               />
                             </div>
-                            {errors.lastName && <p className="text-[7px] text-rose-400 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.lastName}</p>}
+                            {errors.lastName && <p className="text-[7px] text-rose-600 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.lastName}</p>}
                           </div>
                         </div>
 
                         <div className="space-y-1.5">
-                          <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Email Address</Label>
+                          <Label className="text-[8px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-3">Email Address</Label>
                           <div className="relative group/input">
-                            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-white/10 group-focus-within/input:text-indigo-400 transition-colors" />
+                            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-zinc-400 group-focus-within/input:text-[#6366f1] transition-colors" />
                             <Input
                               type="email"
                               value={formData.email}
                               onChange={(e) => handleInputChange("email", e.target.value)}
                               placeholder="email@example.com"
                               required
-                              className={`h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-indigo-500/20 focus:bg-white/[0.08] transition-all duration-300 ${errors.email ? 'ring-2 ring-rose-500/50' : ''}`}
+                              className={`h-9 pl-9 bg-white border border-zinc-250 focus:border-[#6366f1] rounded-xl font-bold text-zinc-800 text-[11px] placeholder:text-zinc-300 focus:ring-4 focus:ring-indigo-500/10 focus:outline-none transition-all duration-300 ${errors.email ? 'ring-2 ring-rose-500/50' : ''}`}
                             />
                           </div>
-                          {errors.email && <p className="text-[7px] text-rose-400 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.email}</p>}
+                          {errors.email && <p className="text-[7px] text-rose-600 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.email}</p>}
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">
                           <div className="space-y-1.5">
-                            <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Password</Label>
+                            <Label className="text-[8px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-3">Password</Label>
                             <div className="relative group/input">
-                              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-white/10 group-focus-within/input:text-indigo-400 transition-colors" />
+                              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-zinc-400 group-focus-within/input:text-[#6366f1] transition-colors" />
                               <Input
                                 type="password"
                                 value={formData.password}
                                 onChange={(e) => handleInputChange("password", e.target.value)}
                                 placeholder="••••••••"
                                 required
-                                className={`h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-indigo-500/20 focus:bg-white/[0.08] transition-all duration-300 ${errors.password ? 'ring-2 ring-rose-500/50' : ''}`}
+                                className={`h-9 pl-9 bg-white border border-zinc-250 focus:border-[#6366f1] rounded-xl font-bold text-zinc-800 text-[11px] placeholder:text-zinc-300 focus:ring-4 focus:ring-indigo-500/10 focus:outline-none transition-all duration-300 ${errors.password ? 'ring-2 ring-rose-500/50' : ''}`}
                               />
                             </div>
-                            {errors.password && <p className="text-[7px] text-rose-400 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.password}</p>}
+                            {errors.password && <p className="text-[7px] text-rose-600 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.password}</p>}
                           </div>
                           <div className="space-y-1.5">
-                            <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Confirm</Label>
+                            <Label className="text-[8px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-3">Confirm</Label>
                             <div className="relative group/input">
-                              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-white/10 group-focus-within/input:text-indigo-400 transition-colors" />
+                              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-zinc-400 group-focus-within/input:text-[#6366f1] transition-colors" />
                               <Input
                                 type="password"
                                 value={formData.confirmPassword}
                                 onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
                                 placeholder="••••••••"
                                 required
-                                className={`h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-indigo-500/20 focus:bg-white/[0.08] transition-all duration-300 ${errors.confirmPassword ? 'ring-2 ring-rose-500/50' : ''}`}
+                                className={`h-9 pl-9 bg-white border border-zinc-250 focus:border-[#6366f1] rounded-xl font-bold text-zinc-800 text-[11px] placeholder:text-zinc-300 focus:ring-4 focus:ring-indigo-500/10 focus:outline-none transition-all duration-300 ${errors.confirmPassword ? 'ring-2 ring-rose-500/50' : ''}`}
                               />
                             </div>
-                            {errors.confirmPassword && <p className="text-[7px] text-rose-400 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.confirmPassword}</p>}
+                            {errors.confirmPassword && <p className="text-[7px] text-rose-600 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.confirmPassword}</p>}
                           </div>
                         </div>
                       </div>
                     )}
 
                     {step === 2 && (
-                      <div className="space-y-3 animate-in fade-in slide-in-from-right-4 duration-500">
+                      <div className="space-y-3 animate-in fade-in slide-in-from-right-4 duration-500 text-left">
                          <div className="space-y-1.5">
-                           <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Phone Number</Label>
+                           <Label className="text-[8px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-3">Phone Number</Label>
                            <div className="relative group/input">
-                             <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-white/10 group-focus-within/input:text-indigo-400 transition-colors" />
+                             <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-zinc-400 group-focus-within/input:text-[#6366f1] transition-colors" />
                              <Input
                                type="tel"
                                value={formData.phone}
                                onChange={(e) => handleInputChange("phone", e.target.value)}
                                placeholder="10-digit mobile number"
                                required
-                               className={`h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-indigo-500/20 focus:bg-white/[0.08] transition-all duration-300 ${errors.phone ? 'ring-2 ring-rose-500/50' : ''}`}
+                               className={`h-9 pl-9 bg-white border border-zinc-250 focus:border-[#6366f1] rounded-xl font-bold text-zinc-800 text-[11px] placeholder:text-zinc-300 focus:ring-4 focus:ring-indigo-500/10 focus:outline-none transition-all duration-300 ${errors.phone ? 'ring-2 ring-rose-500/50' : ''}`}
                              />
                            </div>
-                           {errors.phone && <p className="text-[7px] text-rose-400 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.phone}</p>}
+                           {errors.phone && <p className="text-[7px] text-rose-600 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.phone}</p>}
                          </div>
 
-                           <div className="space-y-1.5">
-                             <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Date of Birth</Label>
-                             <div className="relative group/input">
-                               <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-white/10 group-focus-within/input:text-indigo-400 transition-colors" />
-                               <Input
-                                 type="date"
-                                 value={formData.dateOfBirth}
-                                 onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
-                                 required
-                                 className={`h-9 pl-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] placeholder:text-white/10 focus:ring-4 focus:ring-indigo-500/20 focus:bg-white/[0.08] transition-all duration-300 ${errors.dateOfBirth ? 'ring-2 ring-rose-500/50' : ''}`}
-                               />
-                             </div>
-                             {errors.dateOfBirth && <p className="text-[7px] text-rose-400 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.dateOfBirth}</p>}
+                         <div className="space-y-1.5">
+                           <Label className="text-[8px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-3">Date of Birth</Label>
+                           <div className="relative group/input">
+                             <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-zinc-400 group-focus-within/input:text-[#6366f1] transition-colors" />
+                             <Input
+                               type="date"
+                               value={formData.dateOfBirth}
+                               onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
+                               required
+                               className={`h-9 pl-9 bg-white border border-zinc-250 focus:border-[#6366f1] rounded-xl font-bold text-zinc-800 text-[11px] placeholder:text-zinc-350 focus:ring-4 focus:ring-indigo-500/10 focus:outline-none transition-all duration-300 ${errors.dateOfBirth ? 'ring-2 ring-rose-500/50' : ''}`}
+                             />
                            </div>
-                           <div className="space-y-1.5">
-                             <Label className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] ml-3">Grade Level</Label>
-                             <Select onValueChange={(value) => handleInputChange("gradeLevel", value)}>
-                               <SelectTrigger className={`h-9 bg-white/[0.04] border-none rounded-lg font-bold text-white text-[11px] focus:ring-4 focus:ring-indigo-500/20 transition-all px-3 ${errors.gradeLevel ? 'ring-2 ring-rose-500/50' : ''}`}>
-                                 <SelectValue placeholder="Grade" />
-                               </SelectTrigger>
-                              <SelectContent className="bg-[#12141c] border-white/10 text-white font-bold text-[11px] rounded-lg">
-                                {grades.length > 0 ? (
-                                  grades.map((grade) => (
-                                    <SelectItem key={grade.id} value={grade.id.toString()} className="focus:bg-indigo-500 rounded-md">
-                                      {grade.name}
-                                    </SelectItem>
-                                  ))
-                                ) : (
-                                  <div className="p-2 text-center text-white/30 text-[9px] uppercase tracking-widest">
-                                    Loading grades...
-                                  </div>
-                                )}
-
-                              </SelectContent>
-
-                            </Select>
-                            {errors.gradeLevel && <p className="text-[7px] text-rose-400 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.gradeLevel}</p>}
-                          </div>
-
-
+                           {errors.dateOfBirth && <p className="text-[7px] text-rose-600 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.dateOfBirth}</p>}
+                         </div>
+                         <div className="space-y-1.5">
+                           <Label className="text-[8px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-3">Grade Level</Label>
+                           <Select onValueChange={(value) => handleInputChange("gradeLevel", value)}>
+                             <SelectTrigger className={`h-9 bg-white border border-zinc-250 focus:border-[#6366f1] rounded-xl font-bold text-zinc-800 text-[11px] focus:ring-4 focus:ring-indigo-500/10 transition-all px-3 focus:outline-none ${errors.gradeLevel ? 'ring-2 ring-rose-500/50' : ''}`}>
+                               <SelectValue placeholder="Grade" />
+                             </SelectTrigger>
+                             <SelectContent className="bg-white border border-zinc-200 text-zinc-800 font-bold text-xs rounded-xl shadow-2xl">
+                               {grades.length > 0 ? (
+                                 grades.map((grade) => (
+                                   <SelectItem key={grade.id} value={grade.id.toString()} className="focus:bg-indigo-50 focus:text-[#6366f1] rounded-lg cursor-pointer">
+                                     {grade.name}
+                                   </SelectItem>
+                                 ))
+                               ) : (
+                                 <div className="p-2 text-center text-zinc-400 text-[9px] uppercase tracking-widest">
+                                   Loading grades...
+                                 </div>
+                               )}
+                             </SelectContent>
+                           </Select>
+                           {errors.gradeLevel && <p className="text-[7px] text-rose-600 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.gradeLevel}</p>}
+                         </div>
                       </div>
                     )}
 
@@ -431,10 +434,10 @@ const StudentRegister = () => {
                         <Button
                           type="button"
                           onClick={handleNext}
-                          className="w-full h-11 rounded-xl bg-white text-slate-900 shadow-[0_12px_24px_-8px_rgba(255,255,255,0.3)] hover:shadow-[0_16px_32px_-8px_rgba(255,255,255,0.4)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-500 group/btn"
+                          className="w-full h-11 rounded-xl bg-[#6366f1] hover:bg-[#4f46e5] text-white shadow-[0_4px_14px_rgba(99,102,241,0.35)] hover:shadow-lg transition-all duration-300 border-none"
                         >
                           <span className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.25em]">
-                            Next Step <ChevronRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
+                            Next Step <ChevronRight className="h-4 w-4 group-hover/btn:translate-x-0.5 transition-transform" />
                           </span>
                         </Button>
                       ) : (
@@ -443,34 +446,34 @@ const StudentRegister = () => {
                             type="button"
                             variant="ghost"
                             onClick={() => setStep(1)}
-                            className="flex-1 h-11 rounded-xl text-white/40 hover:text-white hover:bg-white/5 font-black text-[8px] uppercase tracking-widest transition-all"
+                            className="flex-1 h-11 rounded-xl text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 font-black text-[8px] uppercase tracking-widest transition-all"
                           >
                             Back
                           </Button>
                           <Button
                             type="submit"
                             disabled={isLoading}
-                            className="flex-[2] h-11 rounded-xl bg-white text-slate-900 shadow-[0_12px_24px_-8px_rgba(255,255,255,0.3)] hover:shadow-[0_16px_32px_-8px_rgba(255,255,255,0.4)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-500 group/btn"
+                            className="flex-[2] h-11 rounded-xl bg-[#6366f1] hover:bg-[#4f46e5] text-white shadow-[0_4px_14px_rgba(99,102,241,0.35)] hover:shadow-lg transition-all duration-300 border-none"
                           >
                             {isLoading ? (
-                              <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 border-2 border-slate-900 border-t-transparent rounded-full animate-spin" />
+                              <div className="flex items-center gap-2 justify-center">
+                                <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
                                 <span className="text-[8px] font-black uppercase tracking-widest">Processing...</span>
                               </div>
                             ) : (
-                              <span className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.25em]">
-                                Register <ArrowRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
+                              <span className="flex items-center gap-2 justify-center text-[9px] font-black uppercase tracking-[0.25em]">
+                                Register <ArrowRight className="h-4 w-4 group-hover/btn:translate-x-0.5 transition-transform" />
                               </span>
                             )}
                           </Button>
                         </div>
                       )}
 
-                      <p className="text-[8px] font-black text-white/20 uppercase tracking-[0.2em] text-center mt-2.5">
+                      <p className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.2em] text-center mt-2.5">
                         Already have account?
                         <button
                           type="button"
-                          className="text-white hover:text-indigo-400 transition-all font-black ml-2"
+                          className="text-[#6366f1] hover:text-[#4f46e5] transition-all font-black ml-2"
                           onClick={() => navigate('/login')}
                         >
                           Sign In
