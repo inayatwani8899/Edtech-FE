@@ -16,12 +16,16 @@ api.interceptors.request.use(
         const url = config.url || "";
         const lowerUrl = url.toLowerCase();
         
-        // Use Org/SuperAdmin server for Auth, Organization, SuperAdmin, and TenantSync APIs, primary server for others
+        // Use Org/SuperAdmin/Student server for Auth, Organization, SuperAdmin, TenantSync, and Student Module APIs
         if (
             lowerUrl.includes("organization") || 
             lowerUrl.includes("auth") || 
             lowerUrl.includes("superadmin") || 
-            lowerUrl.includes("tenantsync")
+            lowerUrl.includes("tenantsync") ||
+            lowerUrl.includes("student") ||
+            lowerUrl.includes("payment") ||
+            lowerUrl.includes("question") ||
+            lowerUrl.includes("test")
         ) {
             config.baseURL = import.meta.env.VITE_ORG_API_BASE_URL || "https://nervous-dubinsky.180-179-213-167.plesk.page/api/";
         } else {

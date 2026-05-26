@@ -8,7 +8,8 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import {
   CheckCircle2, TrendingUp, Clock, Award, ArrowRight, BarChart3, Users,
-  Sparkles, Target, Zap, Flag, Trophy, Compass, Brain, Microscope, Lightbulb
+  Sparkles, Target, Zap, Flag, Trophy, Compass, Brain, Microscope, Lightbulb,
+  BookOpen
 } from "lucide-react";
 import {
   Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer,
@@ -47,7 +48,7 @@ const performanceTrend = [
 export const StudentDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const { publishedTests, getPublishedTests, userSubmissions, fetchUserSubmissions } = useTestStore();
+  const { publishedTests, getPublishedTests, userSubmissions, fetchUserSubmissions, testTakingLoading } = useTestStore();
   const { handlePayment, isTestPaid } = usePaymentStore();
   const { fetchConfigurationByRoleIdTestId } = useTestConfigurationStore();
 
@@ -55,6 +56,7 @@ export const StudentDashboard = () => {
   const [greeting, setGreeting] = useState("");
   const [testsCompleted, setTestsCompleted] = useState(0);
   const [dashboardStats, setDashboardStats] = useState<StudentDashboardStats | null>(null);
+  const [isStatsLoading, setIsStatsLoading] = useState(true);
 
   const statsSummary = useMemo(() => {
     // Exact mapping from Dashboard API response
@@ -121,6 +123,7 @@ export const StudentDashboard = () => {
 
     // Fetch dashboard stats from API
     const fetchDashboardData = async () => {
+      setIsStatsLoading(true);
       try {
         const response = await api.get<StudentDashboardResponse>("/StudentDashboard");
         if (response.data.code === 200) {
@@ -129,6 +132,8 @@ export const StudentDashboard = () => {
         }
       } catch (err) {
         console.error("Failed to fetch student dashboard data:", err);
+      } finally {
+        setIsStatsLoading(false);
       }
     };
     fetchDashboardData();
@@ -173,7 +178,7 @@ export const StudentDashboard = () => {
               {greeting}, <span className="text-primary">{user?.firstName?.split(' ')[0] || 'Scholar'}!</span>
             </h1>
             <p className="text-[11px] text-slate-500 font-medium -mt-1">
-              Your psychometric profile is currently <span className="text-primary font-bold">85% Complete</span>
+              Your psychometric profile is currently <span className="text-primary font-bold">{testsCompleted > 0 ? "100%" : "0%"} Complete</span>
             </p>
           </div>
         </div>
@@ -227,28 +232,43 @@ export const StudentDashboard = () => {
 
         {/* 2. Top 4 Compact Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {statsSummary.map((stat, i) => (
-            <Card key={i} className="group relative border-none shadow-sm bg-white/90 backdrop-blur-md hover:shadow-md transition-all duration-300 cursor-pointer overflow-hidden rounded-2xl" onClick={() => navigate(stat.route)}>
-              <div className={`absolute top-0 left-0 w-1 h-full opacity-0 group-hover:opacity-100 transition-all duration-300 ${stat.accent}`} />
-              <CardContent className="p-4">
+          {isStatsLoading ? (
+            Array.from({ length: 4 }).map((_, idx) => (
+              <Card key={idx} className="border-none shadow-sm bg-white/90 backdrop-blur-md rounded-2xl p-4">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className={`${stat.bg} p-2 rounded-lg transition-transform group-hover:scale-110`}><stat.icon className={`h-4 w-4 ${stat.color}`} /></div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight truncate">{stat.label}</p>
-                    <p className="text-xl font-black text-slate-900 tracking-tighter">{stat.value}</p>
+                  <Skeleton className="h-8 w-8 rounded-lg bg-slate-200" />
+                  <div className="space-y-2 flex-1">
+                    <Skeleton className="h-3 w-16 bg-slate-200" />
+                    <Skeleton className="h-6 w-10 bg-slate-200" />
                   </div>
                 </div>
-                {stat.progress !== undefined ? (
-                  <Progress value={stat.progress} className="h-1 bg-slate-100 rounded-full" />
-                ) : (
-                  <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-slate-50 border border-slate-100/50 w-fit">
-                    <Sparkles className="h-3 w-3 text-amber-500 animate-pulse" />
-                    <span className="text-[9px] font-bold text-slate-500 uppercase">{stat.sub}</span>
+                <Skeleton className="h-1 w-full rounded-full bg-slate-200" />
+              </Card>
+            ))
+          ) : (
+            statsSummary.map((stat, i) => (
+              <Card key={i} className="group relative border-none shadow-sm bg-white/90 backdrop-blur-md hover:shadow-md transition-all duration-300 cursor-pointer overflow-hidden rounded-2xl" onClick={() => navigate(stat.route)}>
+                <div className={`absolute top-0 left-0 w-1 h-full opacity-0 group-hover:opacity-100 transition-all duration-300 ${stat.accent}`} />
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`${stat.bg} p-2 rounded-lg transition-transform group-hover:scale-110`}><stat.icon className={`h-4 w-4 ${stat.color}`} /></div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight truncate">{stat.label}</p>
+                      <p className="text-xl font-black text-slate-900 tracking-tighter">{stat.value}</p>
+                    </div>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
+                  {stat.progress !== undefined ? (
+                    <Progress value={stat.progress} className="h-1 bg-slate-100 rounded-full" />
+                  ) : (
+                    <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-slate-50 border border-slate-100/50 w-fit">
+                      <Sparkles className="h-3 w-3 text-amber-500 animate-pulse" />
+                      <span className="text-[9px] font-bold text-slate-500 uppercase">{stat.sub}</span>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))
+          )}
         </div>
 
         {/* 4. Deep Visualizations (Radar & Area Charts) */}
@@ -263,23 +283,31 @@ export const StudentDashboard = () => {
               </div>
               <Badge className="bg-emerald-50 text-emerald-600 border-none font-bold">+12% Target</Badge>
             </CardHeader>
-            <CardContent className="h-[280px] w-full pt-4">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={performanceTrend}>
-                  <defs>
-                    <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1} />
-                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
-                  <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
-                  <Area type="monotone" dataKey="score" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" />
-                  <Area type="monotone" dataKey="projected" stroke="#10b981" strokeWidth={2} strokeDasharray="5 5" fill="none" />
-                </AreaChart>
-              </ResponsiveContainer>
+            <CardContent className="h-[280px] w-full pt-4 relative flex items-center justify-center">
+              {testsCompleted > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={performanceTrend}>
+                    <defs>
+                      <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1} />
+                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
+                    <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
+                    <Area type="monotone" dataKey="score" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" />
+                    <Area type="monotone" dataKey="projected" stroke="#10b981" strokeWidth={2} strokeDasharray="5 5" fill="none" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="text-center p-6">
+                  <BarChart3 className="h-10 w-10 text-slate-300 mx-auto mb-2" />
+                  <p className="text-sm font-bold text-slate-500">No Analytics Data</p>
+                  <p className="text-xs text-slate-400 max-w-[250px] mx-auto mt-1">Complete an assessment to generate your momentum trend.</p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -290,14 +318,22 @@ export const StudentDashboard = () => {
               </CardTitle>
               <CardDescription>Cognitive Strengths Mapping</CardDescription>
             </CardHeader>
-            <CardContent className="flex-1 min-h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <RadarChart cx="50%" cy="50%" outerRadius="75%" data={neuralSkillsData}>
-                  <PolarGrid stroke="#e2e8f0" />
-                  <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 10, fontWeight: 700 }} />
-                  <Radar name="Student" dataKey="A" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.5} />
-                </RadarChart>
-              </ResponsiveContainer>
+            <CardContent className="flex-1 min-h-[300px] w-full relative flex items-center justify-center">
+              {testsCompleted > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <RadarChart cx="50%" cy="50%" outerRadius="75%" data={neuralSkillsData}>
+                    <PolarGrid stroke="#e2e8f0" />
+                    <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 10, fontWeight: 700 }} />
+                    <Radar name="Student" dataKey="A" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.5} />
+                  </RadarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="text-center p-6">
+                  <Brain className="h-10 w-10 text-slate-300 mx-auto mb-2" />
+                  <p className="text-sm font-bold text-slate-500">No Cognitive Mapping</p>
+                  <p className="text-xs text-slate-400 max-w-[200px] mx-auto mt-1">Your neural DNA strengths will populate here after evaluation.</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -317,7 +353,9 @@ export const StudentDashboard = () => {
           <div className="grid lg:grid-cols-12 gap-6">
             {/* Featured Psychometric Card */}
             <div className="lg:col-span-8 group">
-              {psychometricTest ? (
+              {testTakingLoading ? (
+                <Skeleton className="h-[400px] w-full rounded-[2.5rem] bg-slate-200" />
+              ) : psychometricTest ? (
                 <Card className="h-full bg-white border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden rounded-[2.5rem] transition-all duration-500 hover:shadow-[0_20px_40px_rgb(0,0,0,0.06)] hover:-translate-y-1">
                   <div className="md:flex h-full">
                     <div className="p-8 md:p-10 md:w-2/3 flex flex-col">
@@ -368,7 +406,13 @@ export const StudentDashboard = () => {
                   </div>
                 </Card>
               ) : (
-                <Skeleton className="h-[400px] w-full rounded-[2.5rem]" />
+                <Card className="h-full bg-white border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden rounded-[2.5rem] flex items-center justify-center p-8">
+                  <div className="text-center max-w-sm">
+                    <BookOpen className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+                    <h4 className="text-lg font-bold text-slate-800 mb-2">No Core Assessments</h4>
+                    <p className="text-sm text-slate-500">There are no core psychometric assessments available at this moment.</p>
+                  </div>
+                </Card>
               )}
             </div>
 
@@ -412,34 +456,48 @@ export const StudentDashboard = () => {
           </div>
 
           {/* Secondary Assessment Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
-            {otherTests?.slice(0, 4).map((test) => (
-              <Card key={test.id} className="group border-none shadow-sm bg-white/60 backdrop-blur-sm rounded-3xl hover:shadow-xl hover:-translate-y-2 transition-all duration-500 overflow-hidden">
-                <CardHeader className="p-5 pb-3">
-                  <div className="flex justify-between items-center mb-3">
-                    <Badge variant="secondary" className="bg-slate-100 text-slate-600 border-none font-bold text-[9px] uppercase tracking-tighter">
-                      {test.difficulty || 'Intermediate'}
-                    </Badge>
-                    <div className="text-[10px] font-bold text-slate-400 flex items-center">
-                      <Clock className="h-3 w-3 mr-1" /> {test.timeDuration}m
+          {testTakingLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
+              {Array.from({ length: 4 }).map((_, idx) => (
+                <Skeleton key={idx} className="h-[150px] w-full rounded-3xl bg-slate-200" />
+              ))}
+            </div>
+          ) : otherTests.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
+              {otherTests.slice(0, 4).map((test) => (
+                <Card key={test.id} className="group border-none shadow-sm bg-white/60 backdrop-blur-sm rounded-3xl hover:shadow-xl hover:-translate-y-2 transition-all duration-500 overflow-hidden">
+                  <CardHeader className="p-5 pb-3">
+                    <div className="flex justify-between items-center mb-3">
+                      <Badge variant="secondary" className="bg-slate-100 text-slate-600 border-none font-bold text-[9px] uppercase tracking-tighter">
+                        {test.difficulty || 'Intermediate'}
+                      </Badge>
+                      <div className="text-[10px] font-bold text-slate-400 flex items-center">
+                        <Clock className="h-3 w-3 mr-1" /> {test.timeDuration}m
+                      </div>
                     </div>
-                  </div>
-                  <CardTitle className="text-base font-black text-slate-800 line-clamp-1 group-hover:text-primary transition-colors">
-                    {test.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-5 pt-0">
-                  <Button
-                    onClick={() => !paidStatus[test.id] ? handlePayment(test) : navigate(`/test/${test.id}`)}
-                    variant="outline"
-                    className="w-full rounded-xl font-bold border-slate-200 hover:bg-primary hover:text-white hover:border-primary transition-all duration-300"
-                  >
-                    {paidStatus[test.id] ? 'Start Assessment' : `Unlock Test`}
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                    <CardTitle className="text-base font-black text-slate-800 line-clamp-1 group-hover:text-primary transition-colors">
+                      {test.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-5 pt-0">
+                    <Button
+                      onClick={() => !paidStatus[test.id] ? handlePayment(test) : navigate(`/test/${test.id}`)}
+                      variant="outline"
+                      className="w-full rounded-xl font-bold border-slate-200 hover:bg-primary hover:text-white hover:border-primary transition-all duration-300"
+                    >
+                      {paidStatus[test.id] ? 'Start Assessment' : `Unlock Test`}
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card className="border-none shadow-sm bg-white/60 backdrop-blur-sm rounded-3xl p-8 text-center mt-8">
+              <BookOpen className="h-8 w-8 text-slate-300 mx-auto mb-2" />
+              <p className="text-sm font-bold text-slate-500">No Additional Modules</p>
+              <p className="text-xs text-slate-400">All available assessments are listed above.</p>
+            </Card>
+          )}
         </div>
       </div>
     </div>
