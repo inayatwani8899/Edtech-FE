@@ -21,7 +21,8 @@ export const SchoolLayout = () => {
     const isSchool = user?.roleId === 4 || 
                      user?.roleId === 3 ||
                      user?.role?.toLowerCase() === "school" || 
-                     user?.role?.toLowerCase() === "organization";
+                     user?.role?.toLowerCase() === "organization" ||
+                     user?.role?.toLowerCase() === "organizationadmin";
 
     if (!isAuthenticated || !isSchool) {
         return <Navigate to="/login" replace />;

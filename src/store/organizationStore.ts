@@ -53,6 +53,9 @@ interface OrganizationState {
   approvalFilter: string; // "All", "Approved", "Not Approved"
   documentFilter: string; // "All", "Documents Completed", "Documents Pending"
   detailsFilter: string; // "All", "Details Completed", "Incomplete"
+  configFilter: string; // "All", "Configured", "Not Configured"
+  activeFilter: string; // "All", "Active", "Inactive"
+  typeFilter: string; // "All", "School", "College", "University", "Institute"
   
   sortDirection: "asc" | "desc";
 
@@ -78,13 +81,16 @@ interface OrganizationState {
   setApprovalFilter: (approval: string) => void;
   setDocumentFilter: (doc: string) => void;
   setDetailsFilter: (details: string) => void;
+  setConfigFilter: (val: string) => void;
+  setActiveFilter: (val: string) => void;
+  setTypeFilter: (val: string) => void;
   
   openDeleteDialog: (id: string) => void;
   closeDeleteDialog: () => void;
   clearOrganization: () => void;
 }
 
-
+let searchTimeout: any = null;
 
 export const useOrganizationStore = create<OrganizationState>((set, get) => ({
   organizations: [],
@@ -105,6 +111,9 @@ export const useOrganizationStore = create<OrganizationState>((set, get) => ({
   approvalFilter: "All",
   documentFilter: "All",
   detailsFilter: "All",
+  configFilter: "All",
+  activeFilter: "All",
+  typeFilter: "All",
   
   sortDirection: "asc",
 
@@ -121,7 +130,10 @@ export const useOrganizationStore = create<OrganizationState>((set, get) => ({
 
   setSearchTerm: (term) => {
     set({ searchTerm: term });
-    setTimeout(() => {
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+    searchTimeout = setTimeout(() => {
       set({ debouncedSearchTerm: term, currentPage: 1 });
       get().fetchOrganizations();
     }, 500);
@@ -152,6 +164,21 @@ export const useOrganizationStore = create<OrganizationState>((set, get) => ({
     get().fetchOrganizations();
   },
 
+  setConfigFilter: (val) => {
+    set({ configFilter: val, currentPage: 1 });
+    get().fetchOrganizations();
+  },
+
+  setActiveFilter: (val) => {
+    set({ activeFilter: val, currentPage: 1 });
+    get().fetchOrganizations();
+  },
+
+  setTypeFilter: (val) => {
+    set({ typeFilter: val, currentPage: 1 });
+    get().fetchOrganizations();
+  },
+
   openDeleteDialog: (id) => set({ selectedOrgId: id, deleteOpen: true }),
   closeDeleteDialog: () => set({ selectedOrgId: null, deleteOpen: false }),
   clearOrganization: () => set({ organization: null, error: null }),
@@ -167,7 +194,10 @@ export const useOrganizationStore = create<OrganizationState>((set, get) => ({
       statusFilter,
       approvalFilter,
       documentFilter,
-      detailsFilter
+      detailsFilter,
+      configFilter,
+      activeFilter,
+      typeFilter
     } = get();
 
     try {
@@ -240,7 +270,31 @@ export const useOrganizationStore = create<OrganizationState>((set, get) => ({
         });
       }
 
-      const calculatedTotalPages = Math.ceil(filtered.length / limit) || 1;
+      // 5. Configuration Status Filter: Configured, Not Configured
+      if (configFilter !== "All") {
+        filtered = filtered.filter(org => {
+          const hasDb = !!(org.tenantDb || org.tenantDatabase);
+          return configFilter === "Configured" ? hasDb : !hasDb;
+        });
+      }
+
+      // 6. Active Status Filter: Active, Inactive
+      if (activeFilter !== "All") {
+        filtered = filtered.filter(org => {
+          const isActive = org.isActive === true;
+          return activeFilter === "Active" ? isActive : !isActive;
+        });
+      }
+
+      // 7. Organization Type Filter: School, College, University, Institute
+      if (typeFilter !== "All") {
+        filtered = filtered.filter(org => {
+          const type = (org.organizationType || "").toLowerCase();
+          return type === typeFilter.toLowerCase();
+        });
+      }
+
+      const calculatedTotalPages = Math.ceil(total / limit) || 1;
 
       set({
         organizations: filtered,

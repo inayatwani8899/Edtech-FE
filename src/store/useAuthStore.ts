@@ -142,6 +142,10 @@ interface AuthState {
   testId: string | null;
   roleId: string | null;
   permissions: Permission[];
+  tenantData: any | null;
+  tenantLoading: boolean;
+  tenantError: string | null;
+  
   login: (email: string, password: string, tenantName?: string | null) => Promise<void>;
   logout: () => void;
   registerStudent: (payload: any) => Promise<{ success: boolean, message?: string, error?: any }>;
@@ -150,6 +154,8 @@ interface AuthState {
 
   loadFromStorage: () => void;
   setTestId: (testId: string | null) => void;
+  fetchTenantDetails: (tenantName: string) => Promise<any>;
+  clearTenantDetails: () => void;
 }
 
 export const useAuthStore = create<AuthState>(
@@ -161,22 +167,24 @@ export const useAuthStore = create<AuthState>(
     testId: null,
     roleId: null,
     permissions: [],
+    tenantData: null,
+    tenantLoading: false,
+    tenantError: null,
+
     loadFromStorage: () => {
       const token = localStorage.getItem("auth_token");
       const userData = localStorage.getItem("user_data");
       const permissionsData = localStorage.getItem("user_permissions");
+      const storedTenantData = localStorage.getItem("organizationData");
 
-      if (token && userData) {
-        set({
-          token,
-          user: JSON.parse(userData),
-          permissions: permissionsData ? JSON.parse(permissionsData) : [],
-          isAuthenticated: true,
-          isLoading: false,
-        });
-      } else {
-        set({ isLoading: false });
-      }
+      set({
+        token: token || null,
+        user: userData ? JSON.parse(userData) : null,
+        permissions: permissionsData ? JSON.parse(permissionsData) : [],
+        tenantData: storedTenantData ? JSON.parse(storedTenantData) : null,
+        isAuthenticated: !!(token && userData),
+        isLoading: false,
+      });
     },
 
     login: async (email, password, routeTenant?: string | null) => {
@@ -225,11 +233,15 @@ export const useAuthStore = create<AuthState>(
 
         if (loginSuccess && responseData) {
           const { access_Token, user, permissions = [] } = responseData.data;
+          const tenant = responseData.data.tenant || routeTenant;
 
           localStorage.setItem("auth_token", access_Token);
           localStorage.setItem("roleId", String(user.roleId));
           localStorage.setItem("user_data", JSON.stringify(user));
           localStorage.setItem("user_permissions", JSON.stringify(permissions));
+          if (tenant) {
+            localStorage.setItem("tenantName", tenant);
+          }
 
           set({
             user,
@@ -360,6 +372,55 @@ export const useAuthStore = create<AuthState>(
       localStorage.removeItem("user_permissions");
       localStorage.removeItem("roleId");
       set({ user: null, token: null, permissions: [], isAuthenticated: false });
+    },
+    fetchTenantDetails: async (tenantName: string) => {
+      set({ tenantLoading: true, tenantError: null });
+      try {
+        const response = await api.get(`/SuperAdmin/organizations/tenant/${tenantName}`, {
+          skipToast: true,
+          headers: {
+            "x-skip-toast": "true",
+          } as any,
+        } as any);
+
+        const data = response.data?.data;
+        if (data) {
+          if (data.isVerified === false) {
+            throw new Error("Organization is not verified yet.");
+          }
+          if (data.isActive === false) {
+            throw new Error("Organization is currently inactive.");
+          }
+          localStorage.setItem("tenantName", data.tenantName || tenantName);
+          localStorage.setItem("organizationId", String(data.id));
+          localStorage.setItem("organizationData", JSON.stringify(data));
+          set({
+            tenantData: data,
+            tenantLoading: false,
+            tenantError: null,
+          });
+          return data;
+        } else {
+          throw new Error("Invalid tenant details received");
+        }
+      } catch (err: any) {
+        const msg = err?.response?.data?.message || err?.message || "Failed to fetch tenant details.";
+        set({
+          tenantData: null,
+          tenantLoading: false,
+          tenantError: msg,
+        });
+        localStorage.removeItem("tenantName");
+        localStorage.removeItem("organizationId");
+        localStorage.removeItem("organizationData");
+        throw err;
+      }
+    },
+    clearTenantDetails: () => {
+      localStorage.removeItem("tenantName");
+      localStorage.removeItem("organizationId");
+      localStorage.removeItem("organizationData");
+      set({ tenantData: null, tenantError: null });
     },
   })
 );

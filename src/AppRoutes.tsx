@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useParams } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { Landing } from "@/pages/Landing";
 import { Login } from "@/pages/auth/Login";
@@ -96,7 +96,7 @@ const isSchoolRole = (user: any) => {
     const roleId = Number(user.roleId);
     if (roleId === 4 || roleId === 3) return true; // Common IDs for Organization/School
     const roleName = (user.role || "").toLowerCase();
-    return roleName === "school" || roleName === "organization";
+    return roleName === "school" || roleName === "organization" || roleName === "organizationadmin";
 };
 
 const ProtectedRoute = ({ children, role }: ProtectedRouteProps) => {
@@ -139,6 +139,7 @@ const ProtectedRoute = ({ children, role }: ProtectedRouteProps) => {
 //Public Route
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
     const { user, isAuthenticated, isLoading } = useAuthStore();
+    const { tenantName } = useParams<{ tenantName?: string }>();
 
     if (isLoading) {
         return (
@@ -150,12 +151,18 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
     }
 
     if (isAuthenticated) {
-        let redirectPath = "/student/dashboard";
-        if (user?.role === "Admin" || user?.role === "SuperAdmin") redirectPath = "/dashboard";
-        else if (isSchoolRole(user)) redirectPath = "/school/dashboard";
-        else if (isCounselorRole(user)) redirectPath = "/counselor/dashboard";
+        const storedTenant = localStorage.getItem("tenantName");
+        const isCorrectTenant = storedTenant && storedTenant === tenantName;
+        const isSuperAdmin = user?.role === "Admin" || user?.role === "SuperAdmin";
 
-        return <Navigate to={redirectPath} replace />;
+        if (!tenantName || (isCorrectTenant && !isSuperAdmin)) {
+            let redirectPath = "/student/dashboard";
+            if (user?.role === "Admin" || user?.role === "SuperAdmin") redirectPath = "/dashboard";
+            else if (isSchoolRole(user)) redirectPath = "/school/dashboard";
+            else if (isCounselorRole(user)) redirectPath = "/counselor/dashboard";
+
+            return <Navigate to={redirectPath} replace />;
+        }
     }
 
     return <>{children}</>;

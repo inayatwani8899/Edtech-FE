@@ -34,7 +34,7 @@ export const Navbar = () => {
                 !isAuthenticated ? '/' :
                   user?.role === 'Admin' || user?.role === 'SuperAdmin' ? '/dashboard' :
                     (user?.role?.toLowerCase().includes('counsel') || user?.role?.toLowerCase() === 'professional') ? '/counselor/dashboard' :
-                      (user?.role?.toLowerCase() === 'school' || user?.role?.toLowerCase() === 'organization') ? '/school/dashboard' :
+                      (user?.role?.toLowerCase() === 'school' || user?.role?.toLowerCase() === 'organization' || user?.role?.toLowerCase() === 'organizationadmin') ? '/school/dashboard' :
                         '/student/dashboard'
               }
               className="flex items-center gap-2.5 min-w-0 group"
@@ -48,7 +48,7 @@ export const Navbar = () => {
                   <span className="text-indigo-600 italic ml-0.5">IQ</span>
                 </div>
                 <span className="text-[7.5px] font-bold tracking-[0.2em] text-slate-400 uppercase whitespace-nowrap">
-                  {user?.role === 'School' ? 'Institution Hub' : 'Student Hub'}
+                  {(user?.role === 'School' || user?.role === 'OrganizationAdmin') ? 'Institution Hub' : 'Student Hub'}
                 </span>
               </div>
             </Link>
@@ -87,11 +87,11 @@ export const Navbar = () => {
                       <span className="text-[10px] text-slate-500 truncate lowercase">{user?.email}</span>
                     </div>
                   </div>
-                  <DropdownMenuItem onClick={() => navigate(user?.role === 'School' ? "/school/profile" : "/profile")} className="rounded-lg gap-2 cursor-pointer focus:bg-indigo-50 focus:text-indigo-600 py-2">
+                  <DropdownMenuItem onClick={() => navigate((user?.role === 'School' || user?.role === 'OrganizationAdmin') ? "/school/profile" : "/profile")} className="rounded-lg gap-2 cursor-pointer focus:bg-indigo-50 focus:text-indigo-600 py-2">
                     <User className="h-4 w-4" />
                     <span className="text-xs font-medium">Profile Settings</span>
                   </DropdownMenuItem>
-                  {user?.role !== 'School' && (
+                  {(user?.role !== 'School' && user?.role !== 'OrganizationAdmin') && (
                     <DropdownMenuItem onClick={() => navigate("/results")} className="rounded-lg gap-2 cursor-pointer focus:bg-indigo-50 focus:text-indigo-600 py-2">
                       <Settings className="h-4 w-4" />
                       <span className="text-xs font-medium">My Performance</span>
