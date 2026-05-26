@@ -76,8 +76,8 @@ export const useAuthStore = create<AuthState>(
       set({ isLoading: true });
       try {
         const storedTenant = localStorage.getItem("tenantName");
-        // Resolve tenant dynamically: URL -> hostname -> localStorage -> default to superadmin
-        const resolvedTenant = routeTenant || getTenantFromHostname() || storedTenant || "superadmin";
+        // Resolve tenant dynamically: URL -> hostname -> localStorage -> default to null (superadmin default login)
+        const resolvedTenant = routeTenant || getTenantFromHostname() || storedTenant || null;
 
         const payload: any = { 
           email, 
