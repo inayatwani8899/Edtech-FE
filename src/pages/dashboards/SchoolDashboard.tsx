@@ -42,6 +42,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import api from "../../api/axios";
+import { useAuthStore } from "../../store/useAuthStore";
 
 const stats = [
     {
@@ -109,6 +111,12 @@ const gradePerformance = [
 
 export const SchoolDashboard = () => {
     const [greeting, setGreeting] = useState("");
+    const [dashboardSummary, setDashboardSummary] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    const user = useAuthStore((state) => state.user);
+    const tenantData = useAuthStore((state) => state.tenantData);
 
     useEffect(() => {
         const hour = new Date().getHours();
@@ -116,6 +124,67 @@ export const SchoolDashboard = () => {
         else if (hour < 18) setGreeting("Good afternoon");
         else setGreeting("Good evening");
     }, []);
+
+    useEffect(() => {
+        const fetchDashboardData = async () => {
+            try {
+                setLoading(true);
+                setError(null);
+                const response = await api.get("/Organization/dashboard-summary");
+                if (response.data && response.data.success) {
+                    setDashboardSummary(response.data.data);
+                } else {
+                    throw new Error("Failed to retrieve dashboard statistics");
+                }
+            } catch (err: any) {
+                console.error("Dashboard Summary fetch error:", err);
+                setError(err?.response?.data?.message || err?.message || "Failed to load dashboard statistics.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDashboardData();
+    }, []);
+
+    const dynamicStats = [
+        {
+            title: "Total Students",
+            value: dashboardSummary?.totalStudents ?? 0,
+            change: "Live",
+            trend: "up",
+            icon: GraduationCap,
+            color: "blue",
+            subText: "Active scholars in tenant"
+        },
+        {
+            title: "Total Tests",
+            value: dashboardSummary?.totalTests ?? 0,
+            change: "Active",
+            trend: "up",
+            icon: Brain,
+            color: "purple",
+            subText: "Configured exams"
+        },
+        {
+            title: "Total Reports",
+            value: dashboardSummary?.totalReports ?? 0,
+            change: "Done",
+            trend: "up",
+            icon: FileText,
+            color: "emerald",
+            subText: "Reports generated"
+        },
+        {
+            title: "Total Grades",
+            value: dashboardSummary?.totalGrades ?? 0,
+            change: "Mapped",
+            trend: "up",
+            icon: Layers,
+            color: "indigo",
+            subText: "Registered academic grades"
+        }
+    ];
 
     return (
         <div className="p-1 space-y-8 animate-in fade-in duration-1000">
@@ -129,11 +198,11 @@ export const SchoolDashboard = () => {
                         <span className="text-[10px] font-bold text-slate-400">•</span>
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">v2.4.0</span>
                     </div>
-                    <h1 className="text-3xl md:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
-                        {greeting}, <span className="text-blue-600">Administrator!</span>
+                    <h1 className="text-3xl md:text-4xl font-black tracking-tight text-slate-900 dark:text-white uppercase">
+                        {greeting}, <span className="text-blue-600">{user?.firstName ? `${user.firstName} ${user.lastName || ''}` : "Administrator!"}</span>
                     </h1>
                     <p className="text-slate-500 dark:text-slate-400 font-medium mt-1">
-                        Strategic overview and operational management of <span className="text-slate-900 dark:text-white font-bold">St. Xavier's International</span>.
+                        Strategic overview and operational management of <span className="text-slate-900 dark:text-white font-bold">{tenantData?.instituteName || "St. Xavier's International"}</span>.
                     </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
@@ -178,7 +247,7 @@ export const SchoolDashboard = () => {
                                     "h-11 w-11 rounded-2xl flex items-center justify-center transition-all duration-500",
                                     item.status === 'active' ? 'bg-blue-600 ring-4 ring-blue-500/30 scale-110 shadow-lg shadow-blue-500/40' : 
                                     item.status === 'completed' ? 'bg-emerald-500 shadow-lg shadow-emerald-500/20' : 'bg-slate-800'
-                                )}>
+                                    )}>
                                     {item.status === 'completed' ? <CheckCircle2 className="h-5 w-5 text-white" /> :
                                     <span className="text-sm font-black text-white">{i + 1}</span>}
                                 </div>
@@ -194,38 +263,60 @@ export const SchoolDashboard = () => {
 
             {/* 3. High-Impact Matrix */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {stats.map((stat, i) => (
-                    <Card key={i} className="border-none shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 bg-white dark:bg-[#0f1117] rounded-[1.8rem] overflow-hidden group">
-                        <CardContent className="p-6">
-                            <div className="flex justify-between items-start mb-4">
-                                <div className={cn(
-                                    "p-3.5 rounded-2xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-6",
-                                    stat.color === "blue" && "bg-blue-50 text-blue-600 dark:bg-blue-500/10",
-                                    stat.color === "emerald" && "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10",
-                                    stat.color === "indigo" && "bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10",
-                                    stat.color === "purple" && "bg-purple-50 text-purple-600 dark:bg-purple-500/10",
-                                )}>
-                                    <stat.icon className="h-6 w-6" />
+                {loading ? (
+                    Array.from({ length: 4 }).map((_, i) => (
+                        <Card key={i} className="border-none shadow-sm bg-white dark:bg-[#0f1117] rounded-[1.8rem] overflow-hidden animate-pulse">
+                            <CardContent className="p-6">
+                                <div className="flex justify-between items-start mb-4">
+                                    <div className="h-12 w-12 rounded-2xl bg-slate-200 dark:bg-slate-800" />
+                                    <div className="h-6 w-16 rounded-full bg-slate-200 dark:bg-slate-800" />
                                 </div>
-                                <div className={cn(
-                                    "flex items-center gap-1 text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider",
-                                    stat.trend === "up" ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10" : "bg-rose-50 text-rose-600 dark:bg-rose-500/10"
-                                )}>
-                                    {stat.trend === "up" ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-                                    {stat.change}
+                                <div className="space-y-2 mt-4">
+                                    <div className="h-3.5 w-24 bg-slate-200 dark:bg-slate-800 rounded" />
+                                    <div className="h-8 w-16 bg-slate-200 dark:bg-slate-800 rounded" />
+                                    <div className="h-3 w-32 bg-slate-200 dark:bg-slate-800 rounded" />
                                 </div>
-                            </div>
-                            <div>
-                                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">{stat.title}</p>
-                                <h3 className="text-3xl font-black text-slate-900 dark:text-white mt-1 group-hover:text-blue-600 transition-colors uppercase tracking-tighter">{stat.value}</h3>
-                                <p className="text-[11px] font-bold text-slate-500 mt-2 flex items-center gap-2">
-                                    <Zap className="h-3 w-3 text-amber-500" />
-                                    {stat.subText}
-                                </p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))}
+                            </CardContent>
+                        </Card>
+                    ))
+                ) : error ? (
+                    <div className="col-span-full p-6 text-center bg-rose-500/10 border border-rose-500/20 text-rose-500 dark:text-rose-400 rounded-[1.8rem]">
+                        <p className="font-bold">{error}</p>
+                    </div>
+                ) : (
+                    dynamicStats.map((stat, i) => (
+                        <Card key={i} className="border-none shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 bg-white dark:bg-[#0f1117] rounded-[1.8rem] overflow-hidden group">
+                            <CardContent className="p-6">
+                                <div className="flex justify-between items-start mb-4">
+                                    <div className={cn(
+                                        "p-3.5 rounded-2xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-6",
+                                        stat.color === "blue" && "bg-blue-50 text-blue-600 dark:bg-blue-500/10",
+                                        stat.color === "emerald" && "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10",
+                                        stat.color === "indigo" && "bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10",
+                                        stat.color === "purple" && "bg-purple-50 text-purple-600 dark:bg-purple-500/10",
+                                    )}>
+                                        <stat.icon className="h-6 w-6" />
+                                    </div>
+                                    <div className={cn(
+                                        "flex items-center gap-1 text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider",
+                                        stat.trend === "up" ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10" : "bg-rose-50 text-rose-600 dark:bg-rose-500/10"
+                                    )}>
+                                        {stat.trend === "up" ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+                                        {stat.change}
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">{stat.title}</p>
+                                    <h3 className="text-3xl font-black text-slate-900 dark:text-white mt-1 group-hover:text-blue-600 transition-colors uppercase tracking-tighter">{stat.value}</h3>
+                                    <p className="text-[11px] font-bold text-slate-500 mt-2 flex items-center gap-2">
+                                        <Zap className="h-3 w-3 text-amber-500" />
+                                        {stat.subText}
+                                    </p>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ))
+                )}
             </div>
 
             {/* 4. Strategic Analytics Grid */}

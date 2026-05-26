@@ -146,7 +146,7 @@ export const SchoolStudents = () => {
                         Export CSV
                     </Button>
                     <Button 
-                        onClick={() => navigate("/students/add")}
+                        onClick={() => navigate("/school/students/add")}
                         className="bg-blue-600 hover:bg-blue-700 text-white h-10 rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg shadow-blue-500/20 gap-2 px-5"
                     >
                         <UserPlus className="h-4 w-4" />
@@ -351,6 +351,7 @@ export const SchoolStudents = () => {
                                                 <Button 
                                                     variant="ghost" 
                                                     size="icon" 
+                                                    onClick={() => navigate(`/school/students/view/${student.id}`)}
                                                     className="h-8 w-8 rounded-lg hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/20"
                                                     title="Quick View"
                                                 >
@@ -359,7 +360,7 @@ export const SchoolStudents = () => {
                                                 <Button 
                                                     variant="ghost" 
                                                     size="icon" 
-                                                    onClick={() => navigate(`/students/edit/${student.id}`)}
+                                                    onClick={() => navigate(`/school/students/edit/${student.id}`)}
                                                     className="h-8 w-8 rounded-lg hover:bg-amber-50 hover:text-amber-600 dark:hover:bg-amber-900/20"
                                                     title="Edit Record"
                                                 >
@@ -420,13 +421,28 @@ export const SchoolStudents = () => {
                                     </div>
 
                                     <div className="grid grid-cols-3 gap-2 w-full mt-6">
-                                        <Button variant="ghost" size="sm" className="h-9 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 hover:text-blue-600 shadow-sm">
+                                        <Button 
+                                            variant="ghost" 
+                                            size="sm" 
+                                            onClick={() => navigate(`/school/students/view/${student.id}`)}
+                                            className="h-9 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 hover:text-blue-600 shadow-sm"
+                                        >
                                             <Eye className="h-3.5 w-3.5" />
                                         </Button>
-                                        <Button variant="ghost" size="sm" className="h-9 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 hover:text-amber-600 shadow-sm">
+                                        <Button 
+                                            variant="ghost" 
+                                            size="sm" 
+                                            onClick={() => navigate(`/school/students/edit/${student.id}`)}
+                                            className="h-9 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 hover:text-amber-600 shadow-sm"
+                                        >
                                             <Edit className="h-3.5 w-3.5" />
                                         </Button>
-                                        <Button variant="ghost" size="sm" className="h-9 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 hover:text-rose-600 shadow-sm">
+                                        <Button 
+                                            variant="ghost" 
+                                            size="sm" 
+                                            onClick={() => openDeleteDialog(String(student.id))}
+                                            className="h-9 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 hover:text-rose-600 shadow-sm"
+                                        >
                                             <Trash2 className="h-3.5 w-3.5" />
                                         </Button>
                                     </div>

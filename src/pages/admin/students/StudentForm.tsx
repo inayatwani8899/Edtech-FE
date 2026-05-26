@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useStudentStore } from "../../../store/studentStore";
+import { useAuthStore } from "../../../store/useAuthStore";
 
 interface StudentFormData {
     firstName: string;
@@ -48,6 +49,15 @@ const StudentForm: React.FC = () => {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
     const { student, loading, fetchStudent, createStudent, updateStudent, clearStudent } = useStudentStore();
+
+    const user = useAuthStore((state) => state.user);
+    const isSchool = user?.roleId === 4 || 
+                     user?.roleId === 3 ||
+                     user?.role?.toLowerCase() === "school" || 
+                     user?.role?.toLowerCase() === "organization" ||
+                     user?.role?.toLowerCase() === "organizationadmin";
+
+    const redirectPath = isSchool ? "/school/students" : "/manage/students";
 
     const [formData, setFormData] = useState<StudentFormData>({
         firstName: "",
@@ -116,7 +126,7 @@ const StudentForm: React.FC = () => {
                 await createStudent(formData);
                 toast.success("New scholar successfully enrolled");
             }
-            navigate("/manage/students");
+            navigate(redirectPath);
         } catch (err: any) {
             toast.error(err.response?.data?.message || "Enrollment protocol failed");
         } finally {
@@ -142,7 +152,7 @@ const StudentForm: React.FC = () => {
                 {/* CONDENSED HEADER */}
                 <div className="flex items-center justify-between gap-3 mb-3 border-b border-slate-200 pb-3">
                     <div className="flex items-center gap-3">
-                        <div className="p-1.5 bg-white rounded-lg shadow-sm cursor-pointer hover:bg-slate-50 border border-slate-100" onClick={() => navigate("/manage/students")}>
+                        <div className="p-1.5 bg-white rounded-lg shadow-sm cursor-pointer hover:bg-slate-50 border border-slate-100" onClick={() => navigate(redirectPath)}>
                             <ArrowLeft className="h-3.5 w-3.5 text-slate-400" />
                         </div>
                         <div>
@@ -156,7 +166,7 @@ const StudentForm: React.FC = () => {
                     <div className="flex items-center gap-2">
                         <Button
                             variant="ghost"
-                            onClick={() => navigate("/manage/students")}
+                            onClick={() => navigate(redirectPath)}
                             className="text-slate-500 hover:bg-slate-100 font-bold text-[10px] h-7 px-3 rounded-lg"
                         >
                             Cancel

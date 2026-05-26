@@ -307,6 +307,9 @@ const AppRoutes = () => {
             >
                 <Route path="/school/dashboard" element={<SchoolDashboard />} />
                 <Route path="/school/students" element={<SchoolStudents />} />
+                <Route path="/school/students/add" element={<StudentForm />} />
+                <Route path="/school/students/edit/:id" element={<StudentForm />} />
+                <Route path="/school/students/view/:id" element={<StudentView />} />
                 <Route path="/school/staff" element={<SchoolStaff />} />
                 <Route path="/school/calendar" element={<div className="p-8"><h2 className="text-2xl font-bold">Academic Calendar</h2><p className="text-slate-500 mt-2">Schedule and view important school events.</p></div>} />
                 <Route path="/school/assessments" element={<div className="p-8"><h2 className="text-2xl font-bold">Assessments</h2><p className="text-slate-500 mt-2">Track and manage student assessments.</p></div>} />

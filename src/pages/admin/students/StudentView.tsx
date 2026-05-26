@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useStudentStore } from "../../../store/studentStore";
+import { useAuthStore } from "../../../store/useAuthStore";
 import { 
     Loader2, 
     Calendar, 
@@ -26,6 +27,15 @@ const StudentView: React.FC = () => {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
     const { student, loading, error, fetchStudent, clearStudent } = useStudentStore();
+
+    const user = useAuthStore((state) => state.user);
+    const isSchool = user?.roleId === 4 || 
+                     user?.roleId === 3 ||
+                     user?.role?.toLowerCase() === "school" || 
+                     user?.role?.toLowerCase() === "organization" ||
+                     user?.role?.toLowerCase() === "organizationadmin";
+
+    const redirectPath = isSchool ? "/school/students" : "/manage/students";
 
     useEffect(() => {
         if (id) {
@@ -59,7 +69,7 @@ const StudentView: React.FC = () => {
                         </div>
                         <h2 className="text-xl font-black text-slate-900 mb-2 uppercase tracking-tight">Access Protocol Failed</h2>
                         <p className="text-slate-500 text-sm mb-8">{error || "The requested individual could not be located in the registry."}</p>
-                        <Button onClick={() => navigate("/manage/students")} className="bg-slate-900 text-white font-black text-[10px] uppercase h-10 px-8 rounded-xl tracking-widest hover:bg-slate-800 transition-all">
+                        <Button onClick={() => navigate(redirectPath)} className="bg-slate-900 text-white font-black text-[10px] uppercase h-10 px-8 rounded-xl tracking-widest hover:bg-slate-800 transition-all">
                             Return to Registry
                         </Button>
                     </CardContent>
@@ -74,7 +84,7 @@ const StudentView: React.FC = () => {
                 {/* CONDENSED HEADER */}
                 <div className="flex items-center justify-between gap-3 mb-6 border-b border-slate-200 pb-3">
                     <div className="flex items-center gap-3">
-                        <div className="p-1.5 bg-white rounded-lg shadow-sm cursor-pointer hover:bg-slate-50 border border-slate-100" onClick={() => navigate("/manage/students")}>
+                        <div className="p-1.5 bg-white rounded-lg shadow-sm cursor-pointer hover:bg-slate-50 border border-slate-100" onClick={() => navigate(redirectPath)}>
                             <ArrowLeft className="h-3.5 w-3.5 text-slate-400" />
                         </div>
                         <div>
@@ -88,13 +98,13 @@ const StudentView: React.FC = () => {
                     <div className="flex items-center gap-2">
                         <Button 
                             variant="ghost" 
-                            onClick={() => navigate("/manage/students")} 
+                            onClick={() => navigate(redirectPath)} 
                             className="text-slate-500 hover:bg-slate-100 font-black text-[10px] h-8 px-4 rounded-lg uppercase"
                         >
                             Back
                         </Button>
                         <Button 
-                            onClick={() => navigate(`/students/edit/${student.id}`)} 
+                            onClick={() => navigate(isSchool ? `/school/students/edit/${student.id}` : `/students/edit/${student.id}`)} 
                             className="bg-cyan-600 text-white font-black text-[10px] h-8 px-5 rounded-lg shadow-lg hover:bg-cyan-500 transition-all flex items-center gap-2 uppercase tracking-wider"
                         >
                             <Edit3 className="h-3.5 w-3.5" />
