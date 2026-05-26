@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -30,15 +30,25 @@ import {
   MapPin,
   Check,
   X,
-  Eye
+  Eye,
+  Database
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import Swal from "sweetalert2";
+import { TenantSetupModal } from "./components/TenantSetupModal";
 
 const Organizations: React.FC = () => {
   const navigate = useNavigate();
+  const [setupModalOpen, setSetupModalOpen] = useState(false);
+  const [selectedOrgForSetup, setSelectedOrgForSetup] = useState<Organization | null>(null);
+
+  const handleOpenSetup = (org: Organization) => {
+    setSelectedOrgForSetup(org);
+    setSetupModalOpen(true);
+  };
+
   const {
     organizations,
     loading,
@@ -130,14 +140,27 @@ const Organizations: React.FC = () => {
     const s = (status || "Pending").toLowerCase();
     switch (s) {
       case "completed":
-        return <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200">Completed</Badge>;
+      case "fully activated":
+        return <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold">Fully Activated</Badge>;
       case "verified":
-        return <Badge className="bg-blue-50 text-blue-700 border border-blue-200">Verified</Badge>;
-      case "rejected":
-        return <Badge className="bg-rose-50 text-rose-700 border border-rose-200">Rejected</Badge>;
+      case "server verified":
+        return <Badge className="bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold">Server Verified</Badge>;
+      case "registered":
+        return <Badge className="bg-sky-50 text-sky-700 border border-sky-200 text-[10px] font-bold">Registered</Badge>;
+      case "database created":
+        return <Badge className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-bold">Database Created</Badge>;
+      case "data synced":
+        return <Badge className="bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-bold">Data Synced</Badge>;
+      case "email sent":
+        return <Badge className="bg-teal-50 text-teal-700 border border-teal-200 text-[10px] font-bold">Email Sent</Badge>;
       case "pending":
+      case "pending setup":
+        return <Badge className="bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold">Pending Setup</Badge>;
+      case "rejected":
+      case "failed setup":
+        return <Badge className="bg-rose-50 text-rose-700 border border-rose-200 text-[10px] font-bold">Failed Setup</Badge>;
       default:
-        return <Badge className="bg-amber-50 text-amber-700 border border-amber-200">Pending</Badge>;
+        return <Badge className="bg-slate-50 text-slate-700 border border-slate-200 text-[10px] font-bold">{status || "Pending"}</Badge>;
     }
   };
 
@@ -360,7 +383,20 @@ const Organizations: React.FC = () => {
                             </TableCell>
 
                             <TableCell className="px-4 py-3">
-                              {getStatusBadge(org.status)}
+                              <div className="flex flex-col gap-1 w-full max-w-[120px]">
+                                {getStatusBadge(org.status)}
+                                {org.status?.toLowerCase() !== "fully activated" && org.status?.toLowerCase() !== "completed" && (
+                                  <div className="w-full bg-slate-100 rounded-full h-1 mt-1 overflow-hidden">
+                                    <div 
+                                      className={`h-full rounded-full transition-all duration-500 ${
+                                        org.status?.toLowerCase() === "failed setup" ? "bg-rose-500 w-1/3" :
+                                        org.status?.toLowerCase() === "database created" ? "bg-indigo-500 w-2/3" :
+                                        org.status?.toLowerCase() === "data synced" || org.status?.toLowerCase() === "email sent" ? "bg-purple-500 w-5/6" : "bg-amber-500 w-1/4"
+                                      }`}
+                                    />
+                                  </div>
+                                )}
+                              </div>
                             </TableCell>
 
                             <TableCell className="px-4 py-3">
@@ -410,6 +446,15 @@ const Organizations: React.FC = () => {
                                   title="View details"
                                 >
                                   <Eye className="h-3.5 w-3.5" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleOpenSetup(org)}
+                                  className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-650 hover:text-indigo-650 hover:bg-indigo-50 hover:border-indigo-300 transition-all"
+                                  title="Configure Tenant Database & Sync"
+                                >
+                                  <Database className="h-3.5 w-3.5" />
                                 </Button>
                                 <Button
                                   variant="ghost"
@@ -509,6 +554,15 @@ const Organizations: React.FC = () => {
                             <Button
                               variant="outline"
                               size="sm"
+                              onClick={() => handleOpenSetup(org)}
+                              className="h-9 w-9 rounded-lg border-slate-200 text-indigo-600 hover:bg-indigo-50"
+                              title="Configure Database"
+                            >
+                              <Database className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
                               onClick={() => navigate(`/organizations/edit/${org.id}`)}
                               className="h-9 w-9 rounded-lg border-slate-200 text-indigo-600 hover:bg-indigo-50"
                             >
@@ -564,6 +618,12 @@ const Organizations: React.FC = () => {
           onConfirm={handleDeleteConfirm}
           title="Delete Organization Registry"
           description="Are you sure you want to permanently remove this organization? All connected tenant database information will be unlinked."
+        />
+
+        <TenantSetupModal
+          open={setupModalOpen}
+          onOpenChange={setSetupModalOpen}
+          organization={selectedOrgForSetup}
         />
       </div>
     </div>

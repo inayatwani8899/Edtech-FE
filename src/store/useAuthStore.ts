@@ -142,7 +142,7 @@ interface AuthState {
   testId: string | null;
   roleId: string | null;
   permissions: Permission[];
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, tenantName?: string | null) => Promise<void>;
   logout: () => void;
   registerStudent: (payload: any) => Promise<{ success: boolean, error?: any }>;
   registerCounsellor: (firstName: string, lastName: string, email: string, password: string, dateOfBirth: string, grade: string, phone: string, role: string) => Promise<void>;
@@ -179,33 +179,66 @@ export const useAuthStore = create<AuthState>(
       }
     },
 
-    login: async (email, password) => {
+    login: async (email, password, routeTenant?: string | null) => {
       set({ isLoading: true });
       try {
         const isSuperAdminEmail = email.toLowerCase().includes('superadmin');
-        const tenantName = isSuperAdminEmail ? null : getTenantFromHostname();
+        const resolvedTenant = isSuperAdminEmail ? null : (routeTenant || getTenantFromHostname());
 
-        const payload: any = { email, password };
-        if (tenantName) {
-          payload.tenant = tenantName;
+        const payload: any = { 
+          email, 
+          password,
+          tenant: resolvedTenant || null
+        };
+
+        let loginSuccess = false;
+        let responseData: any = null;
+        let firstError: any = null;
+
+        // Attempt 1: Try the Super Admin / Org API first (nervous-dubinsky)
+        try {
+          const res = await api.post<LoginResponse>("/Auth/login", payload, {
+            baseURL: import.meta.env.VITE_ORG_API_BASE_URL || "https://nervous-dubinsky.180-179-213-167.plesk.page/api/"
+          });
+          responseData = res.data;
+          loginSuccess = true;
+        } catch (orgErr) {
+          firstError = orgErr;
+          console.warn("Login failed on the primary/org API, attempting fallback to the old API...", orgErr);
+          
+          // Attempt 2: Try the fallback/old URL (charming-bohr)
+          try {
+            const res = await api.post<LoginResponse>("/Auth/login", payload, {
+              baseURL: import.meta.env.VITE_API_BASE_URL || "https://charming-bohr.180-179-213-167.plesk.page/api/"
+            });
+            responseData = res.data;
+            loginSuccess = true;
+          } catch (fallbackErr: any) {
+            // Both failed. If the first attempt got a real validation error from the server,
+            // it is more meaningful than a network/CORS error from the fallback server.
+            if (firstError && firstError.response) {
+              throw firstError;
+            }
+            throw fallbackErr;
+          }
         }
 
-        const { data } = await api.post<LoginResponse>("/Auth/login", payload);
+        if (loginSuccess && responseData) {
+          const { access_Token, user, permissions = [] } = responseData.data;
 
-        const { access_Token, user, permissions = [] } = data.data;
+          localStorage.setItem("auth_token", access_Token);
+          localStorage.setItem("roleId", String(user.roleId));
+          localStorage.setItem("user_data", JSON.stringify(user));
+          localStorage.setItem("user_permissions", JSON.stringify(permissions));
 
-        localStorage.setItem("auth_token", access_Token);
-        localStorage.setItem("roleId", String(user.roleId));
-        localStorage.setItem("user_data", JSON.stringify(user));
-        localStorage.setItem("user_permissions", JSON.stringify(permissions));
-
-        set({
-          user,
-          token: access_Token,
-          permissions,
-          isAuthenticated: true,
-          isLoading: false,
-        });
+          set({
+            user,
+            token: access_Token,
+            permissions,
+            isAuthenticated: true,
+            isLoading: false,
+          });
+        }
       } catch (err) {
         set({ user: null, token: null, permissions: [], isAuthenticated: false, isLoading: false });
         throw err;

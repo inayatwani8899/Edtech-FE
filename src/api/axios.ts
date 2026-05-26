@@ -3,18 +3,30 @@ import Swal from 'sweetalert2';
 import { useAuthStore } from "../store/useAuthStore";
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || "https://nervous-dubinsky.180-179-213-167.plesk.page/api/" || "https://charming-bohr.180-179-213-167.plesk.page/api/",
-
-    // baseURL: "https://18lh764q-5001.inc1.devtunnels.ms/api/",
-    // timeout: 50000,
+    baseURL: import.meta.env.VITE_API_BASE_URL || "https://charming-bohr.180-179-213-167.plesk.page/api/",
     headers: {
         "Content-Type": "application/json",
     },
 });
 
-// Request interceptor - keep your existing token logic
+// Request interceptor - dynamically switches baseURL based on endpoint path
 api.interceptors.request.use(
     (config) => {
+        const url = config.url || "";
+        const lowerUrl = url.toLowerCase();
+        
+        // Use Org/SuperAdmin server for Auth, Organization, SuperAdmin, and TenantSync APIs, primary server for others
+        if (
+            lowerUrl.includes("organization") || 
+            lowerUrl.includes("auth") || 
+            lowerUrl.includes("superadmin") || 
+            lowerUrl.includes("tenantsync")
+        ) {
+            config.baseURL = import.meta.env.VITE_ORG_API_BASE_URL || "https://nervous-dubinsky.180-179-213-167.plesk.page/api/";
+        } else {
+            config.baseURL = import.meta.env.VITE_API_BASE_URL || "https://charming-bohr.180-179-213-167.plesk.page/api/";
+        }
+
         const token = localStorage.getItem("auth_token");
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
@@ -89,7 +101,7 @@ api.interceptors.response.use(
         const backendCode = response?.data?.code;
         const backendMessage = response?.data?.message;
         const method = response.config.method?.toLowerCase();
-        const isAuthRequest = response?.config?.url?.includes('/Auth/');
+        const isAuthRequest = response?.config?.url?.toLowerCase().includes("auth");
 
         // ✅ If backend sends code >= 400, treat it as error manually
         if (backendCode && backendCode >= 400) {
@@ -136,7 +148,7 @@ api.interceptors.response.use(
         const { response } = error;
         const status = response?.status;
         const message = response?.data?.message || getErrorMessage(status);
-        const isAuthRequest = error?.config?.url?.includes('/Auth/') || response?.config?.url?.includes('/Auth/');
+        const isAuthRequest = error?.config?.url?.toLowerCase().includes("auth") || response?.config?.url?.toLowerCase().includes("auth");
 
         // 🚨 Session Expiry Handling
         if (!isAuthRequest && (status === 401 || response?.data?.code === 401)) {

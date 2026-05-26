@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,10 +12,11 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Eye, EyeOff, Loader2, Mail, Lock, ShieldCheck, Sparkles, ArrowRight, Activity, Users, Globe, ArrowLeft } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useAuthStore } from "../../store/useAuthStore";
 
 export const Login = () => {
+  const { tenantName } = useParams<{ tenantName?: string }>();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -24,7 +25,6 @@ export const Login = () => {
   const login = useAuthStore((state) => state.login);
   const isLoading = useAuthStore((state) => state.isLoading);
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,13 +32,34 @@ export const Login = () => {
 
     if (!email || !password) {
       setError("Please fill in all fields");
+      toast.error("Please fill in all fields");
       return;
     }
 
     try {
-      await login(email, password);
+      await login(email, password, tenantName);
+      toast.success("Login successful. Welcome back!");
     } catch (err: any) {
-      setError(err?.response?.data?.message || err?.response?.data?.errorMessage || "Invalid email or password");
+      const status = err?.response?.status;
+      const message = err?.response?.data?.message || err?.response?.data?.errorMessage;
+      
+      let finalMessage = "Invalid email or password";
+      if (message) {
+        finalMessage = message;
+      } else if (status === 401) {
+        finalMessage = "Unauthorized access. Invalid credentials.";
+      } else if (status === 403) {
+        finalMessage = "Access denied. Inactive or unauthorized account.";
+      } else if (status === 404) {
+        finalMessage = "Authentication service or tenant not found.";
+      } else if (status === 500) {
+        finalMessage = "Server error. Please try again later.";
+      } else if (err?.message === "Network Error") {
+        finalMessage = "Network failure. Please check your internet connection.";
+      }
+      
+      setError(finalMessage);
+      toast.error(finalMessage);
     }
   };
 
@@ -145,7 +166,7 @@ export const Login = () => {
                 <form onSubmit={handleSubmit} className="space-y-4">
                   {error && (
                     <Alert className="bg-rose-500/10 border-rose-500/20 text-rose-400 rounded-xl animate-in fade-in zoom-in duration-300 py-2">
-                      <AlertDescription className="text-[8px] font-black uppercase tracking-widest text-center">{error}</AlertDescription>
+                      <AlertDescription className="text-xs font-semibold text-center">{error}</AlertDescription>
                     </Alert>
                   )}
 

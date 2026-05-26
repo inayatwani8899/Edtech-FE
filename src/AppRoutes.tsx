@@ -167,6 +167,7 @@ const AppRoutes = () => {
             {/* Public Routes */}
             <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
             <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+            <Route path="/login/:tenantName" element={<PublicRoute><Login /></PublicRoute>} />
             <Route path="/get-started" element={<PublicRoute><RoleSelection /></PublicRoute>} />
             <Route path="/register/student" element={<StudentRegister />} />
             <Route path="/register/counsellor" element={<CounsellorRegister />} />

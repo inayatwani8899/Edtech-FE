@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import axios from "axios";
+import api from "../api/axios";
 import { GenericResponse } from "@/types/types";
 
 // Define the Organization interface based on API schema
@@ -63,6 +63,9 @@ interface OrganizationState {
   updateOrganization: (id: string, data: Partial<Organization>) => Promise<void>;
   deleteOrganization: () => Promise<void>;
   verifyOrganization: (id: string) => Promise<void>;
+  testDbConnection: (connectionData: any) => Promise<any>;
+  setupDatabase: (orgId: string, connectionData: any) => Promise<any>;
+  syncPrimaryData: (orgId: string, syncData: any) => Promise<any>;
   
   // Setter actions
   setPage: (page: number) => void;
@@ -81,25 +84,7 @@ interface OrganizationState {
   clearOrganization: () => void;
 }
 
-// Create a custom axios instance targeting the configured backend URL
-const orgApi = axios.create({
-  baseURL: import.meta.env.VITE_ORG_API_BASE_URL || "https://nervous-dubinsky.180-179-213-167.plesk.page/api/",
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
 
-// Attach Authorization headers dynamically
-orgApi.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("auth_token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
 
 export const useOrganizationStore = create<OrganizationState>((set, get) => ({
   organizations: [],
@@ -187,7 +172,7 @@ export const useOrganizationStore = create<OrganizationState>((set, get) => ({
 
     try {
       // Fetch list of organizations from the backend
-      const response = await orgApi.get<any>("/Organization", {
+      const response = await api.get<any>("/Organization", {
         params: {
           page: currentPage,
           limit,
@@ -278,7 +263,7 @@ export const useOrganizationStore = create<OrganizationState>((set, get) => ({
     if (!id) return;
     set({ loading: true, error: null });
     try {
-      const response = await orgApi.get(`/Organization/${id}`);
+      const response = await api.get(`/Organization/${id}`);
       const org = response.data?.data || response.data;
       set({ organization: org });
     } catch (err: any) {
@@ -295,7 +280,7 @@ export const useOrganizationStore = create<OrganizationState>((set, get) => ({
   createOrganization: async (formData) => {
     set({ loading: true, error: null });
     try {
-      await orgApi.post("/Organization/register", formData, {
+      await api.post("/Organization/register", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -316,7 +301,7 @@ export const useOrganizationStore = create<OrganizationState>((set, get) => ({
         id: Number(id),
         ...data,
       };
-      await orgApi.put("/Organization", payload);
+      await api.put("/Organization", payload);
       await get().fetchOrganizations();
     } catch (err: any) {
       set({ error: err.response?.data?.message || "Failed to update organization." });
@@ -331,7 +316,7 @@ export const useOrganizationStore = create<OrganizationState>((set, get) => ({
     if (!selectedOrgId) return;
     set({ loading: true, error: null });
     try {
-      await orgApi.delete(`/Organization/${selectedOrgId}`);
+      await api.delete(`/Organization/${selectedOrgId}`);
       
       const remaining = organizations.filter(org => org.id !== Number(selectedOrgId));
       if (remaining.length === 0 && currentPage > 1) {
@@ -351,10 +336,72 @@ export const useOrganizationStore = create<OrganizationState>((set, get) => ({
   verifyOrganization: async (id) => {
     set({ loading: true, error: null });
     try {
-      await orgApi.put(`/Organization/verify/${id}`);
+      await api.put(`/Organization/verify/${id}`);
       await get().fetchOrganizations();
     } catch (err: any) {
       set({ error: err.response?.data?.message || "Failed to verify organization." });
+      throw err;
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  testDbConnection: async (connectionData) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await api.post("/SuperAdmin/organizations/test-db-connection", connectionData);
+      const resData = response.data;
+      if (resData && (resData.success === false || resData.code === 400 || resData.data?.success === false || resData.data?.serverConnected === false)) {
+        const errMsg = resData.message || resData.data?.message || "Connection failed";
+        const error = new Error(errMsg);
+        (error as any).response = { data: resData };
+        throw error;
+      }
+      return resData;
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || err.message || "Failed to verify database connection." });
+      throw err;
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  setupDatabase: async (orgId, connectionData) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await api.post(`/SuperAdmin/organizations/${orgId}/setup-database`, connectionData);
+      const resData = response.data;
+      if (resData && (resData.success === false || resData.code === 400 || resData.data?.success === false)) {
+        const errMsg = resData.message || resData.data?.message || "Database setup failed";
+        const error = new Error(errMsg);
+        (error as any).response = { data: resData };
+        throw error;
+      }
+      await get().fetchOrganizations();
+      return resData;
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || err.message || "Failed to setup tenant database." });
+      throw err;
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  syncPrimaryData: async (orgId, syncData) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await api.post(`/TenantSync/sync-primary-data/${orgId}`, syncData);
+      const resData = response.data;
+      if (resData && (resData.success === false || resData.code === 400 || resData.data?.success === false)) {
+        const errMsg = resData.message || resData.data?.message || "Synchronization failed";
+        const error = new Error(errMsg);
+        (error as any).response = { data: resData };
+        throw error;
+      }
+      await get().fetchOrganizations();
+      return resData;
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || err.message || "Failed to synchronize primary database." });
       throw err;
     } finally {
       set({ loading: false });

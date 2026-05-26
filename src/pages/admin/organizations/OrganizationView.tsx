@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,14 +25,18 @@ import {
     CheckCircle,
     XCircle,
     UserCheck,
-    Briefcase
+    Briefcase,
+    Database,
+    RefreshCw
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import Swal from "sweetalert2";
+import { TenantSetupModal } from "./components/TenantSetupModal";
 
 const OrganizationView: React.FC = () => {
     const navigate = useNavigate();
+    const [setupModalOpen, setSetupModalOpen] = useState(false);
     const { id } = useParams<{ id: string }>();
     const { 
         organization, 
@@ -94,14 +98,27 @@ const OrganizationView: React.FC = () => {
         const s = (status || "Pending").toLowerCase();
         switch (s) {
             case "completed":
-                return <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold uppercase tracking-wider text-[9px] px-3.5 py-1">Completed</Badge>;
+            case "fully activated":
+                return <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold uppercase tracking-wider text-[9px] px-3.5 py-1">Fully Activated</Badge>;
             case "verified":
-                return <Badge className="bg-blue-50 text-blue-700 border border-blue-200 font-bold uppercase tracking-wider text-[9px] px-3.5 py-1">Verified</Badge>;
-            case "rejected":
-                return <Badge className="bg-rose-50 text-rose-700 border border-rose-200 font-bold uppercase tracking-wider text-[9px] px-3.5 py-1">Rejected</Badge>;
+            case "server verified":
+                return <Badge className="bg-blue-50 text-blue-700 border border-blue-200 font-bold uppercase tracking-wider text-[9px] px-3.5 py-1">Server Verified</Badge>;
+            case "registered":
+                return <Badge className="bg-sky-50 text-sky-700 border border-sky-200 font-bold uppercase tracking-wider text-[9px] px-3.5 py-1">Registered</Badge>;
+            case "database created":
+                return <Badge className="bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold uppercase tracking-wider text-[9px] px-3.5 py-1">Database Created</Badge>;
+            case "data synced":
+                return <Badge className="bg-purple-50 text-purple-700 border border-purple-200 font-bold uppercase tracking-wider text-[9px] px-3.5 py-1">Data Synced</Badge>;
+            case "email sent":
+                return <Badge className="bg-teal-50 text-teal-700 border border-teal-200 font-bold uppercase tracking-wider text-[9px] px-3.5 py-1">Email Sent</Badge>;
             case "pending":
+            case "pending setup":
+                return <Badge className="bg-amber-50 text-amber-700 border border-amber-200 font-bold uppercase tracking-wider text-[9px] px-3.5 py-1">Pending Setup</Badge>;
+            case "rejected":
+            case "failed setup":
+                return <Badge className="bg-rose-50 text-rose-700 border border-rose-200 font-bold uppercase tracking-wider text-[9px] px-3.5 py-1">Failed Setup</Badge>;
             default:
-                return <Badge className="bg-amber-50 text-amber-700 border border-amber-200 font-bold uppercase tracking-wider text-[9px] px-3.5 py-1">Pending</Badge>;
+                return <Badge className="bg-slate-50 text-slate-700 border border-slate-200 font-bold uppercase tracking-wider text-[9px] px-3.5 py-1">{status || "Pending"}</Badge>;
         }
     };
 
@@ -169,6 +186,13 @@ const OrganizationView: React.FC = () => {
                             className="bg-white border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-[10px] h-9 px-4 rounded-lg uppercase tracking-wider"
                         >
                             Back
+                        </Button>
+                        <Button 
+                            onClick={() => setSetupModalOpen(true)} 
+                            className="bg-slate-900 text-white font-black text-[10px] h-9 px-5 rounded-lg shadow-lg hover:bg-slate-800 transition-all flex items-center gap-2 uppercase tracking-wider"
+                        >
+                            <Database className="h-3.5 w-3.5" />
+                            Tenant Setup
                         </Button>
                         <Button 
                             onClick={() => navigate(`/organizations/edit/${organization.id}`)} 
@@ -449,6 +473,48 @@ const OrganizationView: React.FC = () => {
                             </CardContent>
                         </Card>
 
+                        {/* MULTI-TENANT ARCHITECTURE PROTOCOL */}
+                        <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.03)] bg-white rounded-3xl border border-slate-100 overflow-hidden">
+                            <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/30 flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <HardDrive className="h-4.5 w-4.5 text-slate-800" />
+                                    <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-widest">Tenant Infrastructure</h3>
+                                </div>
+                                <span className="text-[9px] font-black text-indigo-500 uppercase tracking-widest">Active Cluster</span>
+                            </div>
+                            <CardContent className="p-6 text-left">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-3.5">
+                                        <div className="flex justify-between items-center text-xs">
+                                            <span className="font-bold text-slate-400 uppercase tracking-widest text-[9px]">Server Target</span>
+                                            <span className="font-semibold text-slate-700 font-mono text-[11px]">
+                                                {organization.tenantDatabase ? "Cloud Instance" : "Local Database Cluster"}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-xs border-t border-slate-50 pt-3">
+                                            <span className="font-bold text-slate-400 uppercase tracking-widest text-[9px]">Tenant Database</span>
+                                            <span className="font-black text-indigo-600 font-mono text-[11px] truncate max-w-[150px]">
+                                                {organization.tenantDb || organization.tenantDatabase || "Not Provisioned"}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-3.5 md:border-l md:border-slate-100 md:pl-6 flex flex-col justify-center">
+                                        <div className="flex justify-between items-center text-xs mb-1">
+                                            <span className="font-bold text-slate-400 uppercase tracking-widest text-[9px]">Onboarding Status</span>
+                                            {getStatusBadge(organization.status)}
+                                        </div>
+                                        <Button
+                                            onClick={() => setSetupModalOpen(true)}
+                                            className="w-full text-[9px] font-black uppercase tracking-widest h-8 rounded-xl bg-slate-900 text-white hover:bg-slate-800 transition-all flex items-center justify-center gap-1.5"
+                                        >
+                                            <RefreshCw className="h-3 w-3" /> Initialize / Sync
+                                        </Button>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+
                         {/* STATUS AND AUDIT INFORMATION */}
                         <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.03)] bg-white rounded-3xl border border-slate-100 overflow-hidden">
                             <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/30 flex items-center justify-between">
@@ -491,6 +557,11 @@ const OrganizationView: React.FC = () => {
                 </div>
             </div>
             <div className="h-16"></div>
+            <TenantSetupModal
+                open={setupModalOpen}
+                onOpenChange={setSetupModalOpen}
+                organization={organization}
+            />
         </div>
     );
 };
