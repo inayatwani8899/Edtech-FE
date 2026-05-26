@@ -1,6 +1,7 @@
 import axios from "axios";
 import Swal from 'sweetalert2';
 import { useAuthStore } from "../store/useAuthStore";
+import { toast } from "sonner";
 
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL || "https://charming-bohr.180-179-213-167.plesk.page/api/",
@@ -102,19 +103,12 @@ api.interceptors.response.use(
         const backendMessage = response?.data?.message;
         const method = response.config.method?.toLowerCase();
         const isAuthRequest = response?.config?.url?.toLowerCase().includes("auth");
+        const skipToast = response.config?.headers?.['x-skip-toast'] === 'true' || (response.config as any)?.skipToast;
 
         // ✅ If backend sends code >= 400, treat it as error manually
         if (backendCode && backendCode >= 400) {
-            if (!isAuthRequest) {
-                Swal.fire({
-                    title: 'Error!',
-                    text: backendMessage || 'Something went wrong on the server.',
-                    icon: 'error',
-                    timer: 5000,
-                    showConfirmButton: true,
-                    toast: true,
-                    position: 'top-end',
-                });
+            if (!isAuthRequest && !skipToast) {
+                toast.error(backendMessage || 'Something went wrong on the server.');
             }
 
             // Reject promise to prevent "success" flow from continuing
@@ -129,16 +123,8 @@ api.interceptors.response.use(
         // ✅ Show success message for non-GET requests
         if (!isAuthRequest && ['post', 'put', 'patch', 'delete'].includes(method || '')) {
             const message = getSuccessMessage(method, response.status, backendMessage);
-            if (message) {
-                Swal.fire({
-                    title: 'Success!',
-                    text: message,
-                    icon: 'success',
-                    timer: 3000,
-                    showConfirmButton: false,
-                    toast: true,
-                    position: 'top-end',
-                });
+            if (message && !skipToast) {
+                toast.success(message);
             }
         }
 
@@ -149,6 +135,7 @@ api.interceptors.response.use(
         const status = response?.status;
         const message = response?.data?.message || getErrorMessage(status);
         const isAuthRequest = error?.config?.url?.toLowerCase().includes("auth") || response?.config?.url?.toLowerCase().includes("auth");
+        const skipToast = error?.config?.headers?.['x-skip-toast'] === 'true' || (error?.config as any)?.skipToast;
 
         // 🚨 Session Expiry Handling
         if (!isAuthRequest && (status === 401 || response?.data?.code === 401)) {
@@ -168,16 +155,8 @@ api.interceptors.response.use(
             return Promise.reject(error);
         }
 
-        if (!isAuthRequest) {
-            Swal.fire({
-                title: 'Error!',
-                text: message,
-                icon: 'error',
-                timer: 5000,
-                showConfirmButton: true,
-                toast: true,
-                position: 'top-end',
-            });
+        if (!isAuthRequest && !skipToast) {
+            toast.error(message);
         }
 
         return Promise.reject(error);

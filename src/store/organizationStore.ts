@@ -349,7 +349,7 @@ export const useOrganizationStore = create<OrganizationState>((set, get) => ({
   testDbConnection: async (connectionData) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.post("/SuperAdmin/organizations/test-db-connection", connectionData);
+      const response = await api.post("/SuperAdmin/organizations/test-db-connection", connectionData, { skipToast: true } as any);
       const resData = response.data;
       if (resData && (resData.success === false || resData.code === 400 || resData.data?.success === false || resData.data?.serverConnected === false)) {
         const errMsg = resData.message || resData.data?.message || "Connection failed";
@@ -369,7 +369,7 @@ export const useOrganizationStore = create<OrganizationState>((set, get) => ({
   setupDatabase: async (orgId, connectionData) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.post(`/SuperAdmin/organizations/${orgId}/setup-database`, connectionData);
+      const response = await api.post(`/SuperAdmin/organizations/${orgId}/setup-database`, connectionData, { skipToast: true } as any);
       const resData = response.data;
       if (resData && (resData.success === false || resData.code === 400 || resData.data?.success === false)) {
         const errMsg = resData.message || resData.data?.message || "Database setup failed";
@@ -390,7 +390,7 @@ export const useOrganizationStore = create<OrganizationState>((set, get) => ({
   syncPrimaryData: async (orgId, syncData) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.post(`/TenantSync/sync-primary-data/${orgId}`, syncData);
+      const response = await api.post(`/TenantSync/sync-primary-data/${orgId}`, syncData, { skipToast: true } as any);
       const resData = response.data;
       if (resData && (resData.success === false || resData.code === 400 || resData.data?.success === false)) {
         const errMsg = resData.message || resData.data?.message || "Synchronization failed";

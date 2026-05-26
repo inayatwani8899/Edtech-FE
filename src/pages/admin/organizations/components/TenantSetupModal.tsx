@@ -27,6 +27,7 @@ import {
   ChevronLeft
 } from "lucide-react";
 import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
 
 interface TenantSetupModalProps {
   open: boolean;
@@ -50,6 +51,7 @@ export const TenantSetupModal: React.FC<TenantSetupModalProps> = ({
   const [databaseName, setDatabaseName] = useState("");
   const [dbUsername, setDbUsername] = useState("");
   const [dbPassword, setDbPassword] = useState("");
+  const [directStudentAllow, setDirectStudentAllow] = useState<boolean>(true);
   
   // Connection Test Status
   const [connectionStatus, setConnectionStatus] = useState<"idle" | "testing" | "available" | "connected" | "failed" | "invalid">("idle");
@@ -89,6 +91,7 @@ export const TenantSetupModal: React.FC<TenantSetupModalProps> = ({
       setSetupStatus("idle");
       setSyncStatus("idle");
       setSyncLogs([]);
+      setDirectStudentAllow(true);
     }
   }, [organization, open]);
 
@@ -139,6 +142,7 @@ export const TenantSetupModal: React.FC<TenantSetupModalProps> = ({
         databaseName,
         dbUsername,
         dbPassword,
+        directStudentAllow,
       };
       
       await setupDatabase(String(organization.id), payload);
@@ -303,15 +307,7 @@ export const TenantSetupModal: React.FC<TenantSetupModalProps> = ({
                       <AlertDescription className="text-xs font-semibold">Testing credentials with database server...</AlertDescription>
                     </Alert>
                   )}
-                  {connectionStatus === "available" && (
-                    <Alert className="bg-emerald-50 border-emerald-100 text-emerald-805 rounded-xl flex items-center py-2.5">
-                      <CheckCircle2 className="h-4 w-4 text-emerald-600 mr-3 animate-bounce" />
-                      <div className="text-xs font-semibold">
-                        <p className="font-bold text-emerald-800">Connection Successful</p>
-                        <p className="text-[10px] text-emerald-700/80 mt-0.5">Server Available • Database Connected</p>
-                      </div>
-                    </Alert>
-                  )}
+
                   {connectionStatus === "failed" && (
                     <Alert className="bg-rose-50 border-rose-100 text-rose-800 rounded-xl py-2.5">
                       <div className="flex items-start">
@@ -368,6 +364,20 @@ export const TenantSetupModal: React.FC<TenantSetupModalProps> = ({
                   {setupStatus === "running" ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" /> : <Play className="h-3.5 w-3.5 mr-2 text-indigo-400" />}
                   Setup Database
                 </Button>
+              </div>
+
+              {/* Direct Student Access Toggle Setting */}
+              <div className="p-4 bg-slate-50 border border-slate-150 rounded-2xl flex items-center justify-between">
+                <div className="flex flex-col">
+                  <span className="text-xs font-black text-slate-700 uppercase tracking-tight">Enable Direct Student Registration</span>
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wide mt-0.5">Allow students to directly register online under this tenant</span>
+                </div>
+                <Switch
+                  checked={directStudentAllow}
+                  onCheckedChange={setDirectStudentAllow}
+                  disabled={setupStatus === "running" || setupStatus === "success"}
+                  className="data-[state=checked]:bg-indigo-600"
+                />
               </div>
 
               {/* Status Alert Banner */}
