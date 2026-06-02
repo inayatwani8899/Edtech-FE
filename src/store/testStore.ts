@@ -199,6 +199,7 @@ export interface UserSubmissionsFilters {
 import { create } from 'zustand';
 import api from '@/api/axios';
 import { usePaymentStore } from './paymentStore';
+import { useAuthStore } from './useAuthStore';
 import { TestConfiguration } from '@/types/types';
 // import type { Question, Test, TestFilters, CreateTestPayload, CreateAITestPayload, TestSession, TestProgress } from '@/types';
 
@@ -272,7 +273,7 @@ interface TestState {
     // startTest: (testId: string) => Promise<void>;
     fetchQuestions: (page?: number, limit?: number, sessionId?: string | null, testId?: string | number | null, gradeId?: string | number | null) => Promise<void>;
     submitAnswer: (testId: string, questionId: string, answer: string) => Promise<void>;
-    submitTest: (testId: string, userId: string) => Promise<void>;
+    submitTest: (testId: string, userId: string) => Promise<any>;
     fetchTestProgress: (testId: string, sessionId: string) => Promise<void>;
     goToNextQuestion: (testId: string) => Promise<void>;
     goToPreviousQuestion: (testId: string) => Promise<void>;
@@ -302,6 +303,21 @@ interface TestState {
     setLoading: (loading: boolean) => void;
     setError: (error: string | null) => void;
 }
+
+const sanitizeGradeId = (grade: any): string | number | undefined => {
+    if (grade === null || grade === undefined) return undefined;
+    const str = String(grade).trim();
+    if (!str) return undefined;
+    
+    // Check if it has digits (e.g. "Level 1", "1st Grade", "1")
+    const match = str.match(/\d+/);
+    if (match) {
+        return Number(match[0]);
+    }
+    
+    // If it's a known non-numeric grade or just a string, return as is
+    return str;
+};
 
 const defaultFilters: TestFilters = {
     search: '',
@@ -528,17 +544,19 @@ export const useTestStore = create<TestState>((set, get) => ({
         set({ testTakingLoading: true, testTakingError: null });
         try {
             const currentSessionId = sessionId || get().currentSession?.id;
+            
+            const authStore = useAuthStore.getState();
+            const sessionGradeId = authStore.studentSession?.gradeId ?? (authStore.user as any)?.gradeId ?? (authStore.user as any)?.gradeLevel;
+            const resolvedGradeId = sanitizeGradeId(gradeIdParam) ?? sanitizeGradeId(sessionGradeId) ?? sanitizeGradeId(get().currentTest?.grade) ?? undefined;
 
             // Call the GetQuestions endpoint which returns the shape shown in the example
             const response = await api.get(`/QuestionBank/GetQuestions`, {
                 params: {
                     // Prefer explicit params passed in; fall back to currentTest values
-                    testId: testIdParam ?? get().currentTest?.testId ?? undefined,
-                    gradeId: gradeIdParam ?? get().currentTest?.grade ?? undefined,
-                    // testId: 1,
-                    // gradeId: 1,
+                    testId: testIdParam ?? get().currentTest?.testId ?? get().currentTest?.id ?? undefined,
+                    gradeId: resolvedGradeId,
                     page,
-                    pageSize: 100000,
+                    pageSize: limit ?? 80,
                     sessionId: currentSessionId || undefined
                 }
             });
@@ -660,16 +678,13 @@ export const useTestStore = create<TestState>((set, get) => ({
 
             const payload = {
                 testId: Number(testId),
-                userId: Number(userId),
                 answers: answersArray
             };
 
-            // Specify responseType as blob because the backend returns the generated report
-            await api.post(`/tests/submit`, payload, {
-                responseType: 'blob'
-            });
+            const response = await api.post(`/tests/submit`, payload);
 
             usePaymentStore.getState().clearPaidTest(userId, testId);
+            return response.data;
         } catch (err) {
             console.error("Test submission error:", err);
             throw err;

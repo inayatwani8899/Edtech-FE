@@ -27,6 +27,7 @@ import {
   Sparkles
 } from "lucide-react";
 import api from "@/api/axios";
+import { toast } from "sonner";
 
 // Interface matching your new API response
 interface UserTestSubmission {
@@ -89,88 +90,56 @@ export const Results = () => {
   // pixel-perfect CSS and fully selectable text in the PDF.
   const downloadReportWithReportId = async (reportId: number, testTitle: string) => {
     if (!reportId) {
-      alert("Report not available for this attempt.");
+      toast.error("Report not available for this attempt.");
       return;
     }
 
     setDownloadingReports(prev => ({ ...prev, [reportId]: true }));
 
     try {
-      // 1. Fetch the HTML report from the API
-      const response = await api.get(`/tests/report/${reportId}/html`);
-      const htmlContent: string = response.data;
-
-      // 2. Open a new window with the report HTML
-      const printWindow = window.open('', '_blank', 'width=900,height=700');
-      if (!printWindow) {
-        alert("Pop-up blocked! Please allow pop-ups for this site to download reports.");
-        return;
-      }
-
-      printWindow.document.open();
-      printWindow.document.write(htmlContent);
-      printWindow.document.close();
-
-      // 3. Wait for the report to finish rendering (AI insights, charts, etc.)
-      await new Promise<void>((resolve) => {
-        const timeout = setTimeout(resolve, 12000); // 12s safety fallback
-        const check = setInterval(() => {
-          try {
-            // @ts-ignore — the report HTML sets window.RENDER_COMPLETE = true
-            if (printWindow.RENDER_COMPLETE === true) {
-              clearInterval(check);
-              clearTimeout(timeout);
-              resolve();
-            }
-          } catch (e) {
-            // cross-origin safety — shouldn't happen for same-origin blank
-          }
-        }, 300);
+      // 1. Fetch the PDF blob from the new download endpoint
+      // We pass the x-skip-toast header so the global interceptor does not show a duplicate generic toast.
+      const response = await api.get(`/StudentDashboard/report/${reportId}/download`, {
+        responseType: "blob",
+        headers: {
+          "x-skip-toast": "true"
+        }
       });
 
-      // 4. Small extra delay for any final CSS transitions / font loading
-      await new Promise((r) => setTimeout(r, 500));
-
-      // 5. Inject print-fix CSS to eliminate blank pages
-      const printFixStyle = printWindow.document.createElement('style');
-      printFixStyle.textContent = `
-        @media print {
-          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-          body { background: white !important; margin: 0 !important; padding: 0 !important; }
-          .page {
-            min-height: auto !important;
-            height: auto !important;
-            page-break-after: always !important;
-            page-break-inside: avoid !important;
-            break-after: page !important;
-            break-inside: avoid !important;
-            margin: 0 !important;
-            box-shadow: none !important;
-            overflow: visible !important;
-          }
-          .page:last-child {
-            page-break-after: auto !important;
-            break-after: auto !important;
-          }
-          .page-footer {
-            position: relative !important;
+      // 2. Extract the filename from Content-Disposition header
+      let filename = "Student_Report.pdf";
+      const disposition = response.headers["content-disposition"] || response.headers["Content-Disposition"];
+      if (disposition) {
+        // Try to match UTF-8 encoded filename*
+        const filenameStarMatch = disposition.match(/filename\*=utf-8''([^;\n]+)/i);
+        if (filenameStarMatch && filenameStarMatch[1]) {
+          filename = decodeURIComponent(filenameStarMatch[1]);
+        } else {
+          // Fallback to standard filename
+          const filenameMatch = disposition.match(/filename=([^;\n]+)/);
+          if (filenameMatch && filenameMatch[1]) {
+            filename = filenameMatch[1].replace(/['"]/g, "").trim();
           }
         }
-      `;
-      printWindow.document.head.appendChild(printFixStyle);
+      }
 
-      // 6. Trigger browser's native Print dialog (user selects "Save as PDF")
-      printWindow.focus();
-      printWindow.print();
+      // 3. Create object URL and trigger immediate browser download
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
 
-      // 6. Close the print window after a short delay
-      setTimeout(() => {
-        printWindow.close();
-      }, 1000);
+      // Clean up DOM and memory
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
 
+      toast.success("Report downloaded successfully.");
     } catch (error) {
-      console.error("PDF generation failed:", error);
-      alert("Failed to download report. Please try again.");
+      console.error("PDF download failed:", error);
+      toast.error("Unable to download report.");
     } finally {
       setDownloadingReports(prev => ({ ...prev, [reportId]: false }));
     }
@@ -494,11 +463,16 @@ export const Results = () => {
                                   disabled={isDownloading}
                                 >
                                   {isDownloading ? (
-                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                    <>
+                                      <Loader2 className="h-3 w-3 animate-spin" />
+                                      Downloading...
+                                    </>
                                   ) : (
-                                    <Download className="h-3 w-3" />
+                                    <>
+                                      <Download className="h-3 w-3" />
+                                      Report
+                                    </>
                                   )}
-                                  Report
                                 </Button>
                               </td>
                             </tr>
@@ -618,11 +592,16 @@ export const Results = () => {
                             disabled={isDownloading}
                           >
                             {isDownloading ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
+                              <>
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                Downloading Report...
+                              </>
                             ) : (
-                              <Download className="h-4 w-4" />
+                              <>
+                                <Download className="h-4 w-4" />
+                                Download Report
+                              </>
                             )}
-                            Download Report
                           </Button>
                         </div>
                       </CardContent>

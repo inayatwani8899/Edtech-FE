@@ -4,6 +4,16 @@ import api from "@/api/axios";
 import Swal from "sweetalert2";
 import { usePaymentStore } from "./paymentStore";
 
+export interface StudentSession {
+  token: string | null;
+  tenant: string | null;
+  studentId: number | null;
+  gradeId: number | null;
+  grade: string | null;
+  role: string | null;
+  email: string | null;
+}
+
 const getTenantFromHostname = () => {
   const hostname = window.location.hostname;
   if (hostname === "localhost" || hostname === "127.0.0.1" || /^(\d{1,3}\.){3}\d{1,3}$/.test(hostname)) {
@@ -30,6 +40,7 @@ interface AuthState {
   tenantData: any | null;
   tenantLoading: boolean;
   tenantError: string | null;
+  studentSession: StudentSession | null;
   
   login: (email: string, password: string, tenantName?: string | null) => Promise<void>;
   logout: () => void;
@@ -55,18 +66,51 @@ export const useAuthStore = create<AuthState>(
     tenantData: null,
     tenantLoading: false,
     tenantError: null,
+    studentSession: null,
 
     loadFromStorage: () => {
       const token = localStorage.getItem("accessToken") || localStorage.getItem("auth_token");
       const userData = localStorage.getItem("userData") || localStorage.getItem("user_data");
       const permissionsData = localStorage.getItem("user_permissions");
       const storedTenantData = localStorage.getItem("organizationData");
+      const storedStudentSession = localStorage.getItem("studentSession");
+
+      let studentSession: StudentSession | null = null;
+      if (storedStudentSession) {
+        try {
+          studentSession = JSON.parse(storedStudentSession);
+        } catch (e) {
+          console.error("Error parsing studentSession from localStorage:", e);
+        }
+      }
+
+      // Fallback reconstruction for refresh recovery
+      if (!studentSession && token && userData) {
+        try {
+          const parsedUser = JSON.parse(userData);
+          const tenantVal = localStorage.getItem("tenantName") || "";
+          const gradeIdVal = localStorage.getItem("gradeId");
+          const gradeVal = localStorage.getItem("grade");
+          studentSession = {
+            token: token,
+            tenant: tenantVal,
+            studentId: parsedUser.id ? Number(parsedUser.id) : null,
+            gradeId: gradeIdVal ? Number(gradeIdVal) : (parsedUser.gradeId ? Number(parsedUser.gradeId) : null),
+            grade: gradeVal || parsedUser.grade || "",
+            role: parsedUser.role || "",
+            email: parsedUser.email || ""
+          };
+        } catch (e) {
+          console.error("Error reconstructing studentSession:", e);
+        }
+      }
 
       set({
         token: token || null,
         user: userData ? JSON.parse(userData) : null,
         permissions: permissionsData ? JSON.parse(permissionsData) : [],
         tenantData: storedTenantData ? JSON.parse(storedTenantData) : null,
+        studentSession,
         isAuthenticated: !!(token && userData),
         isLoading: false,
       });
@@ -133,6 +177,16 @@ export const useAuthStore = create<AuthState>(
             }
           }
 
+          const studentSession: StudentSession = {
+            token: access_Token,
+            tenant: tenant || "",
+            studentId: user.id ? Number(user.id) : null,
+            gradeId: user.gradeId ? Number(user.gradeId) : null,
+            grade: user.grade || "",
+            role: user.role || "",
+            email: user.email || ""
+          };
+
           // Save required session keys
           localStorage.setItem("accessToken", access_Token);
           localStorage.setItem("auth_token", access_Token); // fallback compatibility
@@ -148,10 +202,16 @@ export const useAuthStore = create<AuthState>(
             localStorage.setItem("organizationId", organizationId);
           }
 
+          localStorage.setItem("studentSession", JSON.stringify(studentSession));
+          localStorage.setItem("studentId", String(studentSession.studentId || ""));
+          localStorage.setItem("gradeId", String(studentSession.gradeId || ""));
+          localStorage.setItem("grade", studentSession.grade || "");
+
           set({
             user,
             token: access_Token,
             permissions,
+            studentSession,
             isAuthenticated: true,
             isLoading: false,
           });
@@ -255,7 +315,11 @@ export const useAuthStore = create<AuthState>(
       localStorage.removeItem("loginUrl");
       localStorage.removeItem("organizationId");
       localStorage.removeItem("organizationData");
-      set({ user: null, token: null, permissions: [], isAuthenticated: false, tenantData: null });
+      localStorage.removeItem("studentSession");
+      localStorage.removeItem("studentId");
+      localStorage.removeItem("gradeId");
+      localStorage.removeItem("grade");
+      set({ user: null, token: null, permissions: [], studentSession: null, isAuthenticated: false, tenantData: null });
     },
 
     fetchTenantDetails: async (tenantName: string) => {

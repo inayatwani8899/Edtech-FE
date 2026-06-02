@@ -35,7 +35,7 @@ export const useTestLogic = () => {
     const hasNext = currentPage < computedTotalPages;
     const hasPrevious = currentPage > 1;
 
-    const { user } = useAuthStore();
+    const { user, studentSession } = useAuthStore();
     const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
     const [isFullScreen, setIsFullScreen] = useState(false);
     const [currentStep, setCurrentStep] = useState(0); // 0: Instructions, 1: Ready, 2: Test
@@ -57,10 +57,15 @@ export const useTestLogic = () => {
 
     // Single source of truth for fetching questions when entering the interface
     useEffect(() => {
-        if (testId && user?.grade && testQuestions.length === 0) {
-            fetchQuestions(1, 10, null, testId, user.grade);
+        if (!testId || testQuestions.length > 0) return;
+
+        const resolvedGrade = studentSession?.gradeId ?? user?.grade ?? (user as any)?.gradeLevel ?? (user as any)?.gradeId ?? currentTest?.grade;
+
+        // Fetch questions once we have resolved a grade or when currentTest details are fully loaded
+        if (resolvedGrade || currentTest) {
+            fetchQuestions(1, 80, null, testId, resolvedGrade);
         }
-    }, [testId, user?.grade, fetchQuestions, testQuestions.length]);
+    }, [testId, user, studentSession, currentTest, fetchQuestions, testQuestions.length]);
 
 
     // Cleanup camera on page unmount
