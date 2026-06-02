@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -16,10 +17,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { GraduationCap, ArrowLeft, User, Mail, Lock, Calendar, Phone } from "lucide-react";
+import { GraduationCap, ArrowLeft, User, Mail, Lock, Calendar, Phone, ChevronRight, Sparkles, ArrowRight, CheckCircle2, Shield, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuthStore } from "@/store/useAuthStore";
 import Swal from "sweetalert2";
+import api from "@/api/axios";
+
 
 const StudentRegister = () => {
   const navigate = useNavigate();
@@ -37,288 +40,451 @@ const StudentRegister = () => {
     phone: "",
   });
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [step, setStep] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+
+  const validateStep = (currentStep: number) => {
+    const newErrors: Record<string, string> = {};
+    
+    if (currentStep === 1) {
+      if (!formData.firstName.trim()) newErrors.firstName = "Required";
+      if (!formData.lastName.trim()) newErrors.lastName = "Required";
+      
+      if (!formData.email) newErrors.email = "Required";
+      else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Invalid email";
+      
+      if (!formData.password) newErrors.password = "Required";
+      else if (formData.password.length < 6) newErrors.password = "Min 6 characters";
+      
+      if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = "Mismatch";
+    }
+    
+    if (currentStep === 2) {
+      if (!formData.phone) newErrors.phone = "Required";
+      else if (!/^\d{10}$/.test(formData.phone)) newErrors.phone = "Must be 10 digits";
+      
+      if (!formData.dateOfBirth) newErrors.dateOfBirth = "Required";
+      if (!formData.gradeLevel) newErrors.gradeLevel = "Required";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleNext = () => {
+    if (validateStep(step)) {
+      setStep(step + 1);
+    } else {
+      toast({
+        title: "Validation Error",
+        description: "Please check all required fields.",
+        variant: "destructive"
+      });
+    }
+  };
+  const [grades, setGrades] = useState<{ id: number; name: string }[]>([]);
+
+  useEffect(() => {
+    const fetchGrades = async () => {
+      try {
+        const response = await api.get("/Grade", {
+          params: { page: 1, limit: 100, sortDirection: "asc" }
+        });
+        if (response.data.code === 200) {
+          setGrades(response.data.data.grades);
+        }
+      } catch (err) {
+        console.error("Failed to fetch grades:", err);
+      }
+    };
+    fetchGrades();
+  }, []);
+
+
   useEffect(() => {
     window.scroll(0, 0);
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateStep(step)) return;
 
-    if (formData.password !== formData.confirmPassword) {
-      toast({
-        title: "Error",
-        description: "Passwords do not match",
-        variant: "destructive",
-      });
-      return;
-    }
-
+    setIsLoading(true);
     try {
       const { confirmPassword, ...payload } = formData;
-      const result = await registerStudent(payload);
 
-      const { isAuthenticated } = useAuthStore.getState();
-      if (isAuthenticated) {
-        return navigate("/student/dashboard");
+      // Format dateOfBirth to ISO string if it exists
+      const formattedPayload = {
+        ...payload,
+        dateOfBirth: formData.dateOfBirth ? new Date(formData.dateOfBirth).toISOString() : null,
+      };
+
+      const result = await registerStudent(formattedPayload);
+
+      if (result.success) {
+        setIsSuccess(true);
+        Swal.fire({
+          toast: true,
+          icon: "success",
+          title: "Registration Successful",
+          text: "Welcome! Your account has been created.",
+          position: "top-end",
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+        });
+
+        setTimeout(() => {
+          navigate("/login");
+        }, 3000);
+      } else {
+        toast({
+          title: "Error",
+          description: result.error?.message || "Registration failed",
+          variant: "destructive",
+        });
       }
-
-      Swal.fire({
-        toast: true,
-        icon: "success",
-        title: "Registration Successful",
-        text: "Please log in to continue.",
-        position: "top-end",
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
       });
-
-      navigate("/login");
-    } catch (error: any) { }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (field === "phone") {
+      const cleaned = value.replace(/\D/g, '').slice(0, 10);
+      setFormData(prev => ({ ...prev, [field]: cleaned }));
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }));
+    }
+
+    if (errors[field]) {
+      setErrors(prev => {
+        const up = { ...prev };
+        delete up[field];
+        return up;
+      });
+    }
   };
 
   return (
-    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-gradient-to-br from-blue-500 to-cyan-500 relative overflow-hidden">
+    <div className="min-h-screen w-full bg-[#f9fafb] text-zinc-900 relative flex items-center justify-center overflow-y-auto py-12 md:py-20 lg:py-0 select-none font-sans">
+      
+      {/* Subtle radial dot grid pattern from Landing Page */}
+      <div className="absolute inset-0 pointer-events-none z-0" style={{
+        backgroundImage: "radial-gradient(circle, #d1d1d6 1px, transparent 1px)",
+        backgroundSize: "24px 24px",
+        opacity: 0.4
+      }} />
 
-      {/* Decorative shapes */}
-      <div className="hidden lg:block absolute -left-24 -top-24 w-96 h-96 rounded-full bg-white/10 blur-3xl pointer-events-none" />
-      <div className="hidden lg:block absolute -right-24 -bottom-24 w-96 h-96 rounded-full bg-white/5 blur-2xl pointer-events-none" />
-
-      {/* LEFT BRANDING SECTION */}
-      <div className="hidden lg:flex flex-col justify-start px-16 py-28 text-white z-10">
-        <h1 className="text-5xl font-extrabold mb-4 leading-tight drop-shadow-lg">
-          Start Your Journey
-        </h1>
-        <p className="text-lg text-white/85 max-w-lg mb-6">
-          Create your student account and unlock personalized assessments,
-          actionable insights, and career guidance tailored to your goals.
-        </p>
-
-        <div className="mt-8 flex items-center gap-4 text-sm text-white/80">
-          <div className="h-px w-12 bg-white/30" />
-          Trusted • Secure • Smart
-        </div>
-
-        <div className="mt-10 flex items-center gap-6">
-          <div className="bg-white/10 p-4 rounded-2xl flex items-center gap-3">
-            <GraduationCap className="w-6 h-6 text-white/90" />
-            <div>
-              <div className="text-sm font-semibold">For Students</div>
-              <div className="text-xs text-white/75">Personalized learning</div>
-            </div>
-          </div>
-
-          <div className="bg-white/10 p-4 rounded-2xl flex items-center gap-3">
-            <div className="w-6 h-6 rounded-md bg-gradient-to-r from-pink-500 to-yellow-400 flex items-center justify-center text-white">★</div>
-            <div>
-              <div className="text-sm font-semibold">Interactive Tests</div>
-              <div className="text-xs text-white/75">Instant feedback</div>
-            </div>
-          </div>
-        </div>
+      {/* 🏠 Top-Left Navigation */}
+      <div className="absolute top-6 left-6 md:left-12 z-50 flex items-center gap-3">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.25em] text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 border border-zinc-200 backdrop-blur-md transition-all duration-300 group"
+        >
+          <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+          Home
+        </Link>
+        <div className="h-4 w-px bg-zinc-200" />
+        <Button
+          variant="ghost"
+          onClick={() => navigate("/get-started")}
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.25em] text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 border border-zinc-200 backdrop-blur-md transition-all duration-300 group"
+        >
+          Back
+        </Button>
       </div>
 
-      {/* RIGHT FORM SECTION */}
-      <div className="flex items-center justify-center px-6 py-12 z-20">
-        <div className="w-full max-w-xl">
+      {/* 🌌 Ambient Gradients */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[10%] left-[-10%] w-[50%] h-[50%] bg-indigo-500/5 rounded-full blur-[150px] animate-pulse mix-blend-multiply" />
+        <div className="absolute bottom-[20%] right-[-10%] w-[50%] h-[50%] bg-rose-500/5 rounded-full blur-[150px] animate-pulse mix-blend-multiply" />
+      </div>
 
-        
+      <div className="max-w-7xl mx-auto px-4 lg:px-8 relative z-10 w-full">
+        <div className="grid lg:grid-cols-2 gap-8 items-center text-left">
+          
+          {/* 🎭 LEFT BRAND UNIVERSE */}
+          <div className="hidden lg:flex flex-col justify-center space-y-5 animate-in fade-in slide-in-from-left-12 duration-1000 ease-out">
+            <div className="space-y-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#eef2ff] border border-indigo-100 self-start shadow-sm">
+                <Sparkles className="h-3 w-3 text-[#6366f1] animate-pulse" />
+                <span className="text-[9px] font-black tracking-[0.3em] uppercase text-[#6366f1]">Next-gen learning portal</span>
+              </div>
+              <h1 className="text-4xl font-black leading-[1.1] tracking-tight text-zinc-900">
+                Begin Your <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 font-black">Academic Journey.</span>
+              </h1>
+              <p className="text-base text-zinc-500 font-medium max-w-lg leading-relaxed antialiased">
+                Access premium courses, personalized mentorship, and a global community of curious minds.
+              </p>
+            </div>
 
-          <Card className="bg-white/95 shadow-2xl border-0 rounded-3xl overflow-hidden">
-            <div className="relative">
-              <div className="absolute -top-10 right-6 w-40 h-40 rounded-full bg-gradient-to-tr from-blue-500 to-cyan-500 opacity-20 transform rotate-45" />
-              <CardHeader className="text-center space-y-2 pt-8 pb-4">
-                <div className="bg-gradient-to-r from-blue-500 to-cyan-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-2 shadow-lg">
-                  <GraduationCap className="w-8 h-8 text-white" />
+            <div className="flex items-center gap-4 text-[9px] font-black text-zinc-400 uppercase tracking-[0.4em]">
+              <div className="h-px w-10 bg-zinc-200" />
+              Secure • Personalized • Global
+            </div>
+
+            <div className="grid grid-cols-2 gap-3.5 max-w-md">
+              <div className="p-4 rounded-2xl bg-white border border-zinc-200 shadow-[0_8px_30px_rgba(0,0,0,0.04)] group hover:bg-zinc-50/50 transition-all duration-300">
+                <Shield className="h-4.5 w-4.5 text-[#6366f1] mb-1.5" />
+                <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest mb-0.5">Community Trusted</p>
+                <p className="text-xs font-black text-zinc-800 tracking-tight">Secure Access</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-white border border-zinc-200 shadow-[0_8px_30px_rgba(0,0,0,0.04)] group hover:bg-zinc-50/50 transition-all duration-300">
+                <div className="h-4.5 w-4.5 rounded bg-[#6366f1] flex items-center justify-center text-white text-[10px] mb-1.5">✓</div>
+                <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest mb-0.5">Top Ratings</p>
+                <p className="text-xs font-black text-zinc-800 tracking-tight">Quality Content</p>
+              </div>
+            </div>
+          </div>
+
+          {/* 🚀 RIGHT FORM ARCHITECTURE */}
+          <div className="flex items-center justify-center perspective-1000 animate-in fade-in zoom-in duration-1000 delay-100">
+            <Card className="w-full max-w-[440px] relative z-10 bg-white border border-zinc-200 shadow-[0_8px_30px_rgba(0,0,0,0.04)] rounded-[2rem] overflow-hidden group/card transition-all duration-700 ease-out">
+              
+              <CardHeader className="p-5 pb-1 text-center relative z-10">
+                <div className="mx-auto bg-gradient-to-tr from-indigo-500 to-purple-500 h-11 w-11 rounded-xl flex items-center justify-center mb-3 shadow-[0_4px_14px_rgba(99,102,241,0.35)] transform group-hover/card:scale-105 transition-all duration-500">
+                  <GraduationCap className="h-6 w-6 text-white" />
                 </div>
-                <CardTitle className="text-2xl sm:text-3xl font-bold">
+                <CardTitle className="text-xl font-black text-zinc-900 tracking-tight leading-none mb-1.5">
                   Student Registration
                 </CardTitle>
-                <p className="text-sm text-slate-600">
-                  Create your account to begin learning — it only takes a minute.
-                </p>
+                <div className="flex items-center justify-center gap-1.5 mb-1.5">
+                  <div className={`h-1 w-5 rounded-full transition-all duration-500 ${step >= 1 ? 'bg-[#6366f1] shadow-[0_0_8px_rgba(99,102,241,0.5)]' : 'bg-zinc-200'}`} />
+                  <div className={`h-1 w-5 rounded-full transition-all duration-500 ${step >= 2 ? 'bg-[#6366f1] shadow-[0_0_8px_rgba(99,102,241,0.5)]' : 'bg-zinc-200'}`} />
+                </div>
+                <CardDescription className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.25em]">
+                  Step {step} of 2: {step === 1 ? 'Personal Information' : 'Academic Detail'}
+                </CardDescription>
               </CardHeader>
 
-              <CardContent className="px-8 pb-10">
-                <form onSubmit={handleSubmit} className="space-y-6">
-
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>First Name</Label>
-                      <div className="relative">
-                        <Input
-                          value={formData.firstName}
-                          onChange={(e) =>
-                            handleInputChange("firstName", e.target.value)
-                          }
-                          placeholder="John"
-                          required
-                          className="h-11 rounded-xl pl-11 focus:ring-2 focus:ring-indigo-300"
-                        />
-                        <User className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
-                      </div>
+              <CardContent className="p-6 pt-2 relative z-10">
+                {isSuccess ? (
+                  <div className="py-6 text-center space-y-4 animate-in fade-in zoom-in duration-505">
+                    <div className="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-3 border border-indigo-100 shadow-[0_0_20px_rgba(99,102,241,0.15)]">
+                      <CheckCircle2 className="w-8 h-8 text-indigo-500 animate-bounce" />
                     </div>
-
-                    <div className="space-y-2">
-                      <Label>Last Name</Label>
-                      <div className="relative">
-                        <Input
-                          value={formData.lastName}
-                          onChange={(e) =>
-                            handleInputChange("lastName", e.target.value)
-                          }
-                          placeholder="Doe"
-                          required
-                          className="h-11 rounded-xl pl-11 focus:ring-2 focus:ring-indigo-300"
-                        />
-                        <User className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Email Address</Label>
-                    <div className="relative">
-                      <Input
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) =>
-                          handleInputChange("email", e.target.value)
-                        }
-                        placeholder="you@example.com"
-                        required
-                        className="h-11 rounded-xl pl-11 focus:ring-2 focus:ring-indigo-300"
-                      />
-                      <Mail className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
-                    </div>
-                  </div>
-
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Password</Label>
-                      <div className="relative">
-                        <Input
-                          type="password"
-                          value={formData.password}
-                          onChange={(e) =>
-                            handleInputChange("password", e.target.value)
-                          }
-                          placeholder="Create password"
-                          required
-                          className="h-11 rounded-xl pl-11 focus:ring-2 focus:ring-indigo-300"
-                        />
-                        <Lock className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Confirm Password</Label>
-                      <div className="relative">
-                        <Input
-                          type="password"
-                          value={formData.confirmPassword}
-                          onChange={(e) =>
-                            handleInputChange("confirmPassword", e.target.value)
-                          }
-                          placeholder="Confirm password"
-                          required
-                          className="h-11 rounded-xl pl-11 focus:ring-2 focus:ring-indigo-300"
-                        />
-                        <Lock className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Date of Birth</Label>
-                      <div className="relative">
-                        <Input
-                          type="date"
-                          value={formData.dateOfBirth}
-                          onChange={(e) =>
-                            handleInputChange("dateOfBirth", e.target.value)
-                          }
-                          required
-                          className="h-11 rounded-xl pl-11 focus:ring-2 focus:ring-indigo-300"
-                        />
-                        <Calendar className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Grade Level</Label>
-                      <Select
-                        onValueChange={(value) =>
-                          handleInputChange("gradeLevel", value)
-                        }
+                    <h2 className="text-xl font-black text-zinc-900 tracking-tight">Registration Success</h2>
+                    <p className="text-zinc-500 text-[9px] font-black uppercase tracking-widest max-w-[200px] mx-auto">
+                      Profile created successfully. Redirecting to login...
+                    </p>
+                    <div className="pt-2">
+                      <Button
+                        onClick={() => navigate("/login")}
+                        className="h-11 w-full rounded-xl bg-[#6366f1] hover:bg-[#4f46e5] text-white font-black text-[9px] uppercase tracking-widest shadow-[0_4px_14px_rgba(99,102,241,0.35)] transition-all border-none"
                       >
-                        <SelectTrigger className="h-11 rounded-xl">
-                          <SelectValue placeholder="Select grade" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {[...Array(12)].map((_, i) => (
-                            <SelectItem key={i + 1} value={`${i + 1}`}>
-                              {i + 1}th Grade
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        Login Now
+                      </Button>
                     </div>
                   </div>
+                ) : (
+                  <form onSubmit={handleSubmit} className="space-y-3">
+                    {step === 1 && (
+                      <div className="space-y-3 animate-in fade-in slide-in-from-right-4 duration-500 text-left">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1.5">
+                            <Label className="text-[8px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-3">First Name</Label>
+                            <div className="relative group/input">
+                              <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-zinc-400 group-focus-within/input:text-[#6366f1] transition-colors" />
+                              <Input
+                                value={formData.firstName}
+                                onChange={(e) => handleInputChange("firstName", e.target.value)}
+                                placeholder="First Name"
+                                required
+                                className={`h-9 pl-9 bg-white border border-zinc-250 focus:border-[#6366f1] rounded-xl font-bold text-zinc-800 text-[11px] placeholder:text-zinc-300 focus:ring-4 focus:ring-indigo-500/10 focus:outline-none transition-all duration-300 ${errors.firstName ? 'ring-2 ring-rose-500/50' : ''}`}
+                              />
+                            </div>
+                            {errors.firstName && <p className="text-[7px] text-rose-600 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.firstName}</p>}
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label className="text-[8px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-3">Last Name</Label>
+                            <div className="relative group/input">
+                              <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-zinc-400 group-focus-within/input:text-[#6366f1] transition-colors" />
+                              <Input
+                                value={formData.lastName}
+                                onChange={(e) => handleInputChange("lastName", e.target.value)}
+                                placeholder="Last Name"
+                                required
+                                className={`h-9 pl-9 bg-white border border-zinc-250 focus:border-[#6366f1] rounded-xl font-bold text-zinc-800 text-[11px] placeholder:text-zinc-300 focus:ring-4 focus:ring-indigo-500/10 focus:outline-none transition-all duration-300 ${errors.lastName ? 'ring-2 ring-rose-500/50' : ''}`}
+                              />
+                            </div>
+                            {errors.lastName && <p className="text-[7px] text-rose-600 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.lastName}</p>}
+                          </div>
+                        </div>
 
-                  <div className="space-y-2">
-                    <Label>Phone Number (Optional)</Label>
-                    <div className="relative">
-                      <Input
-                        type="tel"
-                        value={formData.phone}
-                        onChange={(e) =>
-                          handleInputChange("phone", e.target.value)
-                        }
-                        placeholder="+91 XXXXX XXXXX"
-                        className="h-11 rounded-xl pl-11 focus:ring-2 focus:ring-indigo-300"
-                      />
-                      <Phone className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+                        <div className="space-y-1.5">
+                          <Label className="text-[8px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-3">Email Address</Label>
+                          <div className="relative group/input">
+                            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-zinc-400 group-focus-within/input:text-[#6366f1] transition-colors" />
+                            <Input
+                              type="email"
+                              value={formData.email}
+                              onChange={(e) => handleInputChange("email", e.target.value)}
+                              placeholder="email@example.com"
+                              required
+                              className={`h-9 pl-9 bg-white border border-zinc-250 focus:border-[#6366f1] rounded-xl font-bold text-zinc-800 text-[11px] placeholder:text-zinc-300 focus:ring-4 focus:ring-indigo-500/10 focus:outline-none transition-all duration-300 ${errors.email ? 'ring-2 ring-rose-500/50' : ''}`}
+                            />
+                          </div>
+                          {errors.email && <p className="text-[7px] text-rose-600 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.email}</p>}
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1.5">
+                            <Label className="text-[8px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-3">Password</Label>
+                            <div className="relative group/input">
+                              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-zinc-400 group-focus-within/input:text-[#6366f1] transition-colors" />
+                              <Input
+                                type="password"
+                                value={formData.password}
+                                onChange={(e) => handleInputChange("password", e.target.value)}
+                                placeholder="••••••••"
+                                required
+                                className={`h-9 pl-9 bg-white border border-zinc-250 focus:border-[#6366f1] rounded-xl font-bold text-zinc-800 text-[11px] placeholder:text-zinc-300 focus:ring-4 focus:ring-indigo-500/10 focus:outline-none transition-all duration-300 ${errors.password ? 'ring-2 ring-rose-500/50' : ''}`}
+                              />
+                            </div>
+                            {errors.password && <p className="text-[7px] text-rose-600 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.password}</p>}
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label className="text-[8px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-3">Confirm</Label>
+                            <div className="relative group/input">
+                              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-zinc-400 group-focus-within/input:text-[#6366f1] transition-colors" />
+                              <Input
+                                type="password"
+                                value={formData.confirmPassword}
+                                onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
+                                placeholder="••••••••"
+                                required
+                                className={`h-9 pl-9 bg-white border border-zinc-250 focus:border-[#6366f1] rounded-xl font-bold text-zinc-800 text-[11px] placeholder:text-zinc-300 focus:ring-4 focus:ring-indigo-500/10 focus:outline-none transition-all duration-300 ${errors.confirmPassword ? 'ring-2 ring-rose-500/50' : ''}`}
+                              />
+                            </div>
+                            {errors.confirmPassword && <p className="text-[7px] text-rose-600 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.confirmPassword}</p>}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {step === 2 && (
+                      <div className="space-y-3 animate-in fade-in slide-in-from-right-4 duration-500 text-left">
+                         <div className="space-y-1.5">
+                           <Label className="text-[8px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-3">Phone Number</Label>
+                           <div className="relative group/input">
+                             <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-zinc-400 group-focus-within/input:text-[#6366f1] transition-colors" />
+                             <Input
+                               type="tel"
+                               value={formData.phone}
+                               onChange={(e) => handleInputChange("phone", e.target.value)}
+                               placeholder="10-digit mobile number"
+                               required
+                               className={`h-9 pl-9 bg-white border border-zinc-250 focus:border-[#6366f1] rounded-xl font-bold text-zinc-800 text-[11px] placeholder:text-zinc-300 focus:ring-4 focus:ring-indigo-500/10 focus:outline-none transition-all duration-300 ${errors.phone ? 'ring-2 ring-rose-500/50' : ''}`}
+                             />
+                           </div>
+                           {errors.phone && <p className="text-[7px] text-rose-600 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.phone}</p>}
+                         </div>
+
+                         <div className="space-y-1.5">
+                           <Label className="text-[8px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-3">Date of Birth</Label>
+                           <div className="relative group/input">
+                             <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3 w-3 text-zinc-400 group-focus-within/input:text-[#6366f1] transition-colors" />
+                             <Input
+                               type="date"
+                               value={formData.dateOfBirth}
+                               onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
+                               required
+                               className={`h-9 pl-9 bg-white border border-zinc-250 focus:border-[#6366f1] rounded-xl font-bold text-zinc-800 text-[11px] placeholder:text-zinc-350 focus:ring-4 focus:ring-indigo-500/10 focus:outline-none transition-all duration-300 ${errors.dateOfBirth ? 'ring-2 ring-rose-500/50' : ''}`}
+                             />
+                           </div>
+                           {errors.dateOfBirth && <p className="text-[7px] text-rose-600 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.dateOfBirth}</p>}
+                         </div>
+                         <div className="space-y-1.5">
+                           <Label className="text-[8px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-3">Grade Level</Label>
+                           <Select onValueChange={(value) => handleInputChange("gradeLevel", value)}>
+                             <SelectTrigger className={`h-9 bg-white border border-zinc-250 focus:border-[#6366f1] rounded-xl font-bold text-zinc-800 text-[11px] focus:ring-4 focus:ring-indigo-500/10 transition-all px-3 focus:outline-none ${errors.gradeLevel ? 'ring-2 ring-rose-500/50' : ''}`}>
+                               <SelectValue placeholder="Grade" />
+                             </SelectTrigger>
+                             <SelectContent className="bg-white border border-zinc-200 text-zinc-800 font-bold text-xs rounded-xl shadow-2xl">
+                               {grades.length > 0 ? (
+                                 grades.map((grade) => (
+                                   <SelectItem key={grade.id} value={grade.id.toString()} className="focus:bg-indigo-50 focus:text-[#6366f1] rounded-lg cursor-pointer">
+                                     {grade.name}
+                                   </SelectItem>
+                                 ))
+                               ) : (
+                                 <div className="p-2 text-center text-zinc-400 text-[9px] uppercase tracking-widest">
+                                   Loading grades...
+                                 </div>
+                               )}
+                             </SelectContent>
+                           </Select>
+                           {errors.gradeLevel && <p className="text-[7px] text-rose-600 font-bold uppercase tracking-tighter ml-3 mt-0.5">{errors.gradeLevel}</p>}
+                         </div>
+                      </div>
+                    )}
+
+                    <div className="flex flex-col gap-2.5 pt-2">
+                      {step === 1 ? (
+                        <Button
+                          type="button"
+                          onClick={handleNext}
+                          className="w-full h-11 rounded-xl bg-[#6366f1] hover:bg-[#4f46e5] text-white shadow-[0_4px_14px_rgba(99,102,241,0.35)] hover:shadow-lg transition-all duration-300 border-none"
+                        >
+                          <span className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.25em]">
+                            Next Step <ChevronRight className="h-4 w-4 group-hover/btn:translate-x-0.5 transition-transform" />
+                          </span>
+                        </Button>
+                      ) : (
+                        <div className="flex gap-2.5">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={() => setStep(1)}
+                            className="flex-1 h-11 rounded-xl text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 font-black text-[8px] uppercase tracking-widest transition-all"
+                          >
+                            Back
+                          </Button>
+                          <Button
+                            type="submit"
+                            disabled={isLoading}
+                            className="flex-[2] h-11 rounded-xl bg-[#6366f1] hover:bg-[#4f46e5] text-white shadow-[0_4px_14px_rgba(99,102,241,0.35)] hover:shadow-lg transition-all duration-300 border-none"
+                          >
+                            {isLoading ? (
+                              <div className="flex items-center gap-2 justify-center">
+                                <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
+                                <span className="text-[8px] font-black uppercase tracking-widest">Processing...</span>
+                              </div>
+                            ) : (
+                              <span className="flex items-center gap-2 justify-center text-[9px] font-black uppercase tracking-[0.25em]">
+                                Register <ArrowRight className="h-4 w-4 group-hover/btn:translate-x-0.5 transition-transform" />
+                              </span>
+                            )}
+                          </Button>
+                        </div>
+                      )}
+
+                      <p className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.2em] text-center mt-2.5">
+                        Already have account?
+                        <button
+                          type="button"
+                          className="text-[#6366f1] hover:text-[#4f46e5] transition-all font-black ml-2"
+                          onClick={() => navigate('/login')}
+                        >
+                          Sign In
+                        </button>
+                      </p>
                     </div>
-                  </div>
-
-                  <div className="flex flex-col items-center pt-2">
-                    <Button
-                      type="submit"
-                      size="lg"
-                      className="w-2/3 rounded-xl shadow-lg hover:shadow-xl transition-all bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
-                    >
-                      Create Account
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      onClick={() => navigate("/get-started")}
-                      className="mb-6 text-white hover:text-white/90"
-                    >
-                      <ArrowLeft className="w-4 h-4 mr-2" />
-                      Back
-                    </Button>
-
-                    <div className="mt-4 text-sm text-slate-600">
-                      Already have an account?{' '}
-                      <button
-                        type="button"
-                        className="text-indigo-600 font-medium hover:underline"
-                        onClick={() => navigate('/login')}
-                      >
-                        Sign in
-                      </button>
-                    </div>
-                  </div>
-                </form>
+                  </form>
+                )}
               </CardContent>
-            </div>
-          </Card>
+            </Card>
+          </div>
         </div>
       </div>
     </div>

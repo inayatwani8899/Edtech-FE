@@ -69,7 +69,7 @@ export const Scholarships: React.FC = () => {
                             <div className="h-px w-6 bg-amber-400/30"></div>
                             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-600">Funding Opportunities</span>
                         </div>
-                        <h1 className="text-4xl font-black tracking-tight text-slate-900 mb-2">
+                        <h1 className="text-3xl md:text-4xl font-black tracking-tight text-slate-900 mb-2">
                             Scholar<span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-600">ships</span>
                         </h1>
                         <p className="text-slate-500 font-medium text-base">Explore funding opportunities tailored to your academic and psychometric profile.</p>

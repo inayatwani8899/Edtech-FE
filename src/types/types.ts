@@ -1,5 +1,5 @@
 // ---------- Roles & Status ----------
-export type UserRole = "Student" | "Counselor" | "Admin" | "Professional" | "School" | "";
+export type UserRole = "Student" | "Counselor" | "Admin" | "Professional" | "School" | "SuperAdmin" | "";
 
 export enum UserStatus {
   Active = "Active",
@@ -83,6 +83,10 @@ export interface School extends User {
 
 export interface Admin extends User {
   role: "Admin";
+}
+
+export interface SuperAdmin extends User {
+  role: "SuperAdmin";
 }
 
 // ---------- Test-related Models ----------
@@ -171,6 +175,7 @@ export interface TestConfiguration {
   isActive?: boolean;
   rolePrices: RolePrice[];
   testId: string;
+  testPrice?: number | string; // Optional property for display
   questionsPerPage: number;
   submitType: 'OneGo' | 'PerPage';
   allowMultiplePurchases: boolean;
@@ -198,3 +203,14 @@ export interface CategoryResponse {
     limit: number;
   };
 }
+
+// ---------- Student Dashboard Type ----------
+export interface StudentDashboardStats {
+  testsTaken: number;
+  attempts: number;
+  avgScore: number;
+  points: number;
+  highScore: number;
+}
+
+export interface StudentDashboardResponse extends GenericResponse<StudentDashboardStats> { }

@@ -1,17 +1,22 @@
 import { create } from "zustand";
 import api from "@/api/axios";
 import { GenericResponse } from "@/types/types";
+import { useAuthStore } from "./useAuthStore";
 
 // Define the Student interface based on API response
 export interface Student {
     id: number;
     userId: number;
-    gradeLevel: string;
+    gradeLevel?: string;
+    gradeId?: number;
+    gradeName?: string;
     dateOfBirth: string;
     firstName: string;
     lastName: string;
     email: string;
-    phone: string; // API uses 'phone' instead of 'phoneNumber'
+    phone?: string;
+    phoneNumber?: string;
+    gender?: string;
 }
 
 interface StudentResponseData {
@@ -38,8 +43,8 @@ interface StudentState {
   sortDirection: 'asc' | 'desc';
 
   // Actions
-  createStudent: (data: Partial<Student>) => Promise<void>;
-  updateStudent: (id: string, data: Partial<Student>) => Promise<void>;
+  createStudent: (data: any) => Promise<void>;
+  updateStudent: (id: string, data: any) => Promise<void>;
   clearStudent: () => void;
   deleteStudent: () => Promise<void>;
   fetchStudents: () => Promise<void>;
@@ -96,8 +101,19 @@ export const useStudentStore = create<StudentState>((set, get) => ({
   fetchStudents: async () => {
     set({ loading: true, error: null });
     const { currentPage, limit, debouncedSearchTerm, sortDirection } = get();
+    
+    // Check if the current user has a School or OrganizationAdmin role
+    const user = useAuthStore.getState().user;
+    const isSchool = user?.roleId === 4 || 
+                     user?.roleId === 3 ||
+                     user?.role?.toLowerCase() === "school" || 
+                     user?.role?.toLowerCase() === "organization" ||
+                     user?.role?.toLowerCase() === "organizationadmin";
+
+    const endpoint = isSchool ? "/Organization/students" : "/Student";
+
     try {
-      const response = await api.get<GenericResponse<StudentResponseData>>("/Student", {
+      const response = await api.get<GenericResponse<StudentResponseData>>(endpoint, {
         params: {
           page: currentPage,
           limit,
@@ -106,11 +122,12 @@ export const useStudentStore = create<StudentState>((set, get) => ({
         },
       });
 
-      const totalCount = response.data.data.totalCount;
+      const studentsList = response.data.data.students || [];
+      const totalCount = response.data.data.totalCount ?? studentsList.length ?? 0;
       const calculatedTotalPages = Math.ceil(totalCount / limit);
 
       set({
-        students: response.data.data.students,
+        students: studentsList,
         totalPages: calculatedTotalPages > 0 ? calculatedTotalPages : 1,
         totalCount: totalCount,
         currentPage: currentPage > calculatedTotalPages ? 1 : currentPage,
@@ -130,20 +147,41 @@ export const useStudentStore = create<StudentState>((set, get) => ({
   createStudent: async (data) => {
     set({ loading: true, error: null });
     try {
-      // Transform the data to match the required API format
-      const transformedData = {
-        email: data.email,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        password: "defaultPassword123", // Default password for student creation
-        phone: data.phone, // Changed from phoneNumber to phone
-        gradeLevel: data.gradeLevel,
-        dateOfBirth: data.dateOfBirth,
-        isAdmin: false, // Students are not admins by default
-        createdBy: 1 // Default createdBy value
-      };
-      
-      await api.post("/Student/admin/create", transformedData);
+      const user = useAuthStore.getState().user;
+      const isSchool = user?.roleId === 4 || 
+                       user?.roleId === 3 ||
+                       user?.role?.toLowerCase() === "school" || 
+                       user?.role?.toLowerCase() === "organization" ||
+                       user?.role?.toLowerCase() === "organizationadmin";
+
+      if (isSchool) {
+        const payload = {
+          email: data.email,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          password: data.password || "defaultPassword123",
+          phone: data.phone || data.phoneNumber,
+          phoneNumber: data.phone || data.phoneNumber,
+          gradeLevel: data.gradeLevel,
+          gradeId: data.gradeId ? Number(data.gradeId) : undefined,
+          dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString() : null,
+          gender: data.gender
+        };
+        await api.post("/Organization/students-added-through-organization", payload);
+      } else {
+        const transformedData = {
+          email: data.email,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          password: "defaultPassword123",
+          phone: data.phone || data.phoneNumber,
+          gradeLevel: data.gradeLevel,
+          dateOfBirth: data.dateOfBirth,
+          isAdmin: false,
+          createdBy: 1
+        };
+        await api.post("/Student/admin/create", transformedData);
+      }
       await get().fetchStudents();
     } catch (err: any) {
       set({ error: err.response?.data?.message || "Failed to create student" });
@@ -157,14 +195,28 @@ export const useStudentStore = create<StudentState>((set, get) => ({
     if (!id) return;
     set({ loading: true, error: null });
     try {
-      // Since there's no direct endpoint to fetch a single student by ID,
-      // we fetch all students and find the one with the matching ID
-      const response = await api.get<GenericResponse<StudentResponseData>>("/Student");
-      const student = response.data.data.students.find(s => s.id === Number(id));
-      if (student) {
-        set({ student });
+      const user = useAuthStore.getState().user;
+      const isSchool = user?.roleId === 4 || 
+                       user?.roleId === 3 ||
+                       user?.role?.toLowerCase() === "school" || 
+                       user?.role?.toLowerCase() === "organization" ||
+                       user?.role?.toLowerCase() === "organizationadmin";
+
+      if (isSchool) {
+        const response = await api.get<any>(`/Organization/students/${id}`);
+        if (response.data && response.data.success) {
+          set({ student: response.data.data });
+        } else {
+          set({ student: response.data });
+        }
       } else {
-        throw new Error("Student not found");
+        const response = await api.get<GenericResponse<StudentResponseData>>("/Student");
+        const student = response.data.data.students.find(s => s.id === Number(id));
+        if (student) {
+          set({ student });
+        } else {
+          throw new Error("Student not found");
+        }
       }
     } catch (err: any) {
       console.error("Failed to fetch student:", err);
@@ -179,8 +231,30 @@ export const useStudentStore = create<StudentState>((set, get) => ({
     data.id = Number(id); // Add the ID to the data payload
     set({ loading: true, error: null });
     try {
-      // Use the endpoint without the ID in the path, send ID in the body
-      await api.put(`/Student`, data);
+      const user = useAuthStore.getState().user;
+      const isSchool = user?.roleId === 4 || 
+                       user?.roleId === 3 ||
+                       user?.role?.toLowerCase() === "school" || 
+                       user?.role?.toLowerCase() === "organization" ||
+                       user?.role?.toLowerCase() === "organizationadmin";
+
+      if (isSchool) {
+        const payload = {
+          id: Number(id),
+          email: data.email,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          phone: data.phone || data.phoneNumber,
+          phoneNumber: data.phone || data.phoneNumber,
+          gradeLevel: data.gradeLevel,
+          gradeId: data.gradeId ? Number(data.gradeId) : undefined,
+          dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString() : null,
+          gender: data.gender
+        };
+        await api.put(`/Organization/students/${id}`, payload);
+      } else {
+        await api.put(`/Student`, data);
+      }
       await get().fetchStudents();
     } catch (err: any) {
       set({ error: err.response?.data?.message || "Failed to update student" });
@@ -196,7 +270,15 @@ export const useStudentStore = create<StudentState>((set, get) => ({
 
     set({ loading: true, error: null });
     try {
-      await api.delete(`/Student/${selectedStudentId}`);
+      const user = useAuthStore.getState().user;
+      const isSchool = user?.roleId === 4 || 
+                       user?.roleId === 3 ||
+                       user?.role?.toLowerCase() === "school" || 
+                       user?.role?.toLowerCase() === "organization" ||
+                       user?.role?.toLowerCase() === "organizationadmin";
+
+      const endpoint = isSchool ? `/Organization/students/${selectedStudentId}` : `/Student/${selectedStudentId}`;
+      await api.delete(endpoint);
 
       const remainingStudents = students.filter(student => student.id !== Number(selectedStudentId));
       if (remainingStudents.length === 0 && currentPage > 1) {

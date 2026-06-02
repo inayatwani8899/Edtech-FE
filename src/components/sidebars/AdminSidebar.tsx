@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
+
 import {
     LayoutDashboard,
     Users,
@@ -22,7 +23,15 @@ import {
     ChevronRight,
     Brain,
     PanelLeft,
+    Lock,
+    Key,
+    UserCog,
+    UserCheck,
+    User,
+    Building,
 } from "lucide-react";
+import Swal from 'sweetalert2';
+
 import {
     Sidebar,
     SidebarContent,
@@ -40,21 +49,29 @@ import { cn } from "@/lib/utils";
 // Define navigation items specific to the Admin role
 const adminMenuItems = [
     { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, color: "text-red-600" },
+    { title: "Organization Management", url: "/manage/organizations", icon: Building, color: "text-purple-600" },
     { title: "User Management", url: "/manage/users", icon: Users, color: "text-blue-600" },
     { title: "Counselor Management", url: "/manage/counselors", icon: Users2, color: "text-yellow-600" },
     { title: "Student Management", url: "/manage/students", icon: Users, color: "text-blue-600" },
     { title: "Test Management", url: "/manage/tests", icon: ClipboardList, color: "text-green-600" },
     { title: "Test Configuration Management", url: "/manage/configurations", icon: Cog, color: "text-green-600" },
-    { title: "AI Question Generation", url: "/ai-generation", icon: BookOpen, color: "text-yellow-600" },
-    { title: "Categories Management", url: "/manage/categories", icon: Book, color: "text-indigo-600" },
+];
+
+const rbacMenuItems = [
+    { title: "RBAC Dashboard", url: "/rbac", icon: Shield, color: "text-indigo-500" },
+    // { title: "Roles & Permissions", url: "/rbac/roles", icon: Lock, color: "text-purple-500" },
+    // { title: "Access Mapping", url: "/rbac/role-permissions", icon: Layers, color: "text-amber-500" },
+    // { title: "User Access", url: "/rbac/users", icon: UserCog, color: "text-blue-500" },
 ];
 
 export function AdminSidebar() {
     const { state, toggleSidebar } = useSidebar();
     const isCollapsed = state === "collapsed";
     const location = useLocation();
+    const navigate = useNavigate();
     const currentPath = location.pathname;
-    const { user } = useAuthStore();
+    const { user, logout } = useAuthStore();
+
 
     const [theme, setTheme] = useState<"dark" | "light">(() => {
         try {
@@ -79,6 +96,27 @@ export function AdminSidebar() {
 
     const isActive = (path: string) => currentPath === path || currentPath.startsWith(`${path}/`);
 
+    const handleLogout = () => {
+        Swal.fire({
+            title: 'Sign Out?',
+            text: 'Are you sure you want to end your executive session?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#4f46e5',
+            cancelButtonColor: '#94a3b8',
+            confirmButtonText: 'Yes, sign out',
+            cancelButtonText: 'Cancel',
+            background: theme === 'dark' ? '#1e293b' : '#fff',
+            color: theme === 'dark' ? '#fff' : '#000',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                logout();
+                navigate("/login");
+            }
+        });
+    };
+
+
     return (
         <Sidebar collapsible="icon" className="transition-all duration-300 border-none">
             <SidebarContent
@@ -87,11 +125,12 @@ export function AdminSidebar() {
                     theme === "dark" ? "bg-[#0b0d11] text-slate-100" : "bg-white text-slate-900 shadow-sm"
                 )}
             >
-                {/* Fixed Header - Scaled Down */}
+                {/* Fixed Header - Slimmed Down */}
                 <div className={cn(
-                    "flex px-3.5 py-5 transition-all duration-300",
+                    "flex px-3.5 py-3 transition-all duration-300",
                     isCollapsed ? "justify-center" : "justify-between items-center"
                 )}>
+
                     <div className="flex items-center gap-2.5 min-w-0">
                         {/* Scaled Logo Container */}
                         <div className={cn(
@@ -105,11 +144,11 @@ export function AdminSidebar() {
 
                         {!isCollapsed && (
                             <div className="flex flex-col min-w-0 animate-in fade-in slide-in-from-left-2 duration-300">
-                                <div className="flex items-baseline font-black tracking-tighter text-[16px] leading-[1.1]">
+                                <div className="flex items-baseline font-black tracking-tight text-[18px] leading-[1.1] logo-serif">
                                     <span className={cn(
                                         theme === "dark" ? "text-white" : "text-slate-900"
-                                    )}>EDTECH</span>
-                                    <span className="text-blue-500 ml-0.5">NEURAL</span>
+                                    )}>Cognify</span>
+                                    <span className="text-blue-500 ml-0.5 italic">IQ</span>
                                 </div>
                                 <div className="flex items-center gap-1 mt-0.5">
                                     <div className="h-1 w-1 flex-shrink-0 rounded-full bg-[#10b981] opacity-70" />
@@ -135,34 +174,77 @@ export function AdminSidebar() {
                     )}
                 </div>
 
-                {/* Navigation Section - REVERTED TO PREVIOUS BODY STYLE */}
-                <SidebarGroup className="flex-1">
-                    {!isCollapsed && (
-                        <div className="px-4 mb-4 flex items-center gap-4">
-                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-600 whitespace-nowrap">
-                                Neural Flow
-                            </span>
-                            <div className={cn(
-                                "h-[1px] w-full",
-                                theme === "dark" ? "bg-slate-800/50" : "bg-slate-100"
-                            )} />
-                        </div>
-                    )}
-                    <SidebarGroupContent>
-                        <SidebarMenu className="space-y-1 px-1 py-2">
-                            {adminMenuItems.map((item) => (
-                                <SidebarMenuItem key={item.title}>
-                                    <SidebarMenuButton asChild isActive={isActive(item.url)} className={`transition-all duration-200 rounded-lg ${theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"} group`}>
-                                        <NavLink to={item.url} title={item.title} className={`flex items-center gap-3 px-3 py-2.5 ${isCollapsed ? "justify-center" : ""} w-full`}>
-                                            <item.icon className={`h-5 w-5 ${isActive(item.url) ? item.color : theme === "dark" ? "text-slate-300" : "text-slate-500"} group-hover:scale-110 transition-transform duration-200`} />
-                                            <span className={`${isCollapsed ? "hidden" : "text-sm font-medium"}`}>{item.title}</span>
-                                        </NavLink>
-                                    </SidebarMenuButton>
-                                </SidebarMenuItem>
-                            ))}
-                        </SidebarMenu>
-                    </SidebarGroupContent>
-                </SidebarGroup>
+                {/* Navigation Menu Area - Ultra Compact */}
+                <div className="flex-1 flex flex-col min-h-0 pt-0 px-0 overflow-hidden">
+                    {/* Navigation Section */}
+                    <SidebarGroup className="py-1 flex-none">
+
+
+                        {!isCollapsed && (
+                            <div className="px-4 mb-4 flex items-center gap-4">
+                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-600 whitespace-nowrap">
+                                    Cognify Flow
+                                </span>
+                                <div className={cn(
+                                    "h-[1px] w-full",
+                                    theme === "dark" ? "bg-slate-800/50" : "bg-slate-100"
+                                )} />
+                            </div>
+                        )}
+                        <SidebarGroupContent>
+                            <SidebarMenu className="space-y-0.5 px-1 py-0">
+                                {adminMenuItems.map((item) => {
+                                    const Icon = item.icon;
+                                    return (
+                                        <SidebarMenuItem key={item.title}>
+                                            <SidebarMenuButton asChild isActive={isActive(item.url)} className={`transition-all duration-200 rounded-lg ${theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"} group h-8`}>
+                                                <NavLink to={item.url} title={item.title} className={`flex items-center gap-3 px-3 py-1.5 ${isCollapsed ? "justify-center" : ""} w-full`}>
+                                                    <Icon className={`h-4.5 w-4.5 ${isActive(item.url) ? item.color : theme === "dark" ? "text-slate-300" : "text-slate-500"} group-hover:scale-105 transition-transform duration-200`} />
+                                                    <span className={`${isCollapsed ? "hidden" : "text-sm font-medium"}`}>{item.title}</span>
+                                                </NavLink>
+                                            </SidebarMenuButton>
+                                        </SidebarMenuItem>
+                                    );
+                                })}
+                            </SidebarMenu>
+                        </SidebarGroupContent>
+
+                    </SidebarGroup>
+
+                    {/* Access Control Section */}
+                    <SidebarGroup>
+                        {!isCollapsed && (
+                            <div className="px-4 mb-4 mt-2 flex items-center gap-4">
+                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-600 whitespace-nowrap">
+                                    Access Control
+                                </span>
+                                <div className={cn(
+                                    "h-[1px] w-full",
+                                    theme === "dark" ? "bg-slate-800/50" : "bg-slate-100"
+                                )} />
+                            </div>
+                        )}
+                        <SidebarGroupContent>
+                            <SidebarMenu className="space-y-0.5 px-1 py-0">
+                                {rbacMenuItems.map((item) => {
+                                    const Icon = item.icon;
+                                    return (
+                                        <SidebarMenuItem key={item.title}>
+                                            <SidebarMenuButton asChild isActive={isActive(item.url)} className={`transition-all duration-200 rounded-lg ${theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"} group h-8`}>
+                                                <NavLink to={item.url} title={item.title} className={`flex items-center gap-3 px-3 py-1 ${isCollapsed ? "justify-center" : ""} w-full`}>
+                                                    <Icon className={`h-4.5 w-4.5 ${isActive(item.url) ? item.color : theme === "dark" ? "text-slate-300" : "text-slate-500"} group-hover:scale-105 transition-transform duration-200`} />
+                                                    <span className={`${isCollapsed ? "hidden" : "text-sm font-medium"}`}>{item.title}</span>
+                                                </NavLink>
+                                            </SidebarMenuButton>
+                                        </SidebarMenuItem>
+                                    );
+                                })}
+                            </SidebarMenu>
+                        </SidebarGroupContent>
+                    </SidebarGroup>
+                </div>
+
+
 
                 {/* Footer Section - REVERTED TO PREVIOUS FOOTER STYLE */}
                 <div className={`px-3 py-3 border-t ${theme === "dark" ? "border-slate-700" : "border-slate-100"}`}>
@@ -176,8 +258,10 @@ export function AdminSidebar() {
                             </div>
                             {!isCollapsed && (
                                 <div className="text-xs">
-                                    <div className="font-medium">{user?.name || "Admin"}</div>
-                                    <div className={`${theme === "dark" ? "text-slate-300" : "text-muted-foreground"} text-[11px]`}>{user?.role?.toUpperCase() || "ADMIN"}</div>
+                                    <div className="font-medium">{user?.name || "Super Admin"}</div>
+                                    <div className={`${theme === "dark" ? "text-slate-300" : "text-muted-foreground"} text-[11px]`}>
+                                        {user?.role === "Admin" || user?.role === "SuperAdmin" ? "SUPER ADMIN" : (user?.role?.toUpperCase() || "SUPER ADMIN")}
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -189,13 +273,28 @@ export function AdminSidebar() {
                                     className={`p-1 rounded-md transition-colors ${theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"}`}
                                     title="Toggle Theme"
                                 >
-                                    {theme === "dark" ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4" />}
+                                    {theme === "dark" ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4 text-indigo-400" />}
                                 </button>
-                                <button onClick={() => { }} title="Sign out" className={`p-1 rounded-md ${theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"}`}>
-                                    <LogOut className="h-4 w-4" />
+                                <button
+                                    onClick={() => navigate("/profile")}
+                                    title="Super Admin Profile"
+                                    className={`p-1 rounded-md transition-colors ${theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"}`}
+                                >
+                                    <User className="h-4 w-4" />
+                                </button>
+                                <button onClick={handleLogout} title="Sign out" className={`p-1 rounded-md transition-colors ${theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"}`}>
+                                    <LogOut className="h-4 w-4 text-red-500" />
                                 </button>
                             </div>
                         )}
+                        {isCollapsed && (
+                            <div className="flex flex-col gap-2 mt-4">
+                                <button onClick={handleLogout} title="Sign out" className="p-1 rounded-md hover:bg-slate-800 transition-colors">
+                                    <LogOut className="h-4 w-4 text-red-500" />
+                                </button>
+                            </div>
+                        )}
+
                     </div>
                 </div>
             </SidebarContent>

@@ -22,12 +22,12 @@
 //   return (
 //     <SidebarProvider>
 //       <div className="min-h-screen flex w-full">
-        
+
 //         {/* Admin Sidebar - Always visible on desktop */}
 //         <AdminSidebar />
-        
+
 //         <div className="flex-1 flex flex-col">
-          
+
 //           {/* Header/Navbar Area
 //           <header className="h-14 flex items-center justify-between border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
 //             <div className="flex items-center gap-4">
@@ -37,9 +37,9 @@
 //                 Administrator Panel 🛡️
 //               </h1> */}
 //             {/* </div> */}
-            
+
 //             {/* The existing Navbar component can handle the User Menu/Dropdown */}
-          
+
 //           {/* </header> */} 
 //   <Navbar /> 
 //           {/* Main Content Area */}
@@ -65,13 +65,13 @@ export const AdminLayout = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        Loading Admin Panel...
+        Loading Super Admin Panel...
       </div>
     );
   }
 
   // 2. Auth + Role check
-  if (!isAuthenticated || user?.role !== "Admin") {
+  if (!isAuthenticated || (user?.role !== "Admin" && user?.role !== "SuperAdmin")) {
     return <Navigate to="/login" replace />;
   }
 
@@ -87,7 +87,7 @@ export const AdminLayout = () => {
         {/* Content area */}
         <div className="flex-1 flex flex-col">
           {/* Navbar */}
-          <Navbar />
+          {/* <Navbar /> */}
 
           {/* Main Content */}
           <main className="flex-1 overflow-auto bg-muted/20 p-4 md:p-6">
@@ -102,9 +102,9 @@ export const AdminLayout = () => {
 // Small component rendered inside the provider so it can access sidebar context.
 function VisibleSidebarRail() {
   try {
-    const { state, toggleSidebar } = useSidebar();
+    const { state, toggleSidebar, isMobile } = useSidebar();
 
-    if (state !== "collapsed") return null;
+    if (isMobile || state !== "collapsed") return null;
 
     return (
       <button

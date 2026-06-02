@@ -77,7 +77,7 @@ export const Schedule: React.FC = () => {
                             <div className="h-px w-6 bg-accent/30"></div>
                             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">Time Management</span>
                         </div>
-                        <h1 className="text-4xl font-black tracking-tight text-slate-900 mb-2">
+                        <h1 className="text-3xl md:text-4xl font-black tracking-tight text-slate-900 mb-2">
                             My <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Schedule</span>
                         </h1>
                         <p className="text-slate-500 font-medium text-base">Plan your learning sessions and stay ahead of your assessment deadlines.</p>
@@ -109,10 +109,10 @@ export const Schedule: React.FC = () => {
                             {events.map((event, i) => (
                                 <div key={i} className="flex gap-6 md:gap-10 group pb-10 last:pb-0">
                                     {/* Time Block - Fixed Width for consistent alignment */}
-                                    <div className="w-20 md:w-24 shrink-0 text-right pt-2 border-r-2 border-slate-50 relative pr-6 md:pr-10">
+                                    <div className="w-20 sm:w-24 shrink-0 text-right pt-2 border-r-2 border-slate-50 relative pr-4 sm:pr-10">
                                         <div className="space-y-0.5">
-                                            <p className="text-sm font-black text-slate-900 tracking-tight">{event.time}</p>
-                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{event.duration}</p>
+                                            <p className="text-xs sm:text-sm font-black text-slate-900 tracking-tight">{event.time}</p>
+                                            <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest">{event.duration}</p>
                                         </div>
                                         {/* Timeline Dot - Positioned on the border */}
                                         <div className="absolute -right-[7px] top-3 h-3 w-3 rounded-full bg-slate-200 group-hover:bg-primary transition-all duration-300 ring-4 ring-white shadow-sm ring-offset-2 z-10 scale-90 group-hover:scale-110"></div>
@@ -135,7 +135,7 @@ export const Schedule: React.FC = () => {
                                                                     {event.type}
                                                                 </span>
                                                                 <span className="h-1 w-1 rounded-full bg-slate-200 hidden sm:block"></span>
-                                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block sm:inline">
                                                                     with {event.instructor}
                                                                 </span>
                                                             </div>

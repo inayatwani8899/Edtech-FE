@@ -17,18 +17,21 @@ export interface QuestionOption {
 //     explanation?: string;
 // }
 export interface Question {
-    questionId: number;
-    questionText: string;
+    question_Id: number | string;
+    question_Text: string;
     category?: string;
     theory?: string;
     tag?: string;
-    grade: string;
+    grade?: string;
     options: Option[];
 }
 
 export interface Option {
-    optionId: number | string;
-    optionText: string;
+    option_Id: number | string;
+    question_Id: number | string;
+    option_Text: string;
+    score?: number;
+    order_No?: number;
 }
 
 export enum OptionID {
@@ -161,43 +164,42 @@ export interface TestProgress {
     }>;
 }
 // Add these interfaces to your existing types
-export interface UserTestSubmission {
-    testAttempts: any;
-    attempts: any;
+export interface TestAttemptReport {
+    reportId: number;
     testId: number;
-    testTitle: string;
-    testDescription: string;
+    testName: string;
     totalQuestions: number;
-    attemptCount: number;
-    lastAttemptDate: string;
+    attemptNumber: number;
+    format: string;
+    createdDate: string;
 }
 
-export interface UserTestSubmissionData {
-    items: UserTestSubmission[];
-    totalCount: number;
+export interface TestReportPaginatedResponse {
     pageNumber: number;
     pageSize: number;
+    totalRecords: number;
     totalPages: number;
-    hasNextPage: boolean;
-    hasPreviousPage: boolean;
+    sortBy: string;
+    sortDirection: string;
+    data: TestAttemptReport[];
 }
 
-export interface UserSubmissionsResponse {
-    code: number;
-    message: string;
-    data: UserTestSubmissionData;
-}
+
 
 export interface UserSubmissionsFilters {
     search?: string;
     filterColumn?: string;
     filterValue?: string;
-    page?: number;
-    limit?: number;
+    pageNumber?: number;
+    pageSize?: number;
+    sortBy?: string;
+    sortDirection?: string;
 }
+
 import { create } from 'zustand';
 import api from '@/api/axios';
 import { usePaymentStore } from './paymentStore';
+import { useAuthStore } from './useAuthStore';
 import { TestConfiguration } from '@/types/types';
 // import type { Question, Test, TestFilters, CreateTestPayload, CreateAITestPayload, TestSession, TestProgress } from '@/types';
 
@@ -233,10 +235,11 @@ interface TestState {
     userAnswers: Map<string, string>;
     testTakingLoading: boolean;
     testTakingError: string | null;
-    userSubmissions: UserTestSubmissionData | null;
+    userSubmissions: TestReportPaginatedResponse | null;
     userSubmissionsLoading: boolean;
     userSubmissionsError: string | null;
     searchTerm: string | null;
+    isSubmitting: boolean;
     deleteId: string | null;
 
 
@@ -270,7 +273,7 @@ interface TestState {
     // startTest: (testId: string) => Promise<void>;
     fetchQuestions: (page?: number, limit?: number, sessionId?: string | null, testId?: string | number | null, gradeId?: string | number | null) => Promise<void>;
     submitAnswer: (testId: string, questionId: string, answer: string) => Promise<void>;
-    submitTest: (testId: string, userId: string) => Promise<void>;
+    submitTest: (testId: string, userId: string) => Promise<any>;
     fetchTestProgress: (testId: string, sessionId: string) => Promise<void>;
     goToNextQuestion: (testId: string) => Promise<void>;
     goToPreviousQuestion: (testId: string) => Promise<void>;
@@ -301,6 +304,21 @@ interface TestState {
     setError: (error: string | null) => void;
 }
 
+const sanitizeGradeId = (grade: any): string | number | undefined => {
+    if (grade === null || grade === undefined) return undefined;
+    const str = String(grade).trim();
+    if (!str) return undefined;
+    
+    // Check if it has digits (e.g. "Level 1", "1st Grade", "1")
+    const match = str.match(/\d+/);
+    if (match) {
+        return Number(match[0]);
+    }
+    
+    // If it's a known non-numeric grade or just a string, return as is
+    return str;
+};
+
 const defaultFilters: TestFilters = {
     search: '',
     status: 'all',
@@ -317,6 +335,7 @@ export const useTestStore = create<TestState>((set, get) => ({
     error: null,
     filters: defaultFilters,
     currentPage: 1,
+    isSubmitting: false,
     totalPages: 1,
     totalCount: 0,
     limit: 5,
@@ -525,17 +544,19 @@ export const useTestStore = create<TestState>((set, get) => ({
         set({ testTakingLoading: true, testTakingError: null });
         try {
             const currentSessionId = sessionId || get().currentSession?.id;
+            
+            const authStore = useAuthStore.getState();
+            const sessionGradeId = authStore.studentSession?.gradeId ?? (authStore.user as any)?.gradeId ?? (authStore.user as any)?.gradeLevel;
+            const resolvedGradeId = sanitizeGradeId(gradeIdParam) ?? sanitizeGradeId(sessionGradeId) ?? sanitizeGradeId(get().currentTest?.grade) ?? undefined;
 
             // Call the GetQuestions endpoint which returns the shape shown in the example
             const response = await api.get(`/QuestionBank/GetQuestions`, {
                 params: {
                     // Prefer explicit params passed in; fall back to currentTest values
-                    // testId: testIdParam ?? get().currentTest?.testId ?? undefined,
-                    // gradeId: gradeIdParam ?? get().currentTest?.grade ?? undefined,
-                    testId: 1,
-                    gradeId: 1,
+                    testId: testIdParam ?? get().currentTest?.testId ?? get().currentTest?.id ?? undefined,
+                    gradeId: resolvedGradeId,
                     page,
-                    pageSize: limit,
+                    pageSize: limit ?? 80,
                     sessionId: currentSessionId || undefined
                 }
             });
@@ -551,18 +572,21 @@ export const useTestStore = create<TestState>((set, get) => ({
                         ? data.data.items
                         : [];
 
-            // Map upstream question shape to local `Question` shape
+            // Map upstream question shape to local `Question` shape preserving original property names
             const questions: Question[] = rawQuestions.map((q: any) => ({
-                questionId: q.question_Id ?? q.questionId ?? q.id,
-                questionText: q.question_Text ?? q.questionText ?? q.text ?? '',
+                question_Id: q.question_Id ?? q.questionId ?? q.id,
+                question_Text: q.question_Text ?? q.questionText ?? q.text ?? '',
                 category: q.category ?? '',
                 theory: q.theory ?? '',
                 tag: q.tag ?? '',
                 grade: data.grade ?? q.grade ?? '',
                 options: Array.isArray(q.options)
                     ? q.options.map((o: any) => ({
-                        optionId: o.option_Id ?? o.optionId ?? o.id,
-                        optionText: o.option_Text ?? o.optionText ?? o.text ?? ''
+                        option_Id: o.option_Id ?? o.optionId ?? o.id,
+                        question_Id: o.question_Id ?? q.question_Id ?? q.questionId ?? q.id,
+                        option_Text: o.option_Text ?? o.optionText ?? o.text ?? '',
+                        score: o.score ?? undefined,
+                        order_No: o.order_No ?? o.order_no ?? undefined
                     }))
                     : []
             }));
@@ -643,24 +667,26 @@ export const useTestStore = create<TestState>((set, get) => ({
     //     }
     // },
     submitTest: async (testId, userId) => {
+        set({ isSubmitting: true });
         const { userAnswers } = get();
         try {
-
-            // Convert Map into required array format
+            // Convert Map into required array format with numeric IDs
             const answersArray = Array.from(userAnswers.entries()).map(([questionId, optionId]) => ({
-                questionId,
-                optionId
+                questionId: Number(questionId),
+                optionId: Number(optionId)
             }));
 
             const payload = {
-                testId,
-                userId,
+                testId: Number(testId),
                 answers: answersArray
             };
-            await api.post(`/tests/submit`, payload);
+
+            const response = await api.post(`/tests/submit`, payload);
+
             usePaymentStore.getState().clearPaidTest(userId, testId);
-            get().resetTestState();
+            return response.data;
         } catch (err) {
+            console.error("Test submission error:", err);
             throw err;
         }
     },
@@ -721,7 +747,8 @@ export const useTestStore = create<TestState>((set, get) => ({
             answers: 0
         },
         testTakingError: null,
-        testTakingLoading: false
+        testTakingLoading: false,
+        isSubmitting: false
     }),
     getCurrentQuestion: () => {
         const { testQuestions, questionPagination } = get();
@@ -744,33 +771,33 @@ export const useTestStore = create<TestState>((set, get) => ({
         set({ userSubmissionsLoading: true, userSubmissionsError: null });
         try {
             const {
-                search = '',
-                filterColumn = '',
-                filterValue = '',
-                page = 1,
-                limit = 10
+                pageNumber = 1,
+                pageSize = 10,
+                sortBy = 'createdDate',
+                sortDirection = 'desc',
+                search = ''
             } = filters;
 
-            const response = await api.get('/Test/user-submissions', {
+            const response = await api.get('/tests/report/all', {
                 params: {
-                    search,
-                    filterColumn,
-                    filterValue,
-                    page,
-                    limit
+                    pageNumber,
+                    pageSize,
+                    sortBy,
+                    sortDirection,
+                    search: search || undefined
                 }
             });
 
-            const data: UserSubmissionsResponse = response.data;
+            const data = response.data;
 
-            if (data.code === 200) {
+            if (data && data.data) {
                 set({
-                    userSubmissions: data.data,
+                    userSubmissions: data,
                     userSubmissionsLoading: false
                 });
             } else {
                 set({
-                    userSubmissionsError: data.message || 'Failed to fetch user submissions',
+                    userSubmissionsError: 'Unexpected response format from server',
                     userSubmissionsLoading: false
                 });
             }

@@ -29,11 +29,15 @@ export const usersApi = {
 
         // Mock data
         const allUsers: User[] = Array.from({ length: 30 }, (_, i) => ({
-            id: (i + 1).toString(),
+            id: i + 1,
             firstName: `User`,
             lastName: `${i + 1}`,
+            name: `User ${i + 1}`,
             email: `user${i + 1}@example.com`,
-            role: (i % 3 === 0 ? 'student' : i % 3 === 1 ? 'professional' : 'counselor') as UserRole,
+            phone: "1234567890",
+            dateOfBirth: "2000-01-01",
+            roleId: i % 3 === 0 ? 1 : i % 3 === 1 ? 2 : 3,
+            role: (i % 3 === 0 ? 'Student' : i % 3 === 1 ? 'Professional' : 'Counselor') as UserRole,
             status: i % 5 === 0 ? 'inactive' : 'active',
             lastActive: new Date(`2024-01-${String(30 - i).padStart(2, '0')}`),
             testsCompleted: Math.floor(Math.random() * 30),
@@ -45,7 +49,7 @@ export const usersApi = {
         // Apply search filter
         if (search) {
             filteredUsers = filteredUsers.filter(user =>
-                user.name.toLowerCase().includes(search.toLowerCase()) ||
+                (user.name || "").toLowerCase().includes(search.toLowerCase()) ||
                 user.email.toLowerCase().includes(search.toLowerCase())
             );
         }

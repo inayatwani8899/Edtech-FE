@@ -119,33 +119,59 @@ export const AdminDashboard = () => {
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-400/5 rounded-full blur-[100px] -z-10 animate-pulse" style={{ animationDelay: '2s' }}></div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8  relative z-10">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
+        {/* 1. Compact Greeting Header */}
+        <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 mb-2">
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600">
-                {greeting},
-              </span>
-              <span className="ml-2">
-                {user?.name ? user.name.split(' ')[0] : 'Admin'}! 👋
-              </span>
+            <h1 className="text-xl md:text-2xl font-black tracking-tight text-slate-900">
+              {greeting}, <span className="text-primary">{user?.name ? user.name.split(' ')[0] : 'Super Admin'}!</span>
             </h1>
-            <p className="text-lg text-slate-500 font-medium">
-              System overview and management command center.
+            <p className="text-[11px] text-slate-500 font-medium -mt-1">
+              System overview and <span className="text-primary font-bold">Command Center</span>
             </p>
           </div>
-          <div className="flex items-center gap-3 bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
-            <div className="bg-primary/10 p-2 rounded-xl">
-              <ShieldCheck className="h-5 w-5 text-primary" />
+          <div className="flex items-center gap-3 bg-white px-3 py-1.5 rounded-xl shadow-sm border border-slate-100">
+            <div className="bg-primary/10 p-1.5 rounded-lg">
+              <ShieldCheck className="h-4 w-4 text-primary" />
             </div>
-            <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">System Status</p>
-              <p className="text-sm font-semibold text-slate-700">All Systems Operational</p>
+            <p className="text-[10px] font-bold text-slate-700">Systems Operational</p>
+          </div>
+        </div>
+
+        {/* 2. System Health Roadmap (Now on top and smaller) */}
+        <div className="mb-8 p-4 md:p-5 rounded-[1.5rem] bg-slate-900 shadow-xl relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-4 opacity-10 rotate-12 pointer-events-none">
+            <Compass className="h-24 w-24 text-white" />
+          </div>
+          <div className="relative z-10">
+            <h3 className="text-sm font-bold text-white mb-5 flex items-center gap-2">
+              <Activity className="h-4 w-4 text-emerald-400" /> Infrastructure Health
+            </h3>
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 relative">
+              <div className="absolute top-[18px] left-0 w-full h-0.5 hidden md:block bg-white/10 rounded-full">
+                <div className="absolute left-0 top-0 h-full bg-emerald-500 transition-all duration-1000" style={{ width: `66%` }} />
+              </div>
+              {[
+                { step: 'Database', title: 'Operational', status: 'completed' },
+                { step: 'Security', title: 'Hardened', status: 'completed' },
+                { step: 'API Gate', title: 'Performance', status: 'active' },
+                { step: 'Scaling', title: 'Auto-Mode', status: 'pending' }
+              ].map((item, i) => (
+                <div key={i} className="flex flex-col items-center gap-1.5 relative z-10 w-full md:w-auto">
+                  <div className={`h-9 w-9 rounded-xl flex items-center justify-center transition-all duration-500 ${item.status === 'active' ? 'bg-emerald-500 ring-2 ring-emerald-500/30 animate-pulse' : item.status === 'completed' ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'bg-slate-800'}`}>
+                    {item.status === 'completed' ? <CheckCircle2 className="h-4 w-4 text-white" /> :
+                      <span className="text-xs font-black text-white">{i + 1}</span>}
+                  </div>
+                  <div className="text-center">
+                    <p className="text-[8px] font-bold uppercase tracking-widest text-white/40 mb-0.5">{item.step}</p>
+                    <p className={`text-[11px] font-bold ${item.status === 'pending' ? 'text-slate-600' : 'text-white'}`}>{item.title}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* Stats Cards - Exactly same as student dashboard */}
+        {/* 3. Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {[
             { label: 'Total Users', value: totalUsers.toLocaleString(), icon: Users, color: 'text-primary', bg: 'bg-primary/10', sub: '+12% this month', link: '/manage/users' },
@@ -154,19 +180,19 @@ export const AdminDashboard = () => {
             { label: 'System Tests', value: totalTests.toLocaleString(), icon: FileText, color: 'text-purple-500', bg: 'bg-purple-500/10', sub: '4 new added', link: '/manage/tests' }
           ].map((stat, i) => (
             <Link key={i} to={stat.link}>
-              <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-md bg-white/70 group hover:translate-y-[-4px] transition-all duration-300 h-full">
-                <CardContent className="p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className={`${stat.bg} p-2.5 rounded-xl transition-transform group-hover:scale-110`}>
-                      <stat.icon className={`h-5 w-5 ${stat.color}`} />
+              <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-md bg-white/70 group hover:translate-y-[-4px] transition-all duration-300 h-full overflow-hidden rounded-2xl">
+                <CardContent className="p-4">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className={`${stat.bg} p-2 rounded-lg transition-transform group-hover:scale-110`}>
+                      <stat.icon className={`h-4 w-4 ${stat.color}`} />
                     </div>
-                    <Badge variant="outline" className="border-slate-100 text-slate-400 bg-white/50">Live</Badge>
+                    <Badge variant="outline" className="text-[8px] border-slate-100 text-slate-400 bg-white/50 px-1.5 py-0">LIVE</Badge>
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">{stat.label}</p>
-                    <p className="text-2xl font-black text-slate-800">{loading ? '...' : stat.value}</p>
-                    <p className="text-[10px] font-bold text-slate-500 mt-2 uppercase tracking-tighter flex items-center gap-1">
-                      <Sparkles className="h-3 w-3 text-yellow-500" />
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight mb-0.5">{stat.label}</p>
+                    <p className="text-xl font-black text-slate-800 tracking-tighter">{loading ? '...' : stat.value}</p>
+                    <p className="text-[9px] font-bold text-slate-500 mt-1 uppercase tracking-tighter flex items-center gap-1">
+                      <Sparkles className="h-2.5 w-2.5 text-amber-500" />
                       {stat.sub}
                     </p>
                   </div>
@@ -174,41 +200,6 @@ export const AdminDashboard = () => {
               </Card>
             </Link>
           ))}
-        </div>
-
-        {/* System Health Roadmap - Matching student roadmap style */}
-        <div className="mb-10 p-6 rounded-[2rem] bg-slate-900 shadow-2xl relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12 group-hover:rotate-0 transition-transform duration-700">
-            <Compass className="h-40 w-40 text-white" />
-          </div>
-          <div className="relative z-10">
-            <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-              <Activity className="h-5 w-5 text-primary" />
-              Infrastructure Health
-            </h3>
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 relative">
-              <div className="absolute top-1/2 left-0 w-full h-0.5 bg-white/10 hidden md:block -translate-y-1/2"></div>
-              {[
-                { step: 'Database', title: 'Operational', status: 'completed' },
-                { step: 'Security', title: 'Hardened', status: 'completed' },
-                { step: 'API Gate', title: 'Performance', status: 'active' },
-                { step: 'Scaling', title: 'Auto-Mode', status: 'pending' }
-              ].map((item, i) => (
-                <div key={i} className="flex md:flex-col items-center gap-4 relative z-10 group/item">
-                  <div className={`h-12 w-12 rounded-2xl flex items-center justify-center transition-all duration-300 ${item.status === 'completed' ? 'bg-success shadow-[0_0_20px_rgba(34,197,94,0.3)]' :
-                    item.status === 'active' ? 'bg-primary animate-pulse shadow-[0_0_20px_rgba(59,130,246,0.5)]' : 'bg-white/10'
-                    }`}>
-                    {item.status === 'completed' ? <CheckCircle2 className="h-6 w-6 text-white" /> :
-                      <span className="text-sm font-black text-white">{i + 1}</span>}
-                  </div>
-                  <div className="text-left md:text-center">
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-1">{item.step}</p>
-                    <p className={`text-sm font-bold ${item.status === 'pending' ? 'text-white/30' : 'text-white'}`}>{item.title}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
 
         <div className="grid lg:grid-cols-4 gap-8">

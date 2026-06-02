@@ -1,443 +1,519 @@
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
-  Brain,
-  Users,
-  TrendingUp,
-  Shield,
-  Sparkles,
-  Clock,
-  Award,
-  BarChart3,
-  Target,
-  Lightbulb,
-  CheckCircle,
-  ArrowRight,
-  BookOpen,
-  Star,
-  Zap
+  Brain, Users, TrendingUp, Shield, Sparkles, Clock,
+  Award, BarChart3, Target, Lightbulb, CheckCircle,
+  ArrowRight, Star, ArrowUpRight, BookOpen,
+  FileText, GraduationCap, Briefcase, School,
+  Headphones, UserCheck, Activity, Zap
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import heroImage from "@/assets/hero-image.jpg";
 import { useTestStore } from "@/store/testStore";
 import { useEffect } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
-
-const features = [
-  {
-    icon: Brain,
-    title: "Advanced AI Assessment",
-    description: "Cutting-edge AI algorithms provide deep insights into cognitive abilities and personality traits."
-  },
-  {
-    icon: Users,
-    title: "Multi-Role Platform",
-    description: "Designed for students, professionals, educators, and HR teams with role-specific features."
-  },
-  {
-    icon: TrendingUp,
-    title: "Adaptive Testing",
-    description: "Tests adapt to your skill level, ensuring accurate and efficient assessment."
-  },
-  {
-    icon: Shield,
-    title: "Secure & Private",
-    description: "Bank-level security with GDPR compliance ensures your data remains protected."
-  },
-  {
-    icon: BarChart3,
-    title: "Detailed Analytics",
-    description: "Comprehensive reports with actionable insights and career recommendations."
-  },
-  {
-    icon: Clock,
-    title: "Instant Results",
-    description: "Get immediate feedback with AI-generated reports and recommendations."
-  }
-];
-
-const testTypes = [
-  {
-    title: "Aptitude Tests",
-    description: "Verbal, numerical, and logical reasoning assessments",
-    icon: Target,
-    color: "bg-primary"
-  },
-  {
-    title: "Personality Assessment",
-    description: "Big Five traits and MBTI-style personality profiling",
-    icon: Users,
-    color: "bg-secondary"
-  },
-  {
-    title: "Interest Inventory",
-    description: "Holland's Code (RIASEC) career interest mapping",
-    icon: Lightbulb,
-    color: "bg-accent"
-  },
-  {
-    title: "Emotional Intelligence",
-    description: "Self-awareness, empathy, and emotional regulation",
-    icon: Brain,
-    color: "bg-warning"
-  }
-];
-
-const benefits = [
-  "Scientifically validated assessments",
-  "AI-powered personalized recommendations",
-  "Real-time progress tracking",
-  "Career guidance and counseling support",
-  "Industry-specific professional assessments",
-  "Comprehensive reporting dashboard"
-];
+import { landingStyles } from "./LandingStyles";
+import {
+  AIAssessmentMockup,
+  AIAnalysisMockup,
+  DepartmentsMockup,
+  InstantResultsMockup,
+  CareerPathsMockup,
+  SmartReportsMockup,
+  AdvancedAnalyticsMockup,
+  EnterpriseSecurityMockup,
+  HowStep1Visual,
+  HowStep2Visual,
+  HowStep3Visual,
+  enterpriseFeatures,
+} from "./LandingVisualizations";
 
 export const Landing = () => {
   const navigate = useNavigate();
   const { getPublicPublishedTests, publicPublishedTests } = useTestStore();
-
-  useEffect(() => {
-    getPublicPublishedTests();
-  }, [getPublicPublishedTests]);
-
-  const formatDuration = (minutes: number) => {
-    if (minutes === 0) return "No time limit";
-    if (minutes < 60) return `${minutes} min`;
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-  };
-
-  const getCategoryColor = (category: string) => {
-    const colors: { [key: string]: string } = {
-      General: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
-      Math: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-      Science: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
-      English: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
-      Technology: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300",
-    };
-    return colors[category] || "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
-  };
+  useEffect(() => { getPublicPublishedTests(); }, [getPublicPublishedTests]);
 
   return (
-    <div className="min-h-screen bg-gradient-hero">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8 animate-fade-in">
-              <div className="space-y-4">
-                <Badge variant="secondary" className="w-fit">
-                  <Sparkles className="h-3 w-3 mr-1" />
-                  AI-Powered Assessment Platform
-                </Badge>
-                <h1 className="text-5xl md:text-6xl font-bold leading-tight">
-                  Unlock Your{" "}
-                  <span className="bg-gradient-primary bg-clip-text text-transparent">
-                    Potential
-                  </span>{" "}
-                  with Smart Testing
-                </h1>
-                <p className="text-xl text-muted-foreground max-w-2xl">
-                  Comprehensive psychometric assessments powered by AI. Discover your strengths,
-                  understand your personality, and get personalized career recommendations.
-                </p>
-              </div>
+    <>
+      <style>{landingStyles}</style>
+      <div className="lp">
 
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="shadow-elegant" asChild>
-                  <Link to="/login">
-                    Take a Test
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-                <Button size="lg" variant="outline" asChild>
-                  <Link to="counselors">Talk to our Counselors</Link>
-                </Button>
-              </div>
-
-              <div className="flex items-center space-x-8 text-sm text-muted-foreground">
-                <div className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-success mr-2" />
-                  Free to start
-                </div>
-                <div className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-success mr-2" />
-                  No credit card required
-                </div>
-                <div className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-success mr-2" />
-                  Instant results
-                </div>
-              </div>
-            </div>
-
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-primary opacity-20 blur-3xl rounded-full animate-float"></div>
-              <img
-                src={heroImage}
-                alt="People taking psychometric assessments"
-                className="relative z-10 rounded-2xl shadow-elegant w-full h-auto animate-scale-in"
-              />
-            </div>
+        {/* ═══════════ NAVBAR ═══════════ */}
+        <nav className="lp-nav">
+          <div className="nav-logo">
+            Cognify<span>IQ</span>
           </div>
-        </div>
-      </section>
+          <div className="nav-links">
+            <Link to="/assessments">Assessments</Link>
+            <Link to="/counselors">Counselors</Link>
+            <Link to="/about">About</Link>
+            <Link to="/pricing">Pricing</Link>
+            <Link to="/privacy">Privacy</Link>
+            <Link to="/terms">Terms</Link>
+          </div>
+          <div className="nav-actions">
+            {/* <Link to="/login" className="btn-nav-ghost">Sign in</Link> */}
+            <Link to="/login" className="btn-nav-primary">Get started</Link>
+          </div>
+        </nav>
 
-      {/* Featured Tests Section */}
-      {publicPublishedTests ? (
-        publicPublishedTests?.length > 0 && (
-          <section id="featured-tests" className="pt-1 pb-2 bg-muted/30">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="text-center space-y-2 mb-16">
-                <div className="flex items-center justify-center gap-2 mb-4">
-                  <Zap className="h-6 w-6 text-yellow-500" />
-                  <h2 className="text-4xl font-bold">Featured Tests</h2>
-                  <Zap className="h-6 w-6 text-yellow-500" />
-                </div>
-                <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                  Start your assessment journey with our most popular tests. Carefully crafted
-                  to provide meaningful insights into your abilities and personality.
-                </p>
-              </div>
-
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {publicPublishedTests.map((test) => (
-                  <Card
-                    key={test.id}
-                    className="group hover:shadow-elegant transition-all duration-300 hover:-translate-y-2 border-2 border-transparent hover:border-primary/20"
-                  >
-                    <CardHeader className="pb-4">
-                      <div className="flex justify-between items-start mb-3">
-                        <Badge variant="outline" className={getCategoryColor(test.category)}>
-                          {test.category}
-                        </Badge>
-                        {test.isPublished === true && (
-                          <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                            <Star className="h-3 w-3 mr-1" />
-                            Live
-                          </Badge>
-                        )}
-                      </div>
-                      <CardTitle className="text-xl line-clamp-2 group-hover:text-primary transition-colors">
-                        {test.title}
-                      </CardTitle>
-                      <CardDescription className="line-clamp-3 mt-2">
-                        {test.description}
-                      </CardDescription>
-                    </CardHeader>
-
-                    <CardContent className="pb-4">
-                      <div className="space-y-3">
-                        {/* <div className="flex items-center text-sm text-muted-foreground">
-                          <Clock className="h-4 w-4 mr-2" />
-                          <span>{formatDuration(test.timeDuration)}</span>
-                        </div> */}
-
-                        {/* <div className="flex items-center text-sm text-muted-foreground">
-                        <BookOpen className="h-4 w-4 mr-2" />
-                        <span>
-                          {test.totalQuestionsPerPage > 0
-                            ? `${test.totalQuestionsPerPage} questions`
-                            : "Multiple questions"}
-                        </span>
-                      </div> */}
-
-                        {test?.completions > 0 && (
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <Users className="h-4 w-4 mr-2" />
-                            <span>{test?.completions} completions</span>
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-
-                    <CardFooter>
-                      <Button
-                        className="w-full group"
-                        size="lg"
-                        asChild
-                      >
-                        <Link to={`/get-started?testId=${test?.id}`}>
-                          Get Started
-                          <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                        </Link>
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                ))}
-              </div>
-
-              {publicPublishedTests.length > 3 && (
-                <div className="text-center mt-12">
-                  <Button size="lg" variant="outline" asChild>
-                    <Link to="/tests">
-                      View All Tests
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                  </Button>
-                </div>
-              )}
+        {/* ═══════════ HERO ═══════════ */}
+        <section className="hero-section">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <span className="hero-badge-dot" />
+              AI-Powered Psychometric Platform
             </div>
-          </section>
-        )) :
-        (
-          // Skeleton / Loading State
-          <section className="pt-1 pb-2 bg-muted/30">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <Skeleton
-                    key={i}
-                    className="h-72 w-full rounded-lg"
-                  />
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
-
-      {/* Features Section */}
-      <section className="py-24 bg-card">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center space-y-4 mb-16">
-            <h2 className="text-4xl font-bold">Why Choose PathGrad?</h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Our platform combines cutting-edge technology with scientific rigor to deliver
-              the most accurate and insightful psychometric assessments available.
+            <h1 className="hero-h1">
+              The AI assessment<br />
+              platform built for <span>everyone</span>
+            </h1>
+            <p className="hero-sub">
+              Comprehensive psychometric testing that reveals cognitive strengths,
+              personality traits, and career pathways — powered by advanced AI and
+              scientifically validated theories.
             </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
-              <Card key={index} className="group hover:shadow-soft transition-all duration-300 hover:-translate-y-1">
-                <CardHeader>
-                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                    <feature.icon className="h-6 w-6 text-primary" />
-                  </div>
-                  <CardTitle className="text-xl">{feature.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-base">{feature.description}</CardDescription>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Test Types Section */}
-      <section className="py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center space-y-4 mb-16">
-            <h2 className="text-4xl font-bold">Comprehensive Test Battery</h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Our scientifically validated assessments cover all aspects of psychological measurement
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {testTypes.map((test, index) => (
-              <Card key={index} className="relative overflow-hidden group hover:shadow-elegant transition-all duration-300">
-                <div className={`absolute top-0 left-0 w-full h-1 ${test.color}`}></div>
-                <CardHeader className="text-center">
-                  <div className={`h-16 w-16 rounded-full ${test.color}/10 flex items-center justify-center mx-auto mb-4`}>
-                    <test.icon className={`h-8 w-8 ${test.color.replace('bg-', 'text-')}`} />
-                  </div>
-                  <CardTitle className="text-lg">{test.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-center">{test.description}</CardDescription>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Benefits Section */}
-      <section className="py-2 bg-muted/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8">
-              <div className="space-y-4">
-                <h2 className="text-4xl font-bold">Everything You Need for Success</h2>
-                <p className="text-xl text-muted-foreground">
-                  Our comprehensive platform provides all the tools you need to understand
-                  yourself better and make informed career decisions.
-                </p>
-              </div>
-
-              <div className="grid gap-4">
-                {benefits.map((benefit, index) => (
-                  <div key={index} className="flex items-center space-x-3">
-                    <CheckCircle className="h-5 w-5 text-success flex-shrink-0" />
-                    <span className="text-lg">{benefit}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex gap-4">
-                <Button
-                  onClick={() => {
-                    localStorage.removeItem("testId");
-                    localStorage.removeItem("testFlowActive");
-                    navigate("/get-started");
-                  }}
-                >
-                  Get Started Today
-                </Button>
-                <Button size="lg" variant="outline" asChild>
-                  <Link to="/about">Learn More</Link>
-                </Button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-6">
-              <Card className="p-6 text-center space-y-2">
-                <div className="text-3xl font-bold text-primary">50K+</div>
-                <div className="text-muted-foreground">Assessments Completed</div>
-              </Card>
-              <Card className="p-6 text-center space-y-2">
-                <div className="text-3xl font-bold text-secondary">95%</div>
-                <div className="text-muted-foreground">Accuracy Rate</div>
-              </Card>
-              <Card className="p-6 text-center space-y-2">
-                <div className="text-3xl font-bold text-accent">24/7</div>
-                <div className="text-muted-foreground">AI Support</div>
-              </Card>
-              <Card className="p-6 text-center space-y-2">
-                <div className="text-3xl font-bold text-warning">4.9/5</div>
-                <div className="text-muted-foreground">User Rating</div>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-24 bg-gradient-primary text-primary-foreground">
-        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8 space-y-8">
-          <h2 className="text-4xl font-bold">Ready to Discover Your Potential?</h2>
-          <p className="text-xl opacity-90 max-w-2xl mx-auto">
-            Join thousands of individuals who have already unlocked their potential
-            with our AI-powered psychometric assessments.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" variant="secondary" className="shadow-lg" asChild>
-              <Link to="/tests">
-                <Award className="mr-2 h-5 w-5" />
-                Explore All Tests
+            <div className="hero-ctas">
+              <Link to="/login" className="btn-primary">
+                Get started <ArrowRight size={16} />
               </Link>
-            </Button>
-            <Button size="lg" variant="outline" className="border-secondary text-secondary" asChild>
-              <Link to="/contact">Contact Sales</Link>
-            </Button>
+              <Link to="/counselors" className="btn-secondary">
+                Talk to a counselor
+              </Link>
+            </div>
           </div>
-        </div>
-      </section>
-    </div>
+
+          {/* Product Preview — like gumloop's hero visual */}
+          <div className="hero-preview">
+            <div className="preview-window">
+              <div className="preview-topbar">
+                <div className="preview-dot preview-dot-r" />
+                <div className="preview-dot preview-dot-y" />
+                <div className="preview-dot preview-dot-g" />
+                <span style={{ marginLeft: 12, fontSize: "0.75rem", color: "#a0a0ab", fontWeight: 500 }}>
+                  PathGrad — Assessment Dashboard
+                </span>
+              </div>
+              <div className="preview-body">
+                <div className="preview-sidebar">
+                  <div className="sidebar-item active">
+                    <BarChart3 size={16} /> Dashboard
+                  </div>
+                  <div className="sidebar-item">
+                    <FileText size={16} /> Assessments
+                  </div>
+                  <div className="sidebar-item">
+                    <Users size={16} /> Students
+                  </div>
+                  <div className="sidebar-item">
+                    <Target size={16} /> Career Paths
+                  </div>
+                  <div className="sidebar-item">
+                    <Activity size={16} /> Analytics
+                  </div>
+                </div>
+                <div className="preview-main">
+                  <div className="preview-card-row">
+                    <div className="preview-stat-card">
+                      <div className="psc-label">Assessments</div>
+                      <div className="psc-value">2,847</div>
+                      <div className="psc-change psc-up">
+                        <TrendingUp size={12} /> +18.2%
+                      </div>
+                    </div>
+                    <div className="preview-stat-card">
+                      <div className="psc-label">Accuracy</div>
+                      <div className="psc-value">95.3%</div>
+                      <div className="psc-change psc-up">
+                        <TrendingUp size={12} /> +2.1%
+                      </div>
+                    </div>
+                    <div className="preview-stat-card">
+                      <div className="psc-label">Avg. Time</div>
+                      <div className="psc-value">24m</div>
+                      <div className="psc-change psc-neutral">
+                        <Clock size={12} /> Steady
+                      </div>
+                    </div>
+                  </div>
+                  <div className="preview-chart">
+                    <div style={{ fontSize: "0.72rem", fontWeight: 600, color: "#a0a0ab", marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                      Assessment Results — Last 7 Days
+                    </div>
+                    <div className="chart-bars">
+                      {[45, 62, 78, 55, 88, 72, 95].map((h, i) => (
+                        <div
+                          key={i}
+                          className="chart-bar"
+                          style={{
+                            height: `${h}%`,
+                            background: `linear-gradient(to top, #6366f1, #818cf8)`,
+                            opacity: 0.3 + (h / 130),
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════ LOGOS ═══════════ */}
+        <section className="logos-section">
+          <div className="logos-label">Empowering various educational sectors</div>
+          <div className="logos-row">
+            {["Schools", "Universities", "Coaching Institutes", "Junior Colleges", "Career Centers", "Educational NGOs"].map((name) => (
+              <div key={name} className="logo-item">
+                <Award size={18} />
+                {name}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ═══════════ FEATURES — BENTO GRID ═══════════ */}
+        <section className="features-section">
+          <div className="features-container">
+            <div className="features-header">
+              <div className="section-eyebrow">Everything you need</div>
+              <h2 className="section-title">
+                Everything you need to assess<br />any individual
+              </h2>
+              <p className="section-subtitle">
+                Powered by Holland's Theory, Big Five, Bloom's Taxonomy and Ability theories — our platform
+                covers every dimension of psychometric evaluation.
+              </p>
+            </div>
+
+            <div className="bento-grid">
+              {/* Card 1 — Large: AI-Powered Assessment */}
+              <div className="bento-card bento-lg">
+                <div className="bento-card-header">
+                  <div className="bento-card-title">AI-Powered Adaptive Assessment</div>
+                  <div className="bento-card-desc">
+                    Questions adapt in real-time to the student's ability level using Item Response Theory
+                  </div>
+                </div>
+                <div className="bento-visual">
+                  <AIAssessmentMockup />
+                </div>
+              </div>
+
+              {/* Card 2 — Regular: Personality Analysis */}
+              <div className="bento-card">
+                <div className="bento-card-header">
+                  <div className="bento-card-title">AI-Enhanced Analysis</div>
+                  <div className="bento-card-desc">
+                    Deep personality profiling using Big Five framework
+                  </div>
+                </div>
+                <div className="bento-visual">
+                  <AIAnalysisMockup />
+                </div>
+              </div>
+
+              {/* Card 3 — Regular: Built For All */}
+              <div className="bento-card">
+                <div className="bento-card-header">
+                  <div className="bento-card-title">Built For Everyone</div>
+                  <div className="bento-card-desc">
+                    Assessments for every stakeholder in education
+                  </div>
+                </div>
+                <div className="bento-visual">
+                  <DepartmentsMockup />
+                </div>
+              </div>
+
+              {/* Card 4 — Regular: Instant Processing */}
+              <div className="bento-card">
+                <div className="bento-card-header">
+                  <div className="bento-card-title">Real-time Processing</div>
+                  <div className="bento-card-desc">
+                    Watch as AI processes and scores assessments live
+                  </div>
+                </div>
+                <div className="bento-visual">
+                  <InstantResultsMockup />
+                </div>
+              </div>
+
+              {/* Card 6 — Regular: Analytics */}
+              <div className="bento-card">
+                <div className="bento-card-header">
+                  <div className="bento-card-title">Advanced Analytics</div>
+                  <div className="bento-card-desc">
+                    Comprehensive dashboards for schools to track cohorts and growth
+                  </div>
+                </div>
+                <div className="bento-visual">
+                  <AdvancedAnalyticsMockup />
+                </div>
+              </div>
+
+              {/* Card 5 — Large: Career Guidance */}
+              <div className="bento-card bento-lg">
+                <div className="bento-card-header">
+                  <div className="bento-card-title">Smart Career Pathways</div>
+                  <div className="bento-card-desc">
+                    AI matches cognitive and personality profiles to ideal career paths with confidence scores
+                  </div>
+                </div>
+                <div className="bento-visual" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                  <CareerPathsMockup />
+                  <SmartReportsMockup />
+                </div>
+              </div>
+
+              {/* Card 7 — Regular: Security */}
+              <div className="bento-card">
+                <div className="bento-card-header">
+                  <div className="bento-card-title">Enterprise Security</div>
+                  <div className="bento-card-desc">
+                    GDPR & FERPA compliant data protection for schools
+                  </div>
+                </div>
+                <div className="bento-visual">
+                  <EnterpriseSecurityMockup />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════ HOW IT WORKS ═══════════ */}
+        <section className="how-section">
+          <div className="how-container">
+            <div className="how-header">
+              <div className="section-eyebrow">How PathGrad works</div>
+              <h2 className="section-title">Get started in three simple steps</h2>
+              <p className="section-subtitle">
+                From choosing a framework to receiving your career report —
+                everything is automated and AI-powered.
+              </p>
+            </div>
+
+            <div className="how-steps">
+              <div className="how-step">
+                <div className="how-step-num">1</div>
+                <div className="how-step-title">Choose a Framework</div>
+                <div className="how-step-desc">
+                  Select from our library of psychometric theories — Holland's for career interests,
+                  Big Five for personality, Ability Theory for cognitive, or Bloom's for knowledge.
+                </div>
+                <HowStep1Visual />
+              </div>
+
+              <div className="how-step">
+                <div className="how-step-num">2</div>
+                <div className="how-step-title">Take the Assessment</div>
+                <div className="how-step-desc">
+                  AI generates adaptive questions calibrated to your grade level.
+                  Questions get harder or easier based on your responses.
+                </div>
+                <HowStep2Visual />
+              </div>
+
+              <div className="how-step">
+                <div className="how-step-num">3</div>
+                <div className="how-step-title">Get Your Insights</div>
+                <div className="how-step-desc">
+                  Receive a comprehensive report with cognitive scores, personality
+                  traits, career recommendations, and growth plans.
+                </div>
+                <HowStep3Visual />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════ STATS BAR ═══════════ */}
+        <section className="stats-section">
+          <div className="stats-container">
+            <div className="stat-item">
+              <div className="stat-num">300+</div>
+              <div className="stat-label">Assessments completed</div>
+            </div>
+            <div className="stat-divider" />
+            <div className="stat-item">
+              <div className="stat-num">2</div>
+              <div className="stat-label">Pilot Institutions Active</div>
+            </div>
+            <div className="stat-divider" />
+            <div className="stat-item">
+              <div className="stat-num">10+</div>
+              <div className="stat-label">Counsellors Onboard</div>
+            </div>
+            <div className="stat-divider" />
+            <div className="stat-item">
+              <div className="stat-num">99.9%</div>
+              <div className="stat-label">Cloud Uptime Guaranteed</div>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════ SOCIAL PROOF ═══════════ */}
+        <section className="proof-section">
+          <div className="proof-container">
+            <div className="proof-header">
+              <div className="section-eyebrow">Trusted by educators</div>
+              <h2 className="section-title">See what our users are saying</h2>
+            </div>
+            <div className="proof-grid">
+              {[
+                {
+                  text: "PathGrad completely transformed how we approach career counseling. The AI-generated insights are incredibly accurate and save us hours of manual assessment.",
+                  name: "Dr. Priya Sharma",
+                  role: "Head Counselor, DPS International",
+                  color: "#6366f1",
+                },
+                {
+                  text: "The adaptive testing is remarkable — it accurately pinpointed my cognitive strengths and recommended career paths I'd never considered but turned out to be perfect.",
+                  name: "Rahul Mehta",
+                  role: "12th Grade Student",
+                  color: "#22c55e",
+                },
+                {
+                  text: "We deployed PathGrad across 15 schools in our network. The standardized reporting and grade-specific assessments are exactly what we needed.",
+                  name: "Anita Desai",
+                  role: "Director of Education, Ashoka Schools",
+                  color: "#f59e0b",
+                },
+              ].map((t, i) => (
+                <div key={i} className="proof-card">
+                  <div className="proof-stars">
+                    {Array(5).fill(0).map((_, j) => (
+                      <Star key={j} size={16} className="proof-star" fill="#f59e0b" />
+                    ))}
+                  </div>
+                  <p className="proof-text">"{t.text}"</p>
+                  <div className="proof-author">
+                    <div className="proof-avatar" style={{ background: t.color }}>
+                      {t.name.charAt(0)}
+                    </div>
+                    <div>
+                      <div className="proof-name">{t.name}</div>
+                      <div className="proof-role">{t.role}</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════ USE CASES ═══════════ */}
+        <section className="usecases-section">
+          <div className="usecases-container">
+            <div className="usecases-header">
+              <div className="section-eyebrow">Built for all departments</div>
+              <h2 className="section-title">
+                Consolidate your assessment tools,<br />empower your team
+              </h2>
+              <p className="section-subtitle">
+                Whether you're a student, school administrator, HR professional,
+                or career counselor — PathGrad has the right assessment for you.
+              </p>
+            </div>
+            <div className="usecases-grid">
+              {[
+                {
+                  icon: GraduationCap, title: "Students",
+                  desc: "Discover cognitive strengths, personality traits, and ideal career paths through scientifically validated tests.",
+                  bg: "#eef2ff", color: "#6366f1",
+                },
+                {
+                  icon: Headphones, title: "Counselors",
+                  desc: "Access comprehensive student reports, track progress across sessions, and provide data-driven career guidance.",
+                  bg: "#fef3c7", color: "#f59e0b",
+                },
+                {
+                  icon: School, title: "Schools",
+                  desc: "Deploy standardized assessments across grades, compare cohort performance, and generate institution-level insights.",
+                  bg: "#f0fdf4", color: "#22c55e",
+                },
+                {
+                  icon: Briefcase, title: "HR Teams",
+                  desc: "Evaluate candidates' cognitive abilities and cultural fit with role-specific psychometric assessments.",
+                  bg: "#fce7f3", color: "#ec4899",
+                },
+              ].map((uc, i) => (
+                <div key={i} className="usecase-card">
+                  <div className="usecase-icon" style={{ background: uc.bg }}>
+                    <uc.icon size={28} color={uc.color} />
+                  </div>
+                  <div className="usecase-title">{uc.title}</div>
+                  <div className="usecase-desc">{uc.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════ ENTERPRISE ═══════════ */}
+        <section className="enterprise-section">
+          <div className="enterprise-container">
+            <div className="enterprise-header">
+              <div className="section-eyebrow">Enterprise ready</div>
+              <h2 className="section-title">Built for institutions at scale</h2>
+              <p className="section-subtitle">
+                Security, compliance, and control — everything schools and organizations need.
+              </p>
+            </div>
+            <div className="enterprise-grid">
+              {enterpriseFeatures.map((feat, i) => (
+                <div key={i} className="ent-card">
+                  <div className="ent-icon">
+                    <feat.icon size={20} color="#818cf8" />
+                  </div>
+                  <div className="ent-title">{feat.title}</div>
+                  <div className="ent-desc">{feat.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════ FINAL CTA ═══════════ */}
+        <section className="cta-section">
+          <div className="cta-content">
+            <h2 className="cta-title">
+              Everyone's talking about AI.<br />
+              Give your team the tool to <span>use it.</span>
+            </h2>
+            <p className="cta-desc">
+              Join thousands of institutions using PathGrad to transform
+              their assessment and career guidance programs.
+            </p>
+            <div className="cta-btns">
+              <Link to="/login" className="btn-primary">
+                Get started for free <ArrowRight size={16} />
+              </Link>
+              <Link to="/counselors" className="btn-secondary">
+                Contact sales <ArrowUpRight size={14} />
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════ FOOTER ═══════════ */}
+        <footer className="lp-footer">
+          <div className="footer-inner">
+            <div className="footer-logo">
+              Cognify<span>IQ</span>
+            </div>
+            <div className="footer-links">
+              <Link to="/assessments">Assessments</Link>
+              <Link to="/counselors">Counselors</Link>
+              <Link to="/about">About</Link>
+              <Link to="/pricing">Pricing</Link>
+              <Link to="/privacy">Privacy</Link>
+              <Link to="/terms">Terms</Link>
+            </div>
+            <div className="footer-copy">© 2026  Cognify<span>IQ</span>. All rights reserved.</div>
+          </div>
+        </footer>
+
+      </div>
+    </>
   );
 };

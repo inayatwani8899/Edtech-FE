@@ -1,5 +1,5 @@
 // import { User, UserRole } from "@/types/auth";
-import {create} from "zustand";
+import { create } from "zustand";
 import { UserFormData } from "./userStore";
 import api from "@/api/axios";
 import { GenericResponse, Role, User, UserRole } from "@/types/types";
@@ -143,7 +143,6 @@ export const useCounselorStore = create<counselorState>((set, get) => ({
         set({ loading: true, error: null });
         try {
             await api.post("/Counsellor/register", data);
-            await get().fetchCounselors();
         } catch (err: any) {
             set({ error: err.response?.data?.message || "Failed to create counselor" });
             throw err;
@@ -168,7 +167,7 @@ export const useCounselorStore = create<counselorState>((set, get) => ({
     },
 
     updateCounselor: async (id, data) => {
-        data.id=id;
+        data.id = id;
         set({ loading: true, error: null });
         try {
             await api.put(`/Counsellor`, data);
