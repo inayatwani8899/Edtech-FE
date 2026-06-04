@@ -46,6 +46,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import Swal from "sweetalert2";
+import { DeleteDialog } from "@/components/ui/delete-dialog";
+import { toast } from "sonner";
 
 export const SchoolStudents = () => {
     const navigate = useNavigate();
@@ -62,6 +64,9 @@ export const SchoolStudents = () => {
         setSearchTerm,
         fetchStudents,
         openDeleteDialog,
+        deleteOpen,
+        closeDeleteDialog,
+        deleteStudent,
     } = useStudentStore();
 
     const [viewMode, setViewMode] = useState<"table" | "grid">("table");
@@ -102,6 +107,14 @@ export const SchoolStudents = () => {
                 setSelectedStudents([]);
             }
         });
+    };
+
+    const handleDeleteConfirm = async () => {
+        try {
+            await deleteStudent();
+        } catch (err: any) {
+            console.error("Failed to delete student record:", err);
+        }
     };
 
     const exportData = () => {
@@ -508,6 +521,15 @@ export const SchoolStudents = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Delete Dialog */}
+            <DeleteDialog
+                open={deleteOpen}
+                onOpenChange={closeDeleteDialog}
+                onConfirm={handleDeleteConfirm}
+                title="Delete Student Record"
+                description="Are you sure you want to permanently remove this student? This action cannot be undone."
+            />
         </div>
     );
 };

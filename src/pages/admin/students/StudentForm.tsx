@@ -33,6 +33,7 @@ interface StudentFormData {
     dateOfBirth: string;
     password?: string;
     studentId?: string; // Optional student ID field
+    isActive?: boolean;
 }
 
 const StudentForm: React.FC = () => {
@@ -61,7 +62,8 @@ const StudentForm: React.FC = () => {
         gradeId: "",
         dateOfBirth: "",
         password: "",
-        studentId: ""
+        studentId: "",
+        isActive: true
     });
 
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -127,12 +129,13 @@ const StudentForm: React.FC = () => {
                 gradeId: selectedGradeId,
                 dateOfBirth: student.dateOfBirth ? new Date(student.dateOfBirth).toISOString().split('T')[0] : "",
                 password: "",
-                studentId: ""
+                studentId: "",
+                isActive: student.isActive !== false
             });
         }
     }, [student, id, grades]);
 
-    const handleInputChange = (field: string, value: string) => {
+    const handleInputChange = (field: string, value: string | boolean) => {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
@@ -187,7 +190,8 @@ const StudentForm: React.FC = () => {
             gradeId: Number(formData.gradeId),
             gradeLevel: selectedGrade ? selectedGrade.name : "",
             dateOfBirth: formData.dateOfBirth,
-            password: formData.password
+            password: formData.password,
+            isActive: formData.isActive !== false
         };
 
         try {
@@ -311,6 +315,27 @@ const StudentForm: React.FC = () => {
                                     required
                                 />
                             </div>
+
+                            {/* Status (Only when editing) */}
+                            {id && (
+                                <div className="space-y-1">
+                                    <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                        Status <span className="text-red-500">*</span>
+                                    </Label>
+                                    <Select
+                                        value={formData.isActive ? "Active" : "Inactive"}
+                                        onValueChange={(val) => handleInputChange("isActive", val === "Active")}
+                                    >
+                                        <SelectTrigger className="w-full h-9 bg-transparent border-slate-200 dark:border-slate-800 rounded-xl px-3 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                            <SelectValue placeholder="Select status" />
+                                        </SelectTrigger>
+                                        <SelectContent className="rounded-xl border-slate-200 dark:border-slate-800 shadow-xl">
+                                            <SelectItem value="Active" className="text-xs font-semibold text-emerald-600">Active</SelectItem>
+                                            <SelectItem value="Inactive" className="text-xs font-semibold text-rose-600">Inactive</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            )}
                         </div>
                     </div>
 

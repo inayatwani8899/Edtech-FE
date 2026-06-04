@@ -16,16 +16,16 @@ export interface StudentSession {
 
 const getTenantFromHostname = () => {
   const hostname = window.location.hostname;
-  if (hostname === "localhost" || hostname === "127.0.0.1" || /^(\d{1,3}\.){3}\d{1,3}$/.test(hostname)) {
-    return null;
-  }
-  const parts = hostname.split('.');
-  if (parts.length > 2) {
-    const subdomain = parts[0].toLowerCase();
-    if (subdomain !== "www" && subdomain !== "nervous-dubinsky" && subdomain !== "charming-bohr") {
-      return subdomain;
-    }
-  }
+  // if (hostname === "localhost" || hostname === "127.0.0.1" || /^(\d{1,3}\.){3}\d{1,3}$/.test(hostname)) {
+  //   return null;
+  // }
+  // const parts = hostname.split('.');
+  // if (parts.length > 0) {
+  //   const subdomain = parts[0].toLowerCase();
+  //   if (subdomain !== "www" && subdomain !== "nervous-dubinsky" && subdomain !== "charming-bohr") {
+  //     return subdomain;
+  //   }
+  // }
   return null;
 };
 
@@ -41,7 +41,7 @@ interface AuthState {
   tenantLoading: boolean;
   tenantError: string | null;
   studentSession: StudentSession | null;
-  
+
   login: (email: string, password: string, tenantName?: string | null) => Promise<void>;
   logout: () => void;
   registerStudent: (payload: any) => Promise<{ success: boolean, message?: string, error?: any }>;
@@ -123,8 +123,8 @@ export const useAuthStore = create<AuthState>(
         // Resolve tenant dynamically: URL -> hostname -> localStorage -> default to null (superadmin default login)
         const resolvedTenant = routeTenant || getTenantFromHostname() || storedTenant || null;
 
-        const payload: any = { 
-          email, 
+        const payload: any = {
+          email,
           password,
           tenant: resolvedTenant
         };
@@ -143,7 +143,7 @@ export const useAuthStore = create<AuthState>(
         } catch (orgErr) {
           firstError = orgErr;
           console.warn("Login failed on the primary/org API, attempting fallback to the old API...", orgErr);
-          
+
           // Attempt 2: Try the fallback/old URL (charming-bohr)
           try {
             const res = await api.post<LoginResponse>("/Auth/login", payload, {
@@ -163,7 +163,7 @@ export const useAuthStore = create<AuthState>(
           const { access_Token, user, permissions = [] } = responseData.data;
           const tenant = responseData.data.tenant || resolvedTenant;
           const loginUrl = responseData.data.loginUrl || `/login/${tenant}`;
-          
+
           let organizationId = "";
           const storedTenantData = localStorage.getItem("organizationData");
           if (storedTenantData) {

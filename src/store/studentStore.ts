@@ -17,6 +17,7 @@ export interface Student {
     phone?: string;
     phoneNumber?: string;
     gender?: string;
+    isActive?: boolean;
 }
 
 interface StudentResponseData {
@@ -122,8 +123,12 @@ export const useStudentStore = create<StudentState>((set, get) => ({
         },
       });
 
-      const studentsList = response.data.data.students || [];
-      const totalCount = response.data.data.totalCount ?? studentsList.length ?? 0;
+      const rawStudentsList = response.data?.data?.students || [];
+      const studentsList = rawStudentsList.map((s: any) => ({
+        ...s,
+        id: s.studentId ? Number(s.studentId) : (s.id ? Number(s.id) : (s.userId ? Number(s.userId) : 0))
+      }));
+      const totalCount = response.data?.data?.totalCount ?? studentsList.length ?? 0;
       const calculatedTotalPages = Math.ceil(totalCount / limit);
 
       set({
@@ -167,7 +172,9 @@ export const useStudentStore = create<StudentState>((set, get) => ({
           dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString() : null,
           gender: data.gender
         };
-        await api.post("/Organization/students-added-through-organization", payload);
+        await api.post("/Organization/students-added-through-organization", payload, {
+          headers: { 'x-skip-toast': 'true' }
+        });
       } else {
         const transformedData = {
           email: data.email,
@@ -180,7 +187,9 @@ export const useStudentStore = create<StudentState>((set, get) => ({
           isAdmin: false,
           createdBy: 1
         };
-        await api.post("/Student/admin/create", transformedData);
+        await api.post("/Student/admin/create", transformedData, {
+          headers: { 'x-skip-toast': 'true' }
+        });
       }
       await get().fetchStudents();
     } catch (err: any) {
@@ -203,17 +212,31 @@ export const useStudentStore = create<StudentState>((set, get) => ({
                        user?.role?.toLowerCase() === "organizationadmin";
 
       if (isSchool) {
-        const response = await api.get<any>(`/Organization/students/${id}`);
-        if (response.data && response.data.success) {
-          set({ student: response.data.data });
+        const response = await api.get<any>(`/organization/students/${id}`);
+        const s = response.data && response.data.success ? response.data.data : response.data;
+        if (s) {
+          const mappedStudent = {
+            ...s,
+            id: s.studentId ? Number(s.studentId) : (s.id ? Number(s.id) : (s.userId ? Number(s.userId) : Number(id)))
+          };
+          set({ student: mappedStudent });
         } else {
-          set({ student: response.data });
+          set({ student: null });
         }
       } else {
         const response = await api.get<GenericResponse<StudentResponseData>>("/Student");
-        const student = response.data.data.students.find(s => s.id === Number(id));
+        const rawStudents = response.data?.data?.students || [];
+        const student = rawStudents.find((s: any) => {
+          const sId = s.studentId ? Number(s.studentId) : (s.id ? Number(s.id) : (s.userId ? Number(s.userId) : 0));
+          return sId === Number(id);
+        });
         if (student) {
-          set({ student });
+          set({ 
+            student: {
+              ...student,
+              id: student.studentId ? Number(student.studentId) : (student.id ? Number(student.id) : (student.userId ? Number(student.userId) : Number(id)))
+            } 
+          });
         } else {
           throw new Error("Student not found");
         }
@@ -240,20 +263,21 @@ export const useStudentStore = create<StudentState>((set, get) => ({
 
       if (isSchool) {
         const payload = {
-          id: Number(id),
-          email: data.email,
           firstName: data.firstName,
           lastName: data.lastName,
-          phone: data.phone || data.phoneNumber,
-          phoneNumber: data.phone || data.phoneNumber,
-          gradeLevel: data.gradeLevel,
-          gradeId: data.gradeId ? Number(data.gradeId) : undefined,
+          phoneNumber: data.phoneNumber || data.phone || "",
+          gender: data.gender,
+          gradeId: data.gradeId ? Number(data.gradeId) : 0,
           dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString() : null,
-          gender: data.gender
+          isActive: data.isActive !== undefined ? data.isActive : true
         };
-        await api.put(`/Organization/students/${id}`, payload);
+        await api.put(`/organization/students/${id}`, payload, {
+          headers: { 'x-skip-toast': 'true' }
+        });
       } else {
-        await api.put(`/Student`, data);
+        await api.put(`/Student`, data, {
+          headers: { 'x-skip-toast': 'true' }
+        });
       }
       await get().fetchStudents();
     } catch (err: any) {
@@ -277,7 +301,7 @@ export const useStudentStore = create<StudentState>((set, get) => ({
                        user?.role?.toLowerCase() === "organization" ||
                        user?.role?.toLowerCase() === "organizationadmin";
 
-      const endpoint = isSchool ? `/Organization/students/${selectedStudentId}` : `/Student/${selectedStudentId}`;
+      const endpoint = isSchool ? `/organization/students/${selectedStudentId}` : `/Student/${selectedStudentId}`;
       await api.delete(endpoint);
 
       const remainingStudents = students.filter(student => student.id !== Number(selectedStudentId));

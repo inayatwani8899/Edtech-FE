@@ -19,9 +19,11 @@ import {
     MapPin,
     CalendarDays,
     GraduationCap,
-    LayoutDashboard
+    LayoutDashboard,
+    XCircle
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 const StudentView: React.FC = () => {
     const navigate = useNavigate();
@@ -143,12 +145,21 @@ const StudentView: React.FC = () => {
                                         <Shield className="h-4 w-4 text-slate-300" />
                                     </div>
                                     
-                                    <div className="flex items-center justify-between p-3.5 bg-emerald-50/30 rounded-2xl border border-emerald-100 shadow-sm shadow-emerald-500/5">
+                                    <div className={cn(
+                                        "flex items-center justify-between p-3.5 rounded-2xl border shadow-sm transition-colors",
+                                        student.isActive !== false ? "bg-emerald-50/30 border-emerald-100 shadow-emerald-500/5" : "bg-rose-50/30 border-rose-100 shadow-rose-500/5"
+                                    )}>
                                         <div className="flex flex-col">
-                                            <span className="text-[9px] font-black text-emerald-600/60 uppercase tracking-tight mb-1">Status Verification</span>
-                                            <span className="text-xs font-black text-emerald-700">Verified Member</span>
+                                            <span className={cn("text-[9px] font-black uppercase tracking-tight mb-1", student.isActive !== false ? "text-emerald-600/60" : "text-rose-600/60")}>Status Verification</span>
+                                            <span className={cn("text-xs font-black", student.isActive !== false ? "text-emerald-700" : "text-rose-700")}>
+                                                {student.isActive !== false ? "Active" : "Inactive"}
+                                            </span>
                                         </div>
-                                        <BadgeCheck className="h-5 w-5 text-emerald-500" />
+                                        {student.isActive !== false ? (
+                                            <BadgeCheck className="h-5 w-5 text-emerald-500" />
+                                        ) : (
+                                            <XCircle className="h-5 w-5 text-rose-500" />
+                                        )}
                                     </div>
                                 </div>
                             </CardContent>
@@ -196,7 +207,7 @@ const StudentView: React.FC = () => {
                                         </div>
                                         <div>
                                             <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.1em] mb-1">Academic Stratum</p>
-                                            <p className="text-sm font-black text-slate-800">Grade {student.gradeLevel || "Not classified"}</p>
+                                            <p className="text-sm font-black text-slate-800">Grade {student.gradeLevel || student.gradeName || "Not classified"}</p>
                                         </div>
                                     </div>
 
@@ -212,6 +223,17 @@ const StudentView: React.FC = () => {
                                                     ? new Date(student.dateOfBirth).toLocaleDateString(undefined, { dateStyle: 'long' }) 
                                                     : "Date unknown"}
                                             </p>
+                                        </div>
+                                    </div>
+
+                                    {/* GENDER */}
+                                    <div className="flex items-center gap-5 group">
+                                        <div className="h-12 w-12 rounded-2xl bg-slate-50 flex items-center justify-center border border-slate-100 transition-all group-hover:scale-110 group-hover:bg-cyan-50 group-hover:border-cyan-100">
+                                            <User className="h-5 w-5 text-slate-400 group-hover:text-cyan-600" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.1em] mb-1">Gender Classification</p>
+                                            <p className="text-sm font-black text-slate-800">{student.gender || "Not specified"}</p>
                                         </div>
                                     </div>
                                 </div>
