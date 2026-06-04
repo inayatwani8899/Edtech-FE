@@ -284,9 +284,10 @@ export const useAuthStore = create<AuthState>(
       try {
         const response = await api.post("Organization/register", formData, {
           headers: {
-            "Content-Type": "multipart/form-data",
+            "Content-Type": undefined,
           },
-        });
+          skipToast: true,
+        } as any);
         if (response.data.code === 201 || response.status === 201 || response.data.success === true) {
           return {
             success: true,
