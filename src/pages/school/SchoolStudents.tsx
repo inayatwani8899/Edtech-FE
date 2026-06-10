@@ -116,6 +116,72 @@ export const SchoolStudents = () => {
         );
     };
 
+    const formatDate = (dateString?: string) => {
+        if (!dateString) return "N/A";
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return dateString;
+            return date.toLocaleDateString("en-US", {
+                day: "numeric",
+                month: "short",
+                year: "numeric"
+            });
+        } catch {
+            return dateString;
+        }
+    };
+
+    const getAvatarGradient = (email: string = "", name: string = "") => {
+        const key = email || name || "default";
+        let hash = 0;
+        for (let i = 0; i < key.length; i++) {
+            hash = key.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const gradients = [
+            "from-blue-500 to-indigo-650 text-white",
+            "from-emerald-500 to-teal-600 text-white",
+            "from-purple-500 to-indigo-600 text-white",
+            "from-rose-500 to-orange-600 text-white",
+            "from-amber-500 to-orange-600 text-white",
+            "from-cyan-500 to-blue-600 text-white",
+            "from-fuchsia-500 to-pink-650 text-white",
+            "from-violet-500 to-purple-650 text-white"
+        ];
+        const index = Math.abs(hash) % gradients.length;
+        return gradients[index];
+    };
+
+    const getStableStudentId = (id: number, email: string) => {
+        let hash = 0;
+        const key = email || String(id);
+        for (let i = 0; i < key.length; i++) {
+            hash = key.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const str = Math.abs(hash).toString(36).substring(0, 6).toUpperCase();
+        return `#${str.padEnd(6, 'X')}`;
+    };
+
+    const formatGrade = (grade?: string) => {
+        if (!grade) return "N/A";
+        if (grade.toLowerCase().includes("grade")) return grade;
+        return `${grade} Grade`;
+    };
+
+    const renderStatusBadge = (isActive?: boolean) => {
+        const active = isActive !== false;
+        return (
+            <span className={cn(
+                "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider",
+                active 
+                    ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-450 border border-emerald-100 dark:border-emerald-900/30"
+                    : "bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-455 border border-rose-100 dark:border-rose-900/30"
+            )}>
+                <span className={cn("h-1.5 w-1.5 rounded-full", active ? "bg-emerald-500" : "bg-rose-500")} />
+                {active ? "Active" : "Inactive"}
+            </span>
+        );
+    };
+
     // Bulk Student Upload States
     const [isUploadOpen, setIsUploadOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -394,46 +460,97 @@ export const SchoolStudents = () => {
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
-            {/* Header Area */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-2xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
-                        <GraduationCap className="h-6 w-6" />
-                    </div>
-                    <div>
-                        <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">Student Matrix</h1>
-                        <p className="text-sm font-medium text-slate-500 flex items-center gap-2">
-                            {totalCount.toLocaleString()} total students enrolled
-                            <span className="h-1 w-1 rounded-full bg-slate-300" />
-                            Academic Year 2025-26
+            {/* Premium Page Header */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-slate-900 to-slate-850 dark:from-slate-950 dark:to-slate-900 p-6 sm:p-8 rounded-3xl text-white shadow-xl">
+                <div className="absolute top-0 right-0 -mt-4 -mr-4 w-48 h-48 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
+                <div className="absolute bottom-0 left-0 -mb-6 -ml-6 w-32 h-32 rounded-full bg-indigo-500/10 blur-2xl pointer-events-none" />
+                
+                <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div className="space-y-2.5">
+                        <div className="flex items-center gap-3">
+                            <span className="text-3xl">🎓</span>
+                            <h1 className="text-2xl sm:text-3xl font-black tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-200 bg-clip-text text-transparent">
+                                Student Matrix
+                            </h1>
+                        </div>
+                        <p className="text-slate-300 text-sm max-w-xl font-medium leading-relaxed">
+                            Manage and monitor all enrolled students within your organization.
                         </p>
+                        
+                        <div className="flex flex-wrap gap-4 pt-1 text-xs text-slate-300 font-semibold">
+                            <div className="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-full backdrop-blur-md">
+                                <span className="h-1.5 w-1.5 rounded-full bg-blue-400" />
+                                Total Students: <span className="text-white font-extrabold">{totalCount}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-full backdrop-blur-md">
+                                <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
+                                Academic Year: <span className="text-white font-extrabold">2025-26</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                        <Button 
+                            variant="outline" 
+                            onClick={exportData}
+                            className="bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white h-11 rounded-xl font-bold text-xs uppercase tracking-wider gap-2 px-4 backdrop-blur-sm"
+                        >
+                            <Download className="h-4 w-4" />
+                            Export CSV
+                        </Button>
+                        <Button 
+                            variant="outline"
+                            onClick={() => setIsUploadOpen(true)}
+                            className="bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white h-11 rounded-xl font-bold text-xs uppercase tracking-wider gap-2 px-4 backdrop-blur-sm"
+                        >
+                            <Upload className="h-4 w-4" />
+                            Bulk Upload Students
+                        </Button>
+                        <Button 
+                            onClick={() => navigate("/school/students/add")}
+                            className="bg-blue-600 hover:bg-blue-500 border-none text-white h-11 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-blue-600/30 gap-2 px-6 hover:scale-[1.02] active:scale-95 transition-all"
+                        >
+                            <UserPlus className="h-4 w-4" />
+                            Register Student
+                        </Button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Summary Statistics */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-2xl flex items-center justify-between shadow-sm">
+                    <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Students</p>
+                        <p className="text-2xl font-black text-slate-900 dark:text-white mt-1">{totalCount}</p>
+                    </div>
+                    <div className="h-10 w-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 flex items-center justify-center text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30">
+                        <GraduationCap className="h-5 w-5" />
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2 flex-wrap md:flex-nowrap">
-                    <Button 
-                        variant="outline" 
-                        onClick={exportData}
-                        className="hidden sm:flex items-center gap-2 border-slate-200 dark:border-slate-800 h-10 rounded-xl font-bold text-xs uppercase"
-                    >
-                        <Download className="h-4 w-4" />
-                        Export CSV
-                    </Button>
-                    <Button 
-                        variant="outline"
-                        onClick={() => setIsUploadOpen(true)}
-                        className="flex items-center gap-2 border-slate-200 dark:border-slate-800 h-10 rounded-xl font-bold text-xs uppercase hover:bg-slate-50 dark:hover:bg-slate-900"
-                    >
-                        <Upload className="h-4 w-4" />
-                        Bulk Upload
-                    </Button>
-                    <Button 
-                        onClick={() => navigate("/school/students/add")}
-                        className="bg-blue-600 hover:bg-blue-700 text-white h-10 rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg shadow-blue-500/20 gap-2 px-5"
-                    >
-                        <UserPlus className="h-4 w-4" />
-                        Register Student
-                    </Button>
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-2xl flex items-center justify-between shadow-sm">
+                    <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Students</p>
+                        <p className="text-2xl font-black text-emerald-600 dark:text-emerald-450 mt-1">
+                            {students.filter(s => s.isActive !== false).length}
+                        </p>
+                    </div>
+                    <div className="h-10 w-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center text-emerald-600 dark:text-emerald-450 border border-emerald-100 dark:border-emerald-900/30">
+                        <CheckCircle2 className="h-5 w-5" />
+                    </div>
+                </div>
+
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-2xl flex items-center justify-between shadow-sm">
+                    <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Grades</p>
+                        <p className="text-2xl font-black text-indigo-600 dark:text-indigo-400 mt-1">
+                            {new Set(students.map(s => s.gradeLevel || s.gradeName).filter(Boolean)).size || 0}
+                        </p>
+                    </div>
+                    <div className="h-10 w-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center text-indigo-600 dark:text-indigo-455 border border-indigo-100 dark:border-indigo-900/30">
+                        <Settings2 className="h-5 w-5" />
+                    </div>
                 </div>
             </div>
 
@@ -447,7 +564,6 @@ export const SchoolStudents = () => {
                             placeholder="Search Student..." 
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            disabled={loading}
                             className="pl-10 h-10 border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 rounded-xl text-sm"
                         />
                     </div>
@@ -626,41 +742,52 @@ export const SchoolStudents = () => {
                                             </div>
                                         </TableCell>
                                         <TableCell className="p-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-blue-100 to-indigo-100 dark:from-slate-800 dark:to-slate-750 flex items-center justify-center font-black text-blue-600 dark:text-blue-400 text-sm shadow-sm">
+                                            <div className="flex items-center gap-3.5">
+                                                {/* Dynamic Avatar */}
+                                                <div className={cn(
+                                                    "h-10 w-10 rounded-xl bg-gradient-to-tr flex items-center justify-center font-black text-sm shadow-sm transition-transform duration-300 group-hover:scale-105",
+                                                    getAvatarGradient(student.email, `${student.firstName} ${student.lastName}`)
+                                                )}>
                                                     {student.firstName[0]}{student.lastName[0]}
                                                 </div>
                                                 <div className="flex flex-col min-w-0">
-                                                    <span className="font-bold text-slate-900 dark:text-white truncate">{student.firstName} {student.lastName}</span>
-                                                    <span className="text-[10px] font-bold text-slate-400 mt-0.5 uppercase tracking-tighter">ID: #{Math.random().toString(36).substr(2, 6).toUpperCase()}</span>
+                                                    <span className="font-extrabold text-slate-900 dark:text-white truncate group-hover:text-blue-600 transition-colors">{student.firstName} {student.lastName}</span>
+                                                    <div className="flex flex-wrap items-center gap-2 mt-0.5 text-[10px] text-slate-400 font-bold uppercase tracking-tight">
+                                                        <span>Student ID: {getStableStudentId(student.id, student.email)}</span>
+                                                        <span className="h-1 w-1 rounded-full bg-slate-300" />
+                                                        <span>DOB: {formatDate(student.dateOfBirth)}</span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </TableCell>
                                         <TableCell className="p-4">
-                                            <Badge variant="outline" className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 font-bold px-3 py-1 text-[10px] rounded-lg">
-                                                Grade {student.gradeLevel}
+                                            <Badge variant="outline" className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-650 dark:text-slate-400 font-black px-3 py-1 text-[10px] rounded-lg">
+                                                {formatGrade(student.gradeLevel || student.gradeName)}
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="p-4">
-                                            <div className="flex flex-col max-w-[180px]">
-                                                <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 truncate">{student.email}</span>
-                                                <span className="text-[11px] text-slate-400 mt-0.5">{student.phone || "+1 234 567 890"}</span>
+                                            <div className="flex flex-col gap-0.5 max-w-[200px]">
+                                                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate flex items-center gap-1.5">
+                                                    <span className="text-sm">📧</span>
+                                                    <span className="truncate">{student.email}</span>
+                                                </span>
+                                                <span className="text-[11px] text-slate-400 dark:text-slate-500 font-semibold flex items-center gap-1.5 mt-0.5">
+                                                    <span className="text-sm">📞</span>
+                                                    <span>{student.phone || student.phoneNumber || "9876543210"}</span>
+                                                </span>
                                             </div>
                                         </TableCell>
                                         <TableCell className="p-4">
-                                            <div className="flex items-center gap-2">
-                                                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                                                <span className="text-[10px] font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest">Active</span>
-                                            </div>
+                                            {renderStatusBadge(student.isActive)}
                                         </TableCell>
                                         <TableCell className="p-4 text-right">
-                                            <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div className="flex items-center justify-end gap-1 px-1">
                                                 <Button 
                                                     variant="ghost" 
                                                     size="icon" 
                                                     onClick={() => navigate(`/school/students/view/${student.id}`)}
-                                                    className="h-8 w-8 rounded-lg hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/20"
-                                                    title="Quick View"
+                                                    className="h-8.5 w-8.5 rounded-xl text-slate-550 dark:text-slate-400 hover:bg-blue-50 dark:hover:bg-blue-950/45 hover:text-blue-600 dark:hover:text-blue-400 hover:scale-105 active:scale-95 transition-all shadow-sm hover:shadow-blue-100 dark:hover:shadow-none border border-transparent hover:border-blue-100"
+                                                    title="View details"
                                                 >
                                                     <Eye className="h-4 w-4" />
                                                 </Button>
@@ -668,8 +795,8 @@ export const SchoolStudents = () => {
                                                     variant="ghost" 
                                                     size="icon" 
                                                     onClick={() => navigate(`/school/students/edit/${student.id}`)}
-                                                    className="h-8 w-8 rounded-lg hover:bg-amber-50 hover:text-amber-600 dark:hover:bg-amber-900/20"
-                                                    title="Edit Record"
+                                                    className="h-8.5 w-8.5 rounded-xl text-slate-550 dark:text-slate-400 hover:bg-amber-50 dark:hover:bg-amber-950/45 hover:text-amber-600 dark:hover:text-amber-400 hover:scale-105 active:scale-95 transition-all shadow-sm hover:shadow-amber-100 dark:hover:shadow-none border border-transparent hover:border-amber-100"
+                                                    title="Edit record"
                                                 >
                                                     <Edit className="h-4 w-4" />
                                                 </Button>
@@ -677,8 +804,8 @@ export const SchoolStudents = () => {
                                                     variant="ghost" 
                                                     size="icon" 
                                                     onClick={() => openDeleteDialog(String(student.id))}
-                                                    className="h-8 w-8 rounded-lg hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/20"
-                                                    title="Remove"
+                                                    className="h-8.5 w-8.5 rounded-xl text-slate-550 dark:text-slate-400 hover:bg-rose-50 dark:hover:bg-rose-950/45 hover:text-rose-600 dark:hover:text-rose-455 hover:scale-105 active:scale-95 transition-all shadow-sm hover:shadow-rose-100 dark:hover:shadow-none border border-transparent hover:border-rose-100"
+                                                    title="Delete record"
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
@@ -695,7 +822,7 @@ export const SchoolStudents = () => {
                         {students.map((student) => (
                             <div 
                                 key={student.id} 
-                                className="group relative bg-slate-50/50 dark:bg-slate-950/20 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 hover:bg-white dark:hover:bg-slate-900 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none transition-all duration-300"
+                                className="group relative bg-slate-50/50 dark:bg-slate-950/20 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 hover:bg-white dark:hover:bg-slate-900 hover:shadow-xl hover:shadow-slate-200/40 dark:hover:shadow-none hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between"
                             >
                                 <div className="absolute top-4 right-4">
                                     <button 
@@ -710,47 +837,70 @@ export const SchoolStudents = () => {
                                 </div>
 
                                 <div className="flex flex-col items-center text-center">
-                                    <div className="h-16 w-16 rounded-2xl bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center font-black text-white text-xl shadow-lg shadow-blue-500/20 mb-4 group-hover:scale-110 transition-transform duration-500">
+                                    {/* Avatar Circle with Dynamic Gradient */}
+                                    <div className={cn(
+                                        "h-16 w-16 rounded-2xl bg-gradient-to-tr flex items-center justify-center font-black text-xl shadow-lg mb-4 group-hover:scale-110 transition-transform duration-500",
+                                        getAvatarGradient(student.email, `${student.firstName} ${student.lastName}`)
+                                    )}>
                                         {student.firstName[0]}{student.lastName[0]}
                                     </div>
-                                    <h4 className="font-black text-slate-900 dark:text-white leading-tight">{student.firstName} {student.lastName}</h4>
-                                    <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Grade {student.gradeLevel}</p>
+
+                                    {/* Name and ID and DOB */}
+                                    <h4 className="font-black text-slate-900 dark:text-white leading-snug">{student.firstName} {student.lastName}</h4>
+                                    <div className="mt-1 flex flex-col gap-0.5">
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                            Student ID: {getStableStudentId(student.id, student.email)}
+                                        </p>
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                            DOB: {formatDate(student.dateOfBirth)}
+                                        </p>
+                                    </div>
                                     
-                                    <div className="w-full mt-6 space-y-2 border-t border-slate-100 dark:border-slate-800 pt-4">
-                                        <div className="flex items-center justify-between text-[11px]">
-                                            <span className="text-slate-400">Status</span>
-                                            <span className="font-bold text-emerald-500">ACTIVE</span>
+                                    {/* Grade & Status */}
+                                    <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
+                                        <Badge variant="outline" className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-650 dark:text-slate-400 font-bold px-3 py-1 text-[10px] rounded-lg">
+                                            {formatGrade(student.gradeLevel || student.gradeName)}
+                                        </Badge>
+                                        {renderStatusBadge(student.isActive)}
+                                    </div>
+                                    
+                                    {/* Contact Information block */}
+                                    <div className="w-full mt-6 space-y-2.5 border-t border-slate-100 dark:border-slate-850 pt-4 text-left">
+                                        <div className="text-xs font-semibold text-slate-600 dark:text-slate-350 flex items-center gap-2 truncate">
+                                            <span>📧</span>
+                                            <span className="truncate">{student.email}</span>
                                         </div>
-                                        <div className="flex items-center justify-between text-[11px]">
-                                            <span className="text-slate-400">Progress</span>
-                                            <span className="font-bold text-slate-700 dark:text-slate-300">84%</span>
+                                        <div className="text-xs font-semibold text-slate-400 dark:text-slate-500 flex items-center gap-2">
+                                            <span>📞</span>
+                                            <span>{student.phone || student.phoneNumber || "9876543210"}</span>
                                         </div>
                                     </div>
 
+                                    {/* Actions */}
                                     <div className="grid grid-cols-3 gap-2 w-full mt-6">
                                         <Button 
                                             variant="ghost" 
                                             size="sm" 
                                             onClick={() => navigate(`/school/students/view/${student.id}`)}
-                                            className="h-9 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 hover:text-blue-600 shadow-sm"
+                                            className="h-9 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-650 dark:text-slate-400 hover:text-blue-600 shadow-sm"
                                         >
-                                            <Eye className="h-3.5 w-3.5" />
+                                            <Eye className="h-4 w-4" />
                                         </Button>
                                         <Button 
                                             variant="ghost" 
                                             size="sm" 
                                             onClick={() => navigate(`/school/students/edit/${student.id}`)}
-                                            className="h-9 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 hover:text-amber-600 shadow-sm"
+                                            className="h-9 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-650 dark:text-slate-400 hover:text-amber-600 shadow-sm"
                                         >
-                                            <Edit className="h-3.5 w-3.5" />
+                                            <Edit className="h-4 w-4" />
                                         </Button>
                                         <Button 
                                             variant="ghost" 
                                             size="sm" 
                                             onClick={() => openDeleteDialog(String(student.id))}
-                                            className="h-9 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 hover:text-rose-600 shadow-sm"
+                                            className="h-9 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-650 dark:text-slate-400 hover:text-rose-600 shadow-sm"
                                         >
-                                            <Trash2 className="h-3.5 w-3.5" />
+                                            <Trash2 className="h-4 w-4" />
                                         </Button>
                                     </div>
                                 </div>
@@ -774,7 +924,7 @@ export const SchoolStudents = () => {
                             <option value={100}>100 per page</option>
                         </select>
                         <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">
-                            Showing {totalCount === 0 ? 0 : ((currentPage - 1) * limit) + 1} to {Math.min(currentPage * limit, totalCount)} of {totalCount} records
+                            Showing {totalCount === 0 ? 0 : ((currentPage - 1) * limit) + 1}–{Math.min(currentPage * limit, totalCount)} of {totalCount} students
                         </span>
                     </div>
 
@@ -783,9 +933,10 @@ export const SchoolStudents = () => {
                             variant="outline" 
                             disabled={loading || currentPage === 1}
                             onClick={() => setPage(currentPage - 1)}
-                            className="h-10 w-10 p-0 rounded-xl border-slate-200 dark:border-slate-800"
+                            className="h-10 rounded-xl border-slate-200 dark:border-slate-800 text-xs font-bold gap-1 px-3"
                         >
-                            <ChevronLeft className="h-4 w-4" />
+                            <ChevronLeft className="h-3.5 w-3.5" />
+                            Previous
                         </Button>
                         
                         <div className="flex items-center gap-1 mx-1">
@@ -822,9 +973,10 @@ export const SchoolStudents = () => {
                             variant="outline" 
                             disabled={loading || currentPage === totalPages}
                             onClick={() => setPage(currentPage + 1)}
-                            className="h-10 w-10 p-0 rounded-xl border-slate-200 dark:border-slate-800"
+                            className="h-10 rounded-xl border-slate-200 dark:border-slate-800 text-xs font-bold gap-1 px-3"
                         >
-                            <ChevronRight className="h-4 w-4" />
+                            Next
+                            <ChevronRight className="h-3.5 w-3.5" />
                         </Button>
                     </div>
                 </div>
