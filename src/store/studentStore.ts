@@ -42,21 +42,26 @@ interface StudentState {
   studentToEdit: Student | null;
   
   sortDirection: 'asc' | 'desc';
+  sortBy: string;
 
   // Actions
   createStudent: (data: any) => Promise<void>;
   updateStudent: (id: string, data: any) => Promise<void>;
   clearStudent: () => void;
   deleteStudent: () => Promise<void>;
+  bulkUploadStudents: (file: File) => Promise<any>;
   fetchStudents: () => Promise<void>;
   fetchStudent: (id: string) => Promise<void>;
   setPage: (page: number) => void;
   setLimit: (limit: number) => void;
   setSearchTerm: (term: string) => void;
   setSortDirection: (direction: 'asc' | 'desc') => void;
+  setSortBy: (sortBy: string) => void;
   openDeleteDialog: (id: string) => void;
   closeDeleteDialog: () => void;
 }
+
+let searchTimeout: any = null;
 
 export const useStudentStore = create<StudentState>((set, get) => ({
   // Student list state
@@ -74,6 +79,7 @@ export const useStudentStore = create<StudentState>((set, get) => ({
   deleteOpen: false,
   studentToEdit: null,
   sortDirection: 'asc',
+  sortBy: "firstName",
 
   // Student list actions
   setPage: (page) => {
@@ -88,7 +94,10 @@ export const useStudentStore = create<StudentState>((set, get) => ({
 
   setSearchTerm: (term) => {
     set({ searchTerm: term });
-    setTimeout(() => {
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+    searchTimeout = setTimeout(() => {
       set({ debouncedSearchTerm: term, currentPage: 1 });
       get().fetchStudents();
     }, 500);
@@ -99,9 +108,14 @@ export const useStudentStore = create<StudentState>((set, get) => ({
     get().fetchStudents();
   },
 
+  setSortBy: (sortBy) => {
+    set({ sortBy, currentPage: 1 });
+    get().fetchStudents();
+  },
+
   fetchStudents: async () => {
     set({ loading: true, error: null });
-    const { currentPage, limit, debouncedSearchTerm, sortDirection } = get();
+    const { currentPage, limit, debouncedSearchTerm, sortDirection, sortBy } = get();
     
     // Check if the current user has a School or OrganizationAdmin role
     const user = useAuthStore.getState().user;
@@ -114,28 +128,58 @@ export const useStudentStore = create<StudentState>((set, get) => ({
     const endpoint = isSchool ? "/Organization/students" : "/Student";
 
     try {
-      const response = await api.get<GenericResponse<StudentResponseData>>(endpoint, {
-        params: {
-          page: currentPage,
-          limit,
-          search: debouncedSearchTerm || undefined,
-          sortDirection
-        },
-      });
+      const params: any = {};
+      if (isSchool) {
+        params.PageNumber = currentPage;
+        params.PageSize = limit;
+        if (debouncedSearchTerm) {
+          params.SearchTerm = debouncedSearchTerm;
+        }
+        if (sortBy) {
+          params.SortBy = sortBy;
+        }
+        params.SortDirection = sortDirection;
+      } else {
+        params.page = currentPage;
+        params.limit = limit;
+        if (debouncedSearchTerm) {
+          params.search = debouncedSearchTerm;
+        }
+        params.sortDirection = sortDirection;
+      }
 
-      const rawStudentsList = response.data?.data?.students || [];
-      const studentsList = rawStudentsList.map((s: any) => ({
-        ...s,
-        id: s.studentId ? Number(s.studentId) : (s.id ? Number(s.id) : (s.userId ? Number(s.userId) : 0))
-      }));
-      const totalCount = response.data?.data?.totalCount ?? studentsList.length ?? 0;
-      const calculatedTotalPages = Math.ceil(totalCount / limit);
+      const response = await api.get<any>(endpoint, { params });
+
+      let studentsList: Student[] = [];
+      let totalCount = 0;
+      let calculatedTotalPages = 1;
+      let activePage = currentPage;
+
+      if (isSchool) {
+        const studentsData = response.data?.data?.students || {};
+        const rawStudentsList = studentsData.items || [];
+        studentsList = rawStudentsList.map((s: any) => ({
+          ...s,
+          id: s.studentId ? Number(s.studentId) : (s.id ? Number(s.id) : (s.userId ? Number(s.userId) : 0))
+        }));
+        totalCount = studentsData.totalCount ?? studentsList.length ?? 0;
+        calculatedTotalPages = studentsData.totalPages ?? Math.ceil(totalCount / limit) ?? 1;
+        activePage = studentsData.pageNumber ?? currentPage;
+      } else {
+        const rawStudentsList = response.data?.data?.students || [];
+        studentsList = rawStudentsList.map((s: any) => ({
+          ...s,
+          id: s.studentId ? Number(s.studentId) : (s.id ? Number(s.id) : (s.userId ? Number(s.userId) : 0))
+        }));
+        totalCount = response.data?.data?.totalCount ?? studentsList.length ?? 0;
+        calculatedTotalPages = Math.ceil(totalCount / limit);
+      }
 
       set({
         students: studentsList,
         totalPages: calculatedTotalPages > 0 ? calculatedTotalPages : 1,
         totalCount: totalCount,
-        currentPage: currentPage > calculatedTotalPages ? 1 : currentPage,
+        currentPage: activePage > calculatedTotalPages ? 1 : activePage,
       });
     } catch (err: any) {
       set({
@@ -229,7 +273,7 @@ export const useStudentStore = create<StudentState>((set, get) => ({
         const student = rawStudents.find((s: any) => {
           const sId = s.studentId ? Number(s.studentId) : (s.id ? Number(s.id) : (s.userId ? Number(s.userId) : 0));
           return sId === Number(id);
-        });
+        }) as any;
         if (student) {
           set({ 
             student: {
@@ -314,6 +358,29 @@ export const useStudentStore = create<StudentState>((set, get) => ({
     } catch (err: any) {
       console.error("Failed to delete student:", err);
       set({ error: err.response?.data?.message || "Failed to delete student" });
+      throw err;
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  bulkUploadStudents: async (file: File) => {
+    set({ loading: true, error: null });
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      
+      const response = await api.post("/Organization/bulk-students-upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      });
+      
+      await get().fetchStudents();
+      return response.data;
+    } catch (err: any) {
+      const msg = err.response?.data?.message || "Bulk student upload failed";
+      set({ error: msg });
       throw err;
     } finally {
       set({ loading: false });
