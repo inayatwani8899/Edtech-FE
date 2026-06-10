@@ -107,6 +107,11 @@ const ProtectedRoute = ({ children, role }: ProtectedRouteProps) => {
     }
 
     if (!isAuthenticated) {
+        const logoutRedirect = localStorage.getItem("logoutRedirectUrl");
+        if (logoutRedirect) {
+            localStorage.removeItem("logoutRedirectUrl");
+            return <Navigate to={logoutRedirect} replace />;
+        }
         return <Navigate to="/login" replace />;
     }
 

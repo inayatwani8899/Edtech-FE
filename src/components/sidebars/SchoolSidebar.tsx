@@ -93,8 +93,8 @@ export function SchoolSidebar() {
             color: theme === 'dark' ? '#fff' : '#000',
         }).then((result) => {
             if (result.isConfirmed) {
-                logout();
-                navigate("/login");
+                const redirectUrl = logout();
+                navigate(redirectUrl);
             }
         });
     };
