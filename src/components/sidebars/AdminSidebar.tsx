@@ -52,7 +52,7 @@ const adminMenuItems = [
     { title: "Organization Management", url: "/manage/organizations", icon: Building, color: "text-purple-600" },
     { title: "User Management", url: "/manage/users", icon: Users, color: "text-blue-600" },
     { title: "Counselor Management", url: "/manage/counselors", icon: Users2, color: "text-yellow-600" },
-    { title: "Student Management", url: "/manage/students", icon: Users, color: "text-blue-600" },
+    // { title: "Student Management", url: "/manage/students", icon: Users, color: "text-blue-600" },
     { title: "Test Management", url: "/manage/tests", icon: ClipboardList, color: "text-green-600" },
     { title: "Test Configuration Management", url: "/manage/configurations", icon: Cog, color: "text-green-600" },
 ];

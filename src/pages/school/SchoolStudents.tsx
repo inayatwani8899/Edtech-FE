@@ -1,21 +1,14 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { 
-    Search, 
-    Plus, 
-    Filter, 
-    FileDown, 
-    MoreHorizontal, 
-    GraduationCap, 
-    ArrowUpDown, 
-    Eye, 
-    Edit, 
-    Trash2, 
-    CheckCircle2, 
+import {
+    Search,
+    Eye,
+    Edit,
+    Trash2,
+    CheckCircle2,
     XCircle,
     UserPlus,
     Download,
-    Settings2,
     LayoutGrid,
     List,
     ChevronLeft,
@@ -24,21 +17,20 @@ import {
     Check,
     Upload,
     FileSpreadsheet,
-    AlertCircle,
-    AlertTriangle
+    AlertCircle
 } from "lucide-react";
 import ExcelJS from "exceljs";
 import { useStudentStore, Student } from "@/store/studentStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { 
-    Table, 
-    TableBody, 
-    TableCell, 
-    TableHead, 
-    TableHeader, 
-    TableRow 
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow
 } from "@/components/ui/table";
 import {
     DropdownMenu,
@@ -171,12 +163,12 @@ export const SchoolStudents = () => {
         const active = isActive !== false;
         return (
             <span className={cn(
-                "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider",
-                active 
+                "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider",
+                active
                     ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-450 border border-emerald-100 dark:border-emerald-900/30"
                     : "bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-455 border border-rose-100 dark:border-rose-900/30"
             )}>
-                <span className={cn("h-1.5 w-1.5 rounded-full", active ? "bg-emerald-500" : "bg-rose-500")} />
+                <span className={cn("h-1 w-1 rounded-full", active ? "bg-emerald-500" : "bg-rose-500")} />
                 {active ? "Active" : "Inactive"}
             </span>
         );
@@ -211,7 +203,7 @@ export const SchoolStudents = () => {
         e.preventDefault();
         e.stopPropagation();
         setDragActive(false);
-        
+
         if (e.dataTransfer.files && e.dataTransfer.files[0]) {
             const file = e.dataTransfer.files[0];
             validateAndSetFile(file);
@@ -238,10 +230,10 @@ export const SchoolStudents = () => {
     const handleDownloadTemplate = async () => {
         try {
             const workbook = new ExcelJS.Workbook();
-            
+
             // 1. Create Students worksheet
             const studentsSheet = workbook.addWorksheet("Students");
-            
+
             // 2. Define headers and columns with exact order & widths
             studentsSheet.columns = [
                 { header: "Email", key: "Email", width: 30 },
@@ -272,7 +264,7 @@ export const SchoolStudents = () => {
                     right: { style: "thin", color: { argb: "FFCBD5E1" } }
                 };
             });
-            
+
             // 4. Freeze Header Row
             studentsSheet.views = [
                 { state: "frozen", ySplit: 1 }
@@ -316,7 +308,7 @@ export const SchoolStudents = () => {
             // 6. Create Instructions worksheet
             const instructionsSheet = workbook.addWorksheet("Instructions");
             instructionsSheet.views = [{ showGridLines: false }];
-            
+
             // Set width of column A for instructions
             instructionsSheet.getColumn(1).width = 90;
 
@@ -348,7 +340,7 @@ export const SchoolStudents = () => {
                 const cell = row.getCell(1);
                 cell.value = line;
                 cell.font = { name: "Arial", size: 11, color: { argb: "FF334155" } };
-                
+
                 if (line.startsWith("5. Gender values:")) {
                     row.height = 70; // Set enough height for multiline text
                     cell.alignment = { vertical: "top", horizontal: "left", wrapText: true };
@@ -356,7 +348,7 @@ export const SchoolStudents = () => {
                     row.height = 22;
                     cell.alignment = { vertical: "middle", horizontal: "left" };
                 }
-                
+
                 rowIdx++;
             });
 
@@ -402,7 +394,8 @@ export const SchoolStudents = () => {
 
     useEffect(() => {
         fetchStudents();
-    }, [currentPage, limit, searchTerm, fetchStudents]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const handleSelectAll = (checked: boolean) => {
         if (checked) {
@@ -413,14 +406,14 @@ export const SchoolStudents = () => {
     };
 
     const toggleStudentSelection = (id: number) => {
-        setSelectedStudents(prev => 
+        setSelectedStudents(prev =>
             prev.includes(id) ? prev.filter(sid => sid !== id) : [...prev, id]
         );
     };
 
     const handleBulkAction = (action: string) => {
         if (selectedStudents.length === 0) return;
-        
+
         Swal.fire({
             title: 'Bulk Action',
             text: `Are you sure you want to ${action} ${selectedStudents.length} selected students?`,
@@ -444,71 +437,44 @@ export const SchoolStudents = () => {
         }
     };
 
-    const exportData = () => {
-        Swal.fire({
-            title: 'Exporting Data',
-            text: 'Your student registry is being prepared for export...',
-            timer: 1500,
-            showConfirmButton: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
-        }).then(() => {
-            Swal.fire('Export Complete', 'Student list exported successfully as CSV', 'success');
-        });
-    };
-
     return (
-        <div className="space-y-6 animate-in fade-in duration-500">
-            {/* Premium Page Header */}
-            <div className="relative overflow-hidden bg-gradient-to-r from-slate-900 to-slate-850 dark:from-slate-950 dark:to-slate-900 p-6 sm:p-8 rounded-3xl text-white shadow-xl">
+        <div className="space-y-3.5 animate-in fade-in duration-500">
+            {/* Compact Page Header */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-slate-900 to-slate-850 dark:from-slate-950 dark:to-slate-900 p-4 sm:p-5 rounded-2xl text-white shadow-lg">
                 <div className="absolute top-0 right-0 -mt-4 -mr-4 w-48 h-48 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
                 <div className="absolute bottom-0 left-0 -mb-6 -ml-6 w-32 h-32 rounded-full bg-indigo-500/10 blur-2xl pointer-events-none" />
-                
-                <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div className="space-y-2.5">
-                        <div className="flex items-center gap-3">
-                            <span className="text-3xl">🎓</span>
-                            <h1 className="text-2xl sm:text-3xl font-black tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-200 bg-clip-text text-transparent">
+
+                <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                            <span className="text-2xl">🎓</span>
+                            <h1 className="text-xl sm:text-2xl font-black tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-200 bg-clip-text text-transparent">
                                 Student Matrix
                             </h1>
                         </div>
-                        <p className="text-slate-300 text-sm max-w-xl font-medium leading-relaxed">
-                            Manage and monitor all enrolled students within your organization.
+                        <p className="text-slate-350 text-xs font-medium mt-0.5">
+                            Manage enrolled students
                         </p>
-                        
-                        <div className="flex flex-wrap gap-4 pt-1 text-xs text-slate-300 font-semibold">
-                            <div className="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-full backdrop-blur-md">
-                                <span className="h-1.5 w-1.5 rounded-full bg-blue-400" />
-                                Total Students: <span className="text-white font-extrabold">{totalCount}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-full backdrop-blur-md">
-                                <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
-                                Academic Year: <span className="text-white font-extrabold">2025-26</span>
-                            </div>
+
+                        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-slate-300 font-semibold mt-2">
+                            <span>Total Students: <span className="text-white font-extrabold">{totalCount}</span></span>
+                            <span className="text-slate-600">•</span>
+                            <span>Academic Year: <span className="text-white font-extrabold">2025-26</span></span>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2.5 flex-wrap">
-                        <Button 
-                            variant="outline" 
-                            onClick={exportData}
-                            className="bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white h-11 rounded-xl font-bold text-xs uppercase tracking-wider gap-2 px-4 backdrop-blur-sm"
-                        >
-                            <Download className="h-4 w-4" />
-                            Export CSV
-                        </Button>
-                        <Button 
+                    <div className="flex items-center gap-2 flex-wrap shrink-0">
+                        <Button
                             variant="outline"
                             onClick={() => setIsUploadOpen(true)}
-                            className="bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white h-11 rounded-xl font-bold text-xs uppercase tracking-wider gap-2 px-4 backdrop-blur-sm"
+                            className="bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white h-9 rounded-xl font-bold text-xs uppercase tracking-wider gap-2 px-4 backdrop-blur-sm"
                         >
                             <Upload className="h-4 w-4" />
-                            Bulk Upload Students
+                            Bulk Upload
                         </Button>
-                        <Button 
+                        <Button
                             onClick={() => navigate("/school/students/add")}
-                            className="bg-blue-600 hover:bg-blue-500 border-none text-white h-11 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-blue-600/30 gap-2 px-6 hover:scale-[1.02] active:scale-95 transition-all"
+                            className="bg-blue-600 hover:bg-blue-500 border-none text-white h-9 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-blue-600/30 gap-2 px-5 hover:scale-[1.02] active:scale-95 transition-all"
                         >
                             <UserPlus className="h-4 w-4" />
                             Register Student
@@ -517,65 +483,28 @@ export const SchoolStudents = () => {
                 </div>
             </div>
 
-            {/* Summary Statistics */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-2xl flex items-center justify-between shadow-sm">
-                    <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Students</p>
-                        <p className="text-2xl font-black text-slate-900 dark:text-white mt-1">{totalCount}</p>
-                    </div>
-                    <div className="h-10 w-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 flex items-center justify-center text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30">
-                        <GraduationCap className="h-5 w-5" />
-                    </div>
-                </div>
-
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-2xl flex items-center justify-between shadow-sm">
-                    <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Students</p>
-                        <p className="text-2xl font-black text-emerald-600 dark:text-emerald-450 mt-1">
-                            {students.filter(s => s.isActive !== false).length}
-                        </p>
-                    </div>
-                    <div className="h-10 w-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center text-emerald-600 dark:text-emerald-450 border border-emerald-100 dark:border-emerald-900/30">
-                        <CheckCircle2 className="h-5 w-5" />
-                    </div>
-                </div>
-
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-2xl flex items-center justify-between shadow-sm">
-                    <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Grades</p>
-                        <p className="text-2xl font-black text-indigo-600 dark:text-indigo-400 mt-1">
-                            {new Set(students.map(s => s.gradeLevel || s.gradeName).filter(Boolean)).size || 0}
-                        </p>
-                    </div>
-                    <div className="h-10 w-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center text-indigo-600 dark:text-indigo-455 border border-indigo-100 dark:border-indigo-900/30">
-                        <Settings2 className="h-5 w-5" />
-                    </div>
-                </div>
-            </div>
-
             {/* Professional Filter Bar */}
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-2xl flex flex-col lg:flex-row gap-4 items-center justify-between shadow-sm mt-6">
-                <div className="flex flex-wrap items-center gap-4 w-full lg:w-auto">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2.5 rounded-2xl flex flex-col lg:flex-row gap-3 items-center justify-between shadow-sm mt-4">
+                <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto">
                     {/* Search Field */}
-                    <div className="relative w-full sm:w-72">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                        <Input 
-                            placeholder="Search Student..." 
+                    <div className="relative w-full sm:w-60">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                        <Input
+                            placeholder="Search Student..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10 h-10 border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 rounded-xl text-sm"
+                            className="pl-9 h-9 border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 rounded-xl text-xs"
                         />
                     </div>
 
                     {/* Sort By Dropdown */}
-                    <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Sort By</span>
-                        <select 
+                    <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Sort By</span>
+                        <select
                             value={sortBy}
                             onChange={(e) => setSortBy(e.target.value)}
                             disabled={loading}
-                            className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold px-3 py-2 outline-none h-10 cursor-pointer"
+                            className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold px-2.5 py-1.5 outline-none h-9 cursor-pointer"
                         >
                             <option value="firstName">First Name</option>
                             <option value="lastName">Last Name</option>
@@ -586,12 +515,12 @@ export const SchoolStudents = () => {
                     </div>
 
                     {/* Direction Dropdown */}
-                    <div className="flex items-center gap-2">
-                        <select 
+                    <div className="flex items-center gap-1.5">
+                        <select
                             value={sortDirection}
                             onChange={(e) => setSortDirection(e.target.value as 'asc' | 'desc')}
                             disabled={loading}
-                            className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold px-3 py-2 outline-none h-10 cursor-pointer"
+                            className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold px-2.5 py-1.5 outline-none h-9 cursor-pointer"
                         >
                             <option value="asc">Ascending</option>
                             <option value="desc">Descending</option>
@@ -599,13 +528,13 @@ export const SchoolStudents = () => {
                     </div>
 
                     {/* Page Size Dropdown */}
-                    <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Page Size</span>
-                        <select 
+                    <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Page Size</span>
+                        <select
                             value={limit}
                             onChange={(e) => setLimit(Number(e.target.value))}
                             disabled={loading}
-                            className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold px-3 py-2 outline-none h-10 cursor-pointer"
+                            className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold px-2.5 py-1.5 outline-none h-9 cursor-pointer"
                         >
                             <option value={10}>10</option>
                             <option value={25}>25</option>
@@ -615,29 +544,29 @@ export const SchoolStudents = () => {
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2 w-full lg:w-auto justify-between lg:justify-end">
-                    <div className="flex bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800">
-                        <button 
+                <div className="flex items-center gap-2.5 w-full lg:w-auto justify-between lg:justify-end">
+                    <div className="flex bg-slate-100 dark:bg-slate-950 p-0.5 rounded-lg border border-slate-200 dark:border-slate-800">
+                        <button
                             onClick={() => setViewMode("table")}
                             className={cn(
-                                "p-2 rounded-lg transition-all",
+                                "p-1.5 rounded-md transition-all",
                                 viewMode === "table" ? "bg-white dark:bg-slate-800 shadow-sm text-blue-600" : "text-slate-400 hover:text-slate-600"
                             )}
                         >
-                            <List className="h-4 w-4" />
+                            <List className="h-3.5 w-3.5" />
                         </button>
-                        <button 
+                        <button
                             onClick={() => setViewMode("grid")}
                             className={cn(
-                                "p-2 rounded-lg transition-all",
+                                "p-1.5 rounded-md transition-all",
                                 viewMode === "grid" ? "bg-white dark:bg-slate-800 shadow-sm text-blue-600" : "text-slate-400 hover:text-slate-600"
                             )}
                         >
-                            <LayoutGrid className="h-4 w-4" />
+                            <LayoutGrid className="h-3.5 w-3.5" />
                         </button>
                     </div>
 
-                    <div className="text-xs font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-3.5 py-2.5 rounded-xl whitespace-nowrap">
+                    <div className="text-xs font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl whitespace-nowrap">
                         Total Students: <span className="text-blue-600 dark:text-blue-400 font-extrabold">{totalCount}</span>
                     </div>
                 </div>
@@ -653,26 +582,26 @@ export const SchoolStudents = () => {
                         <span className="text-sm font-bold tracking-wide">Students Selected</span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Button 
-                            variant="ghost" 
-                            size="sm" 
+                        <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={() => handleBulkAction('promote')}
                             className="text-white hover:bg-white/10 h-8 text-[10px] uppercase font-black tracking-widest px-3"
                         >
                             Promote
                         </Button>
-                        <Button 
-                            variant="ghost" 
-                            size="sm" 
+                        <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={() => handleBulkAction('suspend')}
                             className="text-white hover:bg-white/10 h-8 text-[10px] uppercase font-black tracking-widest px-3"
                         >
                             Suspend
                         </Button>
                         <div className="w-px h-5 bg-white/20 mx-1" />
-                        <Button 
-                            variant="ghost" 
-                            size="sm" 
+                        <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={() => setSelectedStudents([])}
                             className="text-white hover:bg-white/10 h-8"
                         >
@@ -703,8 +632,8 @@ export const SchoolStudents = () => {
                         <Table>
                             <TableHeader className="bg-slate-50/50 dark:bg-slate-950/20 border-b border-slate-100 dark:border-slate-800">
                                 <TableRow className="hover:bg-transparent">
-                                    <TableHead className="w-12 px-5 py-4">
-                                        <div 
+                                    <TableHead className="w-12 px-4 py-2.5">
+                                        <div
                                             onClick={() => handleSelectAll(selectedStudents.length !== students.length)}
                                             className={cn(
                                                 "h-5 w-5 rounded border transition-all cursor-pointer flex items-center justify-center",
@@ -714,24 +643,24 @@ export const SchoolStudents = () => {
                                             {selectedStudents.length === students.length && <Check className="h-3 w-3 text-white" />}
                                         </div>
                                     </TableHead>
-                                    <TableHead className="p-4">{renderSortHeaderLabel("Student Info", "firstName")}</TableHead>
-                                    <TableHead className="p-4">{renderSortHeaderLabel("Grade", "gradeLevel")}</TableHead>
-                                    <TableHead className="p-4">{renderSortHeaderLabel("Contact Info", "email")}</TableHead>
-                                    <TableHead className="text-[11px] font-black uppercase tracking-wider text-slate-500 p-4">Status</TableHead>
-                                    <TableHead className="text-[11px] font-black uppercase tracking-wider text-slate-500 p-4 text-right">Actions</TableHead>
+                                    <TableHead className="py-2.5 px-4">{renderSortHeaderLabel("Student Info", "firstName")}</TableHead>
+                                    <TableHead className="py-2.5 px-4">{renderSortHeaderLabel("Grade", "gradeLevel")}</TableHead>
+                                    <TableHead className="py-2.5 px-4">{renderSortHeaderLabel("Contact Info", "email")}</TableHead>
+                                    <TableHead className="text-[11px] font-black uppercase tracking-wider text-slate-500 py-2.5 px-4">Status</TableHead>
+                                    <TableHead className="text-[11px] font-black uppercase tracking-wider text-slate-500 py-2.5 px-4 text-right">Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {students.map((student) => (
-                                    <TableRow 
-                                        key={student.id} 
+                                    <TableRow
+                                        key={student.id}
                                         className={cn(
                                             "group border-slate-100 dark:border-slate-800 transition-colors",
                                             selectedStudents.includes(student.id) ? "bg-blue-50/30 dark:bg-blue-900/10" : "hover:bg-slate-50/50 dark:hover:bg-slate-800/30"
                                         )}
                                     >
-                                        <TableCell className="px-5">
-                                            <div 
+                                        <TableCell className="px-4 py-2">
+                                            <div
                                                 onClick={() => toggleStudentSelection(student.id)}
                                                 className={cn(
                                                     "h-5 w-5 rounded border transition-all cursor-pointer flex items-center justify-center",
@@ -741,73 +670,71 @@ export const SchoolStudents = () => {
                                                 {selectedStudents.includes(student.id) && <Check className="h-3 w-3 text-white" />}
                                             </div>
                                         </TableCell>
-                                        <TableCell className="p-4">
-                                            <div className="flex items-center gap-3.5">
+                                        <TableCell className="py-2 px-4">
+                                            <div className="flex items-center gap-2.5">
                                                 {/* Dynamic Avatar */}
                                                 <div className={cn(
-                                                    "h-10 w-10 rounded-xl bg-gradient-to-tr flex items-center justify-center font-black text-sm shadow-sm transition-transform duration-300 group-hover:scale-105",
+                                                    "h-8 w-8 rounded-lg bg-gradient-to-tr flex items-center justify-center font-black text-xs shadow-sm transition-transform duration-300 group-hover:scale-105",
                                                     getAvatarGradient(student.email, `${student.firstName} ${student.lastName}`)
                                                 )}>
                                                     {student.firstName[0]}{student.lastName[0]}
                                                 </div>
                                                 <div className="flex flex-col min-w-0">
-                                                    <span className="font-extrabold text-slate-900 dark:text-white truncate group-hover:text-blue-600 transition-colors">{student.firstName} {student.lastName}</span>
-                                                    <div className="flex flex-wrap items-center gap-2 mt-0.5 text-[10px] text-slate-400 font-bold uppercase tracking-tight">
-                                                        <span>Student ID: {getStableStudentId(student.id, student.email)}</span>
-                                                        <span className="h-1 w-1 rounded-full bg-slate-300" />
-                                                        <span>DOB: {formatDate(student.dateOfBirth)}</span>
-                                                    </div>
+                                                    <span className="font-extrabold text-xs text-slate-900 dark:text-white truncate group-hover:text-blue-600 transition-colors leading-tight">{student.firstName} {student.lastName}</span>
+                                                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tight mt-0.5">
+                                                        ID: {getStableStudentId(student.id, student.email)} | DOB: {formatDate(student.dateOfBirth)}
+                                                    </span>
                                                 </div>
                                             </div>
                                         </TableCell>
-                                        <TableCell className="p-4">
-                                            <Badge variant="outline" className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-650 dark:text-slate-400 font-black px-3 py-1 text-[10px] rounded-lg">
+                                        <TableCell className="py-2 px-4">
+                                            <Badge variant="outline" className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-650 dark:text-slate-400 font-black px-2 py-0.5 text-[9px] rounded-md">
                                                 {formatGrade(student.gradeLevel || student.gradeName)}
                                             </Badge>
                                         </TableCell>
-                                        <TableCell className="p-4">
-                                            <div className="flex flex-col gap-0.5 max-w-[200px]">
-                                                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate flex items-center gap-1.5">
-                                                    <span className="text-sm">📧</span>
+                                        <TableCell className="py-2 px-4">
+                                            <div className="flex flex-col gap-0.5 max-w-[200px] text-[11px]">
+                                                <span className="font-bold text-slate-700 dark:text-slate-300 truncate flex items-center gap-1 leading-tight">
+                                                    <span className="text-xs">📧</span>
                                                     <span className="truncate">{student.email}</span>
                                                 </span>
-                                                <span className="text-[11px] text-slate-400 dark:text-slate-500 font-semibold flex items-center gap-1.5 mt-0.5">
-                                                    <span className="text-sm">📞</span>
+                                                <span className="text-slate-400 dark:text-slate-500 font-semibold flex items-center gap-1 leading-tight">
+                                                    <span className="text-xs">📞</span>
                                                     <span>{student.phone || student.phoneNumber || "9876543210"}</span>
                                                 </span>
                                             </div>
                                         </TableCell>
-                                        <TableCell className="p-4">
+                                        <TableCell className="py-2 px-4">
                                             {renderStatusBadge(student.isActive)}
                                         </TableCell>
-                                        <TableCell className="p-4 text-right">
+                                        <TableCell className="py-2 px-4 text-right">
                                             <div className="flex items-center justify-end gap-1 px-1">
-                                                <Button 
-                                                    variant="ghost" 
-                                                    size="icon" 
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
                                                     onClick={() => navigate(`/school/students/view/${student.id}`)}
-                                                    className="h-8.5 w-8.5 rounded-xl text-slate-550 dark:text-slate-400 hover:bg-blue-50 dark:hover:bg-blue-950/45 hover:text-blue-600 dark:hover:text-blue-400 hover:scale-105 active:scale-95 transition-all shadow-sm hover:shadow-blue-100 dark:hover:shadow-none border border-transparent hover:border-blue-100"
+                                                    className="h-7.5 w-7.5 rounded-lg text-slate-550 dark:text-slate-400 hover:bg-blue-50 dark:hover:bg-blue-950/45 hover:text-blue-600 dark:hover:text-blue-400 hover:scale-105 active:scale-95 transition-all border border-transparent"
                                                     title="View details"
                                                 >
-                                                    <Eye className="h-4 w-4" />
+                                                    <Eye className="h-3.5 w-3.5" />
                                                 </Button>
-                                                <Button 
-                                                    variant="ghost" 
-                                                    size="icon" 
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
                                                     onClick={() => navigate(`/school/students/edit/${student.id}`)}
-                                                    className="h-8.5 w-8.5 rounded-xl text-slate-550 dark:text-slate-400 hover:bg-amber-50 dark:hover:bg-amber-950/45 hover:text-amber-600 dark:hover:text-amber-400 hover:scale-105 active:scale-95 transition-all shadow-sm hover:shadow-amber-100 dark:hover:shadow-none border border-transparent hover:border-amber-100"
+                                                    className="h-7.5 w-7.5 rounded-lg text-slate-550 dark:text-slate-400 hover:bg-amber-50 dark:hover:bg-amber-950/45 hover:text-amber-600 dark:hover:text-amber-400 hover:scale-105 active:scale-95 transition-all border border-transparent"
                                                     title="Edit record"
                                                 >
-                                                    <Edit className="h-4 w-4" />
+                                                    <Edit className="h-3.5 w-3.5" />
                                                 </Button>
-                                                <Button 
-                                                    variant="ghost" 
-                                                    size="icon" 
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
                                                     onClick={() => openDeleteDialog(String(student.id))}
-                                                    className="h-8.5 w-8.5 rounded-xl text-slate-550 dark:text-slate-400 hover:bg-rose-50 dark:hover:bg-rose-950/45 hover:text-rose-600 dark:hover:text-rose-455 hover:scale-105 active:scale-95 transition-all shadow-sm hover:shadow-rose-100 dark:hover:shadow-none border border-transparent hover:border-rose-100"
+                                                    className="h-7.5 w-7.5 rounded-lg text-slate-550 dark:text-slate-400 hover:bg-rose-50 dark:hover:bg-rose-950/45 hover:text-rose-600 dark:hover:text-rose-455 hover:scale-105 active:scale-95 transition-all border border-transparent"
                                                     title="Delete record"
                                                 >
-                                                    <Trash2 className="h-4 w-4" />
+                                                    <Trash2 className="h-3.5 w-3.5" />
                                                 </Button>
                                             </div>
                                         </TableCell>
@@ -820,12 +747,12 @@ export const SchoolStudents = () => {
                     /* Grid View Mode */
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-6">
                         {students.map((student) => (
-                            <div 
-                                key={student.id} 
+                            <div
+                                key={student.id}
                                 className="group relative bg-slate-50/50 dark:bg-slate-950/20 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 hover:bg-white dark:hover:bg-slate-900 hover:shadow-xl hover:shadow-slate-200/40 dark:hover:shadow-none hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between"
                             >
                                 <div className="absolute top-4 right-4">
-                                    <button 
+                                    <button
                                         onClick={() => toggleStudentSelection(student.id)}
                                         className={cn(
                                             "h-5 w-5 rounded-full border transition-all flex items-center justify-center",
@@ -855,7 +782,7 @@ export const SchoolStudents = () => {
                                             DOB: {formatDate(student.dateOfBirth)}
                                         </p>
                                     </div>
-                                    
+
                                     {/* Grade & Status */}
                                     <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
                                         <Badge variant="outline" className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-650 dark:text-slate-400 font-bold px-3 py-1 text-[10px] rounded-lg">
@@ -863,7 +790,7 @@ export const SchoolStudents = () => {
                                         </Badge>
                                         {renderStatusBadge(student.isActive)}
                                     </div>
-                                    
+
                                     {/* Contact Information block */}
                                     <div className="w-full mt-6 space-y-2.5 border-t border-slate-100 dark:border-slate-850 pt-4 text-left">
                                         <div className="text-xs font-semibold text-slate-600 dark:text-slate-350 flex items-center gap-2 truncate">
@@ -878,25 +805,25 @@ export const SchoolStudents = () => {
 
                                     {/* Actions */}
                                     <div className="grid grid-cols-3 gap-2 w-full mt-6">
-                                        <Button 
-                                            variant="ghost" 
-                                            size="sm" 
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
                                             onClick={() => navigate(`/school/students/view/${student.id}`)}
                                             className="h-9 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-650 dark:text-slate-400 hover:text-blue-600 shadow-sm"
                                         >
                                             <Eye className="h-4 w-4" />
                                         </Button>
-                                        <Button 
-                                            variant="ghost" 
-                                            size="sm" 
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
                                             onClick={() => navigate(`/school/students/edit/${student.id}`)}
                                             className="h-9 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-650 dark:text-slate-400 hover:text-amber-600 shadow-sm"
                                         >
                                             <Edit className="h-4 w-4" />
                                         </Button>
-                                        <Button 
-                                            variant="ghost" 
-                                            size="sm" 
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
                                             onClick={() => openDeleteDialog(String(student.id))}
                                             className="h-9 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-650 dark:text-slate-400 hover:text-rose-600 shadow-sm"
                                         >
@@ -910,35 +837,35 @@ export const SchoolStudents = () => {
                 )}
 
                 {/* Footer / Pagination */}
-                <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                        <select 
+                <div className="px-4 py-3 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5">
+                        <select
                             value={limit}
                             onChange={(e) => setLimit(Number(e.target.value))}
                             disabled={loading}
-                            className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-[11px] font-bold px-2 py-1 outline-none cursor-pointer disabled:opacity-50"
+                            className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-[10px] font-bold px-2 py-1 outline-none cursor-pointer disabled:opacity-50"
                         >
                             <option value={10}>10 per page</option>
                             <option value={20}>20 per page</option>
                             <option value={50}>50 per page</option>
                             <option value={100}>100 per page</option>
                         </select>
-                        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">
                             Showing {totalCount === 0 ? 0 : ((currentPage - 1) * limit) + 1}–{Math.min(currentPage * limit, totalCount)} of {totalCount} students
                         </span>
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <Button 
-                            variant="outline" 
+                        <Button
+                            variant="outline"
                             disabled={loading || currentPage === 1}
                             onClick={() => setPage(currentPage - 1)}
-                            className="h-10 rounded-xl border-slate-200 dark:border-slate-800 text-xs font-bold gap-1 px-3"
+                            className="h-9 rounded-xl border-slate-200 dark:border-slate-800 text-xs font-bold gap-1 px-3"
                         >
                             <ChevronLeft className="h-3.5 w-3.5" />
                             Previous
                         </Button>
-                        
+
                         <div className="flex items-center gap-1 mx-1">
                             {Array.from({ length: totalPages }).map((_, i) => {
                                 const pageNum = i + 1;
@@ -953,13 +880,13 @@ export const SchoolStudents = () => {
                                     return null;
                                 }
                                 return (
-                                    <Button 
+                                    <Button
                                         key={pageNum}
                                         variant={currentPage === pageNum ? "default" : "outline"}
                                         disabled={loading}
                                         onClick={() => setPage(pageNum)}
                                         className={cn(
-                                            "h-10 w-10 p-0 rounded-xl text-xs font-black",
+                                            "h-9 w-9 p-0 rounded-xl text-xs font-black",
                                             currentPage === pageNum ? "bg-blue-600 text-white" : "border-slate-200 dark:border-slate-800"
                                         )}
                                     >
@@ -969,11 +896,11 @@ export const SchoolStudents = () => {
                             })}
                         </div>
 
-                        <Button 
-                            variant="outline" 
+                        <Button
+                            variant="outline"
                             disabled={loading || currentPage === totalPages}
                             onClick={() => setPage(currentPage + 1)}
-                            className="h-10 rounded-xl border-slate-200 dark:border-slate-800 text-xs font-bold gap-1 px-3"
+                            className="h-9 rounded-xl border-slate-200 dark:border-slate-800 text-xs font-bold gap-1 px-3"
                         >
                             Next
                             <ChevronRight className="h-3.5 w-3.5" />
@@ -1027,7 +954,7 @@ export const SchoolStudents = () => {
                             </div>
 
                             {/* Drag & Drop Area */}
-                            <div 
+                            <div
                                 onDragEnter={handleDrag}
                                 onDragOver={handleDrag}
                                 onDragLeave={handleDrag}
@@ -1035,15 +962,15 @@ export const SchoolStudents = () => {
                                 onClick={() => !uploading && fileInputRef.current?.click()}
                                 className={cn(
                                     "border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all min-h-[180px]",
-                                    dragActive 
-                                        ? "border-blue-500 bg-blue-50/20 dark:bg-blue-950/10" 
+                                    dragActive
+                                        ? "border-blue-500 bg-blue-50/20 dark:bg-blue-950/10"
                                         : "border-slate-200 dark:border-slate-800 hover:bg-slate-50/50 dark:hover:bg-slate-950/20",
                                     selectedFile && "border-green-500/80 bg-green-50/5 dark:bg-green-950/5",
                                     uploading && "pointer-events-none opacity-60"
                                 )}
                             >
-                                <input 
-                                    type="file" 
+                                <input
+                                    type="file"
                                     ref={fileInputRef}
                                     onChange={(e) => e.target.files?.[0] && validateAndSetFile(e.target.files[0])}
                                     accept=".xlsx,.xls"
@@ -1135,8 +1062,8 @@ export const SchoolStudents = () => {
                             {/* Summary Banner */}
                             <div className={cn(
                                 "p-4 rounded-xl border flex items-start gap-3",
-                                uploadResult.data?.failedCount > 0 
-                                    ? "bg-amber-50/45 dark:bg-amber-950/10 border-amber-100 dark:border-amber-900/40" 
+                                uploadResult.data?.failedCount > 0
+                                    ? "bg-amber-50/45 dark:bg-amber-950/10 border-amber-100 dark:border-amber-900/40"
                                     : "bg-emerald-50/45 dark:bg-emerald-950/10 border-emerald-100 dark:border-emerald-900/40"
                             )}>
                                 {uploadResult.data?.failedCount > 0 ? (
@@ -1146,8 +1073,8 @@ export const SchoolStudents = () => {
                                 )}
                                 <div>
                                     <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                                        {uploadResult.data?.failedCount > 0 
-                                            ? "Upload Completed With Errors" 
+                                        {uploadResult.data?.failedCount > 0
+                                            ? "Upload Completed With Errors"
                                             : "Bulk Upload Completed Successfully"}
                                     </h4>
                                     <p className="text-[10px] text-slate-500 mt-0.5">

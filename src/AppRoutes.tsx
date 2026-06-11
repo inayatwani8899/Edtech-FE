@@ -214,7 +214,7 @@ const AppRoutes = () => {
                 <Route path="/counselors/edit/:id" element={<CounselorForm />} />
                 <Route path="/manage/counselors" element={<Counselors />} />
                 <Route path="/manage/tests" element={<ManageTests />} />
-                <Route path="/manage/students" element={<Students />} />
+                {/* <Route path="/manage/students" element={<Students />} /> */}
                 <Route path="/manage/organizations" element={<Organizations />} />
                 <Route path="/organizations/add" element={<OrganizationForm />} />
                 <Route path="/organizations/edit/:id" element={<OrganizationForm />} />
