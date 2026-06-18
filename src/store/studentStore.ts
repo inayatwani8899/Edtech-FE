@@ -156,15 +156,24 @@ export const useStudentStore = create<StudentState>((set, get) => ({
       let activePage = currentPage;
 
       if (isSchool) {
-        const studentsData = response.data?.data?.students || {};
-        const rawStudentsList = studentsData.items || [];
+        const studentsData = response.data?.data?.students;
+        const pagination = response.data?.data?.pagination || {};
+        
+        let rawStudentsList: any[] = [];
+        if (Array.isArray(studentsData)) {
+          rawStudentsList = studentsData;
+        } else if (studentsData && Array.isArray(studentsData.items)) {
+          rawStudentsList = studentsData.items;
+        }
+        
         studentsList = rawStudentsList.map((s: any) => ({
           ...s,
           id: s.studentId ? Number(s.studentId) : (s.id ? Number(s.id) : (s.userId ? Number(s.userId) : 0))
         }));
-        totalCount = studentsData.totalCount ?? studentsList.length ?? 0;
-        calculatedTotalPages = studentsData.totalPages ?? Math.ceil(totalCount / limit) ?? 1;
-        activePage = studentsData.pageNumber ?? currentPage;
+        
+        totalCount = pagination.totalRecords ?? pagination.totalCount ?? studentsData?.totalCount ?? studentsList.length ?? 0;
+        calculatedTotalPages = pagination.totalPages ?? studentsData?.totalPages ?? Math.ceil(totalCount / limit) ?? 1;
+        activePage = pagination.pageNumber ?? studentsData?.pageNumber ?? currentPage;
       } else {
         const rawStudentsList = response.data?.data?.students || [];
         studentsList = rawStudentsList.map((s: any) => ({

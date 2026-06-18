@@ -214,7 +214,7 @@ const AppRoutes = () => {
                 <Route path="/counselors/edit/:id" element={<CounselorForm />} />
                 <Route path="/manage/counselors" element={<Counselors />} />
                 <Route path="/manage/tests" element={<ManageTests />} />
-                {/* <Route path="/manage/students" element={<Students />} /> */}
+                <Route path="/manage/students" element={<Students />} />
                 <Route path="/manage/organizations" element={<Organizations />} />
                 <Route path="/organizations/add" element={<OrganizationForm />} />
                 <Route path="/organizations/edit/:id" element={<OrganizationForm />} />
@@ -313,10 +313,10 @@ const AppRoutes = () => {
                 <Route path="/school/students/edit/:id" element={<StudentForm />} />
                 <Route path="/school/students/view/:id" element={<StudentView />} />
                 <Route path="/school/staff" element={<SchoolStaff />} />
-                <Route path="/school/calendar" element={<div className="p-8"><h2 className="text-2xl font-bold">Academic Calendar</h2><p className="text-slate-500 mt-2">Schedule and view important school events.</p></div>} />
-                <Route path="/school/assessments" element={<div className="p-8"><h2 className="text-2xl font-bold">Assessments</h2><p className="text-slate-500 mt-2">Track and manage student assessments.</p></div>} />
-                <Route path="/school/reports" element={<div className="p-8"><h2 className="text-2xl font-bold">Reports & Analytics</h2><p className="text-slate-500 mt-2">Generate detailed performance reports.</p></div>} />
-                <Route path="/school/messages" element={<div className="p-8"><h2 className="text-2xl font-bold">Message Center</h2><p className="text-slate-500 mt-2">Internal communication platform.</p></div>} />
+                {/* <Route path="/school/calendar" element={<div className="p-8"><h2 className="text-2xl font-bold">Academic Calendar</h2><p className="text-slate-500 mt-2">Schedule and view important school events.</p></div>} /> */}
+                {/* <Route path="/school/assessments" element={<div className="p-8"><h2 className="text-2xl font-bold">Assessments</h2><p className="text-slate-500 mt-2">Track and manage student assessments.</p></div>} /> */}
+                {/* <Route path="/school/reports" element={<div className="p-8"><h2 className="text-2xl font-bold">Reports & Analytics</h2><p className="text-slate-500 mt-2">Generate detailed performance reports.</p></div>} /> */}
+                {/* <Route path="/school/messages" element={<div className="p-8"><h2 className="text-2xl font-bold">Message Center</h2><p className="text-slate-500 mt-2">Internal communication platform.</p></div>} /> */}
                 <Route path="/school/profile" element={<SchoolProfile />} />
                 <Route path="/school/settings" element={<SchoolSettings />} />
             </Route>
