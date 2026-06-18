@@ -76,6 +76,23 @@ export const SchoolStudents = () => {
     const [selectedStudents, setSelectedStudents] = useState<number[]>([]);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
 
+    const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
+
+    // Sync local state if searchTerm changes from outside (e.g. cleared)
+    useEffect(() => {
+        setLocalSearchTerm(searchTerm);
+    }, [searchTerm]);
+
+    // Debounce updating the store's searchTerm
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            if (localSearchTerm !== searchTerm) {
+                setSearchTerm(localSearchTerm);
+            }
+        }, 500);
+        return () => clearTimeout(handler);
+    }, [localSearchTerm, searchTerm, setSearchTerm]);
+
     const handleHeaderSort = (columnKey: string) => {
         if (loading) return;
         if (sortBy === columnKey) {
@@ -491,8 +508,8 @@ export const SchoolStudents = () => {
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
                         <Input
                             placeholder="Search Student..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            value={localSearchTerm}
+                            onChange={(e) => setLocalSearchTerm(e.target.value)}
                             className="pl-9 h-9 border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 rounded-xl text-xs"
                         />
                     </div>
@@ -506,11 +523,11 @@ export const SchoolStudents = () => {
                             disabled={loading}
                             className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold px-2.5 py-1.5 outline-none h-9 cursor-pointer"
                         >
-                            <option value="firstName">First Name</option>
-                            <option value="lastName">Last Name</option>
+                            <option value="firstname">First Name</option>
+                            <option value="lastname">Last Name</option>
                             <option value="email">Email</option>
-                            <option value="gradeLevel">Grade</option>
-                            <option value="createdDate">Created Date</option>
+                            <option value="grade">Grade</option>
+                            <option value="createddate">Created Date</option>
                         </select>
                     </div>
 
@@ -643,8 +660,8 @@ export const SchoolStudents = () => {
                                             {selectedStudents.length === students.length && <Check className="h-3 w-3 text-white" />}
                                         </div>
                                     </TableHead>
-                                    <TableHead className="py-2.5 px-4">{renderSortHeaderLabel("Student Info", "firstName")}</TableHead>
-                                    <TableHead className="py-2.5 px-4">{renderSortHeaderLabel("Grade", "gradeLevel")}</TableHead>
+                                    <TableHead className="py-2.5 px-4">{renderSortHeaderLabel("Student Info", "firstname")}</TableHead>
+                                    <TableHead className="py-2.5 px-4">{renderSortHeaderLabel("Grade", "grade")}</TableHead>
                                     <TableHead className="py-2.5 px-4">{renderSortHeaderLabel("Contact Info", "email")}</TableHead>
                                     <TableHead className="text-[11px] font-black uppercase tracking-wider text-slate-500 py-2.5 px-4">Status</TableHead>
                                     <TableHead className="text-[11px] font-black uppercase tracking-wider text-slate-500 py-2.5 px-4 text-right">Actions</TableHead>

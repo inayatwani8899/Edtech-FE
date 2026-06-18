@@ -4,9 +4,28 @@ import { GenericResponse } from "@/types/types";
 import { useAuthStore } from "./useAuthStore";
 
 // Define the Student interface based on API response
+export interface AttemptItem {
+    reportId: number;
+    attemptNumber: number;
+    format: string;
+    createdDate: string;
+    reportPdfUrl: string;
+    reportHtmlUrl: string;
+}
+
+export interface TestDetailItem {
+    testId: number;
+    testName: string;
+    totalQuestions: number;
+    totalAttempts: number;
+    lastAttemptDate: string;
+    attempts: AttemptItem[];
+}
+
 export interface Student {
     id: number;
     userId: number;
+    studentId?: number;
     gradeLevel?: string;
     gradeId?: number;
     gradeName?: string;
@@ -18,6 +37,7 @@ export interface Student {
     phoneNumber?: string;
     gender?: string;
     isActive?: boolean;
+    testDetails?: TestDetailItem[];
 }
 
 interface StudentResponseData {
@@ -78,8 +98,8 @@ export const useStudentStore = create<StudentState>((set, get) => ({
   selectedStudentId: null,
   deleteOpen: false,
   studentToEdit: null,
-  sortDirection: 'asc',
-  sortBy: "firstName",
+  sortDirection: 'desc',
+  sortBy: "createddate",
 
   // Student list actions
   setPage: (page) => {
@@ -130,15 +150,15 @@ export const useStudentStore = create<StudentState>((set, get) => ({
     try {
       const params: any = {};
       if (isSchool) {
-        params.PageNumber = currentPage;
-        params.PageSize = limit;
+        params.pageNumber = currentPage;
+        params.pageSize = limit;
         if (debouncedSearchTerm) {
-          params.SearchTerm = debouncedSearchTerm;
+          params.search = debouncedSearchTerm;
         }
         if (sortBy) {
-          params.SortBy = sortBy;
+          params.sortBy = sortBy;
         }
-        params.SortDirection = sortDirection;
+        params.sortDirection = sortDirection;
       } else {
         params.page = currentPage;
         params.limit = limit;
