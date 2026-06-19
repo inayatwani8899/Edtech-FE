@@ -52,6 +52,7 @@ export interface Test {
     price: number;
     totalQuestionsPerPage: number;
     questionCount: number;
+    totalQuestions?: number;
     instructions: any;
     id: string;
     testId?: string;
