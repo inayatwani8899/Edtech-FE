@@ -4,9 +4,28 @@ import { GenericResponse } from "@/types/types";
 import { useAuthStore } from "./useAuthStore";
 
 // Define the Student interface based on API response
+export interface AttemptItem {
+    reportId: number;
+    attemptNumber: number;
+    format: string;
+    createdDate: string;
+    reportPdfUrl: string;
+    reportHtmlUrl: string;
+}
+
+export interface TestDetailItem {
+    testId: number;
+    testName: string;
+    totalQuestions: number;
+    totalAttempts: number;
+    lastAttemptDate: string;
+    attempts: AttemptItem[];
+}
+
 export interface Student {
     id: number;
     userId: number;
+    studentId?: number;
     gradeLevel?: string;
     gradeId?: number;
     gradeName?: string;
@@ -17,6 +36,8 @@ export interface Student {
     phone?: string;
     phoneNumber?: string;
     gender?: string;
+    isActive?: boolean;
+    testDetails?: TestDetailItem[];
 }
 
 interface StudentResponseData {
@@ -41,21 +62,26 @@ interface StudentState {
   studentToEdit: Student | null;
   
   sortDirection: 'asc' | 'desc';
+  sortBy: string;
 
   // Actions
   createStudent: (data: any) => Promise<void>;
   updateStudent: (id: string, data: any) => Promise<void>;
   clearStudent: () => void;
   deleteStudent: () => Promise<void>;
+  bulkUploadStudents: (file: File) => Promise<any>;
   fetchStudents: () => Promise<void>;
   fetchStudent: (id: string) => Promise<void>;
   setPage: (page: number) => void;
   setLimit: (limit: number) => void;
   setSearchTerm: (term: string) => void;
   setSortDirection: (direction: 'asc' | 'desc') => void;
+  setSortBy: (sortBy: string) => void;
   openDeleteDialog: (id: string) => void;
   closeDeleteDialog: () => void;
 }
+
+let searchTimeout: any = null;
 
 export const useStudentStore = create<StudentState>((set, get) => ({
   // Student list state
@@ -72,7 +98,8 @@ export const useStudentStore = create<StudentState>((set, get) => ({
   selectedStudentId: null,
   deleteOpen: false,
   studentToEdit: null,
-  sortDirection: 'asc',
+  sortDirection: 'desc',
+  sortBy: "createddate",
 
   // Student list actions
   setPage: (page) => {
@@ -87,7 +114,10 @@ export const useStudentStore = create<StudentState>((set, get) => ({
 
   setSearchTerm: (term) => {
     set({ searchTerm: term });
-    setTimeout(() => {
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+    searchTimeout = setTimeout(() => {
       set({ debouncedSearchTerm: term, currentPage: 1 });
       get().fetchStudents();
     }, 500);
@@ -98,9 +128,14 @@ export const useStudentStore = create<StudentState>((set, get) => ({
     get().fetchStudents();
   },
 
+  setSortBy: (sortBy) => {
+    set({ sortBy, currentPage: 1 });
+    get().fetchStudents();
+  },
+
   fetchStudents: async () => {
     set({ loading: true, error: null });
-    const { currentPage, limit, debouncedSearchTerm, sortDirection } = get();
+    const { currentPage, limit, debouncedSearchTerm, sortDirection, sortBy } = get();
     
     // Check if the current user has a School or OrganizationAdmin role
     const user = useAuthStore.getState().user;
@@ -113,24 +148,67 @@ export const useStudentStore = create<StudentState>((set, get) => ({
     const endpoint = isSchool ? "/Organization/students" : "/Student";
 
     try {
-      const response = await api.get<GenericResponse<StudentResponseData>>(endpoint, {
-        params: {
-          page: currentPage,
-          limit,
-          search: debouncedSearchTerm || undefined,
-          sortDirection
-        },
-      });
+      const params: any = {};
+      if (isSchool) {
+        params.pageNumber = currentPage;
+        params.pageSize = limit;
+        if (debouncedSearchTerm) {
+          params.search = debouncedSearchTerm;
+        }
+        if (sortBy) {
+          params.sortBy = sortBy;
+        }
+        params.sortDirection = sortDirection;
+      } else {
+        params.page = currentPage;
+        params.limit = limit;
+        if (debouncedSearchTerm) {
+          params.search = debouncedSearchTerm;
+        }
+        params.sortDirection = sortDirection;
+      }
 
-      const studentsList = response.data.data.students || [];
-      const totalCount = response.data.data.totalCount ?? studentsList.length ?? 0;
-      const calculatedTotalPages = Math.ceil(totalCount / limit);
+      const response = await api.get<any>(endpoint, { params });
+
+      let studentsList: Student[] = [];
+      let totalCount = 0;
+      let calculatedTotalPages = 1;
+      let activePage = currentPage;
+
+      if (isSchool) {
+        const studentsData = response.data?.data?.students;
+        const pagination = response.data?.data?.pagination || {};
+        
+        let rawStudentsList: any[] = [];
+        if (Array.isArray(studentsData)) {
+          rawStudentsList = studentsData;
+        } else if (studentsData && Array.isArray(studentsData.items)) {
+          rawStudentsList = studentsData.items;
+        }
+        
+        studentsList = rawStudentsList.map((s: any) => ({
+          ...s,
+          id: s.studentId ? Number(s.studentId) : (s.id ? Number(s.id) : (s.userId ? Number(s.userId) : 0))
+        }));
+        
+        totalCount = pagination.totalRecords ?? pagination.totalCount ?? studentsData?.totalCount ?? studentsList.length ?? 0;
+        calculatedTotalPages = pagination.totalPages ?? studentsData?.totalPages ?? Math.ceil(totalCount / limit) ?? 1;
+        activePage = pagination.pageNumber ?? studentsData?.pageNumber ?? currentPage;
+      } else {
+        const rawStudentsList = response.data?.data?.students || [];
+        studentsList = rawStudentsList.map((s: any) => ({
+          ...s,
+          id: s.studentId ? Number(s.studentId) : (s.id ? Number(s.id) : (s.userId ? Number(s.userId) : 0))
+        }));
+        totalCount = response.data?.data?.totalCount ?? studentsList.length ?? 0;
+        calculatedTotalPages = Math.ceil(totalCount / limit);
+      }
 
       set({
         students: studentsList,
         totalPages: calculatedTotalPages > 0 ? calculatedTotalPages : 1,
         totalCount: totalCount,
-        currentPage: currentPage > calculatedTotalPages ? 1 : currentPage,
+        currentPage: activePage > calculatedTotalPages ? 1 : activePage,
       });
     } catch (err: any) {
       set({
@@ -167,7 +245,9 @@ export const useStudentStore = create<StudentState>((set, get) => ({
           dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString() : null,
           gender: data.gender
         };
-        await api.post("/Organization/students-added-through-organization", payload);
+        await api.post("/Organization/students-added-through-organization", payload, {
+          headers: { 'x-skip-toast': 'true' }
+        });
       } else {
         const transformedData = {
           email: data.email,
@@ -180,7 +260,9 @@ export const useStudentStore = create<StudentState>((set, get) => ({
           isAdmin: false,
           createdBy: 1
         };
-        await api.post("/Student/admin/create", transformedData);
+        await api.post("/Student/admin/create", transformedData, {
+          headers: { 'x-skip-toast': 'true' }
+        });
       }
       await get().fetchStudents();
     } catch (err: any) {
@@ -203,17 +285,31 @@ export const useStudentStore = create<StudentState>((set, get) => ({
                        user?.role?.toLowerCase() === "organizationadmin";
 
       if (isSchool) {
-        const response = await api.get<any>(`/Organization/students/${id}`);
-        if (response.data && response.data.success) {
-          set({ student: response.data.data });
+        const response = await api.get<any>(`/organization/students/${id}`);
+        const s = response.data && response.data.success ? response.data.data : response.data;
+        if (s) {
+          const mappedStudent = {
+            ...s,
+            id: s.studentId ? Number(s.studentId) : (s.id ? Number(s.id) : (s.userId ? Number(s.userId) : Number(id)))
+          };
+          set({ student: mappedStudent });
         } else {
-          set({ student: response.data });
+          set({ student: null });
         }
       } else {
         const response = await api.get<GenericResponse<StudentResponseData>>("/Student");
-        const student = response.data.data.students.find(s => s.id === Number(id));
+        const rawStudents = response.data?.data?.students || [];
+        const student = rawStudents.find((s: any) => {
+          const sId = s.studentId ? Number(s.studentId) : (s.id ? Number(s.id) : (s.userId ? Number(s.userId) : 0));
+          return sId === Number(id);
+        }) as any;
         if (student) {
-          set({ student });
+          set({ 
+            student: {
+              ...student,
+              id: student.studentId ? Number(student.studentId) : (student.id ? Number(student.id) : (student.userId ? Number(student.userId) : Number(id)))
+            } 
+          });
         } else {
           throw new Error("Student not found");
         }
@@ -240,20 +336,21 @@ export const useStudentStore = create<StudentState>((set, get) => ({
 
       if (isSchool) {
         const payload = {
-          id: Number(id),
-          email: data.email,
           firstName: data.firstName,
           lastName: data.lastName,
-          phone: data.phone || data.phoneNumber,
-          phoneNumber: data.phone || data.phoneNumber,
-          gradeLevel: data.gradeLevel,
-          gradeId: data.gradeId ? Number(data.gradeId) : undefined,
+          phoneNumber: data.phoneNumber || data.phone || "",
+          gender: data.gender,
+          gradeId: data.gradeId ? Number(data.gradeId) : 0,
           dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString() : null,
-          gender: data.gender
+          isActive: data.isActive !== undefined ? data.isActive : true
         };
-        await api.put(`/Organization/students/${id}`, payload);
+        await api.put(`/organization/students/${id}`, payload, {
+          headers: { 'x-skip-toast': 'true' }
+        });
       } else {
-        await api.put(`/Student`, data);
+        await api.put(`/Student`, data, {
+          headers: { 'x-skip-toast': 'true' }
+        });
       }
       await get().fetchStudents();
     } catch (err: any) {
@@ -277,7 +374,7 @@ export const useStudentStore = create<StudentState>((set, get) => ({
                        user?.role?.toLowerCase() === "organization" ||
                        user?.role?.toLowerCase() === "organizationadmin";
 
-      const endpoint = isSchool ? `/Organization/students/${selectedStudentId}` : `/Student/${selectedStudentId}`;
+      const endpoint = isSchool ? `/organization/students/${selectedStudentId}` : `/Student/${selectedStudentId}`;
       await api.delete(endpoint);
 
       const remainingStudents = students.filter(student => student.id !== Number(selectedStudentId));
@@ -290,6 +387,29 @@ export const useStudentStore = create<StudentState>((set, get) => ({
     } catch (err: any) {
       console.error("Failed to delete student:", err);
       set({ error: err.response?.data?.message || "Failed to delete student" });
+      throw err;
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  bulkUploadStudents: async (file: File) => {
+    set({ loading: true, error: null });
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      
+      const response = await api.post("/Organization/bulk-students-upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      });
+      
+      await get().fetchStudents();
+      return response.data;
+    } catch (err: any) {
+      const msg = err.response?.data?.message || "Bulk student upload failed";
+      set({ error: msg });
       throw err;
     } finally {
       set({ loading: false });

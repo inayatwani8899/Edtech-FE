@@ -27,6 +27,8 @@ export interface Organization {
   tenantDb?: string;
   tenantDatabase?: string;
   documents?: any[];
+  logoPath?: string;
+  siteMessage?: string;
 }
 
 interface OrganizationResponseData {
@@ -63,7 +65,7 @@ interface OrganizationState {
   fetchOrganizations: () => Promise<void>;
   fetchOrganization: (id: string) => Promise<void>;
   createOrganization: (formData: FormData) => Promise<void>;
-  updateOrganization: (id: string, data: Partial<Organization>) => Promise<void>;
+  updateOrganization: (id: string, data: any) => Promise<void>;
   deleteOrganization: () => Promise<void>;
   verifyOrganization: (id: string) => Promise<void>;
   testDbConnection: (connectionData: any) => Promise<any>;
@@ -336,9 +338,10 @@ export const useOrganizationStore = create<OrganizationState>((set, get) => ({
     try {
       await api.post("/Organization/register", formData, {
         headers: {
-          "Content-Type": "multipart/form-data",
+          "Content-Type": undefined,
         },
-      });
+        skipToast: true,
+      } as any);
       await get().fetchOrganizations();
     } catch (err: any) {
       set({ error: err.response?.data?.message || "Failed to register organization." });
@@ -351,11 +354,25 @@ export const useOrganizationStore = create<OrganizationState>((set, get) => ({
   updateOrganization: async (id, data) => {
     set({ loading: true, error: null });
     try {
-      const payload = {
-        id: Number(id),
-        ...data,
-      };
-      await api.put("/Organization", payload);
+      let payload: any;
+      let headers = {};
+      if (data instanceof FormData) {
+        payload = data;
+        payload.set("id", String(id));
+        payload.set("Id", String(id));
+        headers = {
+          "Content-Type": undefined,
+        };
+      } else {
+        payload = {
+          id: Number(id),
+          ...data,
+        };
+      }
+      await api.put("/Organization", payload, {
+        headers,
+        skipToast: true,
+      } as any);
       await get().fetchOrganizations();
     } catch (err: any) {
       set({ error: err.response?.data?.message || "Failed to update organization." });

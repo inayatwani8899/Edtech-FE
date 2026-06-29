@@ -159,8 +159,8 @@ api.interceptors.response.use(
                 background: '#0f172a',
                 color: '#fff',
             }).then(() => {
-                useAuthStore.getState().logout();
-                window.location.href = "/login";
+                const redirectUrl = useAuthStore.getState().logout();
+                window.location.href = redirectUrl;
             });
             return Promise.reject(error);
         }

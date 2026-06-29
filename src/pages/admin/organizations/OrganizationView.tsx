@@ -98,6 +98,15 @@ const OrganizationView: React.FC = () => {
         return `${origin}${docUrl.startsWith("/") ? "" : "/"}${docUrl}`;
     };
 
+    const getLogoAbsoluteUrl = (logoPath?: string) => {
+        if (!logoPath) return "";
+        if (logoPath.startsWith("http://") || logoPath.startsWith("https://")) return logoPath;
+        
+        const base = import.meta.env.VITE_ORG_API_BASE_URL || "https://nervous-dubinsky.180-179-213-167.plesk.page/api/";
+        const origin = base.replace("/api/", "");
+        return `${origin}${logoPath.startsWith("/") ? "" : "/"}${logoPath}`;
+    };
+
     const getStatusBadge = (status?: string) => {
         const s = (status || "Pending").toLowerCase();
         switch (s) {
@@ -217,7 +226,15 @@ const OrganizationView: React.FC = () => {
                         <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 text-center sm:text-left">
                             <div className="h-24 w-24 rounded-2xl bg-white p-1.5 shadow-xl border border-slate-100 flex-shrink-0 flex items-center justify-center">
                                 <div className="h-full w-full rounded-xl bg-slate-50 flex items-center justify-center border-2 border-dashed border-slate-200 overflow-hidden">
-                                    <Building className="h-10 w-10 text-slate-400" />
+                                    {organization.logoPath ? (
+                                        <img 
+                                            src={getLogoAbsoluteUrl(organization.logoPath)} 
+                                            alt={`${organization.instituteName} logo`} 
+                                            className="h-full w-full object-contain"
+                                        />
+                                    ) : (
+                                        <Building className="h-10 w-10 text-slate-400" />
+                                    )}
                                 </div>
                             </div>
                             <div className="min-w-0">
@@ -319,6 +336,23 @@ const OrganizationView: React.FC = () => {
                     {/* Left Column (spans 8 on lg viewports) */}
                     <div className="lg:col-span-8 space-y-6">
                         
+                        {/* Platform Welcome Message */}
+                        {organization.siteMessage && (
+                            <Card className="border-none shadow-elegant bg-gradient-to-br from-indigo-50 to-white rounded-3xl overflow-hidden border border-indigo-150/30 p-5 text-left">
+                                <div className="flex items-start gap-3">
+                                    <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-2xl shadow-sm shrink-0">
+                                        <Sparkles className="h-4.5 w-4.5" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-[10px] font-black text-indigo-900 uppercase tracking-widest leading-none mb-1.5">Platform Message</h3>
+                                        <p className="text-xs font-bold text-slate-800 italic leading-relaxed">
+                                            "{organization.siteMessage}"
+                                        </p>
+                                    </div>
+                                </div>
+                            </Card>
+                        )}
+
                         {/* Profile Information Card */}
                         <Card className="border-none shadow-elegant bg-white rounded-3xl overflow-hidden border border-slate-100/50">
                             <CardContent className="p-6 md:p-8 space-y-6">

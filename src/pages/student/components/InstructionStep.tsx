@@ -1,8 +1,16 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import {
-    Clock, FileText, ShieldCheck, Zap,
-    ArrowRight, LayoutDashboard, AlertCircle
+    Clock,
+    FileText,
+    Shield,
+    Globe,
+    Monitor,
+    Save,
+    VolumeX,
+    Camera,
+    ChevronRight,
+    ArrowLeft
 } from "lucide-react";
 
 interface TestData {
@@ -10,6 +18,8 @@ interface TestData {
     timeDuration: number;
     questionCount?: number | string;
     totalQuestions?: number | string;
+    description?: string;
+    category?: string;
 }
 
 interface InstructionStepProps {
@@ -19,99 +29,122 @@ interface InstructionStepProps {
     stepNumber: number;
 }
 
-export const InstructionStep = ({ currentTest, onContinue, onBack, stepNumber }: InstructionStepProps) => {
+export const InstructionStep = ({ currentTest, onContinue, onBack }: InstructionStepProps) => {
+    const duration = currentTest?.timeDuration || 30;
+    const questions = currentTest?.questionCount || currentTest?.totalQuestions || 80;
+
     return (
-        // Fixed screen height, no scrolling allowed on the body
-        <div className="h-screen w-full bg-slate-50 flex flex-col items-center justify-center p-4 md:p-8 overflow-hidden">
-            {/* Main Container - max-h set to leave room for padding/progress */}
-            <div className="w-full max-w-5xl bg-white rounded-3xl border border-slate-200 shadow-2xl flex flex-col max-h-[92vh] overflow-hidden">
-
-
-
-                {/* Header - Stacks on mobile */}
-                <div className="bg-slate-900 px-6 md:px-8 py-5 md:py-6 text-white flex flex-col md:flex-row items-start md:items-center justify-between shrink-0 gap-4">
-                    <div className="flex flex-col min-w-0">
-                        <span className="text-blue-400 text-[10px] md:text-xs font-bold uppercase tracking-widest mb-1">Assessment Module</span>
-                        <h1 className="text-xl md:text-2xl font-black truncate w-full">
-                            {currentTest?.title || "Technical Evaluation"}
-                        </h1>
-                    </div>
-                    <div className="flex gap-6 md:gap-8 border-t md:border-t-0 md:border-l border-white/10 pt-4 md:pt-0 md:pl-8 w-full md:w-auto shrink-0">
-                        <div className="flex-1 md:text-right">
-                            <p className="text-slate-400 text-[9px] uppercase font-black tracking-tighter">TOTAL TIME</p>
-                            <p className="text-lg md:text-xl font-black">{currentTest?.timeDuration || 60}m</p>
+        <div className="min-h-screen w-full bg-[#F8FAFC] flex flex-col items-center justify-between p-4 md:p-6 font-sans">
+            <div className="w-full max-w-4xl bg-white rounded-[12px] border border-[#E5E7EB] shadow-sm overflow-hidden flex flex-col flex-1">
+                
+                {/* 1. Top Header Card (Max height 120px) */}
+                <div className="bg-white border-b border-[#E5E7EB] p-4 md:p-6 flex items-center justify-between md:h-[120px] shrink-0">
+                    <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                            <h1 className="text-[20px] md:text-[24px] font-bold text-[#111827] tracking-tight leading-tight">
+                                {currentTest?.title || "Psychometric Assessment"}
+                            </h1>
                         </div>
-                        <div className="flex-1 md:text-right">
-                            <p className="text-slate-400 text-[9px] uppercase font-black tracking-tighter">TOTAL ITEMS</p>
-                            <p className="text-lg md:text-xl font-black">{currentTest?.questionCount || currentTest?.totalQuestions || "N/A"}</p>
-                        </div>
-                    </div>
-                </div>
-
-
-                {/* Scrollable Content Area - ONLY this part scrolls if screen is tiny */}
-                <div className="p-8 flex-1 overflow-y-auto min-h-0 custom-scrollbar">
-
-                    {/* Quick Specs Grid - Stacks on mobile */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-8">
-                        <SmallSpecCard icon={<Clock className="w-5 h-5 text-blue-600" />} label="Limit" value={`${currentTest?.timeDuration || 60}m`} />
-                        <SmallSpecCard icon={<Zap className="w-5 h-5 text-amber-500" />} label="Save" value="Auto" />
-                        <SmallSpecCard icon={<FileText className="w-5 h-5 text-emerald-500" />} label="Type" value="MCQ" />
-                    </div>
-
-                    <div className="grid md:grid-cols-2 gap-8">
-                        {/* Requirements Section */}
-                        <div className="space-y-4">
-                            <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
-                                <ShieldCheck className="w-4 h-4 text-blue-600" /> System Requirements
-                            </h3>
-                            <div className="grid grid-cols-1 gap-2.5">
-                                {["Stable Connection", "No Pause Option", "Auto-Submit", "Fullscreen Only"].map((text, i) => (
-                                    <div key={i} className="flex items-center gap-3 text-sm text-slate-600 bg-slate-50/50 p-3 px-4 rounded-xl border border-slate-100">
-                                        <div className="h-1.5 w-1.5 rounded-full bg-blue-500 shrink-0" />
-                                        {text}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-
-                        {/* Conduct Section */}
-                        <div className="space-y-4">
-                            <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
-                                <AlertCircle className="w-4 h-4 text-blue-600" /> Testing Conduct
-                            </h3>
-                            <div className="grid grid-cols-1 gap-2.5">
-                                {["No External Aids", "Responses Saved", "Quiet Room", "No Tab Switch"].map((text, i) => (
-                                    <div key={i} className="flex items-center gap-3 text-sm text-slate-600 bg-slate-50/50 p-3 px-4 rounded-xl border border-slate-100">
-                                        <div className="h-1.5 w-1.5 rounded-full bg-slate-300 shrink-0" />
-                                        {text}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Warning Message - Slimmer */}
-                    <div className="mt-8 bg-amber-50/60 border border-amber-100 p-4 rounded-2xl flex gap-3">
-                        <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
-                        <p className="text-xs text-amber-800 leading-relaxed">
-                            Switching tabs or minimizing the window will trigger an automated security flag and potential submission.
+                        <p className="text-[13px] text-[#6B7280] font-medium">
+                            {currentTest?.category || "MCQ Assessment"} • {duration} mins | {questions} Questions | Auto Save
                         </p>
                     </div>
+
+                    <span className="bg-[#DCFCE7] text-[#166534] border border-[#BBF7D0] text-[12px] font-semibold px-3 py-1 rounded-full shrink-0">
+                        Available
+                    </span>
                 </div>
 
+                {/* 2. Content Area */}
+                <div className="p-4 md:p-6 flex-1 overflow-y-auto space-y-6">
+                    
+                    {/* Information Grid (2 x 2) */}
+                    <div>
+                        <h3 className="text-[12px] font-bold text-[#6B7280] uppercase tracking-wider mb-3">
+                            Assessment Summary
+                        </h3>
+                        <div className="grid grid-cols-2 gap-4">
+                            <InfoGridCard
+                                label="Duration"
+                                value={`${duration} Minutes`}
+                                desc="Total allocated time"
+                            />
+                            <InfoGridCard
+                                label="Questions"
+                                value={`${questions} Items`}
+                                desc="Multiple choice format"
+                            />
+                            <InfoGridCard
+                                label="Type"
+                                value="Adaptive Index"
+                                desc="Adjusts to skill level"
+                            />
+                            <InfoGridCard
+                                label="Save Mode"
+                                value="Auto Save Enabled"
+                                desc="Progress logged instantly"
+                            />
+                        </div>
+                    </div>
 
-                {/* Footer - Fixed Height */}
-                <div className="px-6 md:px-8 py-5 md:py-5 bg-slate-50 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between shrink-0 gap-3">
-                    <Button onClick={onBack} variant="ghost" className="text-slate-500 text-xs h-10 px-4 hover:bg-slate-100 rounded-xl transition-all order-2 md:order-1 w-full md:w-auto">
-                        <LayoutDashboard className="w-4 h-4 mr-2" />
-                        Dashboard
+                    {/* Instructions Section (2 Columns, 56px card height) */}
+                    <div>
+                        <h3 className="text-[12px] font-bold text-[#6B7280] uppercase tracking-wider mb-3">
+                            Assessment Guidelines
+                        </h3>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <InstructionCard
+                                icon={<Globe className="w-4 h-4 text-[#4F46E5]" />}
+                                title="Stable Internet"
+                                desc="Required to sync responses"
+                            />
+                            <InstructionCard
+                                icon={<Monitor className="w-4 h-4 text-[#4F46E5]" />}
+                                title="No Tab Switching"
+                                desc="Keep focus on the screen"
+                            />
+                            <InstructionCard
+                                icon={<Save className="w-4 h-4 text-[#4F46E5]" />}
+                                title="Auto Save Enabled"
+                                desc="Progress saved in real-time"
+                            />
+                            <InstructionCard
+                                icon={<VolumeX className="w-4 h-4 text-[#4F46E5]" />}
+                                title="Quiet Environment"
+                                desc="Minimize background noises"
+                            />
+                            <InstructionCard
+                                icon={<Shield className="w-4 h-4 text-[#4F46E5]" />}
+                                title="Auto Submit"
+                                desc="Submits automatically on timeout"
+                            />
+                            <InstructionCard
+                                icon={<Camera className="w-4 h-4 text-[#4F46E5]" />}
+                                title="Proctor Scan"
+                                desc="Camera monitoring validated"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* 3. Sticky Footer Actions */}
+                <div className="border-t border-[#E5E7EB] bg-[#F8FAFC] p-4 flex items-center justify-between shrink-0">
+                    <Button 
+                        onClick={onBack} 
+                        variant="ghost" 
+                        className="text-[#6B7280] hover:text-[#111827] text-[13px] font-semibold h-[42px] px-4 rounded-[12px] flex items-center gap-1.5 transition-all"
+                    >
+                        <ArrowLeft className="w-4 h-4" />
+                        Back to List
                     </Button>
                     
-                    <Button onClick={onContinue} className="bg-blue-600 hover:bg-blue-700 text-white px-8 h-12 text-sm font-bold rounded-xl shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2 order-1 md:order-2 w-full md:w-auto">
+                    <Button 
+                        onClick={onContinue} 
+                        className="bg-[#4F46E5] hover:bg-[#4338CA] text-white px-6 h-[42px] text-[13px] font-semibold rounded-[12px] transition-all flex items-center gap-1.5 active:scale-[0.98]"
+                    >
                         Continue
-                        <ArrowRight className="w-4 h-4" />
+                        <ChevronRight className="w-4 h-4" />
                     </Button>
                 </div>
 
@@ -120,12 +153,24 @@ export const InstructionStep = ({ currentTest, onContinue, onBack, stepNumber }:
     );
 };
 
-const SmallSpecCard = ({ icon, label, value }: { icon: React.ReactNode, label: string, value: string | number }) => (
-    <div className="flex items-center gap-4 p-4 rounded-2xl border border-slate-100 bg-white shadow-sm">
-        <div className="shrink-0 scale-110">{icon}</div>
-        <div className="min-w-0">
-            <p className="text-[10px] uppercase font-bold text-slate-400 leading-none mb-1 tracking-wider">{label}</p>
-            <p className="text-sm font-black text-slate-700 truncate">{value}</p>
+const InfoGridCard = ({ label, value, desc }: { label: string; value: string; desc: string }) => (
+    <div className="bg-[#F8FAFC] border border-[#E5E7EB] rounded-[12px] p-3.5 flex flex-col justify-between transition-all hover:shadow-sm">
+        <span className="text-[12px] font-medium text-[#6B7280]">{label}</span>
+        <div className="mt-1">
+            <span className="text-[14px] font-bold text-[#111827]">{value}</span>
+            <p className="text-[12px] text-[#6B7280] mt-0.5 leading-none">{desc}</p>
         </div>
     </div>
-);
+);
+
+const InstructionCard = ({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) => (
+    <div className="flex items-center gap-3 p-3 h-[56px] rounded-[12px] border border-[#E5E7EB] bg-white hover:border-[#4F46E5] transition-all">
+        <div className="w-8 h-8 rounded-[8px] bg-indigo-55/10 flex items-center justify-center shrink-0 border border-[#E5E7EB] bg-[#F8FAFC]">
+            {icon}
+        </div>
+        <div className="min-w-0 flex-1">
+            <h4 className="text-[13px] font-bold text-[#111827] leading-tight truncate">{title}</h4>
+            <p className="text-[12px] text-[#6B7280] leading-none truncate mt-0.5">{desc}</p>
+        </div>
+    </div>
+);

@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useOrganizationStore, Organization } from "@/store/organizationStore";
+import api from "@/api/axios";
 import {
   Loader2,
   Server,
@@ -64,8 +65,27 @@ export const TenantSetupModal: React.FC<TenantSetupModalProps> = ({
   // Sync Progress
   const [syncStatus, setSyncStatus] = useState<"idle" | "running" | "success" | "failed">("idle");
   const [syncLogs, setSyncLogs] = useState<string[]>([]);
-  const [selectedGrades, setSelectedGrades] = useState<number[]>([7, 8, 9, 10, 11, 12]);
-  const [selectedRoles, setSelectedRoles] = useState<number[]>([1, 2, 3, 4, 8]); // Default role IDs
+
+  // Dynamic API state
+  interface GradeItem {
+    id: number;
+    name: string;
+    description?: string;
+  }
+
+  interface RoleItem {
+    id: number;
+    name: string;
+  }
+
+  const [grades, setGrades] = useState<GradeItem[]>([]);
+  const [roles, setRoles] = useState<RoleItem[]>([]);
+  const [loadingGrades, setLoadingGrades] = useState<boolean>(false);
+  const [loadingRoles, setLoadingRoles] = useState<boolean>(false);
+  const [gradesSearch, setGradesSearch] = useState<string>("");
+  const [rolesSearch, setRolesSearch] = useState<string>("");
+  const [selectedGrades, setSelectedGrades] = useState<number[]>([]);
+  const [selectedRoles, setSelectedRoles] = useState<number[]>([]);
 
   useEffect(() => {
     if (organization) {
@@ -92,8 +112,48 @@ export const TenantSetupModal: React.FC<TenantSetupModalProps> = ({
       setSyncStatus("idle");
       setSyncLogs([]);
       setDirectStudentAllow(true);
+      setGradesSearch("");
+      setRolesSearch("");
+      setSelectedGrades([]);
+      setSelectedRoles([]);
     }
   }, [organization, open]);
+
+  useEffect(() => {
+    if (open) {
+      const fetchGradesAndRoles = async () => {
+        setLoadingGrades(true);
+        setLoadingRoles(true);
+        try {
+          const orgBaseUrl = import.meta.env.VITE_ORG_API_BASE_URL || "https://nervous-dubinsky.180-179-213-167.plesk.page/api/";
+          
+          // Fetch Grades
+          const gradesRes = await api.get(`${orgBaseUrl}Grade/all`);
+          if (gradesRes.data?.success && Array.isArray(gradesRes.data.data)) {
+            const gradesData = gradesRes.data.data;
+            setGrades(gradesData);
+            setSelectedGrades(gradesData.map((g: any) => g.id));
+          }
+          
+          // Fetch Roles
+          const rolesRes = await api.get(`${orgBaseUrl}Role`);
+          if (rolesRes.data?.success && Array.isArray(rolesRes.data.data)) {
+            const rolesData = rolesRes.data.data;
+            setRoles(rolesData);
+            setSelectedRoles(rolesData.map((r: any) => r.id));
+          }
+        } catch (error) {
+          console.error("Error fetching grades or roles:", error);
+          toast.error("Failed to load onboarding grades or roles.");
+        } finally {
+          setLoadingGrades(false);
+          setLoadingRoles(false);
+        }
+      };
+      
+      fetchGradesAndRoles();
+    }
+  }, [open]);
 
   if (!organization) return null;
 
@@ -161,6 +221,15 @@ export const TenantSetupModal: React.FC<TenantSetupModalProps> = ({
   };
 
   const handleSyncData = async () => {
+    if (selectedGrades.length === 0) {
+      toast.error("Please select at least one Grade.");
+      return;
+    }
+    if (selectedRoles.length === 0) {
+      toast.error("Please select at least one Role.");
+      return;
+    }
+
     setSyncStatus("running");
     setSyncLogs(["Starting primary sync...", "Analyzing Grade tables to clone...", "Replicating permission schemas..."]);
     
@@ -174,7 +243,7 @@ export const TenantSetupModal: React.FC<TenantSetupModalProps> = ({
       
       setSyncLogs(prev => [...prev, "Grades metadata copied.", "Roles hierarchy and authorizations duplicated.", "Sync completed successfully!", "Automated onboarding email dispatched to administrator."]);
       setSyncStatus("success");
-      toast.success("System sync finished and activation email sent!");
+      toast.success("Primary data synced successfully.");
     } catch (err: any) {
       setSyncStatus("failed");
       setSyncLogs(prev => [...prev, `SYNC FAILURE: ${err.response?.data?.message || err.message || "Catalog replication aborted."}`]);
@@ -431,56 +500,165 @@ export const TenantSetupModal: React.FC<TenantSetupModalProps> = ({
             <div className="space-y-4 animate-in fade-in duration-300">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Grades checklist */}
-                <div className="p-4 bg-slate-50 border border-slate-150 rounded-2xl">
-                  <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2.5">Academic Grades to Sync</Label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {[7, 8, 9, 10, 11, 12].map(g => (
-                      <label key={g} className="flex items-center gap-1.5 p-2 bg-white rounded-xl border border-slate-200 cursor-pointer text-xs font-bold text-slate-700 hover:bg-slate-50">
-                        <input 
-                          type="checkbox"
-                          checked={selectedGrades.includes(g)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedGrades([...selectedGrades, g]);
-                            } else {
-                              setSelectedGrades(selectedGrades.filter(x => x !== g));
-                            }
-                          }}
-                          className="rounded border-slate-350 accent-indigo-600"
-                        />
-                        <span>Gr. {g}</span>
-                      </label>
-                    ))}
+                <div className="p-4 bg-slate-50 border border-slate-150 rounded-2xl flex flex-col h-[280px]">
+                  <div className="flex justify-between items-center mb-2">
+                    <div className="flex items-center gap-1.5">
+                      <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">Grades</Label>
+                      <Badge variant="secondary" className="bg-indigo-50 text-indigo-700 text-[9px] font-bold py-0 px-1.5 h-4 border border-indigo-100">
+                        {selectedGrades.length} Selected
+                      </Badge>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (selectedGrades.length === grades.length) {
+                          setSelectedGrades([]);
+                        } else {
+                          setSelectedGrades(grades.map(g => g.id));
+                        }
+                      }}
+                      className="text-[9px] font-bold text-indigo-600 hover:text-indigo-700 uppercase tracking-wider transition-colors"
+                    >
+                      {selectedGrades.length === grades.length ? "Deselect All" : "Select All"}
+                    </button>
+                  </div>
+                  
+                  <div className="mb-2">
+                    <Input
+                      type="text"
+                      placeholder="Search grades..."
+                      value={gradesSearch}
+                      onChange={(e) => setGradesSearch(e.target.value)}
+                      className="h-8 bg-white border-slate-200 focus:bg-white rounded-lg text-[11px]"
+                    />
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto space-y-1.5 pr-1 text-left">
+                    {loadingGrades ? (
+                      <div className="flex items-center justify-center h-full text-[11px] text-slate-400 font-medium">
+                        <Loader2 className="h-4 w-4 animate-spin mr-2 text-indigo-500" /> Loading grades...
+                      </div>
+                    ) : grades.filter(g =>
+                      g.name.toLowerCase().includes(gradesSearch.toLowerCase()) ||
+                      (g.description || "").toLowerCase().includes(gradesSearch.toLowerCase())
+                    ).length === 0 ? (
+                      <div className="flex items-center justify-center h-full text-[11px] text-slate-400 font-medium">
+                        No grades found
+                      </div>
+                    ) : (
+                      grades.filter(g =>
+                        g.name.toLowerCase().includes(gradesSearch.toLowerCase()) ||
+                        (g.description || "").toLowerCase().includes(gradesSearch.toLowerCase())
+                      ).map(g => {
+                        const isChecked = selectedGrades.includes(g.id);
+                        return (
+                          <label
+                            key={g.id}
+                            className={`flex items-center gap-2.5 p-2 bg-white rounded-xl border cursor-pointer text-xs font-bold text-slate-700 hover:bg-slate-50 transition-all ${
+                              isChecked ? "border-indigo-200 bg-indigo-50/20" : "border-slate-200"
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedGrades([...selectedGrades, g.id]);
+                                } else {
+                                  setSelectedGrades(selectedGrades.filter(id => id !== g.id));
+                                }
+                              }}
+                              className="h-3.5 w-3.5 rounded border-slate-300 text-indigo-600 accent-indigo-600 focus:ring-indigo-500/20"
+                            />
+                            <div className="flex flex-col text-left">
+                              <span>{g.name}</span>
+                              {g.description && (
+                                <span className="text-[9px] font-medium text-slate-400 leading-tight">{g.description}</span>
+                              )}
+                            </div>
+                          </label>
+                        );
+                      })
+                    )}
                   </div>
                 </div>
 
                 {/* Roles Checklist */}
-                <div className="p-4 bg-slate-50 border border-slate-150 rounded-2xl">
-                  <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2.5">Global Roles to Sync</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      { id: 1, name: "Student" },
-                      { id: 2, name: "Counselor" },
-                      { id: 3, name: "Teacher" },
-                      { id: 4, name: "Admin" },
-                      { id: 8, name: "SuperAdmin" },
-                    ].map(r => (
-                      <label key={r.id} className="flex items-center gap-1.5 p-2 bg-white rounded-xl border border-slate-200 cursor-pointer text-xs font-bold text-slate-700 hover:bg-slate-50">
-                        <input 
-                          type="checkbox"
-                          checked={selectedRoles.includes(r.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedRoles([...selectedRoles, r.id]);
-                            } else {
-                              setSelectedRoles(selectedRoles.filter(x => x !== r.id));
-                            }
-                          }}
-                          className="rounded border-slate-350 accent-indigo-600"
-                        />
-                        <span>{r.name}</span>
-                      </label>
-                    ))}
+                <div className="p-4 bg-slate-50 border border-slate-150 rounded-2xl flex flex-col h-[280px]">
+                  <div className="flex justify-between items-center mb-2">
+                    <div className="flex items-center gap-1.5">
+                      <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">Roles</Label>
+                      <Badge variant="secondary" className="bg-indigo-50 text-indigo-700 text-[9px] font-bold py-0 px-1.5 h-4 border border-indigo-100">
+                        {selectedRoles.length} Selected
+                      </Badge>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (selectedRoles.length === roles.length) {
+                          setSelectedRoles([]);
+                        } else {
+                          setSelectedRoles(roles.map(r => r.id));
+                        }
+                      }}
+                      className="text-[9px] font-bold text-indigo-600 hover:text-indigo-700 uppercase tracking-wider transition-colors"
+                    >
+                      {selectedRoles.length === roles.length ? "Deselect All" : "Select All"}
+                    </button>
+                  </div>
+                  
+                  <div className="mb-2">
+                    <Input
+                      type="text"
+                      placeholder="Search roles..."
+                      value={rolesSearch}
+                      onChange={(e) => setRolesSearch(e.target.value)}
+                      className="h-8 bg-white border-slate-200 focus:bg-white rounded-lg text-[11px]"
+                    />
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto space-y-1.5 pr-1 text-left">
+                    {loadingRoles ? (
+                      <div className="flex items-center justify-center h-full text-[11px] text-slate-400 font-medium">
+                        <Loader2 className="h-4 w-4 animate-spin mr-2 text-indigo-500" /> Loading roles...
+                      </div>
+                    ) : roles.filter(r =>
+                      r.name.toLowerCase().includes(rolesSearch.toLowerCase())
+                    ).length === 0 ? (
+                      <div className="flex items-center justify-center h-full text-[11px] text-slate-400 font-medium">
+                        No roles found
+                      </div>
+                    ) : (
+                      roles.filter(r =>
+                        r.name.toLowerCase().includes(rolesSearch.toLowerCase())
+                      ).map(r => {
+                        const isChecked = selectedRoles.includes(r.id);
+                        return (
+                          <label
+                            key={r.id}
+                            className={`flex items-center gap-2.5 p-2 bg-white rounded-xl border cursor-pointer text-xs font-bold text-slate-700 hover:bg-slate-50 transition-all ${
+                              isChecked ? "border-indigo-200 bg-indigo-50/20" : "border-slate-200"
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedRoles([...selectedRoles, r.id]);
+                                } else {
+                                  setSelectedRoles(selectedRoles.filter(id => id !== r.id));
+                                }
+                              }}
+                              className="h-3.5 w-3.5 rounded border-slate-300 text-indigo-600 accent-indigo-600 focus:ring-indigo-500/20"
+                            />
+                            <div className="flex flex-col text-left">
+                              <span>{r.name}</span>
+                            </div>
+                          </label>
+                        );
+                      })
+                    )}
                   </div>
                 </div>
               </div>
@@ -496,8 +674,17 @@ export const TenantSetupModal: React.FC<TenantSetupModalProps> = ({
                   disabled={syncStatus === "running" || syncStatus === "success"}
                   className="h-9 px-5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[10px] font-bold uppercase tracking-wider"
                 >
-                  {syncStatus === "running" ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" /> : <RefreshCw className="h-3.5 w-3.5 mr-2" />}
-                  Sync Master Data
+                  {syncStatus === "running" ? (
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />
+                      Syncing Tenant Data...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="h-3.5 w-3.5 mr-2" />
+                      Sync Master Data
+                    </>
+                  )}
                 </Button>
               </div>
 

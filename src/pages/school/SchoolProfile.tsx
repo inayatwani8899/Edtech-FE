@@ -1,258 +1,616 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { 
     School, 
     Mail, 
     Phone, 
     Globe, 
     MapPin, 
-    Camera, 
-    Edit3, 
-    Building2, 
-    CheckCircle2, 
-    Save,
     ExternalLink,
-    Award,
-    ShieldCheck,
-    Users
+    Building2,
+    Users,
+    Download,
+    FileText,
+    AlertCircle,
+    Calendar,
+    Shield,
+    CheckCircle2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { toast } from "sonner";
+import api from "@/api/axios";
+import { useAuthStore } from "../../store/useAuthStore";
 import { cn } from "@/lib/utils";
-import Swal from "sweetalert2";
+
+interface OrganizationProfile {
+    id: number;
+    instituteName: string;
+    tenantDb: string;
+    address: string;
+    city: string;
+    state: string;
+    country: string;
+    postalCode: string;
+    email: string;
+    contactNumber: string;
+    website: string;
+    organizationType: string;
+    approxStudentCount: number;
+    documentUrl: string | null;
+    status: string;
+    onboardingStage: number;
+    isVerified: boolean;
+    isActive: boolean;
+    directStudentAllow: boolean;
+    logoPath: string | null;
+    siteMessage: string | null;
+    createdDate: string;
+    lastModifiedDate: string;
+}
 
 export const SchoolProfile = () => {
-    const [isEditing, setIsEditing] = useState(false);
-    
-    const handleSave = () => {
-        Swal.fire({
-            title: 'Updating Profile',
-            text: 'Saving institutional changes...',
-            icon: 'success',
-            timer: 1500,
-            showConfirmButton: false
-        });
-        setIsEditing(false);
+    const [profile, setProfile] = useState<OrganizationProfile | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    const getOrganizationId = () => {
+        const orgIdFromStorage = localStorage.getItem("organizationId");
+        if (orgIdFromStorage) return orgIdFromStorage;
+
+        const tenantData = useAuthStore.getState().tenantData;
+        if (tenantData?.id) return String(tenantData.id);
+
+        const user = useAuthStore.getState().user as any;
+        if (user?.organizationId) return String(user.organizationId);
+        if (user?.tenantId) return String(user.tenantId);
+
+        try {
+            const orgData = localStorage.getItem("organizationData");
+            if (orgData) {
+                const org = JSON.parse(orgData);
+                if (org?.id) return String(org.id);
+            }
+        } catch {}
+
+        return null;
     };
 
-    return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            {/* Hero Profile Header */}
-            <div className="relative group">
-                <div className="h-48 w-full rounded-[2rem] bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 overflow-hidden relative shadow-2xl">
-                    <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
-                    <button className="absolute bottom-4 right-6 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border border-white/20">
-                        <Camera className="h-4 w-4" />
-                        Change Banner
-                    </button>
+    const fetchProfile = async () => {
+        setLoading(true);
+        setError(null);
+        
+        const orgId = getOrganizationId();
+        if (!orgId) {
+            setError("No organization ID associated with your session.");
+            setLoading(false);
+            return;
+        }
+
+        try {
+            const response = await api.get<any>(`/Organization/${orgId}`);
+            if (response.data && response.data.success) {
+                setProfile(response.data.data);
+            } else {
+                setError("Failed to fetch organization details.");
+            }
+        } catch (err: any) {
+            console.error("Failed to load school profile:", err);
+            setError(err.response?.data?.message || "Failed to load organization profile.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchProfile();
+    }, []);
+
+    const formatDate = (dateString?: string) => {
+        if (!dateString) return "-";
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return dateString;
+            return date.toLocaleDateString("en-US", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric"
+            });
+        } catch {
+            return dateString;
+        }
+    };
+
+    const getFullUrl = (path: string | null) => {
+        if (!path) return "";
+        if (path.startsWith("http")) return path;
+        
+        const baseHost = import.meta.env.VITE_ORG_API_BASE_URL || "https://nervous-dubinsky.180-179-213-167.plesk.page/api/";
+        let domain = baseHost;
+        if (domain.endsWith("/api/")) {
+            domain = domain.substring(0, domain.length - 5);
+        } else if (domain.endsWith("/api")) {
+            domain = domain.substring(0, domain.length - 4);
+        }
+        
+        if (domain.endsWith("/")) {
+            domain = domain.slice(0, -1);
+        }
+        
+        let cleanPath = path;
+        if (!cleanPath.startsWith("/")) {
+            cleanPath = "/" + cleanPath;
+        }
+        return domain + cleanPath;
+    };
+
+    const getDocumentName = (url: string | null) => {
+        if (!url) return "";
+        const parts = url.split("/");
+        const filenameWithUuid = parts[parts.length - 1];
+        const underscoreIndex = filenameWithUuid.indexOf("_");
+        if (underscoreIndex !== -1) {
+            return filenameWithUuid.substring(underscoreIndex + 1);
+        }
+        return filenameWithUuid;
+    };
+
+    const handleDownloadDoc = async (url: string) => {
+        const toastId = toast.loading("Downloading document...");
+        try {
+            const response = await api.get(url, {
+                responseType: "blob",
+                headers: { "x-skip-toast": "true" }
+            });
+            const blob = new Blob([response.data], { type: "application/pdf" });
+            const objectUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = objectUrl;
+            link.download = getDocumentName(url) || "Document.pdf";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(objectUrl);
+            toast.dismiss(toastId);
+            toast.success("Document downloaded successfully.");
+        } catch (err) {
+            console.error(err);
+            toast.dismiss(toastId);
+            toast.error("Failed to download document.");
+        }
+    };
+
+    const getInitials = (name?: string) => {
+        if (!name) return "CT";
+        return name
+            .split(" ")
+            .map((w) => w[0])
+            .join("")
+            .substring(0, 2)
+            .toUpperCase();
+    };
+
+    if (loading) {
+        return (
+            <div className="space-y-6 animate-pulse p-1.5">
+                {/* Hero Skeleton */}
+                <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/85 rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-center md:items-start gap-6 shadow-sm">
+                    {/* Logo Skeleton */}
+                    <div className="h-24 w-24 rounded-full bg-slate-200 dark:bg-slate-800 shrink-0 animate-pulse"></div>
+                    <div className="flex-1 space-y-4 w-full mt-2">
+                        <div className="h-7 w-64 bg-slate-200 dark:bg-slate-800 rounded animate-pulse"></div>
+                        <div className="h-4 w-32 bg-slate-100 dark:bg-slate-850 rounded animate-pulse"></div>
+                        <div className="flex gap-2">
+                            <div className="h-5 w-20 bg-slate-200 dark:bg-slate-800 rounded-full animate-pulse"></div>
+                            <div className="h-5 w-20 bg-slate-200 dark:bg-slate-800 rounded-full animate-pulse"></div>
+                            <div className="h-5 w-20 bg-slate-200 dark:bg-slate-800 rounded-full animate-pulse"></div>
+                        </div>
+                        <div className="h-10 bg-slate-100 dark:bg-slate-850 rounded-xl w-full animate-pulse"></div>
+                    </div>
                 </div>
-                
-                <div className="px-8 -mt-16 relative z-10 flex flex-col md:flex-row items-end gap-6">
-                    <div className="relative group/avatar">
-                        <div className="h-32 w-32 rounded-3xl bg-white p-1 shadow-2xl">
-                            <div className="h-full w-full rounded-2xl bg-slate-100 flex items-center justify-center border-2 border-slate-50 relative overflow-hidden">
-                                <School className="h-12 w-12 text-slate-400" />
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
-                                    <Camera className="h-6 w-6 text-white" />
+
+                {/* Information & Document Skeleton Grid */}
+                <div className="bg-white dark:bg-[#0f1117] border border-slate-200/60 dark:border-slate-800 rounded-[2rem] p-6 sm:p-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-8">
+                        {/* Left Column (Contact & Location) */}
+                        <div className="space-y-8">
+                            <div className="space-y-4">
+                                <div className="h-4 w-36 bg-slate-250 dark:bg-slate-800 rounded"></div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="h-12 bg-slate-100 dark:bg-slate-850 rounded-lg"></div>
+                                    <div className="h-12 bg-slate-100 dark:bg-slate-850 rounded-lg"></div>
+                                    <div className="h-12 bg-slate-100 dark:bg-slate-850 rounded-lg sm:col-span-2"></div>
+                                </div>
+                            </div>
+                            <div className="space-y-4">
+                                <div className="h-4 w-24 bg-slate-250 dark:bg-slate-800 rounded"></div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="h-12 bg-slate-100 dark:bg-slate-850 rounded-lg sm:col-span-2"></div>
+                                    <div className="h-12 bg-slate-100 dark:bg-slate-850 rounded-lg"></div>
+                                    <div className="h-12 bg-slate-100 dark:bg-slate-850 rounded-lg"></div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div className="flex-1 pb-2">
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div>
-                                <div className="flex items-center gap-3">
-                                    <h1 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">St. Xavier's International</h1>
-                                    <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 hover:bg-emerald-500/20 px-2 py-0 font-black text-[10px] uppercase tracking-widest">
-                                        Verified Inst.
-                                    </Badge>
+
+                        {/* Right Column (Info & Document) */}
+                        <div className="space-y-8">
+                            <div className="space-y-4">
+                                <div className="h-4 w-36 bg-slate-250 dark:bg-slate-800 rounded"></div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="h-12 bg-slate-100 dark:bg-slate-850 rounded-lg"></div>
+                                    <div className="h-12 bg-slate-100 dark:bg-slate-850 rounded-lg"></div>
+                                    <div className="h-12 bg-slate-100 dark:bg-slate-850 rounded-lg"></div>
+                                    <div className="h-12 bg-slate-100 dark:bg-slate-850 rounded-lg"></div>
                                 </div>
-                                <p className="text-slate-500 font-medium flex items-center gap-2 mt-1">
-                                    <MapPin className="h-4 w-4" />
-                                    Phase 2, Education Hub, New Delhi, India
-                                </p>
                             </div>
-                            
-                            <div className="flex items-center gap-3">
-                                <Button 
-                                    variant={isEditing ? "outline" : "default"}
-                                    onClick={() => isEditing ? setIsEditing(false) : setIsEditing(true)}
-                                    className={cn(
-                                        "h-11 rounded-xl px-6 font-bold text-xs uppercase tracking-wider transition-all",
-                                        !isEditing && "bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20"
-                                    )}
-                                >
-                                    {isEditing ? "Cancel" : "Edit Profile"}
-                                </Button>
-                                {isEditing && (
-                                    <Button onClick={handleSave} className="h-11 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-6 font-bold text-xs uppercase tracking-wider shadow-lg shadow-emerald-500/20 gap-2">
-                                        <Save className="h-4 w-4" />
-                                        Save Changes
-                                    </Button>
-                                )}
+                            <div className="space-y-4">
+                                <div className="h-4 w-36 bg-slate-250 dark:bg-slate-800 rounded"></div>
+                                <div className="h-16 bg-slate-100 dark:bg-slate-850 rounded-2xl w-full"></div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+        );
+    }
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Left Column: Essential Info */}
-                <div className="space-y-6">
-                    <Card className="border-none shadow-xl bg-white dark:bg-[#0f1117] rounded-[2rem] overflow-hidden">
-                        <CardHeader className="p-6 border-b border-slate-100 dark:border-white/5">
-                            <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-400">Institutional HUD</CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-6 space-y-6">
-                            {[
-                                { icon: Mail, label: "Official Email", value: "contact@stxaviers.edu" },
-                                { icon: Phone, label: "Helpdesk", value: "+91 98765 43210" },
-                                { icon: Globe, label: "Website", value: "www.stxaviers.edu", link: true },
-                                { icon: Building2, label: "Founded", value: "1994 (30 Years)" },
-                            ].map((item, i) => (
-                                <div key={i} className="flex items-start gap-4">
-                                    <div className="h-10 w-10 rounded-xl bg-slate-50 dark:bg-white/5 flex items-center justify-center flex-shrink-0">
-                                        <item.icon className="h-5 w-5 text-blue-500" />
+    if (error || !profile) {
+        return (
+            <div className="min-h-[60vh] flex items-center justify-center px-4 p-1.5">
+                <div className="max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-elegant bg-white dark:bg-slate-900 rounded-2xl p-8 text-center flex flex-col items-center">
+                    <div className="h-14 w-14 rounded-2xl bg-rose-50 dark:bg-rose-955/20 flex items-center justify-center mb-4 border border-rose-100 dark:border-rose-900/30 text-rose-500">
+                        <AlertCircle className="h-7 w-7" />
+                    </div>
+                    <h2 className="text-base font-bold text-slate-900 dark:text-white mb-1.5">Unable to load organization profile.</h2>
+                    <p className="text-slate-500 dark:text-slate-400 text-xs mb-6 max-w-xs leading-relaxed">
+                        Please try again.
+                    </p>
+                    <Button 
+                        onClick={fetchProfile} 
+                        className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold h-9.5 px-6 rounded-xl shadow-lg shadow-blue-600/20 active:scale-95 transition-all"
+                    >
+                        Retry
+                    </Button>
+                </div>
+            </div>
+        );
+    }
+
+    const initials = getInitials(profile.instituteName);
+    const logoUrl = getFullUrl(profile.logoPath);
+
+    return (
+        <div className="space-y-6 animate-in fade-in duration-500 p-1.5">
+            {/* Hero Profile Card */}
+            <div className="bg-gradient-to-br from-blue-500/10 via-indigo-500/5 to-purple-500/10 dark:from-blue-550/5 dark:via-indigo-550/2 dark:to-purple-550/5 bg-white dark:bg-[#0f1117] border border-slate-200/60 dark:border-slate-800 rounded-[2rem] shadow-elegant overflow-hidden relative group transition-all duration-300">
+                <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-600 via-indigo-650 to-purple-600 z-10" />
+                <div className="p-6 sm:p-8 flex flex-col md:flex-row items-center md:items-start gap-6 relative z-0">
+                    
+                    {/* Left: Organization Logo */}
+                    <div className="relative group/avatar shrink-0">
+                        <div className="h-24 w-24 rounded-full bg-slate-50 dark:bg-slate-950 border border-slate-150 dark:border-slate-800 shadow-sm flex items-center justify-center overflow-hidden">
+                            {logoUrl ? (
+                                <img src={logoUrl} alt={profile.instituteName} className="h-full w-full object-cover" />
+                            ) : (
+                                <div className="h-full w-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black text-2xl shadow-inner">
+                                    {initials}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Right: Info Strip */}
+                    <div className="flex-1 text-center md:text-left min-w-0">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div>
+                                <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white leading-tight">
+                                    {profile.instituteName}
+                                </h1>
+                                <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-1 flex items-center justify-center md:justify-start gap-1">
+                                    <School className="h-3.5 w-3.5" />
+                                    {profile.organizationType} Organization
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Status badges */}
+                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-4">
+                            <span className={cn(
+                                "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border transition-colors",
+                                profile.isVerified
+                                    ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-750 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/40"
+                                    : "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border-amber-100 dark:border-amber-900/40"
+                            )}>
+                                <CheckCircle2 className="h-3 w-3 shrink-0" />
+                                {profile.isVerified ? "✓ Verified" : "Pending Verification"}
+                            </span>
+
+                            <span className={cn(
+                                "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border transition-colors",
+                                profile.isActive
+                                    ? "bg-blue-50 dark:bg-blue-955/30 text-blue-700 dark:text-blue-400 border-blue-100 dark:border-blue-900/40"
+                                    : "bg-slate-50 dark:bg-slate-950 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-800"
+                            )}>
+                                {profile.isActive ? "✓ Active" : "Inactive"}
+                            </span>
+
+                            {profile.status && (
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border transition-colors bg-purple-50 dark:bg-purple-950/30 text-purple-750 dark:text-purple-400 border-purple-100 dark:border-purple-900/40">
+                                    {profile.status}
+                                </span>
+                            )}
+
+                            <span className={cn(
+                                "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border transition-colors",
+                                profile.directStudentAllow
+                                    ? "bg-cyan-50 dark:bg-cyan-955/30 text-cyan-700 dark:text-cyan-400 border-cyan-100 dark:border-cyan-900/40"
+                                    : "bg-rose-50 dark:bg-rose-955/20 text-rose-700 dark:text-rose-455 border-rose-100 dark:border-rose-900/40"
+                            )}>
+                                {profile.directStudentAllow ? "Direct Registration Enabled" : "Direct Registration Disabled"}
+                            </span>
+                        </div>
+
+                        {/* Metadata strip */}
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-y-3 gap-x-6 border-t border-slate-150/60 dark:border-slate-800/80 pt-4 mt-5 text-xs font-semibold text-slate-550 dark:text-slate-400">
+                            <div>
+                                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 block uppercase tracking-wider mb-0.5">Tenant Database</span>
+                                <span className="text-slate-800 dark:text-slate-250 font-extrabold">{profile.tenantDb}</span>
+                            </div>
+                            <div>
+                                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 block uppercase tracking-wider mb-0.5">Organization ID</span>
+                                <span className="text-slate-800 dark:text-slate-250 font-extrabold">#{profile.id}</span>
+                            </div>
+                            <div>
+                                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 block uppercase tracking-wider mb-0.5">Created On</span>
+                                <span className="text-slate-800 dark:text-slate-250 font-extrabold">{formatDate(profile.createdDate)}</span>
+                            </div>
+                        </div>
+
+                        {/* Site Message */}
+                        {profile.siteMessage && (
+                            <div className="mt-5 p-4 bg-blue-50/40 dark:bg-blue-950/10 border border-blue-100/50 dark:border-blue-900/20 rounded-2xl">
+                                <span className="text-[9px] font-black uppercase text-blue-600 dark:text-blue-400 block tracking-widest mb-1">Organization Message</span>
+                                <p className="text-sm font-semibold italic text-slate-750 dark:text-slate-350">
+                                    "{profile.siteMessage}"
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Information Grid Container */}
+            <div className="bg-white dark:bg-[#0f1117] border border-slate-200/60 dark:border-slate-800 rounded-[2rem] shadow-elegant overflow-hidden p-6 sm:p-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-8">
+                    
+                    {/* Left Column */}
+                    <div className="space-y-8">
+                        {/* Contact Information */}
+                        <div className="space-y-4">
+                            <div className="border-b border-slate-100 dark:border-slate-800/80 pb-2">
+                                <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 dark:text-slate-550">Contact Information</h3>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {/* Email */}
+                                <div className="flex items-start gap-3">
+                                    <div className="h-8 w-8 rounded-lg bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center shrink-0 text-blue-600 dark:text-blue-400">
+                                        <Mail className="h-4 w-4" />
+                                    </div>
+                                    <div>
+                                        <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Email</span>
+                                        <span className="text-sm font-semibold text-slate-800 dark:text-slate-200 break-all">{profile.email || "-"}</span>
+                                    </div>
+                                </div>
+                                {/* Phone */}
+                                <div className="flex items-start gap-3">
+                                    <div className="h-8 w-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/30 flex items-center justify-center shrink-0 text-indigo-650 dark:text-indigo-400">
+                                        <Phone className="h-4 w-4" />
+                                    </div>
+                                    <div>
+                                        <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Phone</span>
+                                        <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">{profile.contactNumber || "-"}</span>
+                                    </div>
+                                </div>
+                                {/* Website */}
+                                <div className="flex items-start gap-3 sm:col-span-2">
+                                    <div className="h-8 w-8 rounded-lg bg-purple-50 dark:bg-purple-950/30 flex items-center justify-center shrink-0 text-purple-600 dark:text-purple-400">
+                                        <Globe className="h-4 w-4" />
                                     </div>
                                     <div className="min-w-0">
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">{item.label}</p>
-                                        {isEditing ? (
-                                            <Input defaultValue={item.value} className="h-8 text-sm font-bold bg-slate-50 border-none px-0" />
+                                        <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Website</span>
+                                        {profile.website ? (
+                                            <a 
+                                                href={profile.website.startsWith("http") ? profile.website : `https://${profile.website}`} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer" 
+                                                className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 break-all"
+                                            >
+                                                {profile.website}
+                                                <ExternalLink className="h-3 w-3 shrink-0" />
+                                            </a>
                                         ) : (
-                                            <p className={cn("text-sm font-bold text-slate-900 dark:text-white truncate", item.link && "text-blue-600 cursor-pointer flex items-center gap-1 hover:underline")}>
-                                                {item.value}
-                                                {item.link && <ExternalLink className="h-3 w-3" />}
-                                            </p>
+                                            <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">-</span>
                                         )}
                                     </div>
                                 </div>
-                            ))}
-                        </CardContent>
-                    </Card>
-
-                    <Card className="border-none shadow-xl bg-gradient-to-br from-slate-900 to-black text-white rounded-[2rem] overflow-hidden">
-                        <CardContent className="p-8">
-                            <div className="flex items-center gap-3 mb-6">
-                                <Award className="h-6 w-6 text-amber-500" />
-                                <h3 className="font-black text-lg uppercase tracking-tight">Accreditations</h3>
-                            </div>
-                            <div className="space-y-4">
-                                {[
-                                    { name: "CBSE Board", status: "Active", year: "2030" },
-                                    { name: "ISO 9001:2015", status: "Certified", year: "2026" },
-                                    { name: "Global Excellence", status: "Gold Tier", year: "2025" },
-                                ].map((acc, i) => (
-                                    <div key={i} className="bg-white/5 p-4 rounded-2xl border border-white/5 flex items-center justify-between group hover:bg-white/10 transition-all cursor-default">
-                                        <div>
-                                            <p className="text-sm font-bold">{acc.name}</p>
-                                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Valid until {acc.year}</p>
-                                        </div>
-                                        <ShieldCheck className="h-5 w-5 text-emerald-500" />
-                                    </div>
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-
-                {/* Right Column: Detailed Info & Stats */}
-                <div className="lg:col-span-2 space-y-8">
-                    <Card className="border-none shadow-xl bg-white dark:bg-[#0f1117] rounded-[2rem] overflow-hidden">
-                        <CardHeader className="p-8 border-b border-slate-100 dark:border-white/5 flex flex-row items-center justify-between">
-                            <div>
-                                <CardTitle className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Organization Profile</CardTitle>
-                                <p className="text-sm font-medium text-slate-500">Manage institutional biographic data and vision statements.</p>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="p-8 space-y-8">
-                            <div className="space-y-3">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">About the Institution</label>
-                                {isEditing ? (
-                                    <textarea 
-                                        className="w-full min-h-[160px] p-6 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 font-medium focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
-                                        defaultValue="St. Xavier's International has been a pioneer in quality education since 1994. Our mission is to nurture future leaders through holistic development and cutting-edge academic methodologies. With a focus on both traditional values and modern technology, we provide an environment where every student can excel."
-                                    />
-                                ) : (
-                                    <div className="p-6 rounded-3xl bg-slate-50/50 dark:bg-white/5 border border-slate-100 dark:border-white/5">
-                                        <p className="text-slate-700 dark:text-white leading-relaxed font-medium">
-                                            St. Xavier's International has been a pioneer in quality education since 1994. Our mission is to nurture future leaders through holistic development and cutting-edge academic methodologies. With a focus on both traditional values and modern technology, we provide an environment where every student can excel.
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-3 ml-1">
-                                        <div className="h-2 w-2 rounded-full bg-blue-500" />
-                                        <h4 className="text-xs font-black uppercase tracking-widest text-slate-500">Institutional Stats</h4>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-2xl text-center">
-                                            <p className="text-2xl font-black text-blue-600">3.4k</p>
-                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Alumni</p>
-                                        </div>
-                                        <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-2xl text-center">
-                                            <p className="text-2xl font-black text-indigo-600">120+</p>
-                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Classrooms</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-3 ml-1">
-                                        <div className="h-2 w-2 rounded-full bg-blue-500" />
-                                        <h4 className="text-xs font-black uppercase tracking-widest text-slate-500">Reach Index</h4>
-                                    </div>
-                                    <div className="bg-blue-600/5 dark:bg-blue-600/10 p-4 rounded-2xl flex items-center justify-between border border-blue-600/10">
-                                        <div className="flex items-center gap-3">
-                                            <div className="h-10 w-10 rounded-xl bg-blue-600 flex items-center justify-center text-white">
-                                                <Users className="h-5 w-5" />
-                                            </div>
-                                            <div>
-                                                <p className="text-xs font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">Global Rank</p>
-                                                <p className="font-black text-slate-900 dark:text-white">#12 in Region</p>
-                                            </div>
-                                        </div>
-                                        <TrendingUp className="h-5 w-5 text-emerald-500" />
-                                    </div>
-                                </div>
-                            </div>
-                        </CardContent>
-                        <div className="px-8 py-6 bg-slate-50 dark:bg-white/5 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Profile completeness: 95%</p>
-                            <div className="w-48 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                                <div className="h-full w-[95%] bg-emerald-500" />
                             </div>
                         </div>
-                    </Card>
+
+                        {/* Location */}
+                        <div className="space-y-4">
+                            <div className="border-b border-slate-100 dark:border-slate-800/80 pb-2">
+                                <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 dark:text-slate-550">Location</h3>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {/* Address */}
+                                <div className="flex items-start gap-3 sm:col-span-2">
+                                    <div className="h-8 w-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center shrink-0 text-emerald-600 dark:text-emerald-450">
+                                        <MapPin className="h-4 w-4" />
+                                    </div>
+                                    <div>
+                                        <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Address</span>
+                                        <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">{profile.address || "-"}</span>
+                                    </div>
+                                </div>
+                                {/* City */}
+                                <div className="flex items-start gap-3">
+                                    <div className="h-8 w-8 rounded-lg bg-emerald-50/60 dark:bg-emerald-950/20 flex items-center justify-center shrink-0 text-emerald-600 dark:text-emerald-450">
+                                        <MapPin className="h-4 w-4" />
+                                    </div>
+                                    <div>
+                                        <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">City</span>
+                                        <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">{profile.city || "-"}</span>
+                                    </div>
+                                </div>
+                                {/* State */}
+                                <div className="flex items-start gap-3">
+                                    <div className="h-8 w-8 rounded-lg bg-emerald-50/60 dark:bg-emerald-950/20 flex items-center justify-center shrink-0 text-emerald-600 dark:text-emerald-450">
+                                        <MapPin className="h-4 w-4" />
+                                    </div>
+                                    <div>
+                                        <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">State</span>
+                                        <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">{profile.state || "-"}</span>
+                                    </div>
+                                </div>
+                                {/* Country */}
+                                <div className="flex items-start gap-3">
+                                    <div className="h-8 w-8 rounded-lg bg-emerald-50/60 dark:bg-emerald-950/20 flex items-center justify-center shrink-0 text-emerald-600 dark:text-emerald-450">
+                                        <MapPin className="h-4 w-4" />
+                                    </div>
+                                    <div>
+                                        <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Country</span>
+                                        <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">{profile.country || "-"}</span>
+                                    </div>
+                                </div>
+                                {/* Postal Code */}
+                                <div className="flex items-start gap-3">
+                                    <div className="h-8 w-8 rounded-lg bg-emerald-50/60 dark:bg-emerald-950/20 flex items-center justify-center shrink-0 text-emerald-600 dark:text-emerald-450">
+                                        <MapPin className="h-4 w-4" />
+                                    </div>
+                                    <div>
+                                        <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Postal Code</span>
+                                        <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">{profile.postalCode || "-"}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Right Column */}
+                    <div className="space-y-8">
+                        {/* Organization Info */}
+                        <div className="space-y-4">
+                            <div className="border-b border-slate-100 dark:border-slate-800/80 pb-2">
+                                <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 dark:text-slate-550">Organization Information</h3>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {/* Type */}
+                                <div className="flex items-start gap-3">
+                                    <div className="h-8 w-8 rounded-lg bg-orange-50 dark:bg-orange-950/30 flex items-center justify-center shrink-0 text-orange-600 dark:text-orange-500">
+                                        <Building2 className="h-4 w-4" />
+                                    </div>
+                                    <div>
+                                        <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Type</span>
+                                        <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">{profile.organizationType || "-"}</span>
+                                    </div>
+                                </div>
+                                {/* Approx Students */}
+                                <div className="flex items-start gap-3">
+                                    <div className="h-8 w-8 rounded-lg bg-cyan-50 dark:bg-cyan-950/30 flex items-center justify-center shrink-0 text-cyan-600 dark:text-cyan-400">
+                                        <Users className="h-4 w-4" />
+                                    </div>
+                                    <div>
+                                        <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Approx Students</span>
+                                        <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">{profile.approxStudentCount ?? 0}</span>
+                                    </div>
+                                </div>
+                                {/* Direct Student Registration */}
+                                <div className="flex items-start gap-3">
+                                    <div className="h-8 w-8 rounded-lg bg-pink-50 dark:bg-pink-950/30 flex items-center justify-center shrink-0 text-pink-650 dark:text-pink-400">
+                                        <Shield className="h-4 w-4" />
+                                    </div>
+                                    <div>
+                                        <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Direct Student Registration</span>
+                                        <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                                            {profile.directStudentAllow ? "Enabled" : "Disabled"}
+                                        </span>
+                                    </div>
+                                </div>
+                                {/* Onboarding Stage */}
+                                <div className="flex items-start gap-3">
+                                    <div className="h-8 w-8 rounded-lg bg-yellow-50 dark:bg-yellow-950/30 flex items-center justify-center shrink-0 text-yellow-605 dark:text-yellow-500">
+                                        <Calendar className="h-4 w-4" />
+                                    </div>
+                                    <div>
+                                        <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Onboarding Stage</span>
+                                        <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">{profile.onboardingStage ?? 0}</span>
+                                    </div>
+                                </div>
+                                {/* Last Updated */}
+                                <div className="flex items-start gap-3 sm:col-span-2">
+                                    <div className="h-8 w-8 rounded-lg bg-teal-50 dark:bg-teal-950/30 flex items-center justify-center shrink-0 text-teal-600 dark:text-teal-455">
+                                        <Calendar className="h-4 w-4" />
+                                    </div>
+                                    <div>
+                                        <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Last Updated</span>
+                                        <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">{formatDate(profile.lastModifiedDate)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Documents */}
+                        <div className="space-y-4">
+                            <div className="border-b border-slate-100 dark:border-slate-800/80 pb-2">
+                                <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 dark:text-slate-550">Uploaded Documents</h3>
+                            </div>
+                            
+                            {!profile.documentUrl ? (
+                                <div className="flex flex-col items-center justify-center py-4 text-center bg-slate-50/30 dark:bg-slate-950/10 border border-dashed border-slate-200 dark:border-slate-850 rounded-2xl p-4">
+                                    <span className="text-xl mb-1">📄</span>
+                                    <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-450">
+                                        No documents uploaded.
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 border border-slate-150/60 dark:border-slate-800/60 bg-slate-50/30 dark:bg-slate-950/10 rounded-2xl gap-3">
+                                    <div className="flex items-center gap-2.5 min-w-0">
+                                        <div className="h-9 w-9 rounded-xl bg-red-50 dark:bg-red-950/20 flex items-center justify-center border border-red-100 dark:border-red-900/40 text-red-500 shrink-0">
+                                            <FileText className="h-5 w-5" />
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="text-xs font-extrabold text-slate-800 dark:text-slate-200 truncate">
+                                                {getDocumentName(profile.documentUrl)}
+                                            </p>
+                                            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">PDF Document</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                                        <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() => window.open(getFullUrl(profile.documentUrl), "_blank")}
+                                            className="h-8 px-2.5 rounded-lg text-xs font-bold text-slate-650 hover:bg-slate-100 dark:hover:bg-slate-800 gap-1 dark:text-slate-350"
+                                            title="View in new tab"
+                                        >
+                                            <ExternalLink className="h-3.5 w-3.5" />
+                                            View
+                                        </Button>
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => handleDownloadDoc(profile.documentUrl!)}
+                                            className="h-8 px-3 rounded-lg border-slate-250 dark:border-slate-850 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800 gap-1.5 shadow-sm"
+                                        >
+                                            <Download className="h-3.5 w-3.5" />
+                                            Download
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
     );
 };
-
-const Card = ({ children, className }: { children: React.ReactNode; className?: string }) => (
-    <div className={cn("bg-white rounded-lg border", className)}>{children}</div>
-);
-
-const CardHeader = ({ children, className }: { children: React.ReactNode; className?: string }) => (
-    <div className={cn("p-4", className)}>{children}</div>
-);
-
-const CardTitle = ({ children, className }: { children: React.ReactNode; className?: string }) => (
-    <h3 className={cn("text-lg font-semibold", className)}>{children}</h3>
-);
-
-const CardContent = ({ children, className }: { children: React.ReactNode; className?: string }) => (
-    <div className={cn("p-4", className)}>{children}</div>
-);
-
-const TrendingUp = ({ className }: { className?: string }) => (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-        <polyline points="17 6 23 6 23 12" />
-    </svg>
-);

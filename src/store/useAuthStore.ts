@@ -16,16 +16,16 @@ export interface StudentSession {
 
 const getTenantFromHostname = () => {
   const hostname = window.location.hostname;
-  if (hostname === "localhost" || hostname === "127.0.0.1" || /^(\d{1,3}\.){3}\d{1,3}$/.test(hostname)) {
-    return null;
-  }
-  const parts = hostname.split('.');
-  if (parts.length > 2) {
-    const subdomain = parts[0].toLowerCase();
-    if (subdomain !== "www" && subdomain !== "nervous-dubinsky" && subdomain !== "charming-bohr") {
-      return subdomain;
-    }
-  }
+  // if (hostname === "localhost" || hostname === "127.0.0.1" || /^(\d{1,3}\.){3}\d{1,3}$/.test(hostname)) {
+  //   return null;
+  // }
+  // const parts = hostname.split('.');
+  // if (parts.length > 0) {
+  //   const subdomain = parts[0].toLowerCase();
+  //   if (subdomain !== "www" && subdomain !== "nervous-dubinsky" && subdomain !== "charming-bohr") {
+  //     return subdomain;
+  //   }
+  // }
   return null;
 };
 
@@ -41,9 +41,9 @@ interface AuthState {
   tenantLoading: boolean;
   tenantError: string | null;
   studentSession: StudentSession | null;
-  
+
   login: (email: string, password: string, tenantName?: string | null) => Promise<void>;
-  logout: () => void;
+  logout: () => string;
   registerStudent: (payload: any) => Promise<{ success: boolean, message?: string, error?: any }>;
   registerCounsellor: (firstName: string, lastName: string, email: string, password: string, dateOfBirth: string, grade: string, phone: string, role: string) => Promise<void>;
   registerSchool: (payload: any) => Promise<{ success: boolean, message?: string, error?: any }>;
@@ -123,8 +123,8 @@ export const useAuthStore = create<AuthState>(
         // Resolve tenant dynamically: URL -> hostname -> localStorage -> default to null (superadmin default login)
         const resolvedTenant = routeTenant || getTenantFromHostname() || storedTenant || null;
 
-        const payload: any = { 
-          email, 
+        const payload: any = {
+          email,
           password,
           tenant: resolvedTenant
         };
@@ -143,7 +143,7 @@ export const useAuthStore = create<AuthState>(
         } catch (orgErr) {
           firstError = orgErr;
           console.warn("Login failed on the primary/org API, attempting fallback to the old API...", orgErr);
-          
+
           // Attempt 2: Try the fallback/old URL (charming-bohr)
           try {
             const res = await api.post<LoginResponse>("/Auth/login", payload, {
@@ -162,8 +162,20 @@ export const useAuthStore = create<AuthState>(
         if (loginSuccess && responseData) {
           const { access_Token, user, permissions = [] } = responseData.data;
           const tenant = responseData.data.tenant || resolvedTenant;
-          const loginUrl = responseData.data.loginUrl || `/login/${tenant}`;
-          
+          const rawLoginUrl = responseData.data.loginUrl || `/login/${tenant}`;
+          let loginUrl = rawLoginUrl;
+          if (loginUrl.includes("{tenantDb}") && tenant && tenant !== "{tenantDb}") {
+            loginUrl = loginUrl.replace("{tenantDb}", tenant);
+          }
+          if (loginUrl.startsWith("http")) {
+            try {
+              const parsedUrl = new URL(loginUrl);
+              loginUrl = parsedUrl.pathname;
+            } catch {
+              loginUrl = tenant ? `/login/${tenant}` : "/login";
+            }
+          }
+
           let organizationId = "";
           const storedTenantData = localStorage.getItem("organizationData");
           if (storedTenantData) {
@@ -284,9 +296,10 @@ export const useAuthStore = create<AuthState>(
       try {
         const response = await api.post("Organization/register", formData, {
           headers: {
-            "Content-Type": "multipart/form-data",
+            "Content-Type": undefined,
           },
-        });
+          skipToast: true,
+        } as any);
         if (response.data.code === 201 || response.status === 201 || response.data.success === true) {
           return {
             success: true,
@@ -303,23 +316,56 @@ export const useAuthStore = create<AuthState>(
     },
 
     logout: () => {
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("auth_token");
-      localStorage.removeItem("userData");
-      localStorage.removeItem("user_data");
-      localStorage.removeItem("user_permissions");
-      localStorage.removeItem("roleId");
-      localStorage.removeItem("userId");
-      localStorage.removeItem("role");
-      localStorage.removeItem("tenantName");
-      localStorage.removeItem("loginUrl");
-      localStorage.removeItem("organizationId");
-      localStorage.removeItem("organizationData");
-      localStorage.removeItem("studentSession");
-      localStorage.removeItem("studentId");
-      localStorage.removeItem("gradeId");
-      localStorage.removeItem("grade");
-      set({ user: null, token: null, permissions: [], studentSession: null, isAuthenticated: false, tenantData: null });
+      // 1. Retrieve tenant and loginUrl before clearing
+      const user = get().user;
+      let tenant = localStorage.getItem("tenantName") || get().studentSession?.tenant || "";
+      let loginUrl = localStorage.getItem("loginUrl") || "";
+      
+      if (tenant === "{tenantDb}" || tenant === "%7BtenantDb%7D") {
+        tenant = "";
+      }
+
+      if (loginUrl.includes("{tenantDb}") && tenant) {
+        loginUrl = loginUrl.replace("{tenantDb}", tenant);
+      }
+
+      if (loginUrl.startsWith("http")) {
+        try {
+          const parsedUrl = new URL(loginUrl);
+          loginUrl = parsedUrl.pathname;
+        } catch {
+          loginUrl = "";
+        }
+      }
+      
+      const isSuperAdmin = user?.role === "SuperAdmin" || user?.role === "Admin" || localStorage.getItem("role") === "SuperAdmin" || localStorage.getItem("role") === "Admin";
+      
+      if (isSuperAdmin) {
+        loginUrl = "/login";
+      } else if (tenant && (!loginUrl || loginUrl === "/login" || loginUrl.includes("{tenantDb}"))) {
+        loginUrl = `/login/${tenant}`;
+      } else if (!loginUrl) {
+        loginUrl = "/login";
+      }
+
+      // 2. Clear session/localStorage
+      sessionStorage.clear();
+      localStorage.clear();
+
+      // 3. Store temporary redirect key so route guards know where to send the user
+      localStorage.setItem("logoutRedirectUrl", loginUrl);
+
+      // 4. Update Zustand state
+      set({ 
+        user: null, 
+        token: null, 
+        permissions: [], 
+        studentSession: null, 
+        isAuthenticated: false, 
+        tenantData: null 
+      });
+
+      return loginUrl;
     },
 
     fetchTenantDetails: async (tenantName: string) => {

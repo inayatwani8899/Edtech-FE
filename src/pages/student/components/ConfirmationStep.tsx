@@ -1,11 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
-    Play, BrainCircuit, Eye, Sparkles,
-    Fingerprint, ArrowLeft, Loader2, ShieldCheck, CameraOff,
-    Focus, MessageSquare, Zap, ArrowRight
+    Eye,
+    Smile,
+    RefreshCw,
+    Brain,
+    Camera,
+    CameraOff,
+    CheckCircle2,
+    AlertTriangle,
+    ArrowLeft,
+    Play,
+    Loader2
 } from "lucide-react";
-
+import { cn } from "@/lib/utils";
 
 interface TestData {
     title: string;
@@ -33,144 +41,276 @@ export const ConfirmationStep = ({
 }: ConfirmationStepProps) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [streamError, setStreamError] = useState(false);
+    const [calibrationProgress, setCalibrationProgress] = useState(15);
+    const [isCalibrated, setIsCalibrated] = useState(false);
+    const [pupilCoords, setPupilCoords] = useState({ x: 142.4, y: 89.2 });
 
+    // Status indicators
+    const [statusIndicators, setStatusIndicators] = useState({
+        cameraConnected: "loading",
+        faceDetected: "loading",
+        gazeStable: "loading",
+        environmentOk: "loading",
+    });
+
+    // Handle pupil shifting animation
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setPupilCoords({
+                x: parseFloat((140 + Math.random() * 8).toFixed(1)),
+                y: parseFloat((85 + Math.random() * 6).toFixed(1))
+            });
+        }, 450);
+        return () => clearInterval(interval);
+    }, []);
+
+    // Camera initializer
     useEffect(() => {
         async function enableCamera() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { width: 160, height: 160, facingMode: "user" }
+                    video: { width: 640, height: 480, facingMode: "user" }
                 });
                 if (mediaStreamRef) mediaStreamRef.current = stream;
                 if (videoRef.current) videoRef.current.srcObject = stream;
+                
+                setStatusIndicators(prev => ({ 
+                    ...prev, 
+                    cameraConnected: "success",
+                    environmentOk: "success"
+                }));
             } catch (err) {
+                console.error("Camera loading failed:", err);
                 setStreamError(true);
+                setStatusIndicators({
+                    cameraConnected: "error",
+                    faceDetected: "error",
+                    gazeStable: "error",
+                    environmentOk: "error"
+                });
             }
         }
         enableCamera();
+        
         return () => {
-            // We NO LONGER stop tracks here because the parent (useTestLogic) 
-            // manages the stream lifecycle and will stop it when the test completes
             if (videoRef.current) videoRef.current.srcObject = null;
         };
     }, [mediaStreamRef]);
 
+    // Calibration simulation
+    useEffect(() => {
+        if (streamError) return;
+
+        const interval = setInterval(() => {
+            setCalibrationProgress(prev => {
+                const next = prev + Math.floor(Math.random() * 10) + 6;
+                if (next >= 100) {
+                    clearInterval(interval);
+                    setIsCalibrated(true);
+                    setStatusIndicators({
+                        cameraConnected: "success",
+                        faceDetected: "success",
+                        gazeStable: "success",
+                        environmentOk: "success"
+                    });
+                    return 100;
+                }
+                
+                if (next > 70) {
+                    setStatusIndicators(p => ({ ...p, faceDetected: "success", gazeStable: "success" }));
+                } else if (next > 35) {
+                    setStatusIndicators(p => ({ ...p, faceDetected: "success" }));
+                }
+                return next;
+            });
+        }, 500);
+
+        return () => clearInterval(interval);
+    }, [streamError]);
+
     return (
-        <div className="h-screen w-full bg-slate-50 flex flex-col items-center justify-center p-2 md:p-4 overflow-hidden">
-
-            <div className="w-full max-w-5xl bg-white rounded-3xl border border-slate-200 shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
-
-
-                {/* Header - Minimal height to ensure visibility of footer */}
-                {/* Header - Stacks camera on mobile if needed or keeps it compact */}
-                <div className="bg-slate-900 px-5 md:px-6 py-4 text-white flex flex-row items-center justify-between shrink-0 gap-4">
-                    <div className="flex flex-col min-w-0">
-                        <span className="text-blue-400 text-[8px] md:text-[9px] font-black uppercase tracking-widest font-sans opacity-70">Module 03 // Biometric Setup</span>
-                        <h1 className="text-lg md:text-2xl font-black tracking-tight font-sans leading-tight">
-                            Psychometric <br className="block md:hidden" /> Validation
-                        </h1>
+        <div className="min-h-screen w-full bg-[#F8FAFC] flex flex-col items-center justify-between p-4 md:p-6 font-sans">
+            <div className="w-full max-w-4xl bg-white rounded-[12px] border border-[#E5E7EB] shadow-sm overflow-hidden flex flex-col flex-1">
+                
+                {/* 1. Header */}
+                <div className="border-b border-[#E5E7EB] p-4 md:p-5 flex items-center justify-between shrink-0">
+                    <div className="space-y-0.5">
+                        <h1 className="text-[20px] md:text-[24px] font-bold text-[#111827] tracking-tight">Biometric Setup</h1>
+                        <p className="text-[13px] md:text-[14px] font-medium text-[#6B7280]">Psychometric Validation</p>
                     </div>
--
-                    {/* Camera Preview - Compact */}
-                    <div className="relative shrink-0">
-                        <div className="w-14 h-14 md:w-20 md:h-20 rounded-xl border border-white/10 overflow-hidden bg-slate-800 relative flex items-center justify-center">
-                            {streamError ? (
-                                <CameraOff className="w-4 h-4 md:w-5 md:h-5 text-red-500/50" />
-                            ) : (
-                                <>
-                                    <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover scale-x-[-1]" />
-                                    <div className="absolute inset-0 w-full h-0.5 bg-emerald-400/20 opacity-30 animate-[scan_2.5s_linear_infinite]" />
-                                </>
-                            )}
-                        </div>
+                    <div className="bg-[#EEF2F6] px-3 py-1 rounded-[8px] flex items-center gap-1.5 shrink-0">
+                        <div className={cn("h-2 w-2 rounded-full", isCalibrated ? "bg-[#22C55E]" : "bg-[#F59E0B] animate-pulse")} />
+                        <span className="text-[12px] font-semibold text-[#111827]">
+                            {isCalibrated ? "Ready to Start" : `Calibrating: ${calibrationProgress}%`}
+                        </span>
                     </div>
                 </div>
 
-                {/* Content - Compacted for visibility */}
-                <div className="p-5 flex-1 space-y-5 flex flex-col justify-center overflow-hidden">
-
-                    {/* Status Grid */}
-                    {/* Status Grid - Partial wrap on mobile */}
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                        <FeatureBadge icon={<Eye className="w-4 h-4" />} label="Gaze" data="Live Sync" />
-                        <FeatureBadge icon={<MessageSquare className="w-4 h-4" />} label="Sentiment" data="Calibrated" />
-                        <FeatureBadge icon={<Sparkles className="w-4 h-4 md:hidden lg:block" />} label="Logic" data="Monitoring" className="col-span-2 md:col-span-1" />
+                {/* 2. Content */}
+                <div className="p-4 md:p-6 flex-1 overflow-y-auto space-y-6">
+                    
+                    {/* Monitoring Cards (4 equal cards, height 120px, rounded-16px, padding 18px) */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <MonitoringCard
+                            icon={<Eye className="w-5 h-5 text-[#4F46E5]" />}
+                            title="Gaze Tracking"
+                            status={statusIndicators.gazeStable === "success" ? "Ready" : "Syncing..."}
+                            statusColor={statusIndicators.gazeStable === "success" ? "success" : "warning"}
+                            desc="Maintain eye contact"
+                        />
+                        <MonitoringCard
+                            icon={<Smile className="w-5 h-5 text-[#4F46E5]" />}
+                            title="Sentiment"
+                            status={statusIndicators.faceDetected === "success" ? "Ready" : "Calibrating..."}
+                            statusColor={statusIndicators.faceDetected === "success" ? "success" : "warning"}
+                            desc="Face detected"
+                        />
+                        <MonitoringCard
+                            icon={<RefreshCw className="w-5 h-5 text-[#4F46E5] animate-spin" />}
+                            title="Live Sync"
+                            status={statusIndicators.cameraConnected === "success" ? "Active" : "Offline"}
+                            statusColor={statusIndicators.cameraConnected === "success" ? "success" : "error"}
+                            desc="Camera synchronized"
+                        />
+                        <MonitoringCard
+                            icon={<Brain className="w-5 h-5 text-[#4F46E5]" />}
+                            title="Validation"
+                            status={isCalibrated ? "Complete" : "Analyzing..."}
+                            statusColor={isCalibrated ? "success" : "warning"}
+                            desc="Environment calibrated"
+                        />
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-4">
-                        {/* Essential Protocol */}
-                        <div className="space-y-2">
-                            <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-1">
-                                Validation Checks
-                            </h3>
-                            <div className="space-y-2">
-                                <ProtocolItem title="Maintain Gaze" desc="Focus on the interface." icon={<Focus className="w-3.5 h-3.5" />} />
-                                <ProtocolItem title="Environmental Link" desc="Active background scan." icon={<Zap className="w-3.5 h-3.5" />} />
+                    {/* Camera Preview Card (600px width, 350px height, rounded 20px, soft shadow) */}
+                    <div className="w-full max-w-[600px] h-[350px] rounded-[20px] overflow-hidden bg-slate-900 border border-[#E5E7EB] shadow-sm relative mx-auto flex items-center justify-center">
+                        {streamError ? (
+                            <div className="text-center p-6 space-y-3">
+                                <div className="h-10 w-10 rounded-[12px] bg-rose-500/10 border border-rose-500/20 text-rose-500 flex items-center justify-center mx-auto">
+                                    <CameraOff className="w-5 h-5" />
+                                </div>
+                                <p className="text-[13px] font-bold text-white">Camera Connection Failed</p>
+                                <p className="text-[12px] text-slate-400 max-w-[200px] mx-auto leading-relaxed">
+                                    Please allow camera permissions in your browser.
+                                </p>
                             </div>
-                        </div>
+                        ) : (
+                            <>
+                                <video 
+                                    ref={videoRef} 
+                                    autoPlay 
+                                    playsInline 
+                                    muted 
+                                    className="w-full h-full object-cover scale-x-[-1]" 
+                                />
+                                
+                                {/* HUD Laser Overlay */}
+                                <div className="absolute inset-4 rounded-[12px] border border-dashed border-indigo-400/20 pointer-events-none flex items-center justify-center">
+                                    <div className="absolute top-0 left-0 right-0 h-0.5 bg-indigo-500/20 shadow-[0_0_8px_rgba(99,102,241,0.4)] animate-[sweep_3s_linear_infinite]" />
+                                    
+                                    <div className={cn(
+                                        "w-28 h-28 border rounded-full border-dashed border-indigo-500/30 flex items-center justify-center transition-all",
+                                        isCalibrated && "border-[#22C55E]/40"
+                                    )}>
+                                        <span className="text-[10px] font-mono text-indigo-400/80 uppercase tracking-widest animate-pulse">
+                                            {isCalibrated ? "SYNCED" : "ALIGN FACE"}
+                                        </span>
+                                    </div>
+                                    
+                                    {/* Bottom telemetry overlay */}
+                                    <div className="absolute bottom-2 left-2 right-2 flex justify-between text-[10px] font-mono text-slate-400 bg-slate-950/80 px-2.5 py-1 rounded-[6px] backdrop-blur-sm border border-white/5 pointer-events-auto">
+                                        <span className="flex items-center gap-1">
+                                            <span className="h-1.5 w-1.5 bg-[#22C55E] rounded-full animate-ping" />
+                                            Focal: X:{pupilCoords.x} Y:{pupilCoords.y}
+                                        </span>
+                                        <span>Proctor Core: Active</span>
+                                    </div>
+                                </div>
+                            </>
+                        )}
+                    </div>
 
-                        {/* Note */}
-                        <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 flex flex-col justify-center text-center">
-                            <BrainCircuit className="w-5 h-5 text-blue-600 mb-2 mx-auto opacity-50" />
-                            <h4 className="text-[10px] font-black text-slate-800 mb-0.5">Note</h4>
-                            <p className="text-[10px] text-slate-500 leading-tight">
-                                "Minimum movement recommended for calibration."
-                            </p>
-                        </div>
+                    {/* Validation Checks Checklist */}
+                    <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[13px] text-[#6B7280] font-semibold mt-3 max-w-xl mx-auto border-t border-[#E5E7EB] pt-4">
+                        <CheckItem checked={statusIndicators.faceDetected === "success"} label="Face Detected" />
+                        <CheckItem checked={isCalibrated} label="Lighting Good" />
+                        <CheckItem checked={statusIndicators.gazeStable === "success"} label="Looking at Screen" />
+                        <CheckItem checked={isCalibrated} label="Background Stable" />
+                        <CheckItem checked={statusIndicators.cameraConnected === "success"} label="Camera Permission Granted" />
                     </div>
                 </div>
 
-                {/* Footer - Crucial Buttons */}
-                {/* Footer - Crucial Buttons */}
-                <div className="px-5 md:px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between shrink-0 gap-3 font-sans">
-                    <Button onClick={onBack} variant="ghost" className="text-slate-500 text-[10px] h-10 px-4 font-black hover:bg-slate-200 transition-all rounded-lg">
-                        <ArrowLeft className="w-3.5 h-3.5 mr-2" />
+                {/* 3. Footer */}
+                <div className="border-t border-[#E5E7EB] bg-[#F8FAFC] p-4 flex items-center justify-between shrink-0">
+                    <Button 
+                        onClick={onBack} 
+                        variant="ghost" 
+                        className="text-[#6B7280] hover:text-[#111827] text-[13px] font-semibold h-[42px] px-4 rounded-[12px] flex items-center gap-1.5"
+                    >
+                        <ArrowLeft className="w-4 h-4" />
                         PREV
                     </Button>
-
+                    
                     <Button
                         onClick={onStart}
-                        disabled={isLoading || streamError}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 md:px-8 h-11 text-[10px] font-black rounded-lg shadow-lg shadow-blue-200 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2"
+                        disabled={isLoading || streamError || !isCalibrated}
+                        className="bg-[#4F46E5] hover:bg-[#4338CA] text-white px-8 h-[46px] text-[13px] font-semibold rounded-[12px] shadow-sm transition-all flex items-center gap-1.5 active:scale-[0.98] disabled:opacity-40"
                     >
-                        START TEST
-                        <ArrowRight className="w-3.5 h-3.5" />
+                        {isLoading ? (
+                            <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Launching...
+                            </>
+                        ) : (
+                            <>
+                                START TEST
+                                <Play className="w-4 h-4" />
+                            </>
+                        )}
                     </Button>
                 </div>
+
             </div>
 
-
-
-
             <style>{`
-                @keyframes scan { 0% { top: 0%; } 100% { top: 100%; } }
+                @keyframes sweep {
+                    0% { transform: translateY(0); opacity: 0.1; }
+                    50% { transform: translateY(280px); opacity: 0.8; }
+                    100% { transform: translateY(0); opacity: 0.1; }
+                }
             `}</style>
         </div>
     );
 };
 
-
-const FeatureBadge = ({ icon, label, data }: any) => (
-
-    <div className="bg-slate-50 border border-slate-100 p-4 rounded-2xl text-center group hover:bg-slate-100 transition-colors">
-        <div className="flex justify-center mb-2 text-blue-600 group-hover:scale-110 transition-transform">{icon}</div>
-        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{label}</p>
-        <p className="text-sm font-black text-slate-800">{data}</p>
-    </div>
-);
-
-
-
-
-const ProtocolItem = ({ title, desc, icon }: any) => (
-    <div className="flex items-center gap-4 p-4 rounded-2xl bg-white border border-slate-100 hover:border-blue-200 transition-all group">
-        <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 border border-slate-100 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all">
-            {icon}
+const MonitoringCard = ({ icon, title, status, statusColor, desc }: { icon: React.ReactNode; title: string; status: string; statusColor: "success" | "warning" | "error"; desc: string }) => (
+    <div className="h-[120px] rounded-[16px] p-[18px] bg-white border border-[#E5E7EB] flex flex-col justify-between hover:shadow-sm transition-shadow">
+        <div className="flex items-center justify-between">
+            <div className="w-8 h-8 rounded-[8px] bg-[#F8FAFC] flex items-center justify-center border border-[#E5E7EB]">
+                {icon}
+            </div>
+            <span className={cn(
+                "text-[11px] font-bold px-2 py-0.5 rounded-[6px]",
+                statusColor === "success" && "bg-[#DCFCE7] text-[#166534]",
+                statusColor === "warning" && "bg-[#FEF3C7] text-[#92400E] animate-pulse",
+                statusColor === "error" && "bg-[#FEE2E2] text-[#991B1B]"
+            )}>
+                {status}
+            </span>
         </div>
-        <div className="flex flex-col">
-            <span className="text-sm font-black text-slate-800 mb-0.5">{title}</span>
-            <span className="text-[11px] text-slate-500 leading-tight font-medium">{desc}</span>
+        <div className="space-y-0.5">
+            <span className="text-[13px] font-bold text-[#111827] block leading-none">{title}</span>
+            <span className="text-[12px] text-[#6B7280] leading-none block">{desc}</span>
         </div>
     </div>
 );
 
-
+const CheckItem = ({ checked, label }: { checked: boolean; label: string }) => (
+    <div className="flex items-center gap-1.5">
+        {checked ? (
+            <CheckCircle2 className="w-4.5 h-4.5 text-[#22C55E] fill-[#22C55E]/10" />
+        ) : (
+            <AlertTriangle className="w-4.5 h-4.5 text-[#F59E0B] fill-[#F59E0B]/10 animate-pulse" />
+        )}
+        <span className={cn(checked ? "text-[#111827]" : "text-[#6B7280]")}>{label}</span>
+    </div>
+);

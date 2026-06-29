@@ -40,16 +40,16 @@ const schoolMenuItems = [
     { title: "Dashboard", url: "/school/dashboard", icon: LayoutDashboard, color: "text-blue-500" },
     { title: "Manage Students", url: "/school/students", icon: GraduationCap, color: "text-indigo-500" },
     { title: "Manage Staff", url: "/school/staff", icon: UserSquare2, color: "text-emerald-500" },
-    { title: "Class Sections", url: "/school/classes", icon: Layers, color: "text-orange-500" },
-    { title: "Academic Calendar", url: "/school/calendar", icon: Calendar, color: "text-amber-500" },
-    { title: "Assessments", url: "/school/assessments", icon: ClipboardCheck, color: "text-purple-500" },
-    { title: "Reports & Analytics", url: "/school/reports", icon: FileText, color: "text-rose-500" },
+    // { title: "Class Sections", url: "/school/classes", icon: Layers, color: "text-orange-500" },
+    // { title: "Academic Calendar", url: "/school/calendar", icon: Calendar, color: "text-amber-500" },
+    // { title: "Assessments", url: "/school/assessments", icon: ClipboardCheck, color: "text-purple-500" },
+    // { title: "Reports & Analytics", url: "/school/reports", icon: FileText, color: "text-rose-500" },
 ];
 
 const organizationItems = [
-    { title: "Financials", url: "/school/finance", icon: Wallet, color: "text-cyan-500" },
-    { title: "Announcements", url: "/school/announcements", icon: Bell, color: "text-yellow-500" },
-    { title: "Messages", url: "/school/messages", icon: MessageSquare, color: "text-sky-500" },
+    // { title: "Financials", url: "/school/finance", icon: Wallet, color: "text-cyan-500" },
+    // { title: "Announcements", url: "/school/announcements", icon: Bell, color: "text-yellow-500" },
+    // { title: "Messages", url: "/school/messages", icon: MessageSquare, color: "text-sky-500" },
     { title: "School Profile", url: "/school/profile", icon: School, color: "text-indigo-500" },
     { title: "Settings", url: "/school/settings", icon: Settings, color: "text-slate-500" },
 ];
@@ -93,8 +93,8 @@ export function SchoolSidebar() {
             color: theme === 'dark' ? '#fff' : '#000',
         }).then((result) => {
             if (result.isConfirmed) {
-                logout();
-                navigate("/login");
+                const redirectUrl = logout();
+                navigate(redirectUrl);
             }
         });
     };
@@ -154,7 +154,7 @@ export function SchoolSidebar() {
                     )}
                 </div>
 
-                <div 
+                <div
                     className="flex-1 flex flex-col min-h-0 pt-0 px-0 overflow-y-auto scrollbar-none"
                     style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >

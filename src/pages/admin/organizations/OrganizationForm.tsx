@@ -80,7 +80,8 @@ const OrganizationForm: React.FC = () => {
     website: "",
     organizationType: "",
     approxStudentCount: 0,
-    contactPerson: "" // Visual-only field for executive feel
+    contactPerson: "", // Visual-only field for executive feel
+    siteMessage: ""
   });
 
   // Verification & mockup files
@@ -148,8 +149,16 @@ const OrganizationForm: React.FC = () => {
         website: organization.website || "",
         organizationType: organization.organizationType || "",
         approxStudentCount: organization.approxStudentCount || 0,
-        contactPerson: "System Administrator" // Default contact person placeholder
+        contactPerson: "System Administrator", // Default contact person placeholder
+        siteMessage: organization.siteMessage || ""
       });
+
+      if (organization.logoPath) {
+        const fullUrl = organization.logoPath.startsWith("http")
+          ? organization.logoPath
+          : `https://nervous-dubinsky.180-179-213-167.plesk.page${organization.logoPath}`;
+        setLogoPreview(fullUrl);
+      }
     }
   }, [organization, id]);
 
@@ -273,7 +282,8 @@ const OrganizationForm: React.FC = () => {
         formData.contactNumber !== (organization.contactNumber || "") ||
         formData.website !== (organization.website || "") ||
         formData.organizationType !== (organization.organizationType || "") ||
-        formData.approxStudentCount !== (organization.approxStudentCount || 0)
+        formData.approxStudentCount !== (organization.approxStudentCount || 0) ||
+        formData.siteMessage !== (organization.siteMessage || "")
       );
     } else {
       return (
@@ -500,19 +510,43 @@ const OrganizationForm: React.FC = () => {
 
     try {
       if (id) {
-        const updatePayload = {
-          instituteName: formData.instituteName,
-          address: formData.address,
-          city: formData.city,
-          state: formData.state,
-          country: formData.country,
-          postalCode: formData.postalCode,
-          email: formData.email,
-          contactNumber: formData.contactNumber,
-          website: formData.website,
-          organizationType: formData.organizationType,
-          approxStudentCount: formData.approxStudentCount
-        };
+        const updatePayload = new FormData();
+        updatePayload.append("Id", String(id));
+        updatePayload.append("id", String(id));
+        updatePayload.append("instituteName", formData.instituteName);
+        if (formData.password) {
+          updatePayload.append("Password", formData.password);
+        }
+        updatePayload.append("Address", formData.address);
+        updatePayload.append("City", formData.city);
+        updatePayload.append("State", formData.state);
+        updatePayload.append("Country", formData.country);
+        updatePayload.append("PostalCode", formData.postalCode);
+        updatePayload.append("email", formData.email);
+        updatePayload.append("ContactNumber", formData.contactNumber);
+        updatePayload.append("Website", formData.website || "");
+        updatePayload.append("OrganizationType", formData.organizationType);
+        updatePayload.append("approxStudentCount", String(formData.approxStudentCount || 0));
+        
+        updatePayload.append("siteMessage", formData.siteMessage || "");
+        updatePayload.append("SiteMessage", formData.siteMessage || "");
+
+        if (logoFile) {
+          updatePayload.append("logo", logoFile);
+          updatePayload.append("Logo", logoFile);
+          updatePayload.append("LogoFile", logoFile);
+          updatePayload.append("LogoPath", logoFile);
+          updatePayload.append("logoFile", logoFile);
+          updatePayload.append("logoPath", logoFile);
+        }
+
+        if (documentFile) {
+          updatePayload.append("Document", documentFile);
+          updatePayload.append("DocumentFile", documentFile);
+          updatePayload.append("document", documentFile);
+          updatePayload.append("documentFile", documentFile);
+        }
+
         await updateOrganization(id, updatePayload);
         toast.success("Organization profile updated successfully.");
       } else {
@@ -527,12 +561,33 @@ const OrganizationForm: React.FC = () => {
         formPayload.append("email", formData.email);
         formPayload.append("Password", formData.password);
         formPayload.append("ContactNumber", formData.contactNumber);
-        formPayload.append("Website", formData.website);
+        formPayload.append("Website", formData.website || "");
         formPayload.append("OrganizationType", formData.organizationType);
-        formPayload.append("approxStudentCount", String(formData.approxStudentCount));
+        formPayload.append("approxStudentCount", String(formData.approxStudentCount || 0));
+        
+        // Metadata/Config fields to match SchoolRegister.tsx API integration
+        formPayload.append("DocumentUrl", "");
+        formPayload.append("SiteMessage", formData.siteMessage || "");
+        formPayload.append("siteMessage", formData.siteMessage || "");
+        formPayload.append("Status", "Pending");
+        formPayload.append("OnboardingStage", "Submitted");
+        formPayload.append("IsVerified", "false");
+        formPayload.append("IsActive", "true");
 
         if (documentFile) {
           formPayload.append("Document", documentFile);
+          formPayload.append("DocumentFile", documentFile);
+          formPayload.append("document", documentFile);
+          formPayload.append("documentFile", documentFile);
+        }
+
+        if (logoFile) {
+          formPayload.append("LogoPath", logoFile);
+          formPayload.append("Logo", logoFile);
+          formPayload.append("LogoFile", logoFile);
+          formPayload.append("logo", logoFile);
+          formPayload.append("logoFile", logoFile);
+          formPayload.append("logoPath", logoFile);
         }
 
         await createOrganization(formPayload);
@@ -1131,14 +1186,13 @@ const OrganizationForm: React.FC = () => {
                               setLogoPreview(URL.createObjectURL(file));
                             }
                           }}
-                          onClick={() => logoInputRef.current?.click()}
-                          className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all duration-300 flex flex-col items-center justify-center min-h-[140px] ${
-                            isDragActiveLogo ? 'border-indigo-500 bg-indigo-500/5 scale-[0.99]' : 'border-slate-200 hover:border-slate-350 bg-slate-50/20 hover:bg-slate-50/60'
+                          onClick={() => !logoPreview && logoInputRef.current?.click()}
+                          className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all duration-300 flex flex-col items-center justify-center min-h-[160px] relative ${
+                            isDragActiveLogo 
+                              ? 'border-indigo-500 bg-indigo-500/5 scale-[0.99]' 
+                              : 'border-slate-200 hover:border-slate-350 bg-slate-50/20 hover:bg-slate-50/60'
                           }`}
                         >
-                          <Upload className={`h-8 w-8 mb-2 transition-transform duration-300 ${isDragActiveLogo ? 'scale-110 text-indigo-500' : 'text-slate-400'}`} />
-                          <span className="text-xs font-bold text-slate-700 block mb-1">Drag & drop logo asset, or browse</span>
-                          <span className="text-[10px] text-slate-400 font-medium block">PNG, JPG, SVG up to 2MB</span>
                           <input
                             type="file"
                             ref={logoInputRef}
@@ -1152,37 +1206,72 @@ const OrganizationForm: React.FC = () => {
                             accept="image/*"
                             className="hidden"
                           />
-                        </div>
 
-                        {/* File detail item */}
-                        {logoFile && (
-                          <div className="flex items-center gap-3 p-3 bg-white border border-slate-100 rounded-2xl shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
-                            {logoPreview ? (
-                              <img src={logoPreview} alt="Logo preview" className="h-10 w-10 object-contain rounded-lg border border-slate-100 bg-slate-50" />
-                            ) : (
-                              <div className="h-10 w-10 bg-indigo-50 text-indigo-500 rounded-lg flex items-center justify-center">
-                                <Building2 className="h-5 w-5" />
+                          {logoPreview ? (
+                            <div className="flex flex-col items-center space-y-3 w-full" onClick={(e) => e.stopPropagation()}>
+                              <img 
+                                src={logoPreview} 
+                                alt="Logo Preview" 
+                                className="h-16 w-16 object-contain rounded-xl border border-slate-100 bg-white p-1 shadow-sm"
+                              />
+                              <div className="text-center">
+                                <span className="text-xs font-bold text-slate-800 block truncate max-w-[200px]">
+                                  {logoFile ? logoFile.name : (organization?.logoPath ? "Current Logo" : "Uploaded Logo")}
+                                </span>
                               </div>
-                            )}
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs font-bold text-slate-800 truncate leading-none mb-1">{logoFile.name}</p>
-                              <p className="text-[10px] text-slate-400 font-semibold">Branding Asset • {(logoFile.size / 1024).toFixed(1)} KB</p>
+                              <div className="flex items-center gap-3">
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => logoInputRef.current?.click()}
+                                  className="h-8 px-3 rounded-lg text-[10px] font-bold uppercase tracking-wider"
+                                >
+                                  Change Logo
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setLogoFile(null);
+                                    setLogoPreview("");
+                                  }}
+                                  className="h-8 px-3 rounded-lg text-[10px] font-bold uppercase tracking-wider text-rose-500 hover:bg-rose-50"
+                                >
+                                  Remove Logo
+                                </Button>
+                              </div>
                             </div>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setLogoFile(null);
-                                setLogoPreview("");
-                              }}
-                              className="h-8 w-8 text-rose-500 hover:bg-rose-50 rounded-xl"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        )}
+                          ) : (
+                            <>
+                              <Upload className={`h-8 w-8 mb-2 transition-transform duration-300 ${isDragActiveLogo ? 'scale-110 text-indigo-500' : 'text-slate-400'}`} />
+                              <span className="text-xs font-bold text-slate-700 block mb-1">Upload Organization Logo</span>
+                              <span className="text-[10px] text-slate-400 font-medium block">PNG, JPG, SVG up to 2MB</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Welcome message field */}
+                      <div className="space-y-1.5 md:col-span-2">
+                        <div className="flex justify-between items-center px-1">
+                          <Label className="text-[10px] font-black text-slate-500 uppercase tracking-wide">Site Welcome Message (Optional)</Label>
+                          <span className="text-[9px] text-slate-450 text-slate-400 font-mono font-bold">{(formData.siteMessage || "").length} / 500</span>
+                        </div>
+                        <textarea
+                          name="siteMessage"
+                          value={formData.siteMessage || ""}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (val.length <= 500) {
+                              setFormData((prev) => ({ ...prev, siteMessage: val }));
+                            }
+                          }}
+                          placeholder="E.g., Welcome to the Delhi Public School Portal"
+                          rows={3}
+                          className="w-full p-3 bg-slate-50/50 border border-slate-200 focus:bg-white rounded-xl font-bold text-sm transition-all focus-visible:ring-2 focus-visible:ring-indigo-100 focus-visible:border-indigo-500 resize-none text-slate-800 placeholder:text-slate-300"
+                        />
                       </div>
 
                       {/* Onboarding Document Upload (Required on creation) */}
@@ -1375,14 +1464,18 @@ const OrganizationForm: React.FC = () => {
                         </div>
 
                         <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl md:col-span-2">
-                          <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest block mb-2">Documents Audited</span>
-                          <div className="space-y-1.5 text-xs text-slate-700">
-                            <div className="flex justify-between"><span className="font-medium text-slate-400">Branding Logo:</span> <span className="font-bold text-slate-800">{logoFile ? logoFile.name : "Not configured (Default layout)"}</span></div>
+                          <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest block mb-2">Portal Customization & Media</span>
+                          <div className="space-y-1.5 text-xs text-slate-700 text-left">
+                            <div className="flex justify-between"><span className="font-medium text-slate-400">Branding Logo:</span> <span className="font-bold text-slate-800">{logoFile ? logoFile.name : (organization?.logoPath ? "Preserve Existing Logo" : "Default Layout")}</span></div>
                             <div className="flex justify-between">
                               <span className="font-medium text-slate-400">Verification Cert:</span> 
                               <span className="font-bold text-slate-800">
                                 {id ? (organization?.documentUrl ? "Verification file verified" : "Not uploaded") : (documentFile ? documentFile.name : "Missing")}
                               </span>
+                            </div>
+                            <div className="flex flex-col mt-1.5">
+                              <span className="font-medium text-slate-400 mb-0.5">Welcome Message:</span>
+                              <p className="font-bold text-slate-800 bg-white/50 p-2 rounded-lg border border-slate-100">{formData.siteMessage || "Not configured"}</p>
                             </div>
                           </div>
                         </div>
