@@ -46,13 +46,20 @@ export const Login = () => {
           useAuthStore.getState().logout();
         }
       }
-      fetchTenantDetails(tenantName).catch((err) => {
-        console.error("Failed to load tenant details:", err);
-      });
+      
+      // Only fetch tenant details if not already loaded for the current tenantName
+      if (!tenantData || tenantData.tenantName !== tenantName) {
+        fetchTenantDetails(tenantName).catch((err) => {
+          console.error("Failed to load tenant details:", err);
+        });
+      }
     } else {
-      clearTenantDetails();
+      // Only clear tenant details if they are currently set
+      if (tenantData || tenantError) {
+        clearTenantDetails();
+      }
     }
-  }, [tenantName, fetchTenantDetails, clearTenantDetails]);
+  }, [tenantName, fetchTenantDetails, clearTenantDetails, tenantData, tenantError]);
 
   useEffect(() => {
     if (isAuthenticated && user) {

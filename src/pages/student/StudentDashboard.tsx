@@ -21,7 +21,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useTestStore } from "@/store/testStore";
 import { usePaymentStore } from "@/store/paymentStore";
-import { useTestConfigurationStore } from "@/store/testConfigurationStore";
 
 // Import API and Types
 import api from "@/api/axios";
@@ -50,7 +49,6 @@ export const StudentDashboard = () => {
   const { user } = useAuthStore();
   const { publishedTests, getPublishedTests, userSubmissions, fetchUserSubmissions, testTakingLoading } = useTestStore();
   const { handlePayment, isTestPaid } = usePaymentStore();
-  const { fetchConfigurationByRoleIdTestId } = useTestConfigurationStore();
 
   const [paidStatus, setPaidStatus] = useState<Record<string, boolean>>({});
   const [greeting, setGreeting] = useState("");
@@ -116,8 +114,12 @@ export const StudentDashboard = () => {
 
 
   useEffect(() => {
-    getPublishedTests();
-    fetchUserSubmissions({ pageNumber: 1, pageSize: 100 });
+    if (publishedTests.length === 0) {
+      getPublishedTests();
+    }
+    if (!userSubmissions || !userSubmissions.data || userSubmissions.pageSize !== 100) {
+      fetchUserSubmissions({ pageNumber: 1, pageSize: 100 });
+    }
     const hour = new Date().getHours();
     setGreeting(hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening");
 
@@ -137,7 +139,7 @@ export const StudentDashboard = () => {
       }
     };
     fetchDashboardData();
-  }, [getPublishedTests, fetchUserSubmissions]);
+  }, [getPublishedTests, fetchUserSubmissions, publishedTests.length, userSubmissions]);
 
 
   useEffect(() => {
@@ -149,17 +151,15 @@ export const StudentDashboard = () => {
   useEffect(() => {
     const checkStatus = async () => {
       if (!user?.id || !publishedTests?.length) return;
-      const roleId = localStorage.getItem("roleId");
       const statuses: Record<string, boolean> = {};
       await Promise.all(publishedTests.map(async (test) => {
         const isPaid = await isTestPaid(String(user.id), test.id);
         statuses[test.id] = isPaid;
-        return fetchConfigurationByRoleIdTestId(roleId, test.id);
       }));
       setPaidStatus(statuses);
     };
     checkStatus();
-  }, [user?.id, publishedTests]);
+  }, [user?.id, publishedTests, isTestPaid]);
 
   const psychometricTest = publishedTests.find(t => t.title.toLowerCase().includes('psychometric') || t.title.toLowerCase().includes('physometric'));
   const otherTests = publishedTests.filter(t => t.id !== psychometricTest?.id);

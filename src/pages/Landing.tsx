@@ -28,7 +28,11 @@ import {
 export const Landing = () => {
   const navigate = useNavigate();
   const { getPublicPublishedTests, publicPublishedTests } = useTestStore();
-  useEffect(() => { getPublicPublishedTests(); }, [getPublicPublishedTests]);
+  useEffect(() => {
+    if (!publicPublishedTests || publicPublishedTests.length === 0) {
+      getPublicPublishedTests();
+    }
+  }, [getPublicPublishedTests, publicPublishedTests]);
 
   return (
     <>

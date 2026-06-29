@@ -42,6 +42,25 @@ declare global {
         Razorpay: any;
     }
 }
+
+// Cache of in-flight promises to prevent concurrent duplicate API requests
+const inFlightRequests: Record<string, Promise<boolean>> = {};
+
+// Helper to dynamically load Razorpay script
+const loadRazorpayScript = (): Promise<boolean> => {
+    return new Promise((resolve) => {
+        if (window.Razorpay) {
+            resolve(true);
+            return;
+        }
+        const script = document.createElement("script");
+        script.src = "https://checkout.razorpay.com/v1/checkout.js";
+        script.onload = () => resolve(true);
+        script.onerror = () => resolve(false);
+        document.body.appendChild(script);
+    });
+};
+
 export const usePaymentStore = create<PaymentState>((set, get) => ({
     loading: false,
     paidTests: {}, // Structure: { [userId]: { [testId]: boolean } }
@@ -119,33 +138,46 @@ export const usePaymentStore = create<PaymentState>((set, get) => ({
     isTestPaid: async (userId: string, testId: string): Promise<boolean> => {
         const state = get();
 
-        // ✅ Return from cache if available
+        // 1. Return from cache if available
         if (state.paidTests?.[userId]?.[testId] !== undefined) {
             return !!state.paidTests[userId][testId];
         }
 
-        // Otherwise, call API
-        try {
-            const { data } = await api.get("/Payment/check-access", {
-                params: { userId, testId },
-            });
-            const isPaid = data?.data?.access;
-            // Save result in store for reuse
-            set({
-                paidTests: {
-                    ...state.paidTests,
-                    [userId]: {
-                        ...state.paidTests[userId],
-                        [testId]: isPaid,
-                    },
-                    isPaid: isPaid
-                },
-            });
-
-            return isPaid;
-        } catch (err) {
-            return false;
+        // 2. Return in-flight promise if available to deduplicate concurrent requests
+        const cacheKey = `${userId}-${testId}`;
+        if (inFlightRequests[cacheKey]) {
+            return inFlightRequests[cacheKey];
         }
+
+        // Otherwise, call API and cache promise
+        const promise = (async () => {
+            try {
+                const { data } = await api.get("/Payment/check-access", {
+                    params: { userId, testId },
+                });
+                const isPaid = data?.data?.access ?? false;
+
+                // Save result in store for reuse
+                set((state) => ({
+                    paidTests: {
+                        ...state.paidTests,
+                        [userId]: {
+                            ...state.paidTests[userId],
+                            [testId]: isPaid,
+                        },
+                    },
+                }));
+
+                return isPaid;
+            } catch (err) {
+                return false;
+            } finally {
+                delete inFlightRequests[cacheKey];
+            }
+        })();
+
+        inFlightRequests[cacheKey] = promise;
+        return promise;
     },
 
     handlePayment: async (test: TestDetails) => {
@@ -158,6 +190,13 @@ export const usePaymentStore = create<PaymentState>((set, get) => ({
             }
 
             try {
+                // Dynamically load Razorpay script on demand
+                const scriptLoaded = await loadRazorpayScript();
+                if (!scriptLoaded) {
+                    Swal.fire("Error", "Failed to load payment gateway. Please check your internet connection.", "error");
+                    return resolve({ success: false });
+                }
+
                 const { data } = await api.post("/Payment/create-order", {
                     amount: test.price,
                     currency: "INR",
@@ -191,7 +230,7 @@ export const usePaymentStore = create<PaymentState>((set, get) => ({
 
                             if (verifyResponse.data) {
                                 // Mark test as paid for this specific user
-                                get().markTestAsPaid(user.id, test.id);
+                                // get().markTestAsPaid(user.id, test.id);
                                 Swal.fire({
                                     toast: true,
                                     icon: "success",
