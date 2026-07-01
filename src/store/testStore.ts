@@ -328,6 +328,8 @@ const defaultFilters: TestFilters = {
     limit: 5,
 };
 
+let fetchTestsController: AbortController | null = null;
+
 export const useTestStore = create<TestState>((set, get) => ({
     // Initial state
     tests: [],
@@ -383,6 +385,12 @@ export const useTestStore = create<TestState>((set, get) => ({
         get().fetchTests();
     },
     fetchTests: async () => {
+        if (fetchTestsController) {
+            fetchTestsController.abort();
+        }
+        fetchTestsController = new AbortController();
+        const currentController = fetchTestsController;
+
         set({ loading: true, error: null });
         try {
             const { currentPage, limit, filters } = get();
@@ -393,8 +401,12 @@ export const useTestStore = create<TestState>((set, get) => ({
                     search: filters.search || undefined,
                     status: filters.status !== 'all' ? filters.status : undefined,
                     category: filters.category !== 'all' ? filters.category : undefined
-                }
+                },
+                signal: currentController.signal
             });
+
+            if (currentController !== fetchTestsController) return;
+
             const data = response.data;
             const totalCount = data.data.totalCount;
             set({
@@ -402,10 +414,18 @@ export const useTestStore = create<TestState>((set, get) => ({
                 totalPages: Math.ceil(totalCount / limit) || 1,
                 totalCount,
                 currentPage: currentPage > Math.ceil(totalCount / limit) ? 1 : currentPage,
-                loading: false
             });
         } catch (err: any) {
-            set({ error: err.response?.data?.message || 'Failed to fetch tests', loading: false, tests: [], totalPages: 1, totalCount: 0 });
+            if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') {
+                return;
+            }
+            if (currentController === fetchTestsController) {
+                set({ error: err.response?.data?.message || 'Failed to fetch tests', tests: [], totalPages: 1, totalCount: 0 });
+            }
+        } finally {
+            if (currentController === fetchTestsController) {
+                set({ loading: false });
+            }
         }
     },
 

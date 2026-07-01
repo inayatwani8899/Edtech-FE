@@ -93,6 +93,7 @@ interface OrganizationState {
 }
 
 let searchTimeout: any = null;
+let fetchOrganizationsController: AbortController | null = null;
 
 export const useOrganizationStore = create<OrganizationState>((set, get) => ({
   organizations: [],
@@ -187,6 +188,12 @@ export const useOrganizationStore = create<OrganizationState>((set, get) => ({
 
   // Actions
   fetchOrganizations: async () => {
+    if (fetchOrganizationsController) {
+      fetchOrganizationsController.abort();
+    }
+    fetchOrganizationsController = new AbortController();
+    const currentController = fetchOrganizationsController;
+
     set({ loading: true, error: null });
     const { 
       currentPage, 
@@ -211,7 +218,10 @@ export const useOrganizationStore = create<OrganizationState>((set, get) => ({
           search: debouncedSearchTerm || undefined,
           sortDirection,
         },
+        signal: currentController.signal
       });
+
+      if (currentController !== fetchOrganizationsController) return;
 
       // API might return standard wrapper or list directly
       let orgList: Organization[] = [];
@@ -304,14 +314,21 @@ export const useOrganizationStore = create<OrganizationState>((set, get) => ({
         totalCount: total,
       });
     } catch (err: any) {
-      set({
-        error: err.response?.data?.message || "Failed to fetch organizations.",
-        organizations: [],
-        totalPages: 1,
-        totalCount: 0,
-      });
+      if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') {
+        return;
+      }
+      if (currentController === fetchOrganizationsController) {
+        set({
+          error: err.response?.data?.message || "Failed to fetch organizations.",
+          organizations: [],
+          totalPages: 1,
+          totalCount: 0,
+        });
+      }
     } finally {
-      set({ loading: false });
+      if (currentController === fetchOrganizationsController) {
+        set({ loading: false });
+      }
     }
   },
 

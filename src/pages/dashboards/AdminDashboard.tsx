@@ -51,6 +51,9 @@ const systemAlerts = [
   }
 ];
 
+let adminDashboardPromise: Promise<any> | null = null;
+let adminDashboardCache: any = null;
+
 export const AdminDashboard = () => {
   const { user } = useAuthStore();
   const navigate = useNavigate();
@@ -60,14 +63,29 @@ export const AdminDashboard = () => {
   const [greeting, setGreeting] = useState("");
 
   const fetchSummary = async () => {
-    setLoading(true);
+    if (!adminDashboardCache) {
+      setLoading(true);
+    }
     setError(null);
     try {
-      const response = await api.get<any>("/SuperAdmin/dashboard-summary");
-      if (response.data && response.data.success) {
-        setSummary(response.data.data);
-      } else {
-        setError("Failed to fetch dashboard summary.");
+      if (adminDashboardCache) {
+        setSummary(adminDashboardCache);
+      }
+
+      if (!adminDashboardPromise) {
+        adminDashboardPromise = api.get<any>("/SuperAdmin/dashboard-summary").then(res => {
+          if (res.data && res.data.success) {
+            adminDashboardCache = res.data.data;
+          }
+          return res.data.data;
+        }).finally(() => {
+          adminDashboardPromise = null;
+        });
+      }
+
+      const data = await adminDashboardPromise;
+      if (data) {
+        setSummary(data);
       }
     } catch (err: any) {
       console.error("Failed to load dashboard summary:", err);

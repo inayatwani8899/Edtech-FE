@@ -76,23 +76,6 @@ export const SchoolStudents = () => {
     const [selectedStudents, setSelectedStudents] = useState<number[]>([]);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-    const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
-
-    // Sync local state if searchTerm changes from outside (e.g. cleared)
-    useEffect(() => {
-        setLocalSearchTerm(searchTerm);
-    }, [searchTerm]);
-
-    // Debounce updating the store's searchTerm
-    useEffect(() => {
-        const handler = setTimeout(() => {
-            if (localSearchTerm !== searchTerm) {
-                setSearchTerm(localSearchTerm);
-            }
-        }, 500);
-        return () => clearTimeout(handler);
-    }, [localSearchTerm, searchTerm, setSearchTerm]);
-
     const handleHeaderSort = (columnKey: string) => {
         if (loading) return;
         if (sortBy === columnKey) {
@@ -506,8 +489,8 @@ export const SchoolStudents = () => {
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
                         <Input
                             placeholder="Search Student..."
-                            value={localSearchTerm}
-                            onChange={(e) => setLocalSearchTerm(e.target.value)}
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
                             className="pl-9 h-9 border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 rounded-xl text-xs"
                         />
                     </div>

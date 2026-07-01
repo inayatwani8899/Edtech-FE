@@ -42,6 +42,13 @@ interface DashboardSummary {
     totalGrades: number;
 }
 
+let dashboardDataPromise: Promise<any> | null = null;
+let dashboardDataCache: {
+    summary: any;
+    recentStudents: any[];
+    profile: any;
+} | null = null;
+
 export const SchoolDashboard = () => {
     const { user, tenantData } = useAuthStore();
     const navigate = useNavigate();
@@ -151,48 +158,74 @@ export const SchoolDashboard = () => {
     };
 
     const fetchAllData = async () => {
-        setLoading(true);
+        if (!dashboardDataCache) {
+            setLoading(true);
+        }
         setError(null);
         try {
             const orgId = getOrganizationId();
 
-            // Parallel execution of dashboard statistics, recent students registry, and organization profile
-            const summaryPromise = api.get("/Organization/dashboard-summary");
-            const studentsPromise = api.get("/Organization/students", {
-                params: {
-                    pageNumber: 1,
-                    pageSize: 5,
-                    sortBy: "createddate",
-                    sortDirection: "desc"
-                }
-            });
-            const profilePromise = orgId ? api.get(`/Organization/${orgId}`) : Promise.resolve(null);
+            const updateStates = (cache: any) => {
+                if (!cache) return;
+                setSummary(cache.summary);
+                setRecentStudents(cache.recentStudents);
+                if (cache.profile) setProfile(cache.profile);
+            };
 
-            const [summaryRes, studentsRes, profileRes] = await Promise.all([
-                summaryPromise,
-                studentsPromise,
-                profilePromise
-            ]);
-
-            if (summaryRes.data && summaryRes.data.success) {
-                setSummary(summaryRes.data.data);
-            } else {
-                throw new Error("Failed to load dashboard summary stats.");
+            if (dashboardDataCache) {
+                updateStates(dashboardDataCache);
             }
 
-            if (studentsRes.data && studentsRes.data.success) {
-                const sData = studentsRes.data.data?.students;
-                let list: any[] = [];
-                if (Array.isArray(sData)) {
-                    list = sData;
-                } else if (sData && Array.isArray(sData.items)) {
-                    list = sData.items;
-                }
-                setRecentStudents(list);
+            if (!dashboardDataPromise) {
+                const summaryPromise = api.get("/Organization/dashboard-summary");
+                const studentsPromise = api.get("/Organization/students", {
+                    params: {
+                        pageNumber: 1,
+                        pageSize: 5,
+                        sortBy: "createddate",
+                        sortDirection: "desc"
+                    }
+                });
+                const profilePromise = orgId ? api.get(`/Organization/${orgId}`) : Promise.resolve(null);
+
+                dashboardDataPromise = Promise.all([
+                    summaryPromise,
+                    studentsPromise,
+                    profilePromise
+                ]).then(([summaryRes, studentsRes, profileRes]) => {
+                    let summary = null;
+                    let recentStudents: any[] = [];
+                    let profile = null;
+
+                    if (summaryRes.data && summaryRes.data.success) {
+                        summary = summaryRes.data.data;
+                    } else {
+                        throw new Error("Failed to load dashboard summary stats.");
+                    }
+
+                    if (studentsRes.data && studentsRes.data.success) {
+                        const sData = studentsRes.data.data?.students;
+                        if (Array.isArray(sData)) {
+                            recentStudents = sData;
+                        } else if (sData && Array.isArray(sData.items)) {
+                            recentStudents = sData.items;
+                        }
+                    }
+
+                    if (profileRes && profileRes.data && profileRes.data.success) {
+                        profile = profileRes.data.data;
+                    }
+
+                    dashboardDataCache = { summary, recentStudents, profile };
+                    return dashboardDataCache;
+                }).finally(() => {
+                    dashboardDataPromise = null;
+                });
             }
 
-            if (profileRes && profileRes.data && profileRes.data.success) {
-                setProfile(profileRes.data.data);
+            const cache = await dashboardDataPromise;
+            if (cache) {
+                updateStates(cache);
             }
         } catch (err: any) {
             console.error("Dashboard fetch error:", err);

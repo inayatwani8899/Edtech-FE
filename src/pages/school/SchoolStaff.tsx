@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { 
     Users, 
     UserPlus, 
@@ -30,10 +30,12 @@ const dummyStaff = [
 export const SchoolStaff = () => {
     const [searchTerm, setSearchTerm] = useState("");
 
-    const filteredStaff = dummyStaff.filter(s => 
-        s.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        s.role.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredStaff = useMemo(() => {
+        return dummyStaff.filter(s => 
+            s.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+            s.role.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [searchTerm]);
 
     return (
         <div className="min-h-screen w-full bg-[#F8FAFC] relative overflow-hidden">
