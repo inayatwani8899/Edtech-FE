@@ -3,6 +3,8 @@ import { create } from 'zustand';
 import api from '@/api/axios';
 import { Category } from '@/types/types';
 
+let fetchCategoriesController: AbortController | null = null;
+
 interface CategoryState {
     // State
     categories: Category[];
@@ -28,7 +30,7 @@ interface CategoryState {
     // Category CRUD Operations
     fetchCategories: () => Promise<void>;
     fetchCategoryById: (id: string) => Promise<void>;
-    createCategory: (category: Omit<Category, 'id' | 'createdAt' | 'updatedAt'>) => Promise<any>;
+    createCategory: (category: Omit<Category, 'id' | 'createdAt' | 'updatedAt'>) => Promise<unknown>;
     updateCategory: (id: string, category: Partial<Category>) => Promise<void>;
     deleteCategory: () => Promise<void>;
     fetchCategoryByName: (name: string) => Promise<{ code: number, message: string, data: { category: Category | null } }>;
@@ -38,6 +40,16 @@ interface CategoryState {
     openDeleteDialog: (id: string) => void;
     closeDeleteDialog: () => void;
 }
+
+// Helper function to map raw API responses to the frontend Category interface
+const normaliseCategory = (raw: Record<string, unknown>): Category => ({
+    id: String(raw.id ?? raw._id ?? ""),
+    categoryName: (raw.categoryName as string) ?? (raw.name as string) ?? "",
+    description: (raw.description as string) ?? "",
+    isActive: raw.isActive !== false,
+    createdAt: raw.createdAt as string | undefined,
+    updatedAt: raw.updatedAt as string | undefined,
+});
 
 export const useCategoryStore = create<CategoryState>((set, get) => ({
     // Initial state
@@ -63,29 +75,46 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
 
     // Category CRUD Operations
     fetchCategories: async () => {
+        if (fetchCategoriesController) fetchCategoriesController.abort();
+        fetchCategoriesController = new AbortController();
+        const ctrl = fetchCategoriesController;
+
         set({ loading: true, error: null });
         try {
             const { currentPage, limit, searchTerm } = get();
             const queryParams = new URLSearchParams({
                 page: currentPage.toString(),
                 limit: limit.toString(),
-                search: searchTerm,
+                sortDirection: 'desc',
+                ...(searchTerm ? { search: searchTerm } : {}),
             });
 
-            const response = await api.get(`Category?${queryParams}`);
+            const response = await api.get(`Category?${queryParams}`, { signal: ctrl.signal });
+            if (ctrl !== fetchCategoriesController) return;
+
+            const data = response.data?.data ?? response.data;
+            const rawList: Record<string, unknown>[] = data?.categories ?? data?.data ?? (Array.isArray(data) ? data : []);
+            const categoriesList = rawList.map(normaliseCategory);
+            const pagination = data?.pagination ?? {};
+            const totalCount = pagination.totalRecords ?? data?.totalCount ?? categoriesList.length;
+            const totalPages = pagination.totalPages ?? (Math.ceil(totalCount / limit) || 1);
 
             set({
-                categories: response?.data?.categories || response?.data?.data?.categories,
-                totalCategoryPages: response?.data?.data?.pagination?.totalPages,
-                totalCategoriesCount: response?.data?.data?.pagination?.totalRecords,
-                totalPages: response?.data?.data?.pagination?.totalPages || 1,
+                categories: categoriesList,
+                totalCategoryPages: totalPages,
+                totalCategoriesCount: totalCount,
+                totalPages: totalPages,
                 loading: false
             });
-        } catch (error: any) {
-            set({
-                error: error.response?.data?.message || 'Failed to fetch categories',
-                loading: false
-            });
+        } catch (error: unknown) {
+            if ((error as { name?: string })?.name === 'CanceledError' || (error as { code?: string })?.code === 'ERR_CANCELED') return;
+            if (ctrl === fetchCategoriesController) {
+                const msg = (error as { response?: { data?: { message?: string } } }).response?.data?.message ?? 'Failed to fetch categories';
+                set({
+                    error: msg,
+                    loading: false
+                });
+            }
         }
     },
 
@@ -93,13 +122,15 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
         set({ loading: true, error: null });
         try {
             const response = await api.get(`Category/${id}`);
+            const raw = (response.data?.data ?? response.data) as Record<string, unknown>;
             set({
-                currentCategory: response.data.data || response.data.category,
+                currentCategory: normaliseCategory(raw),
                 loading: false
             });
-        } catch (error: any) {
+        } catch (error: unknown) {
+            const msg = (error as { response?: { data?: { message?: string } } }).response?.data?.message ?? 'Failed to fetch category';
             set({
-                error: error.response?.data?.message || 'Failed to fetch category',
+                error: msg,
                 loading: false
             });
         }
@@ -110,27 +141,31 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
         try {
             const response = await api.get(`Category/by-name?name=${encodeURIComponent(name)}`);
             const data = response.data;
+            const raw = (data.data?.category || data.data || null) as Record<string, unknown> | null;
+            const category = raw ? normaliseCategory(raw) : null;
 
-            set({ currentCategory: data.data, loading: false });
+            set({ currentCategory: category, loading: false });
 
             // Return value matching the declared type
             return {
                 code: data.statusCode || 200,
                 message: data.message || 'Success',
                 data: {
-                    category: data.data?.category || data.data || null,
+                    category,
                 },
             };
-        } catch (error: any) {
+        } catch (error: unknown) {
+            const msg = (error as { response?: { data?: { message?: string } } }).response?.data?.message ?? 'Failed to fetch category by name';
+            const status = (error as { response?: { status?: number } }).response?.status ?? 500;
             set({
-                error: error.response?.data?.message || 'Failed to fetch category by name',
+                error: msg,
                 loading: false
             });
 
             // Return a structured error object
             return {
-                code: error.response?.status || 500,
-                message: error.response?.data?.message || 'Failed to fetch category by name',
+                code: status,
+                message: msg,
                 data: {
                     category: null,
                 },
@@ -141,12 +176,18 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
     createCategory: async (categoryData: Omit<Category, 'id' | 'createdAt' | 'updatedAt'>) => {
         set({ loading: true, error: null });
         try {
-            const response = await api.post('Category/create', categoryData);
+            const payload = {
+                name: categoryData.categoryName,
+                description: categoryData.description,
+                isActive: categoryData.isActive !== false,
+            };
+            const response = await api.post('Category', payload);
             set({ loading: false });
             return response.data;
-        } catch (error: any) {
+        } catch (error: unknown) {
+            const msg = (error as { response?: { data?: { message?: string } } }).response?.data?.message ?? 'Failed to create category';
             set({
-                error: error.response?.data?.message || 'Failed to create category',
+                error: msg,
                 loading: false
             });
             throw error;
@@ -155,16 +196,22 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
 
     updateCategory: async (id: string, categoryData: Partial<Category>) => {
         set({ loading: true, error: null });
-        categoryData.id = id;
         try {
-            const response = await api.put(`Category`, categoryData);
+            const payload = {
+                name: categoryData.categoryName,
+                description: categoryData.description,
+                isActive: categoryData.isActive !== false,
+            };
+            const response = await api.put(`Category/${id}`, payload);
+            const raw = (response.data?.data ?? response.data) as Record<string, unknown>;
             set({
-                currentCategory: response.data.data || response.data,
+                currentCategory: normaliseCategory(raw),
                 loading: false
             });
-        } catch (error: any) {
+        } catch (error: unknown) {
+            const msg = (error as { response?: { data?: { message?: string } } }).response?.data?.message ?? 'Failed to update category';
             set({
-                error: error.response?.data?.message || 'Failed to update category',
+                error: msg,
                 loading: false
             });
             throw error;
@@ -172,21 +219,29 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
     },
 
     deleteCategory: async () => {
-        const { deleteId } = get();
+        const { deleteId, categories, currentPage } = get();
         if (!deleteId) return;
 
         set({ loading: true, error: null });
         try {
             await api.delete(`Category/${deleteId}`);
-            // Refresh the categories list after deletion
-            get().fetchCategories();
-            set({ deleteOpen: false, deleteId: null, loading: false });
-        } catch (error: any) {
+            
+            const remaining = categories.filter((c) => c.id !== deleteId);
+            if (remaining.length === 0 && currentPage > 1) {
+                set({ currentPage: currentPage - 1 });
+            }
+
+            set({ deleteOpen: false, deleteId: null });
+            await get().fetchCategories();
+        } catch (error: unknown) {
+            const msg = (error as { response?: { data?: { message?: string } } }).response?.data?.message ?? 'Failed to delete category';
             set({
-                error: error.response?.data?.message || 'Failed to delete category',
+                error: msg,
                 loading: false
             });
             throw error;
+        } finally {
+            set({ loading: false });
         }
     },
 

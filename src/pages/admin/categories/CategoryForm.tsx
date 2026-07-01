@@ -40,6 +40,8 @@ export const CategoryForm: React.FC<{ categoryId?: string }> = ({ categoryId }) 
     const { id: paramId } = useParams();
     const actualCategoryId = categoryId || paramId;
 
+    const isViewMode = window.location.pathname.includes("/view/");
+
     const {
         loading,
         currentCategory,
@@ -71,6 +73,7 @@ export const CategoryForm: React.FC<{ categoryId?: string }> = ({ categoryId }) 
     }, [currentCategory, isEditMode]);
 
     const handleChange = (name: string, value: any) => {
+        if (isViewMode) return;
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
@@ -88,6 +91,7 @@ export const CategoryForm: React.FC<{ categoryId?: string }> = ({ categoryId }) 
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (isViewMode) return;
         if (!validateForm()) return;
 
         try {
@@ -127,7 +131,7 @@ export const CategoryForm: React.FC<{ categoryId?: string }> = ({ categoryId }) 
                         </div>
                         <div>
                             <h1 className="text-lg font-black text-slate-900 tracking-tight leading-none">
-                                {isEditMode ? "Modify Asset" : "New Classification"}
+                                {isViewMode ? "Classification Details" : isEditMode ? "Modify Asset" : "New Classification"}
                             </h1>
                             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Content & Metadata Orchestration</p>
                         </div>
@@ -139,16 +143,18 @@ export const CategoryForm: React.FC<{ categoryId?: string }> = ({ categoryId }) 
                             onClick={() => navigate("/manage/categories")}
                             className="text-slate-500 hover:bg-slate-100 font-bold text-[10px] h-7 px-3 rounded-lg"
                         >
-                            Abort
+                            {isViewMode ? "Back" : "Abort"}
                         </Button>
-                        <Button
-                            onClick={handleSubmit}
-                            disabled={loading}
-                            className="bg-slate-900 text-white font-bold text-[10px] h-7 px-4 rounded-lg shadow-md hover:bg-slate-800 transition-all flex items-center gap-1.5"
-                        >
-                            {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
-                            {isEditMode ? "Sync Asset" : "Initialize"}
-                        </Button>
+                        {!isViewMode && (
+                            <Button
+                                onClick={handleSubmit}
+                                disabled={loading}
+                                className="bg-slate-900 text-white font-bold text-[10px] h-7 px-4 rounded-lg shadow-md hover:bg-slate-800 transition-all flex items-center gap-1.5"
+                            >
+                                {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
+                                {isEditMode ? "Sync Asset" : "Initialize"}
+                            </Button>
+                        )}
                     </div>
                 </div>
 
@@ -186,9 +192,10 @@ export const CategoryForm: React.FC<{ categoryId?: string }> = ({ categoryId }) 
 
                                 <div className="mt-4 space-y-1.5 text-left">
                                     <Label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1 block">Quick Switch</Label>
-                                    <div className="flex items-center justify-between p-2.5 bg-slate-50/50 rounded-xl border border-slate-100 hover:bg-slate-50 transition-all group cursor-pointer" onClick={() => handleChange("isActive", !formData.isActive)}>
+                                    <div className="flex items-center justify-between p-2.5 bg-slate-50/50 rounded-xl border border-slate-100 hover:bg-slate-50 transition-all group cursor-pointer" onClick={() => !isViewMode && handleChange("isActive", !formData.isActive)}>
                                         <span className="text-[10px] font-black text-slate-500 uppercase">Live Visibility</span>
                                         <Switch 
+                                            disabled={isViewMode}
                                             checked={formData.isActive} 
                                             onCheckedChange={(checked) => handleChange("isActive", checked)} 
                                             className="data-[state=checked]:bg-fuchsia-500"
@@ -198,7 +205,7 @@ export const CategoryForm: React.FC<{ categoryId?: string }> = ({ categoryId }) 
                             </CardContent>
                         </Card>
                     </div>
-
+ 
                     {/* RIGHT COLUMN: CLASSIFICATION CORE */}
                     <div className="lg:col-span-9">
                         <Card className="border-none shadow-elegant bg-white rounded-3xl border border-slate-100/50 overflow-hidden h-full">
@@ -219,6 +226,7 @@ export const CategoryForm: React.FC<{ categoryId?: string }> = ({ categoryId }) 
                                         <div className="relative group">
                                             <FolderOpen className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300 group-focus-within:text-fuchsia-500 transition-colors" />
                                             <Input 
+                                                disabled={isViewMode}
                                                 name="categoryName"
                                                 value={formData.categoryName} 
                                                 onChange={(e) => handleChange("categoryName", e.target.value)} 
@@ -227,7 +235,7 @@ export const CategoryForm: React.FC<{ categoryId?: string }> = ({ categoryId }) 
                                             />
                                         </div>
                                     </div>
-
+ 
                                     <div className="space-y-1.5 pt-2">
                                         <Label className="text-[10px] font-bold text-fuchsia-600 uppercase tracking-tight ml-1">Resource Slug (Auto)</Label>
                                         <div className="relative group/slug">
@@ -239,7 +247,7 @@ export const CategoryForm: React.FC<{ categoryId?: string }> = ({ categoryId }) 
                                             />
                                         </div>
                                     </div>
-
+ 
                                     <div className="space-y-1.5 pt-2">
                                         <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">Asset Security</Label>
                                         <div className="h-10 bg-slate-50/50 border border-slate-200/50 rounded-xl flex items-center justify-between px-4">
@@ -247,12 +255,13 @@ export const CategoryForm: React.FC<{ categoryId?: string }> = ({ categoryId }) 
                                             <Shield className="h-3.5 w-3.5 text-slate-300" />
                                         </div>
                                     </div>
-
+ 
                                     <div className="space-y-1.5 col-span-full pt-2">
                                         <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block">Contextual Manifest (Description)</Label>
                                         <div className="relative group">
                                             <Sparkles className="absolute left-4 top-4 h-4 w-4 text-slate-300 group-focus-within:text-fuchsia-500 transition-colors" />
                                             <Textarea 
+                                                disabled={isViewMode}
                                                 name="description" 
                                                 value={formData.description} 
                                                 onChange={(e) => handleChange("description", e.target.value)} 
@@ -264,9 +273,9 @@ export const CategoryForm: React.FC<{ categoryId?: string }> = ({ categoryId }) 
                                 </div>
                             </CardContent>
                         </Card>
-
+ 
                         {/* SYNC STRIP */}
-                        {isEditMode && (
+                        {isEditMode && !isViewMode && (
                             <div className="mt-6 p-4 rounded-3xl bg-fuchsia-600 text-white flex items-center justify-between shadow-xl shadow-fuchsia-600/20 group animate-in slide-in-from-bottom-5 duration-500">
                                 <div className="flex items-center gap-4">
                                     <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center border border-white/10 backdrop-blur-sm group-hover:scale-110 transition-transform">

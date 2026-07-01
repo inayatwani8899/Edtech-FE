@@ -64,6 +64,9 @@ const PublicPrivacy = lazy(() => import("./pages/public/PublicPrivacy"));
 const PublicTerms = lazy(() => import("./pages/public/PublicTerms"));
 const ForgotPassword = lazy(() => import("./pages/auth/ForgotPassword").then(m => ({ default: m.ForgotPassword })));
 const ResetPassword = lazy(() => import("./pages/auth/ResetPassword").then(m => ({ default: m.ResetPassword })));
+const GradesList = lazy(() => import("./pages/admin/grades/GradesList").then(m => ({ default: m.GradesList })));
+const GradeForm = lazy(() => import("./pages/admin/grades/GradeForm").then(m => ({ default: m.GradeForm })));
+const QuestionBankList = lazy(() => import("./pages/admin/question-bank/QuestionBankList").then(m => ({ default: m.QuestionBankList })));
 
 // 🔐 RBAC Module Pages
 const RBACDashboard = lazy(() => import("./modules/rbac/pages/RBACDashboard"));
@@ -85,13 +88,13 @@ interface ProtectedRouteProps {
     role?: "Admin" | "Student" | "School" | "Counselor" | "Professional";
 }
 
-const isCounselorRole = (user: any) => {
+const isCounselorRole = (user: { role?: string } | null | undefined) => {
     if (!user) return false;
     const roleName = (user.role || "").toLowerCase();
     return roleName.includes("counselor") || roleName.includes("counsellor") || roleName === "professional";
 };
 
-const isSchoolRole = (user: any) => {
+const isSchoolRole = (user: { role?: string } | null | undefined) => {
     if (!user) return false;
     const roleName = (user.role || "").toLowerCase();
     return roleName === "school" || roleName === "organization" || roleName === "organizationadmin";
@@ -239,9 +242,15 @@ const AppRoutes = () => {
                 <Route path="/manage/categories" element={<CategoriesList />} />
                 <Route path="/manage/categories/add" element={<CategoryForm />} />
                 <Route path="/manage/categories/edit/:id" element={<CategoryForm />} />
+                <Route path="/manage/categories/view/:id" element={<CategoryForm />} />
                 <Route path="/manage/configurations" element={<TestConfigurationsList />} />
                 <Route path="/manage/configurations/add" element={<TestConfigurationForm />} />
                 <Route path="/manage/configurations/edit/:id" element={<TestConfigurationForm />} />
+                <Route path="/manage/grades" element={<GradesList />} />
+                <Route path="/manage/grades/add" element={<GradeForm />} />
+                <Route path="/manage/grades/edit/:id" element={<GradeForm />} />
+                <Route path="/manage/grades/view/:id" element={<GradeForm />} />
+                <Route path="/manage/question-bank" element={<QuestionBankList />} />
 
                 {/* 🔐 Role-Based Access Control (RBAC) Routes */}
                 <Route path="/rbac" element={<RBACDashboard />} />

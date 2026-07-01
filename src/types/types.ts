@@ -214,3 +214,43 @@ export interface StudentDashboardStats {
 }
 
 export interface StudentDashboardResponse extends GenericResponse<StudentDashboardStats> { }
+
+// ---------- Grade ----------
+export interface Grade {
+  id: string;
+  gradeName: string;
+  description?: string;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface GradeResponse {
+  grades: Grade[];
+  pagination: {
+    totalPages: number;
+    totalRecords: number;
+    currentPage: number;
+    limit: number;
+  };
+}
+
+// ---------- Question Bank ----------
+export interface QuestionBankOption {
+  optionText: string;
+  score?: number;
+  isCorrect?: boolean;
+}
+
+export interface QuestionBankItem {
+  id: string;
+  questionText: string;
+  reverseQuestion?: string;
+  theory?: string;
+  tag?: string;
+  categoryId?: string;
+  categoryName?: string;
+  options: QuestionBankOption[];
+  isActive?: boolean;
+  createdAt?: string;
+}

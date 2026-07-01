@@ -36,6 +36,18 @@ interface OrganizationResponseData {
   totalCount: number;
 }
 
+// Tab types for the Super Admin org view
+export type OrgTab = 'all' | 'approved' | 'unapproved' | 'correction';
+
+interface OrgTabData {
+  organizations: Organization[];
+  loading: boolean;
+  currentPage: number;
+  totalPages: number;
+  totalCount: number;
+  limit: number;
+}
+
 interface OrganizationState {
   organizations: Organization[];
   organization: Organization | null;
@@ -60,6 +72,16 @@ interface OrganizationState {
   typeFilter: string; // "All", "School", "College", "University", "Institute"
   
   sortDirection: "asc" | "desc";
+
+  // Tab state
+  activeTab: OrgTab;
+  tabData: Record<Exclude<OrgTab, 'all'>, OrgTabData>;
+  setActiveTab: (tab: OrgTab) => void;
+  setTabPage: (tab: Exclude<OrgTab, 'all'>, page: number) => void;
+  setTabLimit: (tab: Exclude<OrgTab, 'all'>, limit: number) => void;
+  fetchApprovedOrganizations: () => Promise<void>;
+  fetchUnapprovedOrganizations: () => Promise<void>;
+  fetchCorrectionOrganizations: () => Promise<void>;
 
   // Actions
   fetchOrganizations: () => Promise<void>;
@@ -94,6 +116,18 @@ interface OrganizationState {
 
 let searchTimeout: any = null;
 let fetchOrganizationsController: AbortController | null = null;
+let fetchApprovedController: AbortController | null = null;
+let fetchUnapprovedController: AbortController | null = null;
+let fetchCorrectionController: AbortController | null = null;
+
+const defaultTabData = (): OrgTabData => ({
+  organizations: [],
+  loading: false,
+  currentPage: 1,
+  totalPages: 1,
+  totalCount: 0,
+  limit: 10,
+});
 
 export const useOrganizationStore = create<OrganizationState>((set, get) => ({
   organizations: [],
@@ -119,6 +153,14 @@ export const useOrganizationStore = create<OrganizationState>((set, get) => ({
   typeFilter: "All",
   
   sortDirection: "asc",
+
+  // Tab state
+  activeTab: 'all',
+  tabData: {
+    approved: defaultTabData(),
+    unapproved: defaultTabData(),
+    correction: defaultTabData(),
+  },
 
   // Setters
   setPage: (page) => {
@@ -185,6 +227,116 @@ export const useOrganizationStore = create<OrganizationState>((set, get) => ({
   openDeleteDialog: (id) => set({ selectedOrgId: id, deleteOpen: true }),
   closeDeleteDialog: () => set({ selectedOrgId: null, deleteOpen: false }),
   clearOrganization: () => set({ organization: null, error: null }),
+
+  setActiveTab: (tab) => {
+    set({ activeTab: tab });
+    if (tab === 'approved') get().fetchApprovedOrganizations();
+    else if (tab === 'unapproved') get().fetchUnapprovedOrganizations();
+    else if (tab === 'correction') get().fetchCorrectionOrganizations();
+    else get().fetchOrganizations();
+  },
+
+  setTabPage: (tab, page) => {
+    set((state) => ({
+      tabData: { ...state.tabData, [tab]: { ...state.tabData[tab], currentPage: page } },
+    }));
+    if (tab === 'approved') get().fetchApprovedOrganizations();
+    else if (tab === 'unapproved') get().fetchUnapprovedOrganizations();
+    else if (tab === 'correction') get().fetchCorrectionOrganizations();
+  },
+
+  setTabLimit: (tab, limit) => {
+    set((state) => ({
+      tabData: { ...state.tabData, [tab]: { ...state.tabData[tab], limit, currentPage: 1 } },
+    }));
+    if (tab === 'approved') get().fetchApprovedOrganizations();
+    else if (tab === 'unapproved') get().fetchUnapprovedOrganizations();
+    else if (tab === 'correction') get().fetchCorrectionOrganizations();
+  },
+
+  fetchApprovedOrganizations: async () => {
+    if (fetchApprovedController) fetchApprovedController.abort();
+    fetchApprovedController = new AbortController();
+    const ctrl = fetchApprovedController;
+    const { tabData } = get();
+    const { currentPage, limit } = tabData.approved;
+    set((s) => ({ tabData: { ...s.tabData, approved: { ...s.tabData.approved, loading: true } } }));
+    try {
+      const response = await api.get('/SuperAdmin/organizations/approved', {
+        params: { page: currentPage, limit },
+        signal: ctrl.signal,
+      });
+      if (ctrl !== fetchApprovedController) return;
+      const data = response.data?.data ?? response.data;
+      const orgs: Organization[] = data?.organizations ?? data?.data ?? (Array.isArray(data) ? data : []);
+      const pagination = data?.pagination ?? {};
+      const totalCount = pagination.totalRecords ?? data?.totalCount ?? orgs.length;
+      const totalPages = pagination.totalPages ?? (Math.ceil(totalCount / limit) || 1);
+      set((s) => ({
+        tabData: { ...s.tabData, approved: { ...s.tabData.approved, organizations: orgs, totalCount, totalPages, loading: false } },
+      }));
+    } catch (err: any) {
+      if (err?.name === 'CanceledError' || err?.code === 'ERR_CANCELED') return;
+      if (ctrl === fetchApprovedController)
+        set((s) => ({ tabData: { ...s.tabData, approved: { ...s.tabData.approved, loading: false } } }));
+    }
+  },
+
+  fetchUnapprovedOrganizations: async () => {
+    if (fetchUnapprovedController) fetchUnapprovedController.abort();
+    fetchUnapprovedController = new AbortController();
+    const ctrl = fetchUnapprovedController;
+    const { tabData } = get();
+    const { currentPage, limit } = tabData.unapproved;
+    set((s) => ({ tabData: { ...s.tabData, unapproved: { ...s.tabData.unapproved, loading: true } } }));
+    try {
+      const response = await api.get('/SuperAdmin/organizations/unapproved', {
+        params: { page: currentPage, limit },
+        signal: ctrl.signal,
+      });
+      if (ctrl !== fetchUnapprovedController) return;
+      const data = response.data?.data ?? response.data;
+      const orgs: Organization[] = data?.organizations ?? data?.data ?? (Array.isArray(data) ? data : []);
+      const pagination = data?.pagination ?? {};
+      const totalCount = pagination.totalRecords ?? data?.totalCount ?? orgs.length;
+      const totalPages = pagination.totalPages ?? (Math.ceil(totalCount / limit) || 1);
+      set((s) => ({
+        tabData: { ...s.tabData, unapproved: { ...s.tabData.unapproved, organizations: orgs, totalCount, totalPages, loading: false } },
+      }));
+    } catch (err: any) {
+      if (err?.name === 'CanceledError' || err?.code === 'ERR_CANCELED') return;
+      if (ctrl === fetchUnapprovedController)
+        set((s) => ({ tabData: { ...s.tabData, unapproved: { ...s.tabData.unapproved, loading: false } } }));
+    }
+  },
+
+  fetchCorrectionOrganizations: async () => {
+    if (fetchCorrectionController) fetchCorrectionController.abort();
+    fetchCorrectionController = new AbortController();
+    const ctrl = fetchCorrectionController;
+    const { tabData } = get();
+    const { currentPage, limit } = tabData.correction;
+    set((s) => ({ tabData: { ...s.tabData, correction: { ...s.tabData.correction, loading: true } } }));
+    try {
+      const response = await api.get('/SuperAdmin/organizations/correction-request', {
+        params: { page: currentPage, limit },
+        signal: ctrl.signal,
+      });
+      if (ctrl !== fetchCorrectionController) return;
+      const data = response.data?.data ?? response.data;
+      const orgs: Organization[] = data?.organizations ?? data?.data ?? (Array.isArray(data) ? data : []);
+      const pagination = data?.pagination ?? {};
+      const totalCount = pagination.totalRecords ?? data?.totalCount ?? orgs.length;
+      const totalPages = pagination.totalPages ?? (Math.ceil(totalCount / limit) || 1);
+      set((s) => ({
+        tabData: { ...s.tabData, correction: { ...s.tabData.correction, organizations: orgs, totalCount, totalPages, loading: false } },
+      }));
+    } catch (err: any) {
+      if (err?.name === 'CanceledError' || err?.code === 'ERR_CANCELED') return;
+      if (ctrl === fetchCorrectionController)
+        set((s) => ({ tabData: { ...s.tabData, correction: { ...s.tabData.correction, loading: false } } }));
+    }
+  },
 
   // Actions
   fetchOrganizations: async () => {

@@ -29,6 +29,7 @@ import {
     UserCheck,
     User,
     Building,
+    GraduationCap,
 } from "lucide-react";
 import Swal from 'sweetalert2';
 
@@ -54,7 +55,9 @@ const adminMenuItems = [
     { title: "Counselor Management", url: "/manage/counselors", icon: Users2, color: "text-yellow-600" },
     { title: "Student Management", url: "/manage/students", icon: Users, color: "text-blue-600" },
     { title: "Test Management", url: "/manage/tests", icon: ClipboardList, color: "text-green-600" },
-    { title: "Test Configuration Management", url: "/manage/configurations", icon: Cog, color: "text-green-600" },
+    { title: "Categories", url: "/manage/categories", icon: Layers, color: "text-fuchsia-500" },
+    { title: "Grades", url: "/manage/grades", icon: GraduationCap, color: "text-indigo-500" },
+    { title: "Question Bank", url: "/manage/question-bank", icon: BookOpen, color: "text-pink-500" },
 ];
 
 const rbacMenuItems = [
@@ -104,13 +107,17 @@ export function AdminSidebar() {
     useEffect(() => {
         try {
             localStorage.setItem("adminSidebarCollapsed", JSON.stringify(isCollapsed));
-        } catch { }
+        } catch (e) {
+            void e;
+        }
     }, [isCollapsed]);
 
     useEffect(() => {
         try {
             localStorage.setItem("adminSidebarTheme", theme);
-        } catch { }
+        } catch (e) {
+            void e;
+        }
     }, [theme]);
 
     const isActive = (path: string) => currentPath === path || currentPath.startsWith(`${path}/`);
