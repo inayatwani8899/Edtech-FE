@@ -65,12 +65,31 @@ const rbacMenuItems = [
 ];
 
 export function AdminSidebar() {
-    const { state, toggleSidebar } = useSidebar();
+    const { state, toggleSidebar, setOpen, isMobile, setOpenMobile } = useSidebar();
     const isCollapsed = state === "collapsed";
     const location = useLocation();
     const navigate = useNavigate();
     const currentPath = location.pathname;
     const { user, logout } = useAuthStore();
+
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth >= 768 && window.innerWidth < 1024) {
+                setOpen(false);
+            } else if (window.innerWidth >= 1024) {
+                setOpen(true);
+            }
+        };
+        handleResize();
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, [setOpen]);
+
+    useEffect(() => {
+        if (isMobile) {
+            setOpenMobile(false);
+        }
+    }, [location.pathname, isMobile, setOpenMobile]);
 
 
     const [theme, setTheme] = useState<"dark" | "light">(() => {

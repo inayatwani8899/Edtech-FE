@@ -202,7 +202,7 @@ const RolePermissionMapping: React.FC = () => {
                                                         />
                                                         <Key className={`h-3.5 w-3.5 flex-shrink-0 ${selectedPerms.has(perm.id) ? 'text-amber-500' : 'text-slate-300'} transition-colors`} />
                                                         <div className="flex-1 min-w-0">
-                                                            <code className={`text-[11px] font-mono font-bold transition-colors ${selectedPerms.has(perm.id) ? 'text-slate-800' : 'text-slate-500'}`}>
+                                                            <code className={`text-[11px] font-mono font-bold transition-colors break-all ${selectedPerms.has(perm.id) ? 'text-slate-800' : 'text-slate-500'}`}>
                                                                 {perm.name}
                                                             </code>
                                                             <p className="text-[10px] text-slate-400 mt-0.5">{perm.description}</p>
@@ -219,7 +219,7 @@ const RolePermissionMapping: React.FC = () => {
                         {/* Save Bar */}
                         <div className="sticky bottom-4 z-20">
                             <Card className={`border-none shadow-2xl rounded-2xl overflow-hidden transition-all duration-300 ${hasChanges ? 'bg-white/95 backdrop-blur-2xl' : 'bg-white/60 backdrop-blur'}`}>
-                                <CardContent className="p-4 flex items-center justify-between">
+                                <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                     <div className="flex items-center gap-3">
                                         <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-sm">
                                             <Shield className="h-4 w-4" />

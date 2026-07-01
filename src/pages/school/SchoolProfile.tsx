@@ -278,10 +278,34 @@ export const SchoolProfile = () => {
     const logoUrl = getFullUrl(profile.logoPath);
 
     return (
-        <div className="space-y-6 animate-in fade-in duration-500 p-1.5">
-            {/* Hero Profile Card */}
-            <div className="bg-gradient-to-br from-blue-500/10 via-indigo-500/5 to-purple-500/10 dark:from-blue-550/5 dark:via-indigo-550/2 dark:to-purple-550/5 bg-white dark:bg-[#0f1117] border border-slate-200/60 dark:border-slate-800 rounded-[2rem] shadow-elegant overflow-hidden relative group transition-all duration-300">
-                <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-600 via-indigo-650 to-purple-600 z-10" />
+        <div className="min-h-screen w-full bg-[#F8FAFC] relative overflow-hidden">
+            {/* Dynamic Background */}
+            <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-indigo-50/80 to-transparent pointer-events-none z-0" />
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+                <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] bg-purple-500/5 rounded-full blur-[120px] animate-pulse"></div>
+                <div className="absolute top-[10%] left-[-10%] w-[40%] h-[40%] bg-blue-500/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+            </div>
+
+            <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10 space-y-5 animate-in fade-in duration-500">
+                {/* Header Section */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+                    <div>
+                        <div className="flex items-center gap-2 mb-0.5">
+                            <div className="h-px w-6 bg-primary/40"></div>
+                            <span className="text-[9px] font-black uppercase tracking-[0.25em] text-primary">Organization Console</span>
+                        </div>
+                        <h1 className="text-2xl font-black tracking-tight text-slate-900 flex items-center gap-2 mb-0.5">
+                            School <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-indigo-600">Profile</span>
+                        </h1>
+                        <p className="text-xs font-medium text-slate-500 max-w-2xl">
+                            Manage your institute details, logo, timeline status, and databases.
+                        </p>
+                    </div>
+                </div>
+
+                {/* Hero Profile Card */}
+                <div className="bg-gradient-to-br from-blue-500/10 via-indigo-500/5 to-purple-500/10 dark:from-blue-550/5 dark:via-indigo-550/2 dark:to-purple-550/5 bg-white dark:bg-[#0f1117] border border-slate-200/60 dark:border-slate-800 rounded-[2rem] shadow-elegant overflow-hidden relative group transition-all duration-300">
+                    <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-600 via-indigo-650 to-purple-600 z-10" />
                 <div className="p-6 sm:p-8 flex flex-col md:flex-row items-center md:items-start gap-6 relative z-0">
                     
                     {/* Left: Organization Logo */}
@@ -608,8 +632,8 @@ export const SchoolProfile = () => {
                             )}
                         </div>
                     </div>
-
                 </div>
+            </div>
             </div>
         </div>
     );

@@ -170,7 +170,7 @@ const PermissionsList: React.FC = () => {
                                                         <div className="flex items-center gap-3">
                                                             <Key className="h-3.5 w-3.5 text-emerald-500 flex-shrink-0" />
                                                             <div>
-                                                                <code className="text-[11px] font-mono font-bold text-slate-800 group-hover:text-emerald-700 transition-colors">{perm.name}</code>
+                                                                <code className="text-[11px] font-mono font-bold text-slate-800 group-hover:text-emerald-700 transition-colors break-all">{perm.name}</code>
                                                                 <p className="text-[10px] text-slate-400 mt-0.5">{perm.description}</p>
                                                             </div>
                                                         </div>

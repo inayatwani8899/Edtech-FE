@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Card, CardContent, CardDescription, CardHeader, CardTitle,
@@ -44,11 +44,16 @@ const performanceTrend = [
   { name: 'May', score: null, projected: 85 },
 ];
 
+let dashboardStatsPromise: Promise<any> | null = null;
+let dashboardStatsCache: any = null;
+
 export const StudentDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const { publishedTests, getPublishedTests, userSubmissions, fetchUserSubmissions, testTakingLoading } = useTestStore();
+  const { publishedTests, getPublishedTests, testTakingLoading } = useTestStore();
   const { handlePayment, isTestPaid } = usePaymentStore();
+
+  const hasFetchedData = useRef(false);
 
   const [paidStatus, setPaidStatus] = useState<Record<string, boolean>>({});
   const [greeting, setGreeting] = useState("");
@@ -114,23 +119,47 @@ export const StudentDashboard = () => {
 
 
   useEffect(() => {
-    if (publishedTests.length === 0) {
-      getPublishedTests();
-    }
-    if (!userSubmissions || !userSubmissions.data || userSubmissions.pageSize !== 100) {
-      fetchUserSubmissions({ pageNumber: 1, pageSize: 100 });
-    }
     const hour = new Date().getHours();
     setGreeting(hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening");
+  }, []);
+
+  useEffect(() => {
+    if (hasFetchedData.current) return;
+    hasFetchedData.current = true;
+
+    const storeState = useTestStore.getState();
+    if (publishedTests.length === 0 && !storeState.testTakingLoading) {
+      getPublishedTests();
+    }
 
     // Fetch dashboard stats from API
     const fetchDashboardData = async () => {
-      setIsStatsLoading(true);
+      setIsStatsLoading(!dashboardStatsCache);
+
+      const updateState = (data: any) => {
+        setDashboardStats(data);
+        setTestsCompleted(data.testsTaken);
+      };
+
+      if (dashboardStatsCache) {
+        updateState(dashboardStatsCache);
+      }
+
       try {
-        const response = await api.get<StudentDashboardResponse>("/StudentDashboard");
-        if (response.data.code === 200) {
-          setDashboardStats(response.data.data);
-          setTestsCompleted(response.data.data.testsTaken);
+        if (!dashboardStatsPromise) {
+          dashboardStatsPromise = api.get<StudentDashboardResponse>("/StudentDashboard").then(res => {
+            if (res.data.code === 200) {
+              dashboardStatsCache = res.data.data;
+            }
+            return res.data.data;
+          }).finally(() => {
+            dashboardStatsPromise = null;
+          });
+        }
+
+        const data = await dashboardStatsPromise;
+        if (data) {
+          updateState(data);
         }
       } catch (err) {
         console.error("Failed to fetch student dashboard data:", err);
@@ -139,21 +168,22 @@ export const StudentDashboard = () => {
       }
     };
     fetchDashboardData();
-  }, [getPublishedTests, fetchUserSubmissions, publishedTests.length, userSubmissions]);
-
-
-  useEffect(() => {
-    if (userSubmissions?.data) {
-      setTestsCompleted(new Set(userSubmissions.data.map(s => s.testId)).size);
-    }
-  }, [userSubmissions]);
+  }, [getPublishedTests, publishedTests.length]);
 
   useEffect(() => {
     const checkStatus = async () => {
       if (!user?.id || !publishedTests?.length) return;
+
+      const psychTest = publishedTests.find(t => t.title.toLowerCase().includes('psychometric') || t.title.toLowerCase().includes('physometric'));
+      const otherTs = publishedTests.filter(t => t.id !== psychTest?.id);
+
+      const visibleTests = [];
+      if (psychTest) visibleTests.push(psychTest);
+      otherTs.slice(0, 4).forEach(t => visibleTests.push(t));
+
       const statuses: Record<string, boolean> = {};
-      await Promise.all(publishedTests.map(async (test) => {
-        const isPaid = await isTestPaid(String(user.id), test.id);
+      await Promise.all(visibleTests.map(async (test) => {
+        const isPaid = test.price === 0 ? true : await isTestPaid(String(user.id), test.id);
         statuses[test.id] = isPaid;
       }));
       setPaidStatus(statuses);
