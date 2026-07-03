@@ -19,10 +19,14 @@ import {
     Settings,
     Clock,
     TrendingUp,
-    User
+    User,
+    Circle
 } from "lucide-react";
-
 import Swal from 'sweetalert2';
+import { usePermissionStore } from "../../store/permissionStore";
+import { iconMap } from "../../utils/iconMapper";
+import { motion, AnimatePresence } from "framer-motion";
+import { SidebarSkeleton } from "../layout/sidebar/SidebarSkeleton";
 
 import {
     Sidebar,
@@ -37,17 +41,7 @@ import {
 import { useAuthStore } from "../../store/useAuthStore";
 import { cn } from "@/lib/utils";
 
-// Define navigation items for the Counselor role
-const counselorMenuItems = [
-    { title: "Dashboard", url: "/counselor/dashboard", icon: LayoutDashboard, color: "text-emerald-500" },
-    { title: "My Students", url: "/counselor/students", icon: Users, color: "text-sky-500" },
-    { title: "Appointments", url: "/counselor/appointments", icon: Calendar, color: "text-indigo-500" },
-    { title: "Assessments", url: "/counselor/assessments", icon: Brain, color: "text-purple-500" },
-    { title: "Messages", url: "/counselor/messages", icon: MessageSquare, color: "text-teal-500" },
-    { title: "Reports", url: "/counselor/reports", icon: FileText, color: "text-blue-500" },
-    { title: "Resources", url: "/counselor/resources", icon: BookOpen, color: "text-amber-500" },
-    { title: "Search", url: "/counselor/search", icon: Search, color: "text-slate-500" },
-];
+// No hardcoded menus. Driven by Permission Store.
 
 export function CounselorSidebar() {
     const { state, toggleSidebar } = useSidebar();
@@ -56,6 +50,34 @@ export function CounselorSidebar() {
     const navigate = useNavigate();
     const currentPath = location.pathname;
     const { user, logout } = useAuthStore();
+    const permissions = usePermissionStore((s) => s.permissions);
+    const permissionsLoading = usePermissionStore((s) => s.loading);
+
+    // Filter only items with canView === true
+    const viewablePerms = permissions.filter(p => p.canView);
+
+    // Separate parent and child items
+    const parentItems = viewablePerms
+        .filter(p => p.parentId === null)
+        .sort((a, b) => a.sortOrder - b.sortOrder);
+
+    const childItems = viewablePerms.filter(p => p.parentId !== null);
+
+    // Group child items by parentId
+    const childrenByParent: Record<number, typeof permissions> = {};
+    childItems.forEach(child => {
+        if (child.parentId !== null) {
+            if (!childrenByParent[child.parentId]) {
+                childrenByParent[child.parentId] = [];
+            }
+            childrenByParent[child.parentId].push(child);
+        }
+    });
+
+    // Sort child items by sortOrder
+    Object.keys(childrenByParent).forEach(pid => {
+        childrenByParent[Number(pid)].sort((a, b) => a.sortOrder - b.sortOrder);
+    });
 
     const [theme, setTheme] = useState<"dark" | "light">(() => {
         try {
@@ -69,13 +91,17 @@ export function CounselorSidebar() {
     useEffect(() => {
         try {
             localStorage.setItem("counselorSidebarCollapsed", JSON.stringify(isCollapsed));
-        } catch { }
+        } catch (e) {
+            void e;
+        }
     }, [isCollapsed]);
 
     useEffect(() => {
         try {
             localStorage.setItem("counselorSidebarTheme", theme);
-        } catch { }
+        } catch (e) {
+            void e;
+        }
     }, [theme]);
 
     const isActive = (path: string) => currentPath === path || currentPath.startsWith(`${path}/`);
@@ -162,8 +188,20 @@ export function CounselorSidebar() {
                 </div>
 
                 {/* Navigation Menu */}
-                <SidebarGroup className="flex-1 overflow-y-auto custom-scrollbar pt-2 px-0">
-                    {!isCollapsed && (
+                {permissionsLoading ? (
+                    <SidebarSkeleton isCollapsed={isCollapsed} theme={theme} />
+                ) : (
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key="counselor-sidebar-menu"
+                            initial={{ opacity: 0, x: -8 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -8 }}
+                            transition={{ duration: 0.25 }}
+                            className="flex-1 flex flex-col min-h-0 overflow-y-auto custom-scrollbar pt-2 px-0"
+                        >
+                            <SidebarGroup className="flex-none pt-0 px-0">
+                                {!isCollapsed && (
                         <div className="px-6 mb-4 flex items-center justify-between gap-4 overflow-hidden">
                             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-600/40 whitespace-nowrap">
                                 Operations
@@ -176,50 +214,99 @@ export function CounselorSidebar() {
                     )}
                     <SidebarGroupContent>
                         <SidebarMenu className="space-y-1.5 px-3">
-                            {counselorMenuItems.map((item) => (
-                                <SidebarMenuItem key={item.title}>
-                                    <SidebarMenuButton
-                                        asChild
-                                        isActive={isActive(item.url)}
-                                        className={cn(
-                                            "transition-all duration-300 rounded-xl h-11 border border-transparent",
-                                            theme === "dark"
-                                                ? "hover:bg-emerald-500/5 hover:border-emerald-500/10"
-                                                : "hover:bg-emerald-50 hover:border-emerald-100 shadow-sm hover:shadow-emerald-500/5",
-                                            isActive(item.url) && (
-                                                theme === "dark"
-                                                    ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400 shadow-lg shadow-emerald-500/5"
-                                                    : "bg-emerald-500 text-white border-emerald-600 shadow-lg shadow-emerald-500/25 active:bg-emerald-600"
-                                            )
-                                        )}
-                                    >
-                                        <NavLink
-                                            to={item.url}
-                                            title={item.title}
-                                            className={cn(
-                                                "flex items-center gap-3.5 w-full",
-                                                isCollapsed ? "justify-center" : "px-3"
-                                            )}
-                                        >
-                                            <item.icon className={cn(
-                                                "h-5 w-5 transition-all duration-500",
-                                                isActive(item.url)
-                                                    ? (theme === "dark" ? item.color : "text-white")
-                                                    : (theme === "dark" ? "text-slate-400" : "text-slate-500"),
-                                                "group-hover:scale-110 active:scale-95"
-                                            )} />
-                                            {!isCollapsed && (
-                                                <span className={cn(
-                                                    "text-[13px] font-semibold tracking-wide",
-                                                    isActive(item.url) ? "opacity-100" : "opacity-80"
-                                                )}>
-                                                    {item.title}
-                                                </span>
-                                            )}
-                                        </NavLink>
-                                    </SidebarMenuButton>
-                                </SidebarMenuItem>
-                            ))}
+                            {parentItems.map((item) => {
+                                const Icon = iconMap[item.icon] ?? Circle;
+                                const children = childrenByParent[item.menuId];
+                                return (
+                                    <React.Fragment key={item.menuId}>
+                                        <SidebarMenuItem>
+                                            <SidebarMenuButton
+                                                asChild
+                                                isActive={isActive(item.url)}
+                                                className={cn(
+                                                    "transition-all duration-300 rounded-xl h-11 border border-transparent",
+                                                    theme === "dark"
+                                                        ? "hover:bg-emerald-500/5 hover:border-emerald-500/10"
+                                                        : "hover:bg-emerald-50 hover:border-emerald-100 shadow-sm hover:shadow-emerald-500/5",
+                                                    isActive(item.url) && (
+                                                        theme === "dark"
+                                                            ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400 shadow-lg shadow-emerald-500/5"
+                                                            : "bg-emerald-500 text-white border-emerald-600 shadow-lg shadow-emerald-500/25 active:bg-emerald-600"
+                                                    )
+                                                )}
+                                            >
+                                                <NavLink
+                                                    to={item.url}
+                                                    title={item.title}
+                                                    className={cn(
+                                                        "flex items-center gap-3.5 w-full",
+                                                        isCollapsed ? "justify-center" : "px-3"
+                                                    )}
+                                                >
+                                                    <Icon className={cn(
+                                                        "h-5 w-5 transition-all duration-500",
+                                                        isActive(item.url)
+                                                            ? (theme === "dark" ? (item.color || "text-emerald-500") : "text-white")
+                                                            : (theme === "dark" ? "text-slate-400" : "text-slate-500"),
+                                                        "group-hover:scale-110 active:scale-95"
+                                                    )} />
+                                                    {!isCollapsed && (
+                                                        <span className={cn(
+                                                            "text-[13px] font-semibold tracking-wide",
+                                                            isActive(item.url) ? "opacity-100" : "opacity-80"
+                                                        )}>
+                                                            {item.title}
+                                                        </span>
+                                                    )}
+                                                </NavLink>
+                                            </SidebarMenuButton>
+                                        </SidebarMenuItem>
+
+                                        {!isCollapsed && children && children.map((child) => {
+                                            const ChildIcon = iconMap[child.icon] ?? Circle;
+                                            return (
+                                                <SidebarMenuItem key={child.menuId} className="pl-4 mt-0.5">
+                                                    <SidebarMenuButton
+                                                        asChild
+                                                        isActive={isActive(child.url)}
+                                                        className={cn(
+                                                            "transition-all duration-300 rounded-xl h-10 border border-transparent",
+                                                            theme === "dark"
+                                                                ? "hover:bg-emerald-500/5 hover:border-emerald-500/10"
+                                                                : "hover:bg-emerald-50 hover:border-emerald-100 shadow-sm hover:shadow-emerald-500/5",
+                                                            isActive(child.url) && (
+                                                                theme === "dark"
+                                                                    ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400 shadow-lg shadow-emerald-500/5"
+                                                                    : "bg-emerald-500 text-white border-emerald-600 shadow-lg shadow-emerald-500/25 active:bg-emerald-600"
+                                                            )
+                                                        )}
+                                                    >
+                                                        <NavLink
+                                                            to={child.url}
+                                                            title={child.title}
+                                                            className="flex items-center gap-2.5 w-full px-3"
+                                                        >
+                                                            <ChildIcon className={cn(
+                                                                "h-4 w-4 transition-all duration-500",
+                                                                isActive(child.url)
+                                                                    ? (theme === "dark" ? (child.color || "text-emerald-500") : "text-white")
+                                                                    : (theme === "dark" ? "text-slate-400" : "text-slate-500"),
+                                                                "group-hover:scale-110 active:scale-95"
+                                                            )} />
+                                                            <span className={cn(
+                                                                "text-[12px] font-semibold tracking-wide",
+                                                                isActive(child.url) ? "opacity-100" : "opacity-80"
+                                                            )}>
+                                                                {child.title}
+                                                            </span>
+                                                        </NavLink>
+                                                    </SidebarMenuButton>
+                                                </SidebarMenuItem>
+                                            );
+                                        })}
+                                    </React.Fragment>
+                                );
+                            })}
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
@@ -247,6 +334,9 @@ export function CounselorSidebar() {
                             </div>
                         </div>
                     </div>
+                )}
+                        </motion.div>
+                    </AnimatePresence>
                 )}
 
                 {/* Footer User Area */}

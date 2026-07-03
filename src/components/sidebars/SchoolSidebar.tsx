@@ -20,9 +20,14 @@ import {
     Shield,
     Wallet,
     Bell,
-    Layers
+    Layers,
+    Circle
 } from "lucide-react";
 import Swal from 'sweetalert2';
+import { usePermissionStore } from "../../store/permissionStore";
+import { iconMap } from "../../utils/iconMapper";
+import { motion, AnimatePresence } from "framer-motion";
+import { SidebarSkeleton } from "../layout/sidebar/SidebarSkeleton";
 import {
     Sidebar,
     SidebarContent,
@@ -36,23 +41,7 @@ import {
 import { useAuthStore } from "../../store/useAuthStore";
 import { cn } from "@/lib/utils";
 
-const schoolMenuItems = [
-    { title: "Dashboard", url: "/school/dashboard", icon: LayoutDashboard, color: "text-blue-500" },
-    { title: "Manage Students", url: "/school/students", icon: GraduationCap, color: "text-indigo-500" },
-    { title: "Manage Staff", url: "/school/staff", icon: UserSquare2, color: "text-emerald-500" },
-    // { title: "Class Sections", url: "/school/classes", icon: Layers, color: "text-orange-500" },
-    // { title: "Academic Calendar", url: "/school/calendar", icon: Calendar, color: "text-amber-500" },
-    // { title: "Assessments", url: "/school/assessments", icon: ClipboardCheck, color: "text-purple-500" },
-    // { title: "Reports & Analytics", url: "/school/reports", icon: FileText, color: "text-rose-500" },
-];
-
-const organizationItems = [
-    // { title: "Financials", url: "/school/finance", icon: Wallet, color: "text-cyan-500" },
-    // { title: "Announcements", url: "/school/announcements", icon: Bell, color: "text-yellow-500" },
-    // { title: "Messages", url: "/school/messages", icon: MessageSquare, color: "text-sky-500" },
-    { title: "School Profile", url: "/school/profile", icon: School, color: "text-indigo-500" },
-    { title: "Settings", url: "/school/settings", icon: Settings, color: "text-slate-500" },
-];
+// No hardcoded menus. Driven by Permission Store.
 
 export function SchoolSidebar() {
     const { state, toggleSidebar, setOpen, isMobile, setOpenMobile } = useSidebar();
@@ -61,6 +50,37 @@ export function SchoolSidebar() {
     const navigate = useNavigate();
     const currentPath = location.pathname;
     const { user, logout } = useAuthStore();
+    const permissions = usePermissionStore((s) => s.permissions);
+    const permissionsLoading = usePermissionStore((s) => s.loading);
+
+    // Filter only items with canView === true
+    const viewablePerms = permissions.filter(p => p.canView);
+
+    // Separate parent and child items
+    const parentItems = viewablePerms
+        .filter(p => p.parentId === null)
+        .sort((a, b) => a.sortOrder - b.sortOrder);
+
+    const childItems = viewablePerms.filter(p => p.parentId !== null);
+
+    // Group child items by parentId
+    const childrenByParent: Record<number, typeof permissions> = {};
+    childItems.forEach(child => {
+        if (child.parentId !== null) {
+            if (!childrenByParent[child.parentId]) {
+                childrenByParent[child.parentId] = [];
+            }
+            childrenByParent[child.parentId].push(child);
+        }
+    });
+
+    // Sort child items by sortOrder
+    Object.keys(childrenByParent).forEach(pid => {
+        childrenByParent[Number(pid)].sort((a, b) => a.sortOrder - b.sortOrder);
+    });
+
+    const flowItems = parentItems.filter(p => !p.url.endsWith('/profile') && !p.url.endsWith('/settings'));
+    const orgItems = parentItems.filter(p => p.url.endsWith('/profile') || p.url.endsWith('/settings'));
 
     useEffect(() => {
         const handleResize = () => {
@@ -93,7 +113,9 @@ export function SchoolSidebar() {
     useEffect(() => {
         try {
             localStorage.setItem("schoolSidebarTheme", theme);
-        } catch { }
+        } catch (e) {
+            void e;
+        }
     }, [theme]);
 
     const isActive = (path: string) => currentPath === path || currentPath.startsWith(`${path}/`);
@@ -174,9 +196,21 @@ export function SchoolSidebar() {
                 </div>
 
                 <div
-                    className="flex-1 flex flex-col min-h-0 pt-0 px-0 overflow-y-auto scrollbar-none"
-                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                    className="flex-1 flex flex-col min-h-0 pt-0 px-0 overflow-hidden"
                 >
+                    {permissionsLoading ? (
+                        <SidebarSkeleton isCollapsed={isCollapsed} theme={theme} />
+                    ) : (
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key="school-sidebar-menu"
+                                initial={{ opacity: 0, x: -8 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -8 }}
+                                transition={{ duration: 0.25 }}
+                                className="flex-1 flex flex-col min-h-0 overflow-y-auto scrollbar-none"
+                                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                            >
                     <SidebarGroup className="py-1 flex-none">
                         {!isCollapsed && (
                             <div className="px-4 mb-4 flex items-center gap-4">
@@ -191,71 +225,122 @@ export function SchoolSidebar() {
                         )}
                         <SidebarGroupContent>
                             <SidebarMenu className="space-y-0.5 px-1 py-0">
-                                {schoolMenuItems.map((item) => {
-                                    const Icon = item.icon;
+                                {flowItems.map((item) => {
+                                    const Icon = iconMap[item.icon] ?? Circle;
+                                    const children = childrenByParent[item.menuId];
                                     return (
-                                        <SidebarMenuItem key={item.title}>
-                                            <SidebarMenuButton asChild isActive={isActive(item.url)} className={cn(
-                                                "transition-all duration-200 rounded-lg group h-8",
-                                                theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"
-                                            )}>
-                                                <NavLink to={item.url} title={item.title} className={cn(
-                                                    "flex items-center gap-3 px-3 py-1.5 w-full",
-                                                    isCollapsed && "justify-center"
+                                        <React.Fragment key={item.menuId}>
+                                            <SidebarMenuItem>
+                                                <SidebarMenuButton asChild isActive={isActive(item.url)} className={cn(
+                                                    "transition-all duration-200 rounded-lg group h-8",
+                                                    theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"
                                                 )}>
-                                                    <Icon className={cn(
-                                                        "h-4.5 w-4.5 transition-transform duration-200 group-hover:scale-105",
-                                                        isActive(item.url) ? item.color : theme === "dark" ? "text-slate-300" : "text-slate-500"
-                                                    )} />
-                                                    {!isCollapsed && <span className="text-sm font-medium">{item.title}</span>}
-                                                </NavLink>
-                                            </SidebarMenuButton>
-                                        </SidebarMenuItem>
+                                                    <NavLink to={item.url} title={item.title} className={cn(
+                                                        "flex items-center gap-3 px-3 py-1.5 w-full",
+                                                        isCollapsed && "justify-center"
+                                                    )}>
+                                                        <Icon className={cn(
+                                                            "h-4.5 w-4.5 transition-transform duration-200 group-hover:scale-105",
+                                                            isActive(item.url) ? (item.color || "text-blue-500") : theme === "dark" ? "text-slate-300" : "text-slate-500"
+                                                        )} />
+                                                        {!isCollapsed && <span className="text-sm font-medium">{item.title}</span>}
+                                                    </NavLink>
+                                                </SidebarMenuButton>
+                                            </SidebarMenuItem>
+
+                                            {!isCollapsed && children && children.map((child) => {
+                                                const ChildIcon = iconMap[child.icon] ?? Circle;
+                                                return (
+                                                    <SidebarMenuItem key={child.menuId} className="pl-4 mt-0.5">
+                                                        <SidebarMenuButton asChild isActive={isActive(child.url)} className={cn(
+                                                            "transition-all duration-200 rounded-lg group h-7",
+                                                            theme === "dark" ? "hover:bg-slate-800/60" : "hover:bg-slate-50/60"
+                                                        )}>
+                                                            <NavLink to={child.url} title={child.title} className="flex items-center gap-2.5 px-3 py-1 w-full">
+                                                                <ChildIcon className={cn(
+                                                                    "h-3.5 w-3.5 transition-transform duration-200 group-hover:scale-105",
+                                                                    isActive(child.url) ? (child.color || "text-blue-500") : theme === "dark" ? "text-slate-400" : "text-slate-400"
+                                                                )} />
+                                                                <span className="text-xs font-normal opacity-90">{child.title}</span>
+                                                            </NavLink>
+                                                        </SidebarMenuButton>
+                                                    </SidebarMenuItem>
+                                                );
+                                            })}
+                                        </React.Fragment>
                                     );
                                 })}
                             </SidebarMenu>
                         </SidebarGroupContent>
                     </SidebarGroup>
 
-                    <SidebarGroup className="mt-2">
-                        {!isCollapsed && (
-                            <div className="px-4 mb-4 flex items-center gap-4">
-                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-600 whitespace-nowrap">
-                                    Organization
-                                </span>
-                                <div className={cn(
-                                    "h-[1px] w-full",
-                                    theme === "dark" ? "bg-slate-800/50" : "bg-slate-100"
-                                )} />
-                            </div>
-                        )}
-                        <SidebarGroupContent>
-                            <SidebarMenu className="space-y-0.5 px-1 py-0">
-                                {organizationItems.map((item) => {
-                                    const Icon = item.icon;
-                                    return (
-                                        <SidebarMenuItem key={item.title}>
-                                            <SidebarMenuButton asChild isActive={isActive(item.url)} className={cn(
-                                                "transition-all duration-200 rounded-lg group h-8",
-                                                theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"
-                                            )}>
-                                                <NavLink to={item.url} title={item.title} className={cn(
-                                                    "flex items-center gap-3 px-3 py-1.5 w-full",
-                                                    isCollapsed && "justify-center"
-                                                )}>
-                                                    <Icon className={cn(
-                                                        "h-4.5 w-4.5 transition-transform duration-200 group-hover:scale-105",
-                                                        isActive(item.url) ? item.color : theme === "dark" ? "text-slate-300" : "text-slate-500"
-                                                    )} />
-                                                    {!isCollapsed && <span className="text-sm font-medium">{item.title}</span>}
-                                                </NavLink>
-                                            </SidebarMenuButton>
-                                        </SidebarMenuItem>
-                                    );
-                                })}
-                            </SidebarMenu>
-                        </SidebarGroupContent>
-                    </SidebarGroup>
+                    {orgItems.length > 0 && (
+                        <SidebarGroup className="mt-2">
+                            {!isCollapsed && (
+                                <div className="px-4 mb-4 flex items-center gap-4">
+                                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-600 whitespace-nowrap">
+                                        Organization
+                                    </span>
+                                    <div className={cn(
+                                        "h-[1px] w-full",
+                                        theme === "dark" ? "bg-slate-800/50" : "bg-slate-100"
+                                    )} />
+                                </div>
+                            )}
+                            <SidebarGroupContent>
+                                <SidebarMenu className="space-y-0.5 px-1 py-0">
+                                    {orgItems.map((item) => {
+                                        const Icon = iconMap[item.icon] ?? Circle;
+                                        const children = childrenByParent[item.menuId];
+                                        return (
+                                            <React.Fragment key={item.menuId}>
+                                                <SidebarMenuItem>
+                                                    <SidebarMenuButton asChild isActive={isActive(item.url)} className={cn(
+                                                        "transition-all duration-200 rounded-lg group h-8",
+                                                        theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"
+                                                    )}>
+                                                        <NavLink to={item.url} title={item.title} className={cn(
+                                                            "flex items-center gap-3 px-3 py-1.5 w-full",
+                                                            isCollapsed && "justify-center"
+                                                        )}>
+                                                            <Icon className={cn(
+                                                                "h-4.5 w-4.5 transition-transform duration-200 group-hover:scale-105",
+                                                                isActive(item.url) ? (item.color || "text-indigo-500") : theme === "dark" ? "text-slate-300" : "text-slate-500"
+                                                            )} />
+                                                            {!isCollapsed && <span className="text-sm font-medium">{item.title}</span>}
+                                                        </NavLink>
+                                                    </SidebarMenuButton>
+                                                </SidebarMenuItem>
+
+                                                {!isCollapsed && children && children.map((child) => {
+                                                    const ChildIcon = iconMap[child.icon] ?? Circle;
+                                                    return (
+                                                        <SidebarMenuItem key={child.menuId} className="pl-4 mt-0.5">
+                                                            <SidebarMenuButton asChild isActive={isActive(child.url)} className={cn(
+                                                                "transition-all duration-200 rounded-lg group h-7",
+                                                                theme === "dark" ? "hover:bg-slate-800/60" : "hover:bg-slate-50/60"
+                                                            )}>
+                                                                <NavLink to={child.url} title={child.title} className="flex items-center gap-2.5 px-3 py-1 w-full">
+                                                                    <ChildIcon className={cn(
+                                                                        "h-3.5 w-3.5 transition-transform duration-200 group-hover:scale-105",
+                                                                        isActive(child.url) ? (child.color || "text-indigo-500") : theme === "dark" ? "text-slate-400" : "text-slate-400"
+                                                                    )} />
+                                                                    <span className="text-xs font-normal opacity-90">{child.title}</span>
+                                                                </NavLink>
+                                                            </SidebarMenuButton>
+                                                        </SidebarMenuItem>
+                                                    );
+                                                })}
+                                            </React.Fragment>
+                                        );
+                                    })}
+                                </SidebarMenu>
+                            </SidebarGroupContent>
+                        </SidebarGroup>
+                    )}
+                            </motion.div>
+                        </AnimatePresence>
+                    )}
                 </div>
 
                 {/* Footer Section */}

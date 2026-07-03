@@ -16,7 +16,7 @@ api.interceptors.request.use(
         const url = config.url || "";
         const lowerUrl = url.toLowerCase();
         
-        // Use Org/SuperAdmin/Student server for Auth, Organization, SuperAdmin, TenantSync, Student Module, Category, and Grade APIs
+        // Use Org/SuperAdmin/Student server for Auth, Organization, SuperAdmin, TenantSync, Student Module, Category, Grade, and Permission APIs
         if (
             lowerUrl.includes("organization") || 
             lowerUrl.includes("auth") || 
@@ -27,7 +27,8 @@ api.interceptors.request.use(
             lowerUrl.includes("question") ||
             lowerUrl.includes("test") ||
             lowerUrl.includes("category") ||
-            lowerUrl.includes("grade")
+            lowerUrl.includes("grade") ||
+            lowerUrl.includes("permission")
         ) {
             config.baseURL = import.meta.env.VITE_ORG_API_BASE_URL || "https://nervous-dubinsky.180-179-213-167.plesk.page/api/";
         } else {

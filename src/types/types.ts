@@ -254,3 +254,21 @@ export interface QuestionBankItem {
   isActive?: boolean;
   createdAt?: string;
 }
+
+// ---------- Permission & RBAC ----------
+export interface PermissionItem {
+  menuId: number;
+  title: string;
+  url: string;
+  icon: string;
+  color?: string;
+  sortOrder: number;
+  parentId: number | null;
+  canView: boolean;
+  canCreate: boolean;
+  canEdit: boolean;
+  canDelete: boolean;
+  tenant?: string;
+  organizationId?: string | number;
+  isUserOverride?: boolean;
+}

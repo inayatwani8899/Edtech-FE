@@ -3,6 +3,7 @@ import { LoginResponse, User, Permission } from "@/types/auth";
 import api from "@/api/axios";
 import Swal from "sweetalert2";
 import { usePaymentStore } from "./paymentStore";
+import { usePermissionStore } from "./permissionStore";
 
 export interface StudentSession {
   token: string | null;
@@ -105,15 +106,25 @@ export const useAuthStore = create<AuthState>(
         }
       }
 
+      const isAuthenticated = !!(token && userData);
       set({
         token: token || null,
         user: userData ? JSON.parse(userData) : null,
         permissions: permissionsData ? JSON.parse(permissionsData) : [],
         tenantData: storedTenantData ? JSON.parse(storedTenantData) : null,
         studentSession,
-        isAuthenticated: !!(token && userData),
+        isAuthenticated,
         isLoading: false,
       });
+
+      if (isAuthenticated) {
+        const currentPerms = usePermissionStore.getState().permissions;
+        if (!currentPerms || currentPerms.length === 0) {
+          usePermissionStore.getState().fetchPermissions().catch((e) => {
+            console.error("Failed to restore permissions:", e);
+          });
+        }
+      }
     },
 
     login: async (email, password, routeTenant?: string | null) => {
@@ -218,6 +229,13 @@ export const useAuthStore = create<AuthState>(
           localStorage.setItem("studentId", String(studentSession.studentId || ""));
           localStorage.setItem("gradeId", String(studentSession.gradeId || ""));
           localStorage.setItem("grade", studentSession.grade || "");
+
+          // Fetch permissions from backend using the active token
+          try {
+            await usePermissionStore.getState().fetchPermissions(true);
+          } catch (e) {
+            console.error("Failed to fetch permissions on login:", e);
+          }
 
           set({
             user,
@@ -348,7 +366,8 @@ export const useAuthStore = create<AuthState>(
         loginUrl = "/login";
       }
 
-      // 2. Clear session/localStorage
+      // 2. Clear session/localStorage & permissions
+      usePermissionStore.getState().clearPermissions();
       sessionStorage.clear();
       localStorage.clear();
 
