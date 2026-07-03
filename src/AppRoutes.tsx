@@ -67,6 +67,8 @@ const ResetPassword = lazy(() => import("./pages/auth/ResetPassword").then(m => 
 const GradesList = lazy(() => import("./pages/admin/grades/GradesList").then(m => ({ default: m.GradesList })));
 const GradeForm = lazy(() => import("./pages/admin/grades/GradeForm").then(m => ({ default: m.GradeForm })));
 const QuestionBankList = lazy(() => import("./pages/admin/question-bank/QuestionBankList").then(m => ({ default: m.QuestionBankList })));
+const QuestionsList = lazy(() => import("./pages/admin/questions/QuestionsList").then(m => ({ default: m.QuestionsList })));
+const QuestionForm = lazy(() => import("./pages/admin/questions/QuestionForm").then(m => ({ default: m.QuestionForm })));
 
 // 🔐 RBAC Module Pages
 const RBACDashboard = lazy(() => import("./modules/rbac/pages/RBACDashboard"));
@@ -251,6 +253,10 @@ const AppRoutes = () => {
                 <Route path="/manage/grades/edit/:id" element={<GradeForm />} />
                 <Route path="/manage/grades/view/:id" element={<GradeForm />} />
                 <Route path="/manage/question-bank" element={<QuestionBankList />} />
+                <Route path="/manage/questions" element={<QuestionsList />} />
+                <Route path="/manage/questions/add" element={<QuestionForm />} />
+                <Route path="/manage/questions/edit/:id" element={<QuestionForm />} />
+                <Route path="/manage/questions/view/:id" element={<QuestionForm />} />
 
                 {/* 🔐 Role-Based Access Control (RBAC) Routes */}
                 <Route path="/rbac" element={<RBACDashboard />} />

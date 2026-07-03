@@ -28,7 +28,8 @@ api.interceptors.request.use(
             lowerUrl.includes("test") ||
             lowerUrl.includes("category") ||
             lowerUrl.includes("grade") ||
-            lowerUrl.includes("permission")
+            lowerUrl.includes("permission") ||
+            lowerUrl.includes("psychometric")
         ) {
             config.baseURL = import.meta.env.VITE_ORG_API_BASE_URL || "https://nervous-dubinsky.180-179-213-167.plesk.page/api/";
         } else {

@@ -65,7 +65,28 @@ export function AdminSidebar() {
     const permissionsLoading = usePermissionStore((s) => s.loading);
 
     // Filter only items with canView === true
-    const viewablePerms = permissions.filter(p => p.canView);
+    let viewablePerms = permissions.filter(p => p.canView);
+
+    // Ensure Questions is present for Admin / SuperAdmin
+    const hasQuestionsPerm = viewablePerms.some(p => p.url === "/manage/questions");
+    if (!hasQuestionsPerm && (user?.role === "Admin" || user?.role === "SuperAdmin")) {
+        viewablePerms = [
+            ...viewablePerms,
+            {
+                menuId: 9999,
+                title: "Questions",
+                url: "/manage/questions",
+                icon: "BookOpen",
+                color: "text-rose-500",
+                sortOrder: 6,
+                parentId: null,
+                canView: true,
+                canCreate: true,
+                canEdit: true,
+                canDelete: true,
+            }
+        ];
+    }
 
     // Separate parent and child items
     const parentItems = viewablePerms
