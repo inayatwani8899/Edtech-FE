@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRBACStore } from '../store/useRBACStore';
+import { useOrganizationStore } from '@/store/organizationStore';
 import { useToast } from '../hooks';
 import { PageHeader } from '../components/PageHeader';
 import { UserSwitcher } from '../components/UserSwitcher';
@@ -14,88 +15,93 @@ import {
   Table, TableHeader, TableRow, TableHead, TableBody, TableCell,
 } from '@/components/ui/table';
 import {
-  UserCog, Save, Shield, Key, Layers, Loader2, Users, Info, CheckSquare
+  Building, Save, Key, Loader2, CheckSquare, Layers, Lock, ShieldAlert
 } from 'lucide-react';
+import api from '@/api/axios';
+import { PermissionItem } from '@/types/types';
 
-export const UserPermissionMapping: React.FC = () => {
+export const OrganizationPermissionMapping: React.FC = () => {
   const { showToast } = useToast();
+  
+  const { menus, fetchMenus, loading: rbacLoading } = useRBACStore();
+  const { organizations, fetchOrganizations, loading: orgLoading } = useOrganizationStore();
 
-  const {
-    users, fetchUsers,
-    roles, fetchRoles,
-    menus, fetchMenus,
-    userPermissions, fetchUserPermissions,
-    assignUserPermission,
-    loading, saving
-  } = useRBACStore();
-
-  const [selectedUserId, setSelectedUserId] = useState<string>('');
-  const [mappedPermissions, setMappedPermissions] = useState<Record<number | string, any>>({});
-  const [originalPermissions, setOriginalPermissions] = useState<Record<number | string, any>>({});
+  const [selectedOrgId, setSelectedOrgId] = useState<string>('');
+  const [mappedPermissions, setMappedPermissions] = useState<Record<number, PermissionItem>>({});
+  const [originalPermissions, setOriginalPermissions] = useState<Record<number, PermissionItem>>({});
+  const [loadingPerms, setLoadingPerms] = useState(false);
   const [isSavingLocal, setIsSavingLocal] = useState(false);
 
   useEffect(() => {
-    fetchUsers();
-    fetchRoles();
     fetchMenus();
-  }, [fetchUsers, fetchRoles, fetchMenus]);
+    fetchOrganizations();
+  }, [fetchMenus, fetchOrganizations]);
 
-  // Sync user overrides when userId changes
+  const selectedOrg = organizations.find(o => String(o.id) === selectedOrgId);
+  const tenantName = selectedOrg?.tenantDb || selectedOrg?.instituteName?.toLowerCase().replace(/\s+/g, '-') || '';
+
+  // Load organization permissions when selectedOrg changes
   useEffect(() => {
-    if (selectedUserId) {
-      fetchUserPermissions(selectedUserId);
-    } else {
-      setMappedPermissions({});
-      setOriginalPermissions({});
-    }
-  }, [selectedUserId, fetchUserPermissions]);
+    const loadOrgPermissions = async () => {
+      if (!selectedOrgId || !tenantName) {
+        setMappedPermissions({});
+        setOriginalPermissions({});
+        return;
+      }
+      setLoadingPerms(true);
+      try {
+        const response = await api.get('/permission/permissions', {
+          params: { tenant: tenantName }
+        });
+        const list = (response.data?.data ?? response.data ?? []) as PermissionItem[];
+        const map: Record<number, PermissionItem> = {};
+        list.forEach(p => {
+          map[p.menuId] = {
+            ...p,
+            canView: Boolean(p.canView),
+            canCreate: Boolean(p.canCreate),
+            canEdit: Boolean(p.canEdit),
+            canDelete: Boolean(p.canDelete),
+          };
+        });
+        setMappedPermissions(JSON.parse(JSON.stringify(map)));
+        setOriginalPermissions(JSON.parse(JSON.stringify(map)));
+      } catch (err) {
+        console.error('Failed to load organization permissions', err);
+        showToast('error', 'Failed to load tenant permissions');
+      } finally {
+        setLoadingPerms(false);
+      }
+    };
+    loadOrgPermissions();
+  }, [selectedOrgId, tenantName, showToast]);
 
-  // Load userPermissions into local state map
-  useEffect(() => {
-    if (selectedUserId && userPermissions) {
-      // Ensure the userPermissions belong to the currently selected user to avoid stale mapping
-      const firstPerm = userPermissions[0] as any;
-      const isCorrectUser = userPermissions.length === 0 || String(firstPerm?.userId) === String(selectedUserId);
-      if (!isCorrectUser) return;
-
-      const map: Record<number | string, any> = {};
-      userPermissions.forEach(p => {
-        const item = p as any;
-        map[p.menuId] = {
-          id: item.id ?? p.menuId,
-          menuId: p.menuId,
-          canView: Boolean(p.canView),
-          canCreate: Boolean(p.canCreate),
-          canEdit: Boolean(p.canEdit),
-          canDelete: Boolean(p.canDelete),
-        };
-      });
-      setMappedPermissions(JSON.parse(JSON.stringify(map)));
-      setOriginalPermissions(JSON.parse(JSON.stringify(map)));
-    }
-  }, [selectedUserId, userPermissions]);
-
-  const handleToggle = (menuId: number | string, field: 'canView' | 'canCreate' | 'canEdit' | 'canDelete', checked: boolean) => {
+  const handleToggle = (menuId: number, field: 'canView' | 'canCreate' | 'canEdit' | 'canDelete', checked: boolean) => {
     setMappedPermissions(prev => {
       const existing = prev[menuId] || {
         menuId,
+        title: '',
+        url: '',
+        icon: '',
+        sortOrder: 0,
+        parentId: null,
         canView: false,
         canCreate: false,
         canEdit: false,
         canDelete: false,
       };
-
+      
       const updated = {
         ...existing,
         [field]: checked,
       };
 
-      // Auto-enable view if override create/edit/delete checked
+      // Auto-enable canView if create/edit/delete is enabled
       if ((field === 'canCreate' || field === 'canEdit' || field === 'canDelete') && checked) {
         updated.canView = true;
       }
 
-      // Auto-disable create/edit/delete if view unchecked
+      // Auto-disable create/edit/delete if canView is disabled
       if (field === 'canView' && !checked) {
         updated.canCreate = false;
         updated.canEdit = false;
@@ -110,7 +116,7 @@ export const UserPermissionMapping: React.FC = () => {
   };
 
   // Helper to determine if a specific menu row has been modified
-  const isRowChanged = (menuId: number | string) => {
+  const isRowChanged = (menuId: number) => {
     const orig = originalPermissions[menuId] || { canView: false, canCreate: false, canEdit: false, canDelete: false };
     const curr = mappedPermissions[menuId] || { canView: false, canCreate: false, canEdit: false, canDelete: false };
     return (
@@ -121,13 +127,13 @@ export const UserPermissionMapping: React.FC = () => {
     );
   };
 
-  const computedHasChanges = menus.some(menu => isRowChanged(menu.id));
+  const computedHasChanges = menus.some(menu => isRowChanged(Number(menu.id)));
 
   const handleSave = async () => {
-    if (!selectedUserId || isSavingLocal) return;
+    if (!selectedOrgId || !tenantName || isSavingLocal) return;
 
     // Filter down to only changed menu items
-    const changedMenus = menus.filter(menu => isRowChanged(menu.id));
+    const changedMenus = menus.filter(menu => isRowChanged(Number(menu.id)));
     if (changedMenus.length === 0) {
       showToast('info', 'No changes to apply');
       return;
@@ -135,9 +141,9 @@ export const UserPermissionMapping: React.FC = () => {
 
     setIsSavingLocal(true);
     try {
-      // Loop only changed menus and save each permission override record
+      // Loop changed menus and save each permission override record
       const promises = changedMenus.map(async (menu) => {
-        const mId = menu.id;
+        const mId = Number(menu.id);
         const current = mappedPermissions[mId] || {
           canView: false,
           canCreate: false,
@@ -146,7 +152,7 @@ export const UserPermissionMapping: React.FC = () => {
         };
 
         const payload = {
-          userId: selectedUserId,
+          tenant: tenantName,
           menuId: mId,
           canView: Boolean(current.canView),
           canCreate: Boolean(current.canCreate),
@@ -154,28 +160,45 @@ export const UserPermissionMapping: React.FC = () => {
           canDelete: Boolean(current.canDelete),
         };
 
-        await assignUserPermission(payload);
+        await api.post('/permission/assign-organization-permission', payload);
       });
 
       await Promise.all(promises);
-      showToast('success', 'User permission overrides saved successfully');
+      showToast('success', 'Tenant permissions updated successfully');
       
       // Reload permissions from server to align original state
-      await fetchUserPermissions(selectedUserId);
+      const response = await api.get('/permission/permissions', {
+        params: { tenant: tenantName }
+      });
+      const list = (response.data?.data ?? response.data ?? []) as PermissionItem[];
+      const map: Record<number, PermissionItem> = {};
+      list.forEach(p => {
+        map[p.menuId] = {
+          ...p,
+          canView: Boolean(p.canView),
+          canCreate: Boolean(p.canCreate),
+          canEdit: Boolean(p.canEdit),
+          canDelete: Boolean(p.canDelete),
+        };
+      });
+      setMappedPermissions(JSON.parse(JSON.stringify(map)));
+      setOriginalPermissions(JSON.parse(JSON.stringify(map)));
     } catch (err) {
-      showToast('error', 'Failed to save user permission overrides');
+      console.error('Failed to save tenant permissions', err);
+      showToast('error', 'Failed to save tenant permissions');
     } finally {
       setIsSavingLocal(false);
     }
   };
 
   const selectAll = () => {
-    const map: Record<number | string, any> = {};
+    const map: Record<number, PermissionItem> = {};
     menus.forEach(menu => {
-      const existing = mappedPermissions[menu.id] || {};
-      map[menu.id] = {
+      const mId = Number(menu.id);
+      const existing = mappedPermissions[mId] || {};
+      map[mId] = {
         ...existing,
-        menuId: menu.id,
+        menuId: mId,
         canView: true,
         canCreate: true,
         canEdit: true,
@@ -186,12 +209,13 @@ export const UserPermissionMapping: React.FC = () => {
   };
 
   const deselectAll = () => {
-    const map: Record<number | string, any> = {};
+    const map: Record<number, PermissionItem> = {};
     menus.forEach(menu => {
-      const existing = mappedPermissions[menu.id] || {};
-      map[menu.id] = {
+      const mId = Number(menu.id);
+      const existing = mappedPermissions[mId] || {};
+      map[mId] = {
         ...existing,
-        menuId: menu.id,
+        menuId: mId,
         canView: false,
         canCreate: false,
         canEdit: false,
@@ -201,58 +225,57 @@ export const UserPermissionMapping: React.FC = () => {
     setMappedPermissions(map);
   };
 
-  const selectedUser = users.find(u => String(u.id) === selectedUserId);
-  const selectedRole = selectedUser ? roles.find(r => String(r.id) === selectedUser.roleId) : null;
-
-  // Group child menus by parent menu
+  // Group child menus by parent
   const parentMenus = menus.filter(m => m.parentId === null).sort((a, b) => a.sortOrder - b.sortOrder);
-  const childrenByParent: Record<number | string, typeof menus> = {};
+  const childrenByParent: Record<number, typeof menus> = {};
   menus.filter(m => m.parentId !== null).forEach(m => {
-    const pid = m.parentId!;
+    const pid = Number(m.parentId);
     if (!childrenByParent[pid]) childrenByParent[pid] = [];
     childrenByParent[pid].push(m);
   });
   Object.keys(childrenByParent).forEach(pid => {
-    childrenByParent[pid].sort((a, b) => a.sortOrder - b.sortOrder);
+    childrenByParent[Number(pid)].sort((a, b) => a.sortOrder - b.sortOrder);
   });
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-[#F8FAFC]">
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-rose-500/5 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-pink-450/5 rounded-full blur-[120px]" />
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-500/5 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-400/5 rounded-full blur-[120px]" />
       </div>
 
       <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10">
         <PageHeader
-          tag="Direct Overrides"
-          title="User"
-          highlight="Permission Override"
-          subtitle="Define unique dynamic permissions directly on accounts, overriding their roles"
+          tag="Tenant Licensing"
+          title="Organization"
+          highlight="Permission Mapping"
+          subtitle="Configure system menu visibility and feature permissions for entire tenant databases"
           breadcrumbs={[
             { label: 'RBAC', href: '/rbac' },
-            { label: 'User Overrides' },
+            { label: 'Tenant Permissions' },
           ]}
           actions={<UserSwitcher />}
         />
 
-        {/* User Selector */}
+        {/* Organization Selector */}
         <Card className="glass-card border-none shadow-elegant rounded-2xl overflow-hidden mb-6">
           <CardContent className="p-5">
             <div className="flex flex-col md:flex-row md:items-end gap-4">
               <div className="flex-1 space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Select User</label>
-                <Select value={selectedUserId} onValueChange={setSelectedUserId}>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Select Organization (Tenant)</label>
+                <Select value={selectedOrgId} onValueChange={setSelectedOrgId}>
                   <SelectTrigger className="h-11 rounded-xl border-slate-200 bg-white">
-                    <SelectValue placeholder="Choose a user to configure overrides..." />
+                    <SelectValue placeholder={orgLoading ? "Loading organizations..." : "Choose an organization to license..."} />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl max-h-60">
-                    {users.map(user => (
-                      <SelectItem key={user.id} value={String(user.id)} className="rounded-lg">
+                    {organizations.map(org => (
+                      <SelectItem key={org.id} value={String(org.id)} className="rounded-lg">
                         <div className="flex items-center gap-2">
-                          <Users className="h-3.5 w-3.5 text-rose-500" />
-                          <span>{user.name}</span>
-                          <Badge variant="secondary" className="text-[8px] ml-1">{user.roleName || 'No Role'}</Badge>
+                          <Building className="h-3.5 w-3.5 text-indigo-500" />
+                          <span>{org.instituteName}</span>
+                          <Badge variant={org.isActive ? 'default' : 'secondary'} className="text-[8px] ml-2">
+                            {org.isActive ? 'active' : 'inactive'}
+                          </Badge>
                         </div>
                       </SelectItem>
                     ))}
@@ -260,45 +283,35 @@ export const UserPermissionMapping: React.FC = () => {
                 </Select>
               </div>
 
-              {selectedUserId && (
+              {selectedOrgId && (
                 <div className="flex items-center gap-2">
                   <Button variant="outline" onClick={selectAll} size="sm" className="h-9 rounded-lg text-[10px] font-bold uppercase tracking-wider gap-1.5 border-slate-200">
-                    <CheckSquare className="h-3.5 w-3.5" /> Override All
+                    <CheckSquare className="h-3.5 w-3.5" /> License All
                   </Button>
                   <Button variant="outline" onClick={deselectAll} size="sm" className="h-9 rounded-lg text-[10px] font-bold uppercase tracking-wider gap-1.5 border-slate-200">
-                    Clear Overrides
+                    Revoke All
                   </Button>
                 </div>
               )}
             </div>
-
-            {selectedUser && (
-              <div className="mt-4 p-3 bg-blue-50/50 rounded-xl flex items-start gap-2">
-                <Info className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                <p className="text-[10px] text-blue-700 leading-relaxed">
-                  <strong>{selectedUser.name}</strong> currently has the <strong>{selectedRole?.name || selectedUser.roleName || 'No Role'}</strong> role.
-                  Toggle specific checkboxes below to define explicit overrides. Checking overrides directly modifies the user's dynamic access.
-                </p>
-              </div>
-            )}
           </CardContent>
         </Card>
 
         {/* Matrix View */}
-        {!selectedUserId ? (
+        {!selectedOrgId ? (
           <Card className="glass-card border-none shadow-elegant rounded-2xl overflow-hidden">
             <CardContent className="p-16 text-center">
               <div className="h-16 w-16 rounded-2xl bg-slate-50 flex items-center justify-center mx-auto mb-4">
-                <UserCog className="h-8 w-8 text-slate-200" />
+                <Building className="h-8 w-8 text-slate-200" />
               </div>
-              <h3 className="text-lg font-black text-slate-400 mb-1">Select a User</h3>
-              <p className="text-xs text-slate-400">Choose a user account above to configure direct overrides</p>
+              <h3 className="text-lg font-black text-slate-400 mb-1">Select an Organization</h3>
+              <p className="text-xs text-slate-400">Choose a tenant above to configure their database permissions</p>
             </CardContent>
           </Card>
-        ) : loading ? (
+        ) : loadingPerms || rbacLoading ? (
           <div className="flex flex-col justify-center items-center py-20 space-y-4">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Loading overrides...</span>
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Loading tenant permissions...</span>
           </div>
         ) : (
           <div className="space-y-6">
@@ -317,7 +330,7 @@ export const UserPermissionMapping: React.FC = () => {
                     </TableHeader>
                     <TableBody>
                       {parentMenus.map(parent => {
-                        const pid = parent.id;
+                        const pid = Number(parent.id);
                         const children = childrenByParent[pid] || [];
                         const parentPerm = mappedPermissions[pid] || { canView: false, canCreate: false, canEdit: false, canDelete: false };
 
@@ -357,7 +370,7 @@ export const UserPermissionMapping: React.FC = () => {
 
                             {/* Child Menus */}
                             {children.map(child => {
-                              const cid = child.id;
+                              const cid = Number(child.id);
                               const childPerm = mappedPermissions[cid] || { canView: false, canCreate: false, canEdit: false, canDelete: false };
 
                               return (
@@ -407,21 +420,21 @@ export const UserPermissionMapping: React.FC = () => {
               <Card className={`border-none shadow-2xl rounded-2xl overflow-hidden transition-all duration-300 ${computedHasChanges ? 'bg-white/95 backdrop-blur-2xl' : 'bg-white/60 backdrop-blur'}`}>
                 <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-rose-500 to-pink-650 flex items-center justify-center text-white shadow-sm">
-                      <UserCog className="h-4 w-4" />
+                    <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-650 flex items-center justify-center text-white shadow-sm animate-none">
+                      <Building className="h-4 w-4" />
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-slate-800">{selectedUser?.name}</p>
-                      <p className="text-[10px] text-slate-400">Configure direct user overrides</p>
+                      <p className="text-xs font-bold text-slate-800">{selectedOrg?.instituteName}</p>
+                      <p className="text-[10px] text-slate-400">Database: <code className="font-mono bg-slate-105 px-1 py-0.5 rounded">{tenantName}</code></p>
                     </div>
                   </div>
                   <Button
                     onClick={handleSave}
-                    disabled={!computedHasChanges || saving || isSavingLocal}
+                    disabled={!computedHasChanges || loadingPerms || rbacLoading || isSavingLocal}
                     className="rounded-xl font-bold text-xs uppercase tracking-wider gap-2 shadow-lg transition-all bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-indigo-500/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
                   >
-                    {(saving || isSavingLocal) ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                    {(saving || isSavingLocal) ? 'Synchronizing...' : computedHasChanges ? 'Apply Matrix' : 'No Alterations'}
+                    {(loadingPerms || rbacLoading || isSavingLocal) ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                    {(loadingPerms || rbacLoading || isSavingLocal) ? 'Synchronizing...' : computedHasChanges ? 'Apply Matrix' : 'No Alterations'}
                   </Button>
                 </CardContent>
               </Card>
@@ -433,4 +446,4 @@ export const UserPermissionMapping: React.FC = () => {
   );
 };
 
-export default UserPermissionMapping;
+export default OrganizationPermissionMapping;

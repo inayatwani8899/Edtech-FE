@@ -118,7 +118,8 @@ export const TestInterface = ({
                 }
             } catch (e) {}
         }
-        return { x: 20, y: 100, width: 220, height: 150 };
+        const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+        return { x: 10, y: 80, width: isMobile ? 120 : 220, height: isMobile ? 90 : 150 };
     });
 
     const acquireCameraStream = async () => {
@@ -644,59 +645,64 @@ export const TestInterface = ({
                         </div>
                     )}
 
-                    {/* Table Header */}
-                    <div className="flex-none grid grid-cols-[1fr_repeat(5,60px)] sm:grid-cols-[1fr_repeat(5,80px)] md:grid-cols-[1fr_repeat(5,100px)] bg-[#F8FAFC] border-b border-[#E5E7EB] sticky top-0 z-30 min-w-[500px] sm:min-w-[700px] md:min-w-0">
-                        <div className="p-3 text-[12px] font-bold text-[#111827] pl-4 md:pl-6 self-center uppercase tracking-wider truncate">
-                            {currentCategoryLabel}
-                        </div>
-                        {testQuestions.length > 0 && testQuestions[0].options.map((option) => (
-                            <div key={option.option_Id} className="p-2 text-center font-bold text-[11px] text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB] flex items-center justify-center">
-                                {option.option_Text}
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Table Questions Body */}
-                    <div ref={questionsContainerRef} className="flex-1 overflow-y-auto w-full custom-scrollbar scroll-smooth p-4 space-y-3">
-                        <div className={cn("min-w-[500px] sm:min-w-[700px] md:min-w-0 space-y-3", isFullScreen && "h-full flex flex-col")}>
-                            {testQuestions.map((question, qIdx) => (
-                                <div
-                                    key={question.question_Id}
-                                    className={cn(
-                                        "question-card grid grid-cols-[1fr_repeat(5,60px)] sm:grid-cols-[1fr_repeat(5,80px)] md:grid-cols-[1fr_repeat(5,100px)] items-center rounded-[12px] group",
-                                        isFullScreen && "flex-1"
-                                    )}
-                                >
-                                    <div className="text-[13px] font-semibold text-[#111827] pl-4 md:pl-6 p-3 flex gap-2 relative z-10">
-                                        <span className="text-slate-400 font-mono text-[12px]">{(currentPage - 1) * 10 + (qIdx + 1)}.</span>
-                                        <span>{question.question_Text}</span>
-                                    </div>
-
-                                    {question.options.map((option) => {
-                                        const optionIdStr = String(option.option_Id);
-                                        const isSelected = getCurrentAnswer(question.question_Id.toString()) === optionIdStr;
-                                        return (
-                                            <div key={option.option_Id} className="flex justify-center border-l border-[#E5E7EB]/50 p-1 relative z-10">
-                                                <button
-                                                    className={cn(
-                                                        "relative h-5 w-5 rounded-full border flex items-center justify-center transition-all duration-200",
-                                                        isSelected 
-                                                            ? "bg-[#4F46E5] border-[#4F46E5] shadow-sm scale-105" 
-                                                            : "bg-white border-[#CBD5E1] hover:border-[#4F46E5] scale-95"
-                                                    )}
-                                                    onClick={() => {
-                                                        setAnswerLocally(question.question_Id.toString(), optionIdStr);
-                                                    }}
-                                                >
-                                                    {isSelected && (
-                                                        <div className="h-2 w-2 rounded-full bg-white animate-in zoom-in duration-200" />
-                                                    )}
-                                                </button>
-                                            </div>
-                                        );
-                                    })}
+                    {/* Scrollable table matrix for mobile layout responsiveness */}
+                    <div className="flex-1 min-h-0 overflow-x-auto w-full flex flex-col">
+                        <div className="min-w-[600px] sm:min-w-[750px] md:min-w-0 flex flex-col flex-1">
+                            {/* Table Header */}
+                            <div className="flex-none grid grid-cols-[1fr_repeat(5,60px)] sm:grid-cols-[1fr_repeat(5,80px)] md:grid-cols-[1fr_repeat(5,100px)] bg-[#F8FAFC] border-b border-[#E5E7EB] sticky top-0 z-30">
+                                <div className="p-3 text-[12px] font-bold text-[#111827] pl-4 md:pl-6 self-center uppercase tracking-wider truncate">
+                                    {currentCategoryLabel}
                                 </div>
-                            ))}
+                                {testQuestions.length > 0 && testQuestions[0].options.map((option) => (
+                                    <div key={option.option_Id} className="p-2 text-center font-bold text-[11px] text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB] flex items-center justify-center">
+                                        {option.option_Text}
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Table Questions Body */}
+                            <div ref={questionsContainerRef} className="flex-1 overflow-y-auto w-full custom-scrollbar scroll-smooth p-4 space-y-3">
+                                <div className={cn("space-y-3", isFullScreen && "h-full flex flex-col")}>
+                                    {testQuestions.map((question, qIdx) => (
+                                        <div
+                                            key={question.question_Id}
+                                            className={cn(
+                                                "question-card grid grid-cols-[1fr_repeat(5,60px)] sm:grid-cols-[1fr_repeat(5,80px)] md:grid-cols-[1fr_repeat(5,100px)] items-center rounded-[12px] group",
+                                                isFullScreen && "flex-1"
+                                            )}
+                                        >
+                                            <div className="text-[13px] font-semibold text-[#111827] pl-4 md:pl-6 p-3 flex gap-2 relative z-10">
+                                                <span className="text-slate-400 font-mono text-[12px]">{(currentPage - 1) * 10 + (qIdx + 1)}.</span>
+                                                <span>{question.question_Text}</span>
+                                            </div>
+
+                                            {question.options.map((option) => {
+                                                const optionIdStr = String(option.option_Id);
+                                                const isSelected = getCurrentAnswer(question.question_Id.toString()) === optionIdStr;
+                                                return (
+                                                    <div key={option.option_Id} className="flex justify-center border-l border-[#E5E7EB]/50 p-1 relative z-10">
+                                                        <button
+                                                            className={cn(
+                                                                "relative h-5 w-5 rounded-full border flex items-center justify-center transition-all duration-200",
+                                                                isSelected 
+                                                                    ? "bg-[#4F46E5] border-[#4F46E5] shadow-sm scale-105" 
+                                                                    : "bg-white border-[#CBD5E1] hover:border-[#4F46E5] scale-95"
+                                                            )}
+                                                            onClick={() => {
+                                                                setAnswerLocally(question.question_Id.toString(), optionIdStr);
+                                                            }}
+                                                        >
+                                                            {isSelected && (
+                                                                <div className="h-2 w-2 rounded-full bg-white animate-in zoom-in duration-200" />
+                                                            )}
+                                                        </button>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -709,7 +715,7 @@ export const TestInterface = ({
                     position: "fixed",
                     left: `${cameraPos.x}px`,
                     top: `${cameraPos.y}px`,
-                    width: isCamCollapsed ? "170px" : `${cameraPos.width}px`,
+                    width: isCamCollapsed ? (typeof window !== "undefined" && window.innerWidth < 640 ? "100px" : "170px") : `${cameraPos.width}px`,
                     height: isCamCollapsed ? "40px" : `${cameraPos.height}px`,
                 }}
                 className={cn(
@@ -724,13 +730,13 @@ export const TestInterface = ({
                     {isCamCollapsed ? (
                         <div className="flex items-center justify-between w-full">
                             <span className="text-[11px] font-semibold text-slate-200 flex items-center gap-1.5">
-                                <span className="text-[12px]">📷</span> AI Monitoring
+                                <span className="text-[12px]">📷</span> <span className="hidden xs:inline">AI Monitoring</span>
                             </span>
                             <button 
                                 onClick={handleMaximize}
                                 className="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 uppercase tracking-wider transition-colors ml-2"
                             >
-                                Maximize
+                                Max
                             </button>
                         </div>
                     ) : (

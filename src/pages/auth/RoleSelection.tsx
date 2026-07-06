@@ -65,7 +65,7 @@ export const RoleSelection = () => {
   ];
 
   return (
-    <div className="h-screen w-full bg-[#0a0c10] relative flex items-center justify-center overflow-hidden select-none">
+    <div className="min-h-screen w-full bg-[#0a0c10] relative flex items-center justify-center overflow-y-auto py-16 md:py-0 select-none">
       {/* 🌌 ULTRA-FLUID DYNAMIC BACKDROP (Parity with Login) */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-primary/20 rounded-full blur-[160px] animate-pulse mix-blend-screen transition-opacity duration-1000"></div>

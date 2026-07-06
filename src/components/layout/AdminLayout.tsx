@@ -51,13 +51,55 @@
 //     </SidebarProvider>
 //   );
 // };
-import { Outlet, Navigate, useNavigate } from "react-router-dom";
+import { Outlet, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "../../store/useAuthStore"; // ✅ using zustand
 import { AdminSidebar } from "../sidebars/AdminSidebar";
 import { Navbar } from "../ui/navbar";
 import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
-import { ChevronRight, Menu, Brain } from "lucide-react";
+import { ChevronRight, Menu, Brain, Loader2 } from "lucide-react";
 import Swal from "sweetalert2";
+import React, { useEffect } from "react";
+import { usePermissionStore, matchPermission } from "@/store/permissionStore";
+
+const AdminPermissionGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const location = useLocation();
+  const { user } = useAuthStore();
+  const permissions = usePermissionStore((s) => s.permissions);
+  const loading = usePermissionStore((s) => s.loading);
+  const loaded = usePermissionStore((s) => s.permissionsLoaded);
+  const fetchPermissions = usePermissionStore((s) => s.fetchPermissions);
+
+  useEffect(() => {
+    fetchPermissions();
+  }, [fetchPermissions]);
+
+  // Bypass checking for base /dashboard route
+  if (location.pathname === "/dashboard") {
+    return <>{children}</>;
+  }
+
+  // SuperAdmin has full bypass for all administrator panel pages
+  if (user?.role === "SuperAdmin") {
+    return <>{children}</>;
+  }
+
+  if (loading && !loaded) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 w-full">
+        <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
+        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Verifying Permissions...</span>
+      </div>
+    );
+  }
+
+  const match = matchPermission(location.pathname, permissions);
+
+  if (loaded && (!match || !match.canView)) {
+    return <Navigate to="/unauthorized" replace />;
+  }
+
+  return <>{children}</>;
+};
 
 export const AdminLayout = () => {
   const { user, isAuthenticated, isLoading } = useAuthStore();
@@ -92,13 +134,16 @@ export const AdminLayout = () => {
 
           {/* Main Content */}
           <main className="flex-1 overflow-auto bg-muted/20 p-4 md:p-6">
-            <Outlet />
+            <AdminPermissionGuard>
+              <Outlet />
+            </AdminPermissionGuard>
           </main>
         </div>
       </div>
     </SidebarProvider>
   );
 };
+
 
 // Responsive Mobile Header component
 function MobileHeader() {

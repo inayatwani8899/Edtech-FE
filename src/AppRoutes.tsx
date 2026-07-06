@@ -82,6 +82,8 @@ const RBACUserForm = lazy(() => import("./modules/rbac/pages/RBACUserForm"));
 const RBACUserDetail = lazy(() => import("./modules/rbac/pages/RBACUserDetail"));
 const RolePermissionMapping = lazy(() => import("./modules/rbac/pages/RolePermissionMapping"));
 const UserPermissionMapping = lazy(() => import("./modules/rbac/pages/UserPermissionMapping"));
+const Unauthorized = lazy(() => import("./pages/Unauthorized"));
+const OrganizationPermissionMapping = lazy(() => import("./modules/rbac/pages/OrganizationPermissionMapping"));
 
 
 // 🔒 Protected Route
@@ -196,6 +198,7 @@ const AppRoutes = () => {
             <Route path="/register/school" element={<SchoolRegister />} />
             <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
             <Route path="/reset-password" element={<PublicRoute><ResetPassword /></PublicRoute>} />
+            <Route path="/unauthorized" element={<Unauthorized />} />
 
 
             {/* Public Themed Layout for subpages */}
@@ -222,6 +225,7 @@ const AppRoutes = () => {
                 {/* 🔐 Access Control Mapping (Prioritized) */}
                 <Route path="/rbac/role-permissions" element={<RolePermissionMapping />} />
                 <Route path="/rbac/user-permissions" element={<UserPermissionMapping />} />
+                <Route path="/rbac/organization-permissions" element={<OrganizationPermissionMapping />} />
 
                 <Route path="/manage/users" element={<Users />} />
                 <Route path="/counselors/add" element={<CounselorForm />} />
@@ -332,6 +336,7 @@ const AppRoutes = () => {
             >
                 <Route path="/school/dashboard" element={<SchoolDashboard />} />
                 <Route path="/organization/dashboard" element={<SchoolDashboard />} />
+                <Route path="/school/role-permissions" element={<RolePermissionMapping />} />
                 <Route path="/school/students" element={<SchoolStudents />} />
                 <Route path="/school/students/add" element={<StudentForm />} />
                 <Route path="/school/students/edit/:id" element={<StudentForm />} />

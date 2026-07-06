@@ -1,186 +1,633 @@
-// ============================================================
-// RBAC Module — Zustand Store
-// ============================================================
 import { create } from 'zustand';
-import type { RBACState } from '../types';
-import {
-    MOCK_ROLES,
-    MOCK_PERMISSIONS,
-    MOCK_RBAC_USERS,
-    MOCK_ROLE_PERMISSION_MAP,
-    MOCK_USER_PERMISSION_MAP,
-    MOCK_SIMULATED_USERS,
-} from '../services/mockData';
-import { roleService, permissionService, userService } from '../services/rbacService';
+import api from '@/api/axios';
+import { PermissionItem } from '@/types/types';
 
-export const useRBACStore = create<RBACState>((set, get) => ({
-    // ── Initial State ──
-    roles: [],
-    permissions: [],
-    users: [],
-    rolePermissionMap: {},
-    userPermissionMap: {},
-    currentSimUser: null,
-    simulatedUsers: [],
-    loading: false,
+export interface RBACRole {
+  id: string | number;
+  name: string;
+  description: string;
+  status: 'active' | 'inactive';
+  createdAt?: string;
+  updatedAt?: string;
+}
 
-    // ── Init (loads mock data) ──
-    init: () => {
-        set({
-            roles: [...MOCK_ROLES],
-            permissions: [...MOCK_PERMISSIONS],
-            users: [...MOCK_RBAC_USERS],
-            rolePermissionMap: { ...MOCK_ROLE_PERMISSION_MAP },
-            userPermissionMap: { ...MOCK_USER_PERMISSION_MAP },
-            simulatedUsers: [...MOCK_SIMULATED_USERS],
-            currentSimUser: MOCK_SIMULATED_USERS[0], // Default: Super Admin
-        });
-    },
+export interface RBACUser {
+  id: string | number;
+  name: string;
+  email: string;
+  roleId: string | number;
+  roleName?: string;
+  status: 'active' | 'inactive';
+  createdAt?: string;
+}
 
-    // ── Role CRUD ─────────────────────────────────────────────
-    addRole: async (data) => {
-        set({ loading: true });
-        const created = await roleService.create(data);
-        set(s => ({ roles: [...s.roles, created], loading: false }));
-        return created;
-    },
+export interface RBACMenu {
+  id: string | number;
+  title: string;
+  url: string;
+  icon: string;
+  color?: string;
+  sortOrder: number;
+  parentId: string | number | null;
+}
 
-    updateRole: async (id, data) => {
-        set({ loading: true });
-        const updated = await roleService.update(get().roles, id, data);
-        set(s => ({
-            roles: s.roles.map(r => (r.id === id ? updated : r)),
-            loading: false,
-        }));
-        return updated;
-    },
+export interface RBACPermission {
+  id: string;
+  name: string;
+  module: string;
+  description: string;
+}
 
-    deleteRole: async (id) => {
-        set({ loading: true });
-        await roleService.remove(id);
-        set(s => ({
-            roles: s.roles.filter(r => r.id !== id),
-            rolePermissionMap: (() => { const m = { ...s.rolePermissionMap }; delete m[id]; return m; })(),
-            loading: false,
-        }));
-    },
+interface RBACStoreState {
+  roles: RBACRole[];
+  users: RBACUser[];
+  menus: RBACMenu[];
+  permissions: RBACPermission[];
+  rolePermissions: PermissionItem[];
+  userPermissions: PermissionItem[];
+  rolePermissionMap: Record<string, string[]>;
+  userPermissionMap: Record<string, string[]>;
+  simulatedUsers: { id: string; name: string; roleName: string }[];
+  currentSimUser: { id: string; name: string; roleName: string } | null;
+  
+  loading: boolean;
+  saving: boolean;
+  error: string | null;
 
-    toggleRoleStatus: (id) => {
-        set(s => ({
-            roles: s.roles.map(r =>
-                r.id === id ? { ...r, status: r.status === 'active' ? 'inactive' : 'active' } : r
-            ),
-        }));
-    },
+  init: () => Promise<void>;
+  fetchRoles: () => Promise<void>;
+  fetchUsers: () => Promise<void>;
+  fetchMenus: () => Promise<void>;
+  
+  fetchRolePermissions: (roleId: string | number) => Promise<void>;
+  fetchUserPermissions: (userId: string | number) => Promise<void>;
+  
+  assignRolePermission: (payload: {
+    roleId: string | number;
+    menuId: string | number;
+    canView: boolean;
+    canCreate: boolean;
+    canEdit: boolean;
+    canDelete: boolean;
+  }) => Promise<void>;
+  
+  updateRolePermission: (payload: {
+    id: string | number;
+    roleId: string | number;
+    menuId: string | number;
+    canView: boolean;
+    canCreate: boolean;
+    canEdit: boolean;
+    canDelete: boolean;
+  }) => Promise<void>;
+  
+  assignUserPermission: (payload: {
+    userId: string | number;
+    menuId: string | number;
+    canView: boolean;
+    canCreate: boolean;
+    canEdit: boolean;
+    canDelete: boolean;
+  }) => Promise<void>;
 
-    // ── Permission CRUD ───────────────────────────────────────
-    addPermission: async (data) => {
-        set({ loading: true });
-        const created = await permissionService.create(data);
-        set(s => ({ permissions: [...s.permissions, created], loading: false }));
-        return created;
-    },
+  assignOrganizationPermission: (payload: {
+    organizationId?: string | number;
+    tenant: string;
+    menuId: string | number;
+    canView: boolean;
+    canCreate: boolean;
+    canEdit: boolean;
+    canDelete: boolean;
+  }) => Promise<void>;
 
-    updatePermission: async (id, data) => {
-        set({ loading: true });
-        const updated = await permissionService.update(get().permissions, id, data);
-        set(s => ({
-            permissions: s.permissions.map(p => (p.id === id ? updated : p)),
-            loading: false,
-        }));
-        return updated;
-    },
+  bulkUpdateRolePermission: (payload: {
+    roleId: number;
+    tenant: string | null;
+    organizationId: number | null;
+    permissions: {
+      menuId: number;
+      canView: boolean;
+      canCreate: boolean;
+      canEdit: boolean;
+      canDelete: boolean;
+    }[];
+  }) => Promise<void>;
 
-    deletePermission: async (id) => {
-        set({ loading: true });
-        await permissionService.remove(id);
-        set(s => ({
-            permissions: s.permissions.filter(p => p.id !== id),
-            // Remove from all role maps
-            rolePermissionMap: Object.fromEntries(
-                Object.entries(s.rolePermissionMap).map(([k, v]) => [k, v.filter(pid => pid !== id)])
-            ),
-            // Remove from all user maps
-            userPermissionMap: Object.fromEntries(
-                Object.entries(s.userPermissionMap).map(([k, v]) => [k, v.filter(pid => pid !== id)])
-            ),
-            loading: false,
-        }));
-    },
+  bulkAssignRolePermission: (payload: {
+    roleId: number;
+    tenant: string | null;
+    organizationId: number | null;
+    permissions: {
+      menuId: number;
+      canView: boolean;
+      canCreate: boolean;
+      canEdit: boolean;
+      canDelete: boolean;
+    }[];
+  }) => Promise<void>;
 
-    // ── User CRUD ─────────────────────────────────────────────
-    addUser: async (data) => {
-        set({ loading: true });
-        const created = await userService.create(data);
-        set(s => ({ users: [...s.users, created], loading: false }));
-        return created;
-    },
+  switchSimUser: (id: string) => void;
+  hasPermission: (name: string) => boolean;
+  hasRole: (name: string) => boolean;
+  getEffectivePermissions: (userId: string) => string[];
+  setRolePermissions: (roleId: string, permissionIds: string[]) => void;
+  setUserDirectPermissions: (userId: string, permissionIds: string[]) => void;
+  deleteRole: (roleId: string) => Promise<void>;
+  toggleRoleStatus: (roleId: string) => void;
+  deletePermission: (id: string | number) => Promise<void>;
+  addPermission: (data: any) => Promise<void>;
+  updatePermission: (id: string | number, data: any) => Promise<void>;
+  addRole: (data: { name: string; description: string; status: 'active' | 'inactive' }) => Promise<void>;
+  updateRole: (id: string | number, data: { name: string; description: string; status: 'active' | 'inactive' }) => Promise<void>;
+}
 
-    updateUser: async (id, data) => {
-        set({ loading: true });
-        const updated = await userService.update(get().users, id, data);
-        set(s => ({
-            users: s.users.map(u => (u.id === id ? updated : u)),
-            loading: false,
-        }));
-        return updated;
-    },
+let fetchRolesController: AbortController | null = null;
+let fetchUsersController: AbortController | null = null;
+let fetchMenusController: AbortController | null = null;
+let fetchRolePermsController: AbortController | null = null;
+let fetchUserPermsController: AbortController | null = null;
 
-    deleteUser: async (id) => {
-        set({ loading: true });
-        await userService.remove(id);
-        set(s => ({
-            users: s.users.filter(u => u.id !== id),
-            userPermissionMap: (() => { const m = { ...s.userPermissionMap }; delete m[id]; return m; })(),
-            loading: false,
-        }));
-    },
+const normaliseRole = (raw: Record<string, any>): RBACRole => ({
+  id: String(raw.id ?? raw._id ?? ''),
+  name: String(raw.name ?? ''),
+  description: String(raw.description ?? ''),
+  status: raw.isDeleted === true ? 'inactive' : 'active',
+  createdAt: raw.createdAt as string | undefined,
+  updatedAt: raw.updatedAt as string | undefined,
+});
 
-    // ── Mappings ──────────────────────────────────────────────
-    setRolePermissions: (roleId, permissionIds) => {
-        set(s => ({
-            rolePermissionMap: { ...s.rolePermissionMap, [roleId]: permissionIds },
-        }));
-    },
+const normaliseUser = (raw: Record<string, any>): RBACUser => ({
+  id: String(raw.id ?? raw._id ?? ''),
+  name: String((raw.fullName ?? raw.name ?? `${raw.firstName || ''} ${raw.lastName || ''}`.trim()) || 'User'),
+  email: String(raw.email ?? ''),
+  roleId: String(raw.roleId ?? raw.role_Id ?? ''),
+  roleName: String(raw.role?.name ?? raw.roleName ?? ''),
+  status: raw.isActive === false ? 'inactive' : 'active',
+  createdAt: raw.createdAt as string | undefined,
+});
 
-    setUserDirectPermissions: (userId, permissionIds) => {
-        set(s => ({
-            userPermissionMap: { ...s.userPermissionMap, [userId]: permissionIds },
-        }));
-    },
+const MOCK_SIMULATED_USERS = [
+  { id: 'sim-1', name: 'Alex Johnson', roleName: 'Super Admin' },
+  { id: 'sim-2', name: 'Maria Rodriguez', roleName: 'Admin' },
+  { id: 'sim-3', name: 'Sarah Chen', roleName: 'Viewer' }
+];
 
-    // ── Permission Engine ─────────────────────────────────────
-    switchSimUser: (userId) => {
-        const { simulatedUsers } = get();
-        const user = simulatedUsers.find(u => u.id === userId);
-        if (user) set({ currentSimUser: user });
-    },
+export const useRBACStore = create<RBACStoreState>((set, get) => ({
+  roles: [],
+  users: [],
+  menus: [],
+  permissions: [],
+  rolePermissions: [],
+  userPermissions: [],
+  rolePermissionMap: {},
+  userPermissionMap: {},
+  simulatedUsers: MOCK_SIMULATED_USERS,
+  currentSimUser: MOCK_SIMULATED_USERS[0],
+  loading: false,
+  saving: false,
+  error: null,
 
-    getEffectivePermissions: (userId) => {
-        const { users, rolePermissionMap, userPermissionMap } = get();
-        const user = users.find(u => u.id === userId);
-        if (!user) return [];
-        const rolePerms = rolePermissionMap[user.roleId] || [];
-        const directPerms = userPermissionMap[userId] || [];
-        return [...new Set([...rolePerms, ...directPerms])];
-    },
+  init: async () => {
+    await Promise.all([
+      get().fetchRoles(),
+      get().fetchUsers(),
+      get().fetchMenus(),
+    ]);
+  },
 
-    hasPermission: (permissionName) => {
-        const { currentSimUser, rolePermissionMap, userPermissionMap, permissions } = get();
-        if (!currentSimUser) return false;
+  fetchRoles: async () => {
+    if (fetchRolesController) fetchRolesController.abort();
+    fetchRolesController = new AbortController();
+    const ctrl = fetchRolesController;
 
-        const perm = permissions.find(p => p.name === permissionName);
-        if (!perm) return false;
+    set({ loading: true, error: null });
+    try {
+      const response = await api.get('/Role', { signal: ctrl.signal });
+      if (ctrl !== fetchRolesController) return;
 
-        const rolePerms = rolePermissionMap[currentSimUser.roleId] || [];
-        const directPerms = userPermissionMap[currentSimUser.id] || currentSimUser.directPermissions || [];
+      const data = response.data;
+      const rawList = (data?.data ?? data ?? []) as Record<string, any>[];
+      const list = rawList.map(normaliseRole);
+      set({ roles: list, loading: false });
+    } catch (err: unknown) {
+      const e = err as { name?: string; response?: { data?: { message?: string } } };
+      if (e.name === 'CanceledError' || (err as { code?: string }).code === 'ERR_CANCELED') return;
+      if (ctrl !== fetchRolesController) return;
 
-        return rolePerms.includes(perm.id) || directPerms.includes(perm.id);
-    },
+      set({ error: e.response?.data?.message ?? 'Failed to fetch roles.', loading: false, roles: [] });
+    }
+  },
 
-    hasRole: (roleName) => {
-        const { currentSimUser } = get();
-        if (!currentSimUser) return false;
-        return currentSimUser.roleName.toLowerCase() === roleName.toLowerCase();
-    },
+  fetchUsers: async () => {
+    if (fetchUsersController) fetchUsersController.abort();
+    fetchUsersController = new AbortController();
+    const ctrl = fetchUsersController;
+
+    set({ loading: true, error: null });
+    try {
+      const response = await api.get('/User', { params: { limit: 1000 }, signal: ctrl.signal });
+      if (ctrl !== fetchUsersController) return;
+
+      const data = response.data?.data ?? response.data;
+      const rawList = (data?.users ?? data?.data ?? (Array.isArray(data) ? data : [])) as Record<string, any>[];
+      const list = rawList.map(normaliseUser);
+      set({ users: list, loading: false });
+    } catch (err: unknown) {
+      const e = err as { name?: string; response?: { data?: { message?: string } } };
+      if (e.name === 'CanceledError' || (err as { code?: string }).code === 'ERR_CANCELED') return;
+      if (ctrl !== fetchUsersController) return;
+
+      set({ error: e.response?.data?.message ?? 'Failed to fetch users.', loading: false, users: [] });
+    }
+  },
+
+  fetchMenus: async () => {
+    if (fetchMenusController) fetchMenusController.abort();
+    fetchMenusController = new AbortController();
+    const ctrl = fetchMenusController;
+
+    set({ loading: true, error: null });
+    try {
+      const response = await api.get('/Permission/menus', { signal: ctrl.signal });
+      if (ctrl !== fetchMenusController) return;
+
+      const data = response.data;
+      const list = (data?.data ?? data ?? []) as RBACMenu[];
+      
+      // Normalize menus into Permissions list for backward compatibility with mapping grids
+      const permissionList: RBACPermission[] = list.map(menu => {
+        const parent = menu.parentId ? list.find(m => m.id === menu.parentId) : null;
+        return {
+          id: String(menu.id),
+          name: menu.title,
+          module: parent ? parent.title : 'Root Menu Items',
+          description: menu.url || '',
+        };
+      });
+
+      set({ menus: list, permissions: permissionList, loading: false });
+    } catch (err: unknown) {
+      const e = err as { name?: string; response?: { data?: { message?: string } } };
+      if (e.name === 'CanceledError' || (err as { code?: string }).code === 'ERR_CANCELED') return;
+      if (ctrl !== fetchMenusController) return;
+
+      set({ error: e.response?.data?.message ?? 'Failed to fetch menus.', loading: false, menus: [], permissions: [] });
+    }
+  },
+
+  fetchRolePermissions: async (roleId) => {
+    if (!roleId || roleId === 'undefined' || roleId === 'null') {
+      set({ rolePermissions: [] });
+      return;
+    }
+
+    if (fetchRolePermsController) fetchRolePermsController.abort();
+    fetchRolePermsController = new AbortController();
+    const ctrl = fetchRolePermsController;
+
+    set({ loading: true, error: null });
+    try {
+      const response = await api.get('/permission/permissions', {
+        params: { roleId },
+        signal: ctrl.signal,
+      });
+
+      if (ctrl !== fetchRolePermsController) return;
+
+      const data = response.data;
+      const list = (data?.data ?? data ?? []) as PermissionItem[];
+      
+      // Update rolePermissionMap for compatibility
+      const permIds = list.filter(p => p.canView).map(p => String(p.menuId));
+      
+      set(state => ({
+        rolePermissions: list,
+        loading: false,
+        rolePermissionMap: {
+          ...state.rolePermissionMap,
+          [String(roleId)]: permIds
+        }
+      }));
+    } catch (err: unknown) {
+      const e = err as { name?: string; response?: { data?: { message?: string } } };
+      if (e.name === 'CanceledError' || (err as { code?: string }).code === 'ERR_CANCELED') return;
+      if (ctrl !== fetchRolePermsController) return;
+
+      set({ error: e.response?.data?.message ?? 'Failed to fetch role permissions.', loading: false, rolePermissions: [] });
+    }
+  },
+
+  fetchUserPermissions: async (userId) => {
+    if (!userId || userId === 'undefined' || userId === 'null') {
+      set({ userPermissions: [] });
+      return;
+    }
+
+    if (fetchUserPermsController) fetchUserPermsController.abort();
+    fetchUserPermsController = new AbortController();
+    const ctrl = fetchUserPermsController;
+
+    set({ loading: true, error: null });
+    try {
+      const response = await api.get('/permission/permissions', {
+        params: { userId },
+        signal: ctrl.signal,
+      });
+
+      if (ctrl !== fetchUserPermsController) return;
+
+      const data = response.data;
+      const list = (data?.data ?? data ?? []) as PermissionItem[];
+      
+      // Update userPermissionMap for compatibility
+      const permIds = list.filter(p => p.canView).map(p => String(p.menuId));
+
+      set(state => ({
+        userPermissions: list,
+        loading: false,
+        userPermissionMap: {
+          ...state.userPermissionMap,
+          [String(userId)]: permIds
+        }
+      }));
+    } catch (err: unknown) {
+      const e = err as { name?: string; response?: { data?: { message?: string } } };
+      if (e.name === 'CanceledError' || (err as { code?: string }).code === 'ERR_CANCELED') return;
+      if (ctrl !== fetchUserPermsController) return;
+
+      set({ error: e.response?.data?.message ?? 'Failed to fetch user override permissions.', loading: false, userPermissions: [] });
+    }
+  },
+
+  assignRolePermission: async (payload) => {
+    set({ saving: true, error: null });
+    try {
+      const formatted = {
+        roleId: Number(payload.roleId),
+        menuId: Number(payload.menuId),
+        canView: Boolean(payload.canView),
+        canCreate: Boolean(payload.canCreate),
+        canEdit: Boolean(payload.canEdit),
+        canDelete: Boolean(payload.canDelete),
+      };
+      await api.post('/permission/assign-role-permission', formatted);
+      set({ saving: false });
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { message?: string } } };
+      set({ error: e.response?.data?.message ?? 'Failed to assign role permission.', saving: false });
+      throw err;
+    }
+  },
+
+  updateRolePermission: async (payload) => {
+    set({ saving: true, error: null });
+    try {
+      const formatted = {
+        id: Number(payload.id),
+        roleId: Number(payload.roleId),
+        menuId: Number(payload.menuId),
+        canView: Boolean(payload.canView),
+        canCreate: Boolean(payload.canCreate),
+        canEdit: Boolean(payload.canEdit),
+        canDelete: Boolean(payload.canDelete),
+      };
+      await api.put('/permission/update-role-permission', formatted);
+      set({ saving: false });
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { message?: string } } };
+      set({ error: e.response?.data?.message ?? 'Failed to update role permission.', saving: false });
+      throw err;
+    }
+  },
+
+  assignUserPermission: async (payload) => {
+    set({ saving: true, error: null });
+    try {
+      const formatted = {
+        userId: Number(payload.userId),
+        menuId: Number(payload.menuId),
+        canView: Boolean(payload.canView),
+        canCreate: Boolean(payload.canCreate),
+        canEdit: Boolean(payload.canEdit),
+        canDelete: Boolean(payload.canDelete),
+      };
+      await api.post('/permission/assign-user-permission', formatted);
+      set({ saving: false });
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { message?: string } } };
+      set({ error: e.response?.data?.message ?? 'Failed to override user permission.', saving: false });
+      throw err;
+    }
+  },
+
+  assignOrganizationPermission: async (payload) => {
+    set({ saving: true, error: null });
+    try {
+      const formatted = {
+        organizationId: payload.organizationId ? Number(payload.organizationId) : undefined,
+        tenant: payload.tenant,
+        menuId: Number(payload.menuId),
+        canView: Boolean(payload.canView),
+        canCreate: Boolean(payload.canCreate),
+        canEdit: Boolean(payload.canEdit),
+        canDelete: Boolean(payload.canDelete),
+      };
+      await api.post('/permission/assign-organization-permission', formatted);
+      set({ saving: false });
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { message?: string } } };
+      set({ error: e.response?.data?.message ?? 'Failed to assign organization permission.', saving: false });
+      throw err;
+    }
+  },
+
+  bulkUpdateRolePermission: async (payload) => {
+    set({ saving: true, error: null });
+    try {
+      const formatted = {
+        roleId: Number(payload.roleId),
+        tenant: payload.tenant,
+        organizationId: payload.organizationId,
+        permissions: payload.permissions.map(p => ({
+          menuId: Number(p.menuId),
+          canView: Boolean(p.canView),
+          canCreate: Boolean(p.canCreate),
+          canEdit: Boolean(p.canEdit),
+          canDelete: Boolean(p.canDelete),
+        })),
+      };
+      await api.put('/Permission/bulk-update-role-permission', formatted);
+      set({ saving: false });
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { message?: string } } };
+      set({ error: e.response?.data?.message ?? 'Failed bulk update of role permissions.', saving: false });
+      throw err;
+    }
+  },
+
+  bulkAssignRolePermission: async (payload) => {
+    set({ saving: true, error: null });
+    try {
+      const formatted = {
+        roleId: Number(payload.roleId),
+        tenant: payload.tenant,
+        organizationId: payload.organizationId,
+        permissions: payload.permissions.map(p => ({
+          menuId: Number(p.menuId),
+          canView: Boolean(p.canView),
+          canCreate: Boolean(p.canCreate),
+          canEdit: Boolean(p.canEdit),
+          canDelete: Boolean(p.canDelete),
+        })),
+      };
+      await api.post('/Permission/bulk-assign-role-permission', formatted);
+      set({ saving: false });
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { message?: string } } };
+      set({ error: e.response?.data?.message ?? 'Failed bulk assign of role permissions.', saving: false });
+      throw err;
+    }
+  },
+
+  switchSimUser: (id) => {
+    const user = get().simulatedUsers.find(u => u.id === id);
+    if (user) {
+      set({ currentSimUser: user });
+    }
+  },
+
+  hasPermission: (name) => {
+    // Simulated bypass for full client clearance
+    return true;
+  },
+
+  hasRole: (name) => {
+    // Simulated role matching
+    const sim = get().currentSimUser;
+    return sim ? sim.roleName.toLowerCase() === name.toLowerCase() : false;
+  },
+
+  getEffectivePermissions: (userId) => {
+    return get().userPermissions.map(p => String(p.menuId));
+  },
+
+  setRolePermissions: (roleId, permissionIds) => {
+    // No-op for compatibility
+  },
+
+  setUserDirectPermissions: (userId, permissionIds) => {
+    // No-op for compatibility
+  },
+
+  deleteRole: async (roleId) => {
+    set({ loading: true, error: null });
+    try {
+      await api.delete(`/Role/${roleId}`);
+      set(state => ({
+        roles: state.roles.filter(r => String(r.id) !== roleId),
+        loading: false
+      }));
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { message?: string } } };
+      set({ error: e.response?.data?.message ?? 'Failed to delete role.', loading: false });
+      throw err;
+    }
+  },
+
+  toggleRoleStatus: (roleId) => {
+    set(state => ({
+      roles: state.roles.map(r => String(r.id) === roleId ? { ...r, status: r.status === 'active' ? 'inactive' : 'active' } : r)
+    }));
+  },
+
+  deletePermission: async (id) => {
+    set({ loading: true, error: null });
+    try {
+      await api.delete(`/Permission/menus/${id}`);
+      set({ loading: false });
+      await get().fetchMenus();
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { message?: string } } };
+      set({ error: e.response?.data?.message ?? 'Failed to delete menu option.', loading: false });
+      throw err;
+    }
+  },
+
+  addPermission: async (data) => {
+    set({ saving: true, error: null });
+    try {
+      const payload = {
+        title: data.name,
+        url: data.description,
+        icon: 'LayoutDashboard',
+        sortOrder: 1,
+        parentId: null,
+      };
+      await api.post('/Permission/menus', payload);
+      set({ saving: false });
+      await get().fetchMenus();
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { message?: string } } };
+      set({ error: e.response?.data?.message ?? 'Failed to create menu.', saving: false });
+      throw err;
+    }
+  },
+
+  updatePermission: async (id, data) => {
+    set({ saving: true, error: null });
+    try {
+      const payload = {
+        id: Number(id),
+        title: data.name,
+        url: data.description,
+        icon: 'LayoutDashboard',
+        sortOrder: 1,
+        parentId: null,
+      };
+      await api.put(`/Permission/menus/${id}`, payload);
+      set({ saving: false });
+      await get().fetchMenus();
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { message?: string } } };
+      set({ error: e.response?.data?.message ?? 'Failed to update menu.', saving: false });
+      throw err;
+    }
+  },
+
+  addRole: async (data) => {
+    set({ saving: true, error: null });
+    try {
+      const payload = {
+        name: data.name,
+        description: data.description,
+        isDeleted: data.status === 'inactive',
+      };
+      await api.post('/Role', payload);
+      set({ saving: false });
+      await get().fetchRoles();
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { message?: string } } };
+      set({ error: e.response?.data?.message ?? 'Failed to create role.', saving: false });
+      throw err;
+    }
+  },
+
+  updateRole: async (id, data) => {
+    set({ saving: true, error: null });
+    try {
+      const payload = {
+        id: Number(id),
+        name: data.name,
+        description: data.description,
+        isDeleted: data.status === 'inactive',
+      };
+      await api.put(`/Role/${id}`, payload);
+      set({ saving: false });
+      await get().fetchRoles();
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { message?: string } } };
+      set({ error: e.response?.data?.message ?? 'Failed to update role.', saving: false });
+      throw err;
+    }
+  },
 }));
