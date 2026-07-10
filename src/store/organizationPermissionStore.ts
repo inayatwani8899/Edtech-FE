@@ -92,7 +92,7 @@ export const useOrganizationPermissionStore = create<OrgPermissionState>((set, g
       set({ orgPermissions: list, loading: false });
     } catch (err: unknown) {
       const e = err as { name?: string; response?: { data?: { message?: string } } };
-      if (e.name === 'CanceledError' || (err as { code?: string }).code === 'ERR_CANCELED') return;
+      if (e.name === 'CanceledError' || e.name === 'AbortError' || (err as { code?: string }).code === 'ERR_CANCELED') return;
       if (ctrl !== fetchOrgController) return;
 
       set({ error: e.response?.data?.message ?? 'Failed to load organization permissions.', loading: false, orgPermissions: [] });

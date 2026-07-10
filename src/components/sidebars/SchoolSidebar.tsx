@@ -50,31 +50,30 @@ export function SchoolSidebar() {
     const navigate = useNavigate();
     const currentPath = location.pathname;
     const { user, logout } = useAuthStore();
-    const permissions = usePermissionStore((s) => s.permissions);
+    const menus = usePermissionStore((s) => s.menus);
     const permissionsLoading = usePermissionStore((s) => s.loading);
 
     // Filter only items with canView === true
-    const viewablePerms = permissions.filter(p => p.canView);
+    const viewablePerms = menus.filter(p => p.canView);
 
-    // Separate parent and child items
+    const childrenByParent: Record<number | string, any[]> = {};
+
+    // Build hierarchy from flat permissions list loaded from backend by roleId
     const parentItems = viewablePerms
         .filter(p => p.parentId === null)
         .sort((a, b) => a.sortOrder - b.sortOrder);
 
     const childItems = viewablePerms.filter(p => p.parentId !== null);
-
-    // Group child items by parentId
-    const childrenByParent: Record<number, typeof permissions> = {};
     childItems.forEach(child => {
         if (child.parentId !== null) {
-            if (!childrenByParent[child.parentId]) {
-                childrenByParent[child.parentId] = [];
+            const pid = child.parentId;
+            if (!childrenByParent[pid]) {
+                childrenByParent[pid] = [];
             }
-            childrenByParent[child.parentId].push(child);
+            childrenByParent[pid].push(child);
         }
     });
 
-    // Sort child items by sortOrder
     Object.keys(childrenByParent).forEach(pid => {
         childrenByParent[Number(pid)].sort((a, b) => a.sortOrder - b.sortOrder);
     });

@@ -1,9 +1,59 @@
-import { Outlet, Navigate, useNavigate } from "react-router-dom";
+import { Outlet, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "../../store/useAuthStore";
 import { SchoolSidebar } from "../sidebars/SchoolSidebar";
 import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
-import { ChevronRight, Menu, Brain } from "lucide-react";
+import { ChevronRight, Menu, Brain, Loader2 } from "lucide-react";
 import Swal from "sweetalert2";
+import React, { useEffect } from "react";
+import { usePermissionStore, matchPermission } from "@/store/permissionStore";
+
+const SchoolPermissionGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const location = useLocation();
+    const { user } = useAuthStore();
+    const permissions = usePermissionStore((s) => s.permissions);
+    const loading = usePermissionStore((s) => s.loading);
+    const loaded = usePermissionStore((s) => s.loaded);
+    const fetchMenus = usePermissionStore((s) => s.fetchMenus);
+
+    useEffect(() => {
+        const roleId = user?.roleId || localStorage.getItem("roleId");
+        if (roleId && !loaded) {
+            fetchMenus(roleId);
+        }
+    }, [fetchMenus, user?.roleId, loaded]);
+
+    // Bypass checking for base dashboard/profile/settings route
+    if (
+        location.pathname === "/school/dashboard" ||
+        location.pathname === "/school/profile" ||
+        location.pathname === "/school/settings" ||
+        location.pathname === "/organization/dashboard"
+    ) {
+        return <>{children}</>;
+    }
+
+    // SuperAdmin bypass
+    if (user?.role === "SuperAdmin") {
+        return <>{children}</>;
+    }
+
+    if (loading && !loaded) {
+        return (
+            <div className="flex flex-col items-center justify-center py-20 w-full">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-500 mb-2" />
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">Verifying School Permissions...</span>
+            </div>
+        );
+    }
+
+    const match = matchPermission(location.pathname, permissions);
+
+    if (loaded && (!match || !match.canView)) {
+        return <Navigate to="/unauthorized" replace />;
+    }
+
+    return <>{children}</>;
+};
 
 export const SchoolLayout = () => {
     const { user, isAuthenticated, isLoading } = useAuthStore();
@@ -23,7 +73,8 @@ export const SchoolLayout = () => {
                      user?.roleId === 3 ||
                      user?.role?.toLowerCase() === "school" || 
                      user?.role?.toLowerCase() === "organization" ||
-                     user?.role?.toLowerCase() === "organizationadmin";
+                     user?.role?.toLowerCase() === "organizationadmin" ||
+                     user?.role === "SuperAdmin";
 
     if (!isAuthenticated || !isSchool) {
         return <Navigate to="/login" replace />;
@@ -41,7 +92,9 @@ export const SchoolLayout = () => {
                     <MobileHeader />
 
                     <main className="flex-1 overflow-auto p-4 md:p-8">
-                        <Outlet />
+                        <SchoolPermissionGuard>
+                            <Outlet />
+                        </SchoolPermissionGuard>
                     </main>
                 </div>
             </div>

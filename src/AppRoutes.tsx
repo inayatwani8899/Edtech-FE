@@ -125,13 +125,13 @@ const ProtectedRoute = ({ children, role }: ProtectedRouteProps) => {
     }
 
     if (role && (
-        (role === "Student" && user?.role !== "Student") ||
+        (role === "Student" && user?.role !== "Student" && user?.role !== "SuperAdmin") ||
         (role === "Admin" && user?.role !== "Admin" && user?.role !== "SuperAdmin") ||
-        (role === "School" && !isSchoolRole(user)) ||
-        (role === "Counselor" && !isCounselorRole(user))
+        (role === "School" && !isSchoolRole(user) && user?.role !== "SuperAdmin") ||
+        (role === "Counselor" && !isCounselorRole(user) && user?.role !== "SuperAdmin")
     )) {
         let redirectPath = "/student/dashboard";
-        if (user?.role === "Admin" || user?.role === "SuperAdmin") redirectPath = "/dashboard";
+        if (user?.role === "Admin" || (user?.role as string) === "SuperAdmin") redirectPath = "/dashboard";
         else if (isSchoolRole(user)) redirectPath = "/school/dashboard";
         else if (isCounselorRole(user)) redirectPath = "/counselor/dashboard";
 
@@ -308,7 +308,7 @@ const AppRoutes = () => {
             </Route>
             <Route path="/test/:id" element={<TestDetail />} />
 
-            {/* Counselor Routes */}
+            {/* Counselor Routes (Temporarily commented out)
             <Route
                 element={
                     <ProtectedRoute role="Counselor">
@@ -325,6 +325,7 @@ const AppRoutes = () => {
                 <Route path="/counselor/resources" element={<div className="p-4">Counseling Resources (Coming Soon)</div>} />
                 <Route path="/counselor/search" element={<div className="p-4">Search Students (Coming Soon)</div>} />
             </Route>
+            */}
 
             {/* School/Organization Routes */}
             <Route

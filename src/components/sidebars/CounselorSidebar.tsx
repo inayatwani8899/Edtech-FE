@@ -50,11 +50,11 @@ export function CounselorSidebar() {
     const navigate = useNavigate();
     const currentPath = location.pathname;
     const { user, logout } = useAuthStore();
-    const permissions = usePermissionStore((s) => s.permissions);
+    const menus = usePermissionStore((s) => s.menus);
     const permissionsLoading = usePermissionStore((s) => s.loading);
 
     // Filter only items with canView === true
-    const viewablePerms = permissions.filter(p => p.canView);
+    const viewablePerms = menus.filter(p => p.canView);
 
     // Separate parent and child items
     const parentItems = viewablePerms

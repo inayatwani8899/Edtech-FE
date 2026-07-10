@@ -9,6 +9,8 @@ export interface RBACRole {
   status: 'active' | 'inactive';
   createdAt?: string;
   updatedAt?: string;
+  tenant?: string | null;
+  organizationId?: number | string | null;
 }
 
 export interface RBACUser {
@@ -154,6 +156,8 @@ const normaliseRole = (raw: Record<string, any>): RBACRole => ({
   status: raw.isDeleted === true ? 'inactive' : 'active',
   createdAt: raw.createdAt as string | undefined,
   updatedAt: raw.updatedAt as string | undefined,
+  tenant: raw.tenant ?? null,
+  organizationId: raw.organizationId ?? raw.organization_id ?? null,
 });
 
 const normaliseUser = (raw: Record<string, any>): RBACUser => ({
@@ -211,7 +215,7 @@ export const useRBACStore = create<RBACStoreState>((set, get) => ({
       set({ roles: list, loading: false });
     } catch (err: unknown) {
       const e = err as { name?: string; response?: { data?: { message?: string } } };
-      if (e.name === 'CanceledError' || (err as { code?: string }).code === 'ERR_CANCELED') return;
+      if (e.name === 'CanceledError' || e.name === 'AbortError' || (err as { code?: string }).code === 'ERR_CANCELED') return;
       if (ctrl !== fetchRolesController) return;
 
       set({ error: e.response?.data?.message ?? 'Failed to fetch roles.', loading: false, roles: [] });
@@ -219,25 +223,12 @@ export const useRBACStore = create<RBACStoreState>((set, get) => ({
   },
 
   fetchUsers: async () => {
-    if (fetchUsersController) fetchUsersController.abort();
-    fetchUsersController = new AbortController();
-    const ctrl = fetchUsersController;
-
     set({ loading: true, error: null });
     try {
-      const response = await api.get('/User', { params: { limit: 1000 }, signal: ctrl.signal });
-      if (ctrl !== fetchUsersController) return;
-
-      const data = response.data?.data ?? response.data;
-      const rawList = (data?.users ?? data?.data ?? (Array.isArray(data) ? data : [])) as Record<string, any>[];
-      const list = rawList.map(normaliseUser);
-      set({ users: list, loading: false });
+      // API call removed as /User endpoint is dead
+      set({ users: [], loading: false });
     } catch (err: unknown) {
-      const e = err as { name?: string; response?: { data?: { message?: string } } };
-      if (e.name === 'CanceledError' || (err as { code?: string }).code === 'ERR_CANCELED') return;
-      if (ctrl !== fetchUsersController) return;
-
-      set({ error: e.response?.data?.message ?? 'Failed to fetch users.', loading: false, users: [] });
+      set({ error: 'Failed to fetch users.', loading: false, users: [] });
     }
   },
 
@@ -268,7 +259,7 @@ export const useRBACStore = create<RBACStoreState>((set, get) => ({
       set({ menus: list, permissions: permissionList, loading: false });
     } catch (err: unknown) {
       const e = err as { name?: string; response?: { data?: { message?: string } } };
-      if (e.name === 'CanceledError' || (err as { code?: string }).code === 'ERR_CANCELED') return;
+      if (e.name === 'CanceledError' || e.name === 'AbortError' || (err as { code?: string }).code === 'ERR_CANCELED') return;
       if (ctrl !== fetchMenusController) return;
 
       set({ error: e.response?.data?.message ?? 'Failed to fetch menus.', loading: false, menus: [], permissions: [] });
@@ -310,7 +301,7 @@ export const useRBACStore = create<RBACStoreState>((set, get) => ({
       }));
     } catch (err: unknown) {
       const e = err as { name?: string; response?: { data?: { message?: string } } };
-      if (e.name === 'CanceledError' || (err as { code?: string }).code === 'ERR_CANCELED') return;
+      if (e.name === 'CanceledError' || e.name === 'AbortError' || (err as { code?: string }).code === 'ERR_CANCELED') return;
       if (ctrl !== fetchRolePermsController) return;
 
       set({ error: e.response?.data?.message ?? 'Failed to fetch role permissions.', loading: false, rolePermissions: [] });
@@ -352,7 +343,7 @@ export const useRBACStore = create<RBACStoreState>((set, get) => ({
       }));
     } catch (err: unknown) {
       const e = err as { name?: string; response?: { data?: { message?: string } } };
-      if (e.name === 'CanceledError' || (err as { code?: string }).code === 'ERR_CANCELED') return;
+      if (e.name === 'CanceledError' || e.name === 'AbortError' || (err as { code?: string }).code === 'ERR_CANCELED') return;
       if (ctrl !== fetchUserPermsController) return;
 
       set({ error: e.response?.data?.message ?? 'Failed to fetch user override permissions.', loading: false, userPermissions: [] });

@@ -28,34 +28,52 @@ export const RolePermissionMapping: React.FC = () => {
 
   const {
     roles, fetchRoles,
-    menus, fetchMenus,
     rolePermissions, fetchRolePermissions,
     bulkUpdateRolePermission,
-    bulkAssignRolePermission,
     loading: rbacLoading, saving: rbacSaving
   } = useRBACStore();
 
   const {
     orgPermissions,
     fetchOrgPermissions,
-    bulkAssignOrgRolePermissions,
     bulkUpdateOrgRolePermissions,
     loading: orgLoading, saving: orgSaving
   } = useOrganizationPermissionStore();
 
   const [selectedRoleId, setSelectedRoleId] = useState<string>('');
-  const [mappedPermissions, setMappedPermissions] = useState<Record<number | string, any>>({});
-  const [originalPermissions, setOriginalPermissions] = useState<Record<number | string, any>>({});
+  const [permissionMatrix, setPermissionMatrix] = useState<Record<number, {
+    canView: boolean;
+    canCreate: boolean;
+    canEdit: boolean;
+    canDelete: boolean;
+  }>>({});
+  const [originalMatrix, setOriginalMatrix] = useState<Record<number, {
+    canView: boolean;
+    canCreate: boolean;
+    canEdit: boolean;
+    canDelete: boolean;
+  }>>({});
   const [isSavingLocal, setIsSavingLocal] = useState(false);
 
   const loading = isOrgMode ? orgLoading : rbacLoading;
   const saving = isOrgMode ? orgSaving : rbacSaving;
   const activePermissions = isOrgMode ? orgPermissions : rolePermissions;
 
+  // Derive menus dynamically from activePermissions (no menus API needed!)
+  const displayMenus = activePermissions ? activePermissions.map(p => ({
+    id: p.menuId,
+    title: p.title,
+    url: p.url,
+    icon: p.icon,
+    color: p.color || '',
+    sortOrder: p.sortOrder || 0,
+    parentId: p.parentId ?? null
+  })) : [];
+
+  // Mount effect: only load roles
   useEffect(() => {
     fetchRoles();
-    fetchMenus();
-  }, [fetchRoles, fetchMenus]);
+  }, [fetchRoles]);
 
   // Preselect logged-in user's role on mount/load
   useEffect(() => {
@@ -67,48 +85,49 @@ export const RolePermissionMapping: React.FC = () => {
   // Sync role's mapped permissions when roleId changes
   useEffect(() => {
     if (selectedRoleId) {
+      // Clear previous matrix first to avoid showing stale values while loading
+      setPermissionMatrix({});
+      setOriginalMatrix({});
       if (isOrgMode) {
         fetchOrgPermissions(selectedRoleId);
       } else {
         fetchRolePermissions(selectedRoleId);
       }
     } else {
-      setMappedPermissions({});
-      setOriginalPermissions({});
+      setPermissionMatrix({});
+      setOriginalMatrix({});
     }
   }, [selectedRoleId, isOrgMode, fetchRolePermissions, fetchOrgPermissions]);
 
   // When activePermissions loads, transform into a local mapping record
   useEffect(() => {
     if (selectedRoleId && activePermissions) {
-      // Ensure the activePermissions belong to the currently selected role to avoid stale mapping
-      const firstPerm = activePermissions[0] as any;
-      const isCorrectRole = activePermissions.length === 0 || String(firstPerm?.roleId) === String(selectedRoleId);
-      if (!isCorrectRole) return;
+      const matrix: Record<number, {
+        canView: boolean;
+        canCreate: boolean;
+        canEdit: boolean;
+        canDelete: boolean;
+      }> = {};
 
-      const map: Record<number | string, any> = {};
       activePermissions.forEach(p => {
-        const item = p as any;
-        map[p.menuId] = {
-          id: item.id ?? p.menuId,
-          menuId: p.menuId,
+        matrix[Number(p.menuId)] = {
           canView: Boolean(p.canView),
           canCreate: Boolean(p.canCreate),
           canEdit: Boolean(p.canEdit),
           canDelete: Boolean(p.canDelete),
         };
       });
-      setMappedPermissions(JSON.parse(JSON.stringify(map)));
-      setOriginalPermissions(JSON.parse(JSON.stringify(map)));
+
+      setPermissionMatrix(JSON.parse(JSON.stringify(matrix)));
+      setOriginalMatrix(JSON.parse(JSON.stringify(matrix)));
     }
   }, [selectedRoleId, activePermissions]);
 
-  const handleToggle = (menuId: number | string, field: 'canView' | 'canCreate' | 'canEdit' | 'canDelete', checked: boolean) => {
+  const handleToggle = (menuId: number, field: 'canView' | 'canCreate' | 'canEdit' | 'canDelete', checked: boolean) => {
     if (loading || saving || isSavingLocal) return;
 
-    setMappedPermissions(prev => {
+    setPermissionMatrix(prev => {
       const existing = prev[menuId] || {
-        menuId,
         canView: false,
         canCreate: false,
         canEdit: false,
@@ -141,8 +160,9 @@ export const RolePermissionMapping: React.FC = () => {
 
   // Helper to determine if a specific menu row has been modified
   const isRowChanged = (menuId: number | string) => {
-    const orig = originalPermissions[menuId] || { canView: false, canCreate: false, canEdit: false, canDelete: false };
-    const curr = mappedPermissions[menuId] || { canView: false, canCreate: false, canEdit: false, canDelete: false };
+    const mId = Number(menuId);
+    const orig = originalMatrix[mId] || { canView: false, canCreate: false, canEdit: false, canDelete: false };
+    const curr = permissionMatrix[mId] || { canView: false, canCreate: false, canEdit: false, canDelete: false };
     return (
       Boolean(orig.canView) !== Boolean(curr.canView) ||
       Boolean(orig.canCreate) !== Boolean(curr.canCreate) ||
@@ -151,28 +171,22 @@ export const RolePermissionMapping: React.FC = () => {
     );
   };
 
-  const computedHasChanges = menus.some(menu => isRowChanged(menu.id));
+  const computedHasChanges = displayMenus.some(menu => isRowChanged(menu.id));
 
   const handleSave = async () => {
     if (!selectedRoleId || isSavingLocal) return;
 
-    // Filter down to only changed menu items
-    const changedMenus = menus.filter(menu => isRowChanged(menu.id));
-    if (changedMenus.length === 0) {
-      showToast('info', 'No changes to apply');
-      return;
-    }
-
-    const payloadPermissions = changedMenus.map((menu) => {
-      const mId = menu.id;
-      const current = mappedPermissions[mId] || {
+    // Build payload for all menus representing the full matrix
+    const payloadPermissions = displayMenus.map((menu) => {
+      const mId = Number(menu.id);
+      const current = permissionMatrix[mId] || {
         canView: false,
         canCreate: false,
         canEdit: false,
         canDelete: false,
       };
       return {
-        menuId: Number(mId),
+        menuId: mId,
         canView: Boolean(current.canView),
         canCreate: Boolean(current.canCreate),
         canEdit: Boolean(current.canEdit),
@@ -182,38 +196,23 @@ export const RolePermissionMapping: React.FC = () => {
 
     setIsSavingLocal(true);
     try {
-      const hasOriginalPermissions = activePermissions && activePermissions.length > 0;
+      const tenant = selectedRole?.tenant || localStorage.getItem("tenantName") || tenantData?.tenantName || null;
+      const orgIdStr = selectedRole?.organizationId || localStorage.getItem("organizationId") || tenantData?.id || null;
+      const organizationId = orgIdStr ? Number(orgIdStr) : null;
+
+      const payload = {
+        roleId: Number(selectedRoleId),
+        tenant,
+        organizationId,
+        permissions: payloadPermissions,
+      };
 
       if (isOrgMode) {
-        const tenant = localStorage.getItem("tenantName") || tenantData?.tenantName || null;
-        const orgIdStr = localStorage.getItem("organizationId") || tenantData?.id || null;
-        const organizationId = orgIdStr ? Number(orgIdStr) : null;
-
-        const payload = {
-          roleId: Number(selectedRoleId),
-          tenant,
-          organizationId,
-          permissions: payloadPermissions,
-        };
-        if (hasOriginalPermissions) {
-          await bulkUpdateOrgRolePermissions(payload);
-        } else {
-          await bulkAssignOrgRolePermissions(payload);
-        }
+        await bulkUpdateOrgRolePermissions(payload);
         showToast('success', 'Organization role permissions updated successfully.');
         await fetchOrgPermissions(selectedRoleId);
       } else {
-        const payload = {
-          roleId: Number(selectedRoleId),
-          tenant: null,
-          organizationId: null,
-          permissions: payloadPermissions,
-        };
-        if (hasOriginalPermissions) {
-          await bulkUpdateRolePermission(payload);
-        } else {
-          await bulkAssignRolePermission(payload);
-        }
+        await bulkUpdateRolePermission(payload);
         showToast('success', 'Global role permissions updated successfully.');
         await fetchRolePermissions(selectedRoleId);
       }
@@ -226,44 +225,48 @@ export const RolePermissionMapping: React.FC = () => {
 
   const selectAll = () => {
     if (loading || saving || isSavingLocal) return;
-    const map: Record<number | string, any> = {};
-    menus.forEach(menu => {
-      const existing = mappedPermissions[menu.id] || {};
-      map[menu.id] = {
-        ...existing,
-        menuId: menu.id,
+    const matrix: Record<number, {
+      canView: boolean;
+      canCreate: boolean;
+      canEdit: boolean;
+      canDelete: boolean;
+    }> = {};
+    displayMenus.forEach(menu => {
+      matrix[Number(menu.id)] = {
         canView: true,
         canCreate: true,
         canEdit: true,
         canDelete: true,
       };
     });
-    setMappedPermissions(map);
+    setPermissionMatrix(matrix);
   };
 
   const deselectAll = () => {
     if (loading || saving || isSavingLocal) return;
-    const map: Record<number | string, any> = {};
-    menus.forEach(menu => {
-      const existing = mappedPermissions[menu.id] || {};
-      map[menu.id] = {
-        ...existing,
-        menuId: menu.id,
+    const matrix: Record<number, {
+      canView: boolean;
+      canCreate: boolean;
+      canEdit: boolean;
+      canDelete: boolean;
+    }> = {};
+    displayMenus.forEach(menu => {
+      matrix[Number(menu.id)] = {
         canView: false,
         canCreate: false,
         canEdit: false,
         canDelete: false,
       };
     });
-    setMappedPermissions(map);
+    setPermissionMatrix(matrix);
   };
 
   const selectedRole = roles.find(r => String(r.id) === selectedRoleId);
 
   // Group child menus by parent menu
-  const parentMenus = menus.filter(m => m.parentId === null).sort((a, b) => a.sortOrder - b.sortOrder);
-  const childrenByParent: Record<number | string, typeof menus> = {};
-  menus.filter(m => m.parentId !== null).forEach(m => {
+  const parentMenus = displayMenus.filter(m => m.parentId === null).sort((a, b) => a.sortOrder - b.sortOrder);
+  const childrenByParent: Record<number | string, typeof displayMenus> = {};
+  displayMenus.filter(m => m.parentId !== null).forEach(m => {
     const pid = m.parentId!;
     if (!childrenByParent[pid]) childrenByParent[pid] = [];
     childrenByParent[pid].push(m);
@@ -296,6 +299,20 @@ export const RolePermissionMapping: React.FC = () => {
 
   const isInteractionDisabled = loading || saving || isSavingLocal;
 
+  // Single dynamic loader spinner on initial mount or when matrix loads for the first time
+  const isInitialLoading = roles.length === 0 || (selectedRoleId && activePermissions.length === 0 && loading);
+
+  if (isInitialLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-10 w-10 animate-spin text-indigo-600 mx-auto" />
+          <p className="text-sm font-bold text-slate-500 animate-pulse">Initializing permission matrix...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen relative overflow-hidden bg-[#F8FAFC]">
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
@@ -325,9 +342,12 @@ export const RolePermissionMapping: React.FC = () => {
             <div className="flex flex-col md:flex-row md:items-end gap-4">
               <div className="flex-1 space-y-2">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Select Role</label>
-                <Select value={selectedRoleId} onValueChange={setSelectedRoleId} disabled={isSavingLocal || saving}>
+                <Select value={selectedRoleId} onValueChange={setSelectedRoleId} disabled={isSavingLocal || saving || loading}>
                   <SelectTrigger className="h-11 rounded-xl border-slate-200 bg-white">
-                    <SelectValue placeholder="Choose a role to configure..." />
+                    <div className="flex items-center gap-2">
+                      {loading && <Loader2 className="h-4 w-4 animate-spin text-indigo-500 shrink-0" />}
+                      <SelectValue placeholder="Choose a role to configure..." />
+                    </div>
                   </SelectTrigger>
                   <SelectContent className="rounded-xl max-h-60">
                     {roles.map(role => (
@@ -391,7 +411,7 @@ export const RolePermissionMapping: React.FC = () => {
                         parentMenus.map(parent => {
                           const pid = parent.id;
                           const children = childrenByParent[pid] || [];
-                          const parentPerm = mappedPermissions[pid] || { canView: false, canCreate: false, canEdit: false, canDelete: false };
+                          const parentPerm = permissionMatrix[Number(pid)] || { canView: false, canCreate: false, canEdit: false, canDelete: false };
 
                           return (
                             <React.Fragment key={pid}>
@@ -404,28 +424,28 @@ export const RolePermissionMapping: React.FC = () => {
                                 <TableCell className="px-4 py-3 text-center">
                                   <Checkbox
                                     checked={Boolean(parentPerm.canView)}
-                                    onCheckedChange={(checked) => handleToggle(pid, 'canView', Boolean(checked))}
+                                    onCheckedChange={(checked) => handleToggle(Number(pid), 'canView', Boolean(checked))}
                                     disabled={isInteractionDisabled}
                                   />
                                 </TableCell>
                                 <TableCell className="px-4 py-3 text-center">
                                   <Checkbox
                                     checked={Boolean(parentPerm.canCreate)}
-                                    onCheckedChange={(checked) => handleToggle(pid, 'canCreate', Boolean(checked))}
+                                    onCheckedChange={(checked) => handleToggle(Number(pid), 'canCreate', Boolean(checked))}
                                     disabled={isInteractionDisabled}
                                   />
                                 </TableCell>
                                 <TableCell className="px-4 py-3 text-center">
                                   <Checkbox
                                     checked={Boolean(parentPerm.canEdit)}
-                                    onCheckedChange={(checked) => handleToggle(pid, 'canEdit', Boolean(checked))}
+                                    onCheckedChange={(checked) => handleToggle(Number(pid), 'canEdit', Boolean(checked))}
                                     disabled={isInteractionDisabled}
                                   />
                                 </TableCell>
                                 <TableCell className="px-4 py-3 text-center">
                                   <Checkbox
                                     checked={Boolean(parentPerm.canDelete)}
-                                    onCheckedChange={(checked) => handleToggle(pid, 'canDelete', Boolean(checked))}
+                                    onCheckedChange={(checked) => handleToggle(Number(pid), 'canDelete', Boolean(checked))}
                                     disabled={isInteractionDisabled}
                                   />
                                 </TableCell>
@@ -434,7 +454,7 @@ export const RolePermissionMapping: React.FC = () => {
                               {/* Child Menus */}
                               {children.map(child => {
                                 const cid = child.id;
-                                const childPerm = mappedPermissions[cid] || { canView: false, canCreate: false, canEdit: false, canDelete: false };
+                                const childPerm = permissionMatrix[Number(cid)] || { canView: false, canCreate: false, canEdit: false, canDelete: false };
 
                                 return (
                                   <TableRow key={cid} className="hover:bg-slate-50/30 border-slate-50">
@@ -445,28 +465,28 @@ export const RolePermissionMapping: React.FC = () => {
                                     <TableCell className="px-4 py-2.5 text-center">
                                       <Checkbox
                                         checked={Boolean(childPerm.canView)}
-                                        onCheckedChange={(checked) => handleToggle(cid, 'canView', Boolean(checked))}
+                                        onCheckedChange={(checked) => handleToggle(Number(cid), 'canView', Boolean(checked))}
                                         disabled={isInteractionDisabled}
                                       />
                                     </TableCell>
                                     <TableCell className="px-4 py-2.5 text-center">
                                       <Checkbox
                                         checked={Boolean(childPerm.canCreate)}
-                                        onCheckedChange={(checked) => handleToggle(cid, 'canCreate', Boolean(checked))}
+                                        onCheckedChange={(checked) => handleToggle(Number(cid), 'canCreate', Boolean(checked))}
                                         disabled={isInteractionDisabled}
                                       />
                                     </TableCell>
                                     <TableCell className="px-4 py-2.5 text-center">
                                       <Checkbox
                                         checked={Boolean(childPerm.canEdit)}
-                                        onCheckedChange={(checked) => handleToggle(cid, 'canEdit', Boolean(checked))}
+                                        onCheckedChange={(checked) => handleToggle(Number(cid), 'canEdit', Boolean(checked))}
                                         disabled={isInteractionDisabled}
                                       />
                                     </TableCell>
                                     <TableCell className="px-4 py-2.5 text-center">
                                       <Checkbox
                                         checked={Boolean(childPerm.canDelete)}
-                                        onCheckedChange={(checked) => handleToggle(cid, 'canDelete', Boolean(checked))}
+                                        onCheckedChange={(checked) => handleToggle(Number(cid), 'canDelete', Boolean(checked))}
                                         disabled={isInteractionDisabled}
                                       />
                                     </TableCell>

@@ -4,7 +4,7 @@ import { useAuthStore } from "../store/useAuthStore";
 import { toast } from "sonner";
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || "https://charming-bohr.180-179-213-167.plesk.page/api/",
+    baseURL: import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_ORG_API_BASE_URL || "https://nervous-dubinsky.180-179-213-167.plesk.page/api/",
     headers: {
         "Content-Type": "application/json",
     },
@@ -13,28 +13,7 @@ const api = axios.create({
 // Request interceptor - dynamically switches baseURL based on endpoint path
 api.interceptors.request.use(
     (config) => {
-        const url = config.url || "";
-        const lowerUrl = url.toLowerCase();
-        
-        // Use Org/SuperAdmin/Student server for Auth, Organization, SuperAdmin, TenantSync, Student Module, Category, Grade, and Permission APIs
-        if (
-            lowerUrl.includes("organization") || 
-            lowerUrl.includes("auth") || 
-            lowerUrl.includes("superadmin") || 
-            lowerUrl.includes("tenantsync") ||
-            lowerUrl.includes("student") ||
-            lowerUrl.includes("payment") ||
-            lowerUrl.includes("question") ||
-            lowerUrl.includes("test") ||
-            lowerUrl.includes("category") ||
-            lowerUrl.includes("grade") ||
-            lowerUrl.includes("permission") ||
-            lowerUrl.includes("psychometric")
-        ) {
-            config.baseURL = import.meta.env.VITE_ORG_API_BASE_URL || "https://nervous-dubinsky.180-179-213-167.plesk.page/api/";
-        } else {
-            config.baseURL = import.meta.env.VITE_API_BASE_URL || "https://charming-bohr.180-179-213-167.plesk.page/api/";
-        }
+        config.baseURL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_ORG_API_BASE_URL || "https://nervous-dubinsky.180-179-213-167.plesk.page/api/";
 
         const token = localStorage.getItem("auth_token") || localStorage.getItem("accessToken");
         if (token) {
