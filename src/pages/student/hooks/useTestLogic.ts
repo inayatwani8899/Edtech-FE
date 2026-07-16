@@ -27,6 +27,8 @@ export const useTestLogic = () => {
         currentSession,
         userAnswers,
         isSubmitting,
+        theories,
+        perCategory,
     } = useTestStore();
 
 
@@ -523,6 +525,9 @@ export const useTestLogic = () => {
         testContainerRef,
         questionsContainerRef,
         hasAnswers: userAnswers.size > 0,
+        theories,
+        perCategory,
+        allTestQuestions: testQuestions,
 
 
         // Functions

@@ -16,6 +16,11 @@ export interface QuestionOption {
 //     marks?: number;
 //     explanation?: string;
 // }
+export interface TheoryInfo {
+    name: string;
+    description: string;
+}
+
 export interface Question {
     question_Id: number | string;
     question_Text: string;
@@ -242,6 +247,8 @@ interface TestState {
     searchTerm: string | null;
     isSubmitting: boolean;
     deleteId: string | null;
+    theories: TheoryInfo[];
+    perCategory: Record<string, number>;
 
 
 
@@ -376,6 +383,8 @@ export const useTestStore = create<TestState>((set, get) => ({
     deleteId: null,
     totalConfigurationPages: null,
     totalConfigurationsCount: null,
+    theories: [],
+    perCategory: {},
 
     // Test Management Actions 
     setPage: (page) => { set({ currentPage: page }); get().fetchTests(); },
@@ -629,11 +638,21 @@ export const useTestStore = create<TestState>((set, get) => ({
                 limit: pagination.pageSize ?? limit ?? 1
             };
 
+            const theories: TheoryInfo[] = Array.isArray(data.theories)
+                ? data.theories.map((t: any) => ({ name: t.name ?? '', description: t.description ?? '' }))
+                : [];
+
+            const perCategory: Record<string, number> = (data.perCategory && typeof data.perCategory === 'object')
+                ? data.perCategory
+                : {};
+
             set({
                 testQuestions: questions,
                 questionPagination,
                 currentSession: data.session ?? get().currentSession,
-                testTakingLoading: false
+                testTakingLoading: false,
+                theories,
+                perCategory
             });
 
         } catch (err: any) {
