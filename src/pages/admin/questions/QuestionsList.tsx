@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -27,14 +27,19 @@ import {
   Trash2,
   Loader2,
   Eye,
-  BookOpen,
   ArrowUpDown,
   RefreshCw,
   HelpCircle,
-  FileText
+  FileText,
+  Upload,
+  Download,
+  FileSpreadsheet,
+  AlertCircle
 } from 'lucide-react';
 import { useQuestionStore } from "@/store/questionStore";
-import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 export const QuestionsList: React.FC = () => {
   const navigate = useNavigate();
@@ -78,13 +83,142 @@ export const QuestionsList: React.FC = () => {
     openDeleteDialog,
     closeDeleteDialog,
     deleteQuestion,
+    downloadTemplate,
+    bulkImportQuestions,
   } = useQuestionStore();
+
+  // Bulk Upload States
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchTests();
     fetchGrades();
     fetchQuestions();
   }, [fetchTests, fetchGrades, fetchQuestions]);
+
+  const parseErrors = (errorResponse: any): string[] => {
+    if (!errorResponse) return [];
+    if (typeof errorResponse === 'string') return [errorResponse];
+    if (Array.isArray(errorResponse)) return errorResponse.map(String);
+    
+    const errorsList: string[] = [];
+    
+    // ASP.NET validation style: { errors: { FieldName: ["Error 1", "Error 2"] } }
+    if (errorResponse.errors && typeof errorResponse.errors === 'object') {
+      Object.entries(errorResponse.errors).forEach(([field, messages]: [string, any]) => {
+        if (Array.isArray(messages)) {
+          errorsList.push(...messages.map(m => `${field}: ${m}`));
+        } else if (typeof messages === 'string') {
+          errorsList.push(`${field}: ${messages}`);
+        }
+      });
+    }
+    
+    // Custom API response style: { data: { validationErrors: [...] } }
+    if (errorResponse.data && typeof errorResponse.data === 'object') {
+      const dataObj = errorResponse.data;
+      if (Array.isArray(dataObj.validationErrors)) {
+        errorsList.push(...dataObj.validationErrors.map(String));
+      }
+      if (Array.isArray(dataObj.errors)) {
+        errorsList.push(...dataObj.errors.map(String));
+      }
+    }
+
+    // Fallback to message
+    if (errorsList.length === 0 && errorResponse.message) {
+      errorsList.push(String(errorResponse.message));
+    }
+    
+    return errorsList;
+  };
+
+  const handleCloseUpload = () => {
+    if (uploading) return;
+    setIsUploadOpen(false);
+    setSelectedFile(null);
+    setValidationErrors([]);
+  };
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const file = e.dataTransfer.files[0];
+      validateAndSetFile(file);
+    }
+  };
+
+  const validateAndSetFile = (file: File) => {
+    const extension = file.name.split('.').pop()?.toLowerCase();
+    if (extension !== 'xlsx' && extension !== 'xls') {
+      toast.error("Invalid file type. Please upload a .xlsx or .xls Excel file.");
+      return;
+    }
+    setSelectedFile(file);
+    setValidationErrors([]);
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const handleDownloadTemplate = async () => {
+    try {
+      await downloadTemplate();
+      toast.success("Question template downloaded successfully");
+    } catch (err: any) {
+      console.error("Error downloading template:", err);
+      toast.error(err.response?.data?.message || "Failed to download template");
+    }
+  };
+
+  const handleUploadSubmit = async () => {
+    if (!selectedFile) {
+      toast.error("Please select a file to upload");
+      return;
+    }
+    setUploading(true);
+    setValidationErrors([]);
+    try {
+      const result = await bulkImportQuestions(selectedFile);
+      toast.success(result?.message || "Questions imported successfully!");
+      setIsUploadOpen(false);
+      setSelectedFile(null);
+    } catch (err: any) {
+      console.error("Bulk import failed:", err);
+      const parsed = parseErrors(err.response?.data);
+      if (parsed.length > 0) {
+        setValidationErrors(parsed);
+        toast.error("Import failed with validation errors. Please review them.");
+      } else {
+        toast.error(err.response?.data?.message || "Failed to import questions");
+      }
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSort = (field: string) => {
     const isCurrent = sortBy === field;
@@ -130,6 +264,15 @@ export const QuestionsList: React.FC = () => {
               title="Refresh Questions List"
             >
               <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
+            </Button>
+
+            <Button
+              variant="outline"
+              onClick={() => setIsUploadOpen(true)}
+              className="bg-white hover:bg-slate-50 border-slate-200 text-slate-700 h-9 rounded-lg font-bold text-[10px] uppercase tracking-wider gap-2 px-4 shadow-sm transition-all hover:scale-105 active:scale-95 flex items-center"
+            >
+              <Upload className="h-3.5 w-3.5 text-slate-500" />
+              <span>Bulk Import</span>
             </Button>
 
             <Button
@@ -500,10 +643,167 @@ export const QuestionsList: React.FC = () => {
         open={deleteOpen}
         onOpenChange={closeDeleteDialog}
         onConfirm={deleteQuestion}
-        loading={loading}
         title="Delete Question Record"
         description="Are you sure you want to soft delete this question? Users won't see it in upcoming psychometric evaluations."
       />
+
+      {/* Bulk Upload Dialog */}
+      <Dialog open={isUploadOpen} onOpenChange={handleCloseUpload}>
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border-slate-200 dark:border-slate-800 p-6 bg-white dark:bg-slate-900 shadow-xl">
+          <DialogHeader className="text-left pb-4 border-b border-slate-100 dark:border-slate-800">
+            <DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
+              Bulk Question Import
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              Upload multiple questions at once using our Excel template format.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-5 py-4">
+            {/* Template Download Option */}
+            <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800/80 rounded-xl">
+              <div className="flex items-center gap-2.5">
+                <div className="h-8 w-8 rounded-lg bg-green-50 dark:bg-green-950/20 flex items-center justify-center border border-green-100 dark:border-green-900/40">
+                  <FileSpreadsheet className="h-4 w-4 text-green-600 dark:text-green-500" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">Question Template</p>
+                  <p className="text-[10px] text-slate-400">Download the layout template containing option mappings.</p>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                onClick={handleDownloadTemplate}
+                className="h-8 text-[10px] font-bold uppercase rounded-lg border-slate-200 dark:border-slate-800 gap-1.5"
+              >
+                <Download className="h-3 w-3" />
+                Download Template
+              </Button>
+            </div>
+
+            {/* Drag & Drop Area */}
+            <div
+              onDragEnter={handleDrag}
+              onDragOver={handleDrag}
+              onDragLeave={handleDrag}
+              onDrop={handleDrop}
+              onClick={() => !uploading && fileInputRef.current?.click()}
+              className={cn(
+                "border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all min-h-[180px]",
+                dragActive
+                  ? "border-blue-500 bg-blue-50/20 dark:bg-blue-950/10"
+                  : "border-slate-200 dark:border-slate-800 hover:bg-slate-50/50 dark:hover:bg-slate-950/20",
+                selectedFile && "border-green-500/80 bg-green-50/5 dark:bg-green-950/5",
+                uploading && "pointer-events-none opacity-60"
+              )}
+            >
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={(e) => e.target.files?.[0] && validateAndSetFile(e.target.files[0])}
+                accept=".xlsx,.xls"
+                className="hidden"
+              />
+
+              {!selectedFile ? (
+                <>
+                  <div className="h-10 w-10 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200/60 dark:border-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500">
+                    <Upload className="h-5 w-5" />
+                  </div>
+                  <div className="text-center space-y-1">
+                    <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Drag and drop your Excel file here
+                    </p>
+                    <p className="text-[10px] text-slate-450 dark:text-slate-500">
+                      or click to browse from your device
+                    </p>
+                  </div>
+                  <p className="text-[9px] font-medium text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">
+                    Supports .xlsx and .xls (Max 10MB)
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="h-12 w-12 bg-green-50 dark:bg-green-950 rounded-xl border border-green-150/40 dark:border-green-900/50 flex items-center justify-center text-green-600 dark:text-green-500">
+                    <FileSpreadsheet className="h-6 w-6" />
+                  </div>
+                  <div className="text-center min-w-0 max-w-md">
+                    <p className="text-xs font-bold text-slate-800 dark:text-slate-250 truncate px-4">
+                      {selectedFile.name}
+                    </p>
+                    <p className="text-[10px] text-slate-450 font-medium mt-0.5">
+                      {formatFileSize(selectedFile.size)}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 mt-1" onClick={(e) => e.stopPropagation()}>
+                    <Button
+                      variant="ghost"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="h-7 px-3 text-[10px] rounded-lg border-slate-200 dark:border-slate-800 font-bold uppercase text-slate-650 dark:text-slate-400"
+                    >
+                      Change File
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      onClick={() => setSelectedFile(null)}
+                      className="h-7 px-3 text-[10px] rounded-lg font-bold uppercase text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20"
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Validation Errors Section */}
+            {validationErrors.length > 0 && (
+              <div className="p-4 rounded-xl border bg-rose-50/45 dark:bg-rose-950/10 border-rose-100 dark:border-rose-900/40 space-y-2">
+                <div className="flex items-center gap-2 text-rose-600 dark:text-rose-455">
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  <h4 className="text-xs font-black uppercase tracking-wider">Validation Errors Identified:</h4>
+                </div>
+                <div className="max-h-[160px] overflow-y-auto pl-6 list-disc text-[11px] font-semibold text-slate-650 dark:text-slate-400 space-y-1 scrollbar-thin">
+                  {validationErrors.map((err, idx) => (
+                    <div key={idx} className="flex items-start gap-1">
+                      <span className="text-rose-400 shrink-0">•</span>
+                      <span>{err}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <Button
+                variant="outline"
+                onClick={handleCloseUpload}
+                disabled={uploading}
+                className="h-9 px-4 rounded-xl border-slate-200 dark:border-slate-800 text-xs font-semibold"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleUploadSubmit}
+                disabled={!selectedFile || uploading}
+                className="h-9 px-5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm gap-2"
+              >
+                {uploading ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    Uploading template...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-3.5 w-3.5" />
+                    Upload Questions
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

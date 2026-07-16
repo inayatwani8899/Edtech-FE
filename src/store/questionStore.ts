@@ -24,6 +24,7 @@ export interface QuestionAdmin {
   gradeId: string | number;
   gradeName?: string;
   isActive: boolean;
+  isReversed?: boolean;
   createdAt?: string;
   options: QuestionOptionAdmin[];
 }
@@ -129,6 +130,8 @@ interface QuestionState {
   createQuestion: (data: Omit<QuestionAdmin, 'id'>) => Promise<void>;
   updateQuestion: (id: string, data: Partial<QuestionAdmin>) => Promise<void>;
   deleteQuestion: () => Promise<void>;
+  downloadTemplate: () => Promise<void>;
+  bulkImportQuestions: (file: File) => Promise<any>;
 }
 
 let fetchQuestionsController: AbortController | null = null;
@@ -200,17 +203,18 @@ const normaliseQuestion = (raw: Record<string, unknown>): QuestionAdmin => {
   return {
     id: String(raw.id ?? raw.question_Id ?? raw.questionId ?? ''),
     questionText: String(raw.questionText ?? raw.question_Text ?? ''),
-    testId: String(raw.testId ?? raw.test_Id ?? ''),
-    testName: (raw.testName ?? (raw.test as { title?: string })?.title ?? '') as string,
-    categoryId: String(raw.categoryId ?? raw.category_Id ?? ''),
-    categoryName: (raw.categoryName ?? (raw.category as { categoryName?: string })?.categoryName ?? '') as string,
-    theoryId: String(raw.theoryId ?? raw.theory_Id ?? ''),
-    theoryName: (raw.theoryName ?? (raw.theory as { theoryName?: string })?.theoryName ?? '') as string,
-    tagId: String(raw.tagId ?? raw.tag_Id ?? ''),
-    tagName: (raw.tagName ?? (raw.tag as { tagName?: string })?.tagName ?? '') as string,
-    gradeId: String(raw.gradeId ?? raw.grade_Id ?? ''),
-    gradeName: (raw.gradeName ?? (raw.grade as { gradeName?: string })?.gradeName ?? '') as string,
+    testId: String(raw.testId ?? raw.test_Id ?? (raw.test as { id?: number | string })?.id ?? ''),
+    testName: (raw.testName ?? (raw.test as { title?: string; name?: string })?.name ?? (raw.test as { title?: string; name?: string })?.title ?? '') as string,
+    categoryId: String(raw.categoryId ?? raw.category_Id ?? (raw.category as { id?: number | string })?.id ?? ''),
+    categoryName: (raw.categoryName ?? (raw.category as { categoryName?: string; name?: string })?.name ?? (raw.category as { categoryName?: string; name?: string })?.categoryName ?? '') as string,
+    theoryId: String(raw.theoryId ?? raw.theory_Id ?? (raw.theory as { id?: number | string })?.id ?? ''),
+    theoryName: (raw.theoryName ?? (raw.theory as { theoryName?: string; name?: string })?.name ?? (raw.theory as { theoryName?: string; name?: string })?.theoryName ?? '') as string,
+    tagId: String(raw.tagId ?? raw.tag_Id ?? (raw.tag as { id?: number | string })?.id ?? ''),
+    tagName: (raw.tagName ?? (raw.tag as { tagName?: string; name?: string })?.name ?? (raw.tag as { tagName?: string; name?: string })?.tagName ?? '') as string,
+    gradeId: String(raw.gradeId ?? raw.grade_Id ?? (raw.grade as { id?: number | string })?.id ?? ''),
+    gradeName: (raw.gradeName ?? (raw.grade as { gradeName?: string; name?: string })?.name ?? (raw.grade as { gradeName?: string; name?: string })?.gradeName ?? '') as string,
     isActive: raw.isActive !== undefined ? Boolean(raw.isActive) : true,
+    isReversed: raw.isReversed !== undefined ? Boolean(raw.isReversed) : false,
     createdAt: (raw.createdAt ?? raw.createdDate) as string | undefined,
     options,
   };
@@ -603,6 +607,7 @@ export const useQuestionStore = create<QuestionState>((set, get) => ({
         tagId: Number(data.tagId),
         gradeId: Number(data.gradeId),
         isActive: data.isActive,
+        isReversed: data.isReversed !== undefined ? Boolean(data.isReversed) : false,
         options: data.options.map((o) => ({
           optionText: o.optionText,
           score: Number(o.score),
@@ -632,6 +637,7 @@ export const useQuestionStore = create<QuestionState>((set, get) => ({
       if (data.tagId !== undefined) payload.tagId = Number(data.tagId);
       if (data.gradeId !== undefined) payload.gradeId = Number(data.gradeId);
       if (data.isActive !== undefined) payload.isActive = Boolean(data.isActive);
+      if (data.isReversed !== undefined) payload.isReversed = Boolean(data.isReversed);
       if (data.options !== undefined) {
         payload.options = data.options.map((o) => ({
           id: o.id ? Number(o.id) : undefined,
@@ -670,6 +676,56 @@ export const useQuestionStore = create<QuestionState>((set, get) => ({
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string } } };
       const msg = e.response?.data?.message ?? 'Failed to delete question.';
+      set({ error: msg });
+      throw err;
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  downloadTemplate: async () => {
+    set({ loading: true, error: null });
+    try {
+      const response = await api.get('/Question/download-template', {
+        responseType: 'blob',
+      });
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'Question_Import_Template.xlsx';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { message?: string } } };
+      const msg = e.response?.data?.message ?? 'Failed to download template.';
+      set({ error: msg });
+      throw err;
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  bulkImportQuestions: async (file: File) => {
+    set({ loading: true, error: null });
+    try {
+      const formData = new FormData();
+      formData.append('File', file);
+
+      const response = await api.post('/Question/bulk-import', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      await get().fetchQuestions();
+      return response.data;
+    } catch (err: any) {
+      const msg = err.response?.data?.message || 'Bulk import failed.';
       set({ error: msg });
       throw err;
     } finally {
