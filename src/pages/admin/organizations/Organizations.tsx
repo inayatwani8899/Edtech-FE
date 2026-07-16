@@ -12,8 +12,9 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
-import { useOrganizationStore, Organization } from "@/store/organizationStore";
+import { useOrganizationStore, Organization, OrgTab } from "@/store/organizationStore";
 import { Pagination } from "@/components/ui/pagination";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Plus,
   Search,
@@ -39,6 +40,97 @@ import { toast } from "sonner";
 import Swal from "sweetalert2";
 import { TenantSetupModal } from "./components/TenantSetupModal";
 
+// Mini table for Approved / Unapproved / Correction tabs (no filters)
+const OrgMiniTable: React.FC<{
+  orgs: Organization[];
+  loading: boolean;
+  currentPage: number;
+  totalPages: number;
+  totalCount: number;
+  limit: number;
+  onPage: (p: number) => void;
+  onLimit: (l: number) => void;
+  onView: (id: string) => void;
+  emptyLabel: string;
+}> = ({ orgs, loading, currentPage, totalPages, totalCount, limit, onPage, onLimit, onView, emptyLabel }) => {
+  if (loading) {
+    return (
+      <div className="flex flex-col justify-center items-center py-20 space-y-4">
+        <Loader2 className="h-10 w-10 text-primary animate-spin" />
+        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Loading...</span>
+      </div>
+    );
+  }
+  if (orgs.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center px-8">
+        <Building className="h-16 w-16 text-slate-200 mb-4" />
+        <p className="text-slate-500 font-semibold text-sm">{emptyLabel}</p>
+      </div>
+    );
+  }
+  return (
+    <div>
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader className="bg-slate-50">
+            <TableRow className="border-slate-200 hover:bg-transparent">
+              <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider">Institute Name</TableHead>
+              <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider">Contact</TableHead>
+              <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider">Location</TableHead>
+              <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider">Type</TableHead>
+              <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider text-center">Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {orgs.map((org) => (
+              <TableRow key={org.id} className="border-slate-100 hover:bg-slate-50 transition-all duration-200 group">
+                <TableCell className="px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white text-xs flex-shrink-0">
+                      {org.instituteName?.[0] || "I"}
+                    </div>
+                    <p className="text-xs font-bold text-slate-900 truncate max-w-[180px]">{org.instituteName}</p>
+                  </div>
+                </TableCell>
+                <TableCell className="px-4 py-3">
+                  <p className="text-xs font-semibold text-slate-700 truncate max-w-[160px]">{org.email}</p>
+                  <p className="text-[10px] text-slate-400">{org.contactNumber || "-"}</p>
+                </TableCell>
+                <TableCell className="px-4 py-3">
+                  <p className="text-xs text-slate-600 font-medium">{[org.city, org.state, org.country].filter(Boolean).join(", ") || "—"}</p>
+                </TableCell>
+                <TableCell className="px-4 py-3">
+                  <Badge variant="secondary" className="bg-slate-100 text-slate-600 text-[9px] font-bold border-none">{org.organizationType || "—"}</Badge>
+                </TableCell>
+                <TableCell className="px-4 py-3 text-center">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onView(String(org.id))}
+                    className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-primary hover:bg-primary/5 hover:border-primary/30 transition-all"
+                    title="View Details"
+                  >
+                    <Eye className="h-3.5 w-3.5" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+      <div className="p-2 border-t border-slate-200 bg-slate-50/50 flex items-center justify-between gap-2">
+        <p className="text-xs font-bold text-slate-600 ml-2">
+          Showing <span className="text-primary">{((currentPage - 1) * limit) + 1}–{Math.min(currentPage * limit, totalCount)}</span> of {totalCount}
+        </p>
+        <div className="bg-white p-1 rounded-lg shadow-sm border border-slate-200 scale-90 origin-right">
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={onPage} limit={limit} onLimitChange={onLimit} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Organizations: React.FC = () => {
   const navigate = useNavigate();
   const [setupModalOpen, setSetupModalOpen] = useState(false);
@@ -58,6 +150,14 @@ const Organizations: React.FC = () => {
     totalCount,
     searchTerm,
     sortDirection,
+    activeTab,
+    tabData,
+    setActiveTab,
+    setTabPage,
+    setTabLimit,
+    fetchApprovedOrganizations,
+    fetchUnapprovedOrganizations,
+    fetchCorrectionOrganizations,
     
     statusFilter,
     approvalFilter,
@@ -210,6 +310,36 @@ const Organizations: React.FC = () => {
         </div>
 
         {/* Filter & Data Card */}
+        {/* Tab navigation */}
+        <Tabs
+          value={activeTab}
+          onValueChange={(v) => setActiveTab(v as OrgTab)}
+          className="w-full"
+        >
+          <TabsList className="mb-4 bg-white border border-slate-200 rounded-xl p-1 gap-1 h-auto shadow-sm">
+            {([
+              { key: 'all', label: 'All Organizations' },
+              { key: 'approved', label: 'Approved' },
+              { key: 'unapproved', label: 'Unapproved' },
+              { key: 'correction', label: 'Correction Requests' },
+            ] as { key: OrgTab; label: string }[]).map(({ key, label }) => (
+              <TabsTrigger
+                key={key}
+                value={key}
+                className="rounded-lg px-4 py-1.5 text-[10px] font-black uppercase tracking-wide data-[state=active]:bg-slate-900 data-[state=active]:text-white data-[state=inactive]:text-slate-500 transition-all"
+              >
+                {label}
+                {key !== 'all' && tabData[key as Exclude<OrgTab, 'all'>].totalCount > 0 && (
+                  <span className="ml-1.5 bg-primary/20 text-primary rounded-full px-1.5 py-px text-[8px] font-black">
+                    {tabData[key as Exclude<OrgTab, 'all'>].totalCount}
+                  </span>
+                )}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+
+          {/* TAB: All (existing full filter card) */}
+          <TabsContent value="all" className="mt-0">
         <Card className="glass-card border-none shadow-elegant rounded-2xl overflow-hidden">
           <CardHeader className="p-4 border-b border-slate-50 space-y-4">
             {/* Search and Sort Toggle */}
@@ -664,7 +794,69 @@ const Organizations: React.FC = () => {
               </div>
             )}
           </CardContent>
-        </Card>
+          </Card>
+          </TabsContent>
+
+          {/* TAB: Approved */}
+          <TabsContent value="approved" className="mt-0">
+            <Card className="glass-card border-none shadow-elegant rounded-2xl overflow-hidden">
+              <CardContent className="p-0">
+                <OrgMiniTable
+                  orgs={tabData.approved.organizations}
+                  loading={tabData.approved.loading}
+                  currentPage={tabData.approved.currentPage}
+                  totalPages={tabData.approved.totalPages}
+                  totalCount={tabData.approved.totalCount}
+                  limit={tabData.approved.limit}
+                  onPage={(p) => setTabPage('approved', p)}
+                  onLimit={(l) => setTabLimit('approved', l)}
+                  onView={(id) => navigate(`/organizations/view/${id}`)}
+                  emptyLabel="No approved organizations found."
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* TAB: Unapproved */}
+          <TabsContent value="unapproved" className="mt-0">
+            <Card className="glass-card border-none shadow-elegant rounded-2xl overflow-hidden">
+              <CardContent className="p-0">
+                <OrgMiniTable
+                  orgs={tabData.unapproved.organizations}
+                  loading={tabData.unapproved.loading}
+                  currentPage={tabData.unapproved.currentPage}
+                  totalPages={tabData.unapproved.totalPages}
+                  totalCount={tabData.unapproved.totalCount}
+                  limit={tabData.unapproved.limit}
+                  onPage={(p) => setTabPage('unapproved', p)}
+                  onLimit={(l) => setTabLimit('unapproved', l)}
+                  onView={(id) => navigate(`/organizations/view/${id}`)}
+                  emptyLabel="No unapproved organizations found."
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* TAB: Correction Requests */}
+          <TabsContent value="correction" className="mt-0">
+            <Card className="glass-card border-none shadow-elegant rounded-2xl overflow-hidden">
+              <CardContent className="p-0">
+                <OrgMiniTable
+                  orgs={tabData.correction.organizations}
+                  loading={tabData.correction.loading}
+                  currentPage={tabData.correction.currentPage}
+                  totalPages={tabData.correction.totalPages}
+                  totalCount={tabData.correction.totalCount}
+                  limit={tabData.correction.limit}
+                  onPage={(p) => setTabPage('correction', p)}
+                  onLimit={(l) => setTabLimit('correction', l)}
+                  onView={(id) => navigate(`/organizations/view/${id}`)}
+                  emptyLabel="No organizations with correction requests found."
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
 
         {/* Delete Confirmation */}
         <DeleteDialog

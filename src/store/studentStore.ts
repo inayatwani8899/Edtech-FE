@@ -82,6 +82,7 @@ interface StudentState {
 }
 
 let searchTimeout: any = null;
+let fetchStudentsController: AbortController | null = null;
 
 export const useStudentStore = create<StudentState>((set, get) => ({
   // Student list state
@@ -134,6 +135,12 @@ export const useStudentStore = create<StudentState>((set, get) => ({
   },
 
   fetchStudents: async () => {
+    if (fetchStudentsController) {
+      fetchStudentsController.abort();
+    }
+    fetchStudentsController = new AbortController();
+    const currentController = fetchStudentsController;
+
     set({ loading: true, error: null });
     const { currentPage, limit, debouncedSearchTerm, sortDirection, sortBy } = get();
     
@@ -168,7 +175,12 @@ export const useStudentStore = create<StudentState>((set, get) => ({
         params.sortDirection = sortDirection;
       }
 
-      const response = await api.get<any>(endpoint, { params });
+      const response = await api.get<any>(endpoint, { 
+        params,
+        signal: currentController.signal
+      });
+
+      if (currentController !== fetchStudentsController) return;
 
       let studentsList: Student[] = [];
       let totalCount = 0;
@@ -211,14 +223,21 @@ export const useStudentStore = create<StudentState>((set, get) => ({
         currentPage: activePage > calculatedTotalPages ? 1 : activePage,
       });
     } catch (err: any) {
-      set({
-        error: err.response?.data?.message || "Failed to fetch students.",
-        students: [],
-        totalPages: 1,
-        totalCount: 0
-      });
+      if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') {
+        return;
+      }
+      if (currentController === fetchStudentsController) {
+        set({
+          error: err.response?.data?.message || "Failed to fetch students.",
+          students: [],
+          totalPages: 1,
+          totalCount: 0
+        });
+      }
     } finally {
-      set({ loading: false });
+      if (currentController === fetchStudentsController) {
+        set({ loading: false });
+      }
     }
   },
 

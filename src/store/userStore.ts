@@ -143,28 +143,17 @@ export const useUserStore = create<UserState>((set, get) => ({
     },
     fetchUsers: async () => {
         set({ loading: true, error: null });
-        const { currentPage, limit, debouncedSearchTerm } = get();
         try {
-            const response = await api.get<GenericResponse>("/User", {
-                params: {
-                    page: currentPage,
-                    limit,
-                    search: debouncedSearchTerm || undefined
-                },
-            });
-
-            const totalCount = response.data.data.totalCount;
-            const calculatedTotalPages = Math.ceil(totalCount / limit);
-
+            // API call removed as /User endpoint is dead
             set({
-                users: response.data.data.users,
-                totalPages: calculatedTotalPages > 0 ? calculatedTotalPages : 1,
-                totalCount: totalCount,
-                currentPage: currentPage > calculatedTotalPages ? 1 : currentPage,
+                users: [],
+                totalPages: 1,
+                totalCount: 0,
+                currentPage: 1,
             });
         } catch (err: any) {
             set({
-                error: err.response?.data?.message || "Failed to fetch users.",
+                error: "Failed to fetch users.",
                 users: [],
                 totalPages: 1,
                 totalCount: 0
@@ -177,10 +166,9 @@ export const useUserStore = create<UserState>((set, get) => ({
     createUser: async (data) => {
         set({ loading: true, error: null });
         try {
-            await api.post("/User", data);
-            await get().fetchUsers();
+            // API call removed as /User endpoint is dead
         } catch (err: any) {
-            set({ error: err.response?.data?.message || "Failed to create user" });
+            set({ error: "Failed to create user" });
             throw err;
         } finally {
             set({ loading: false });
@@ -191,11 +179,10 @@ export const useUserStore = create<UserState>((set, get) => ({
         if (!id) return;
         set({ loading: true, error: null });
         try {
-            const res = await api.get(`/User/${id}`);
-            set({ user: res.data.data.user });
+            // API call removed as /User endpoint is dead
+            set({ user: null });
         } catch (err: any) {
-            console.error("Failed to fetch user:", err);
-            set({ error: err.response?.data?.message || "Failed to fetch user", user: null });
+            set({ error: "Failed to fetch user", user: null });
             throw err;
         } finally {
             set({ loading: false });
@@ -206,10 +193,9 @@ export const useUserStore = create<UserState>((set, get) => ({
         data.id=id;
         set({ loading: true, error: null });
         try {
-            await api.put(`/User/update`, data);
-            await get().fetchUsers();
+            // API call removed as /User endpoint is dead
         } catch (err: any) {
-            set({ error: err.response?.data?.message || "Failed to update user" });
+            set({ error: "Failed to update user" });
             throw err;
         } finally {
             set({ loading: false });
@@ -217,23 +203,15 @@ export const useUserStore = create<UserState>((set, get) => ({
     },
 
     deleteUser: async () => {
-        const { selectedUserId, fetchUsers, currentPage, users } = get();
+        const { selectedUserId } = get();
         if (!selectedUserId) return;
 
         set({ loading: true, error: null });
         try {
-            await api.delete(`/User/${selectedUserId}`);
-
-            const remainingUsers = users.filter(user => user.id !== selectedUserId);
-            if (remainingUsers.length === 0 && currentPage > 1) {
-                set({ currentPage: currentPage - 1 });
-            }
-
+            // API call removed as /User endpoint is dead
             set({ deleteOpen: false, selectedUserId: null });
-            await fetchUsers();
         } catch (err: any) {
-            console.error("Failed to delete user:", err);
-            set({ error: err.response?.data?.message || "Failed to delete user" });
+            set({ error: "Failed to delete user" });
             throw err;
         } finally {
             set({ loading: false });

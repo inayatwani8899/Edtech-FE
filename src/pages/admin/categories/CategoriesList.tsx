@@ -26,9 +26,11 @@ import {
 } from 'lucide-react';
 import { useCategoryStore } from "@/store/categoryStore";
 import { Badge } from "@/components/ui/badge";
+import { usePagePermissions } from "@/store/permissionStore";
 
 export const CategoriesList: React.FC = () => {
     const navigate = useNavigate();
+    const { canCreate, canEdit, canDelete } = usePagePermissions();
     const {
         categories,
         loading,
@@ -79,13 +81,15 @@ export const CategoriesList: React.FC = () => {
 
                     <div className="flex items-center gap-3">
                         {/* Hidden Stats box to match user preference */}
-                        <Button
-                            onClick={() => navigate("/manage/categories/add")}
-                            className="bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-900/20 rounded-lg h-9 px-4 transition-all hover:scale-105 active:scale-95 group"
-                        >
-                            <Plus className="h-3.5 w-3.5 mr-2 group-hover:rotate-90 transition-transform" />
-                            <span className="text-[10px] font-bold uppercase tracking-wide">Add Category</span>
-                        </Button>
+                        {canCreate && (
+                            <Button
+                                onClick={() => navigate("/manage/categories/add")}
+                                className="bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-900/20 rounded-lg h-9 px-4 transition-all hover:scale-105 active:scale-95 group"
+                            >
+                                <Plus className="h-3.5 w-3.5 mr-2 group-hover:rotate-90 transition-transform" />
+                                <span className="text-[10px] font-bold uppercase tracking-wide">Add Category</span>
+                            </Button>
+                        )}
                     </div>
                 </div>
 
@@ -178,24 +182,28 @@ export const CategoriesList: React.FC = () => {
                                                             >
                                                                 <Eye className="h-3.5 w-3.5" />
                                                             </Button>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                onClick={() => navigate(`/manage/categories/edit/${category.id}`)}
-                                                                className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 transition-all"
-                                                                title="Edit Category"
-                                                            >
-                                                                <Edit className="h-3.5 w-3.5" />
-                                                            </Button>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                onClick={() => openDeleteDialog(category.id)}
-                                                                className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-300 transition-all"
-                                                                title="Delete Category"
-                                                            >
-                                                                <Trash2 className="h-3.5 w-3.5" />
-                                                            </Button>
+                                                            {canEdit && (
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    onClick={() => navigate(`/manage/categories/edit/${category.id}`)}
+                                                                    className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 transition-all"
+                                                                    title="Edit Category"
+                                                                >
+                                                                    <Edit className="h-3.5 w-3.5" />
+                                                                </Button>
+                                                            )}
+                                                            {canDelete && (
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    onClick={() => openDeleteDialog(category.id)}
+                                                                    className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-300 transition-all"
+                                                                    title="Delete Category"
+                                                                >
+                                                                    <Trash2 className="h-3.5 w-3.5" />
+                                                                </Button>
+                                                            )}
                                                         </div>
                                                     </TableCell>
                                                 </TableRow>

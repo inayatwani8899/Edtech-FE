@@ -1,9 +1,58 @@
-import { Outlet, Navigate } from "react-router-dom";
+import { Outlet, Navigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "@/store/useAuthStore";
 import { CounselorSidebar } from "@/components/sidebars/CounselorSidebar";
 import { Navbar } from "../ui/navbar";
 import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Loader2 } from "lucide-react";
+import React, { useEffect } from "react";
+import { usePermissionStore, matchPermission } from "@/store/permissionStore";
+
+const CounselorPermissionGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const location = useLocation();
+    const { user } = useAuthStore();
+    const permissions = usePermissionStore((s) => s.permissions);
+    const loading = usePermissionStore((s) => s.loading);
+    const loaded = usePermissionStore((s) => s.loaded);
+    const fetchMenus = usePermissionStore((s) => s.fetchMenus);
+
+    useEffect(() => {
+        const roleId = user?.roleId || localStorage.getItem("roleId");
+        if (roleId && !loaded) {
+            fetchMenus(roleId);
+        }
+    }, [fetchMenus, user?.roleId, loaded]);
+
+    // Bypass checking for base dashboard / profile / settings route
+    if (
+        location.pathname === "/counselor/dashboard" ||
+        location.pathname === "/profile" ||
+        location.pathname === "/settings"
+    ) {
+        return <>{children}</>;
+    }
+
+    // SuperAdmin bypass
+    if (user?.role === "SuperAdmin") {
+        return <>{children}</>;
+    }
+
+    if (loading && !loaded) {
+        return (
+            <div className="flex flex-col items-center justify-center py-20 w-full">
+                <Loader2 className="h-8 w-8 animate-spin text-emerald-500 mb-2" />
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">Verifying Professional Permissions...</span>
+            </div>
+        );
+    }
+
+    const match = matchPermission(location.pathname, permissions);
+
+    if (loaded && (!match || !match.canView)) {
+        return <Navigate to="/unauthorized" replace />;
+    }
+
+    return <>{children}</>;
+};
 
 export const CounselorLayout = () => {
     const { user, isAuthenticated, isLoading } = useAuthStore();
@@ -24,7 +73,8 @@ export const CounselorLayout = () => {
     const isCounselor = user?.roleId === 2 ||
         user?.role?.toLowerCase() === "counselor" ||
         user?.role?.toLowerCase() === "counsellor" ||
-        user?.role?.toLowerCase() === "professional";
+        user?.role?.toLowerCase() === "professional" ||
+        user?.role === "SuperAdmin";
 
     if (!isAuthenticated || !isCounselor) {
         return <Navigate to="/login" replace />;
@@ -47,7 +97,9 @@ export const CounselorLayout = () => {
                     {/* Main Content */}
                     <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
                         <div className="max-w-[1600px] mx-auto">
-                            <Outlet />
+                            <CounselorPermissionGuard>
+                                <Outlet />
+                            </CounselorPermissionGuard>
                         </div>
                     </main>
                 </div>

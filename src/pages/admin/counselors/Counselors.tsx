@@ -48,13 +48,10 @@ const Counselors: React.FC = () => {
         deleteCounselor,
     } = useCounselorStore();
 
-    // Debounce search
+    // Fetch counselors on mount
     useEffect(() => {
-        const timer = setTimeout(() => {
-            fetchCounselors();
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [currentPage, limit, searchTerm, fetchCounselors]);
+        fetchCounselors();
+    }, [fetchCounselors]);
 
     return (
         <div className="min-h-screen w-full bg-[#F8FAFC] relative overflow-hidden">

@@ -10,6 +10,9 @@ export interface User {
   phone: string; // Added
   role: UserRole;
   roleId: number; // Changed from string to number
+  tenantId?: number | string;
+  gradeId?: number | string;
+  gradeLevel?: number | string;
 
   // Optional fields not in login response but maybe used elsewhere
   phoneNumber?: string;
@@ -44,6 +47,7 @@ export interface LoginResponse {
     user: User;
     permissions?: Permission[];
     tenant?: string | null;
+    tenantId?: number | string | null;
     loginUrl?: string | null;
     isSuccess?: boolean;
     errorMessage?: string | null;

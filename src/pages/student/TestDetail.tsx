@@ -39,7 +39,10 @@ export const TestDetail = () => {
     navigate,
     mediaStreamRef,
     stopCamera,
-    hasAnswers
+    hasAnswers,
+    theories,
+    perCategory,
+    allTestQuestions
   } = useTestLogic();
 
 
@@ -230,6 +233,7 @@ export const TestDetail = () => {
       questionsContainerRef={questionsContainerRef}
       currentCategory={currentCategory}
       testQuestions={testQuestions}
+      allTestQuestions={allTestQuestions}
       currentPage={currentPage}
       totalPages={totalPages}
       hasNext={hasNext}
@@ -249,6 +253,10 @@ export const TestDetail = () => {
       formatTime={formatTime}
       testTakingLoading={testTakingLoading}
       hasAnswers={hasAnswers}
+      theories={theories}
+      perCategory={perCategory}
+      testName={currentTest?.title}
+      totalQuestions={allTestQuestions?.length}
     />
 
   );

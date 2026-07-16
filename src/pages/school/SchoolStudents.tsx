@@ -76,23 +76,6 @@ export const SchoolStudents = () => {
     const [selectedStudents, setSelectedStudents] = useState<number[]>([]);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-    const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
-
-    // Sync local state if searchTerm changes from outside (e.g. cleared)
-    useEffect(() => {
-        setLocalSearchTerm(searchTerm);
-    }, [searchTerm]);
-
-    // Debounce updating the store's searchTerm
-    useEffect(() => {
-        const handler = setTimeout(() => {
-            if (localSearchTerm !== searchTerm) {
-                setSearchTerm(localSearchTerm);
-            }
-        }, 500);
-        return () => clearTimeout(handler);
-    }, [localSearchTerm, searchTerm, setSearchTerm]);
-
     const handleHeaderSort = (columnKey: string) => {
         if (loading) return;
         if (sortBy === columnKey) {
@@ -455,50 +438,48 @@ export const SchoolStudents = () => {
     };
 
     return (
-        <div className="space-y-3.5 animate-in fade-in duration-500">
-            {/* Compact Page Header */}
-            <div className="relative overflow-hidden bg-gradient-to-r from-slate-900 to-slate-850 dark:from-slate-950 dark:to-slate-900 p-4 sm:p-5 rounded-2xl text-white shadow-lg">
-                <div className="absolute top-0 right-0 -mt-4 -mr-4 w-48 h-48 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
-                <div className="absolute bottom-0 left-0 -mb-6 -ml-6 w-32 h-32 rounded-full bg-indigo-500/10 blur-2xl pointer-events-none" />
+        <div className="min-h-screen w-full bg-[#F8FAFC] relative overflow-hidden">
+            {/* Dynamic Background */}
+            <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-indigo-50/80 to-transparent pointer-events-none z-0" />
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+                <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] bg-purple-500/5 rounded-full blur-[120px] animate-pulse"></div>
+                <div className="absolute top-[10%] left-[-10%] w-[40%] h-[40%] bg-blue-500/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+            </div>
 
-                <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                            <span className="text-2xl">🎓</span>
-                            <h1 className="text-xl sm:text-2xl font-black tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-200 bg-clip-text text-transparent">
-                                Student Matrix
-                            </h1>
+            <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10 space-y-5 animate-in fade-in duration-500">
+                {/* Header Section */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+                    <div>
+                        <div className="flex items-center gap-2 mb-0.5">
+                            <div className="h-px w-6 bg-primary/40"></div>
+                            <span className="text-[9px] font-black uppercase tracking-[0.25em] text-primary">Organization Console</span>
                         </div>
-                        <p className="text-slate-350 text-xs font-medium mt-0.5">
-                            Manage enrolled students
+                        <h1 className="text-2xl font-black tracking-tight text-slate-900 flex items-center gap-2 mb-0.5">
+                            Student <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-indigo-600">Registry</span>
+                        </h1>
+                        <p className="text-xs font-medium text-slate-500 max-w-2xl">
+                            Register, verify, and manage students enrolled in your academic organization.
                         </p>
-
-                        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-slate-300 font-semibold mt-2">
-                            <span>Total Students: <span className="text-white font-extrabold">{totalCount}</span></span>
-                            <span className="text-slate-600">•</span>
-                            <span>Academic Year: <span className="text-white font-extrabold">2025-26</span></span>
-                        </div>
                     </div>
 
                     <div className="flex items-center gap-2 flex-wrap shrink-0">
                         <Button
                             variant="outline"
                             onClick={() => setIsUploadOpen(true)}
-                            className="bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white h-9 rounded-xl font-bold text-xs uppercase tracking-wider gap-2 px-4 backdrop-blur-sm"
+                            className="bg-white hover:bg-slate-50 border-slate-200 text-slate-700 h-9 rounded-xl font-bold text-xs uppercase tracking-wider gap-2 px-4 shadow-sm"
                         >
                             <Upload className="h-4 w-4" />
                             Bulk Upload
                         </Button>
                         <Button
                             onClick={() => navigate("/school/students/add")}
-                            className="bg-blue-600 hover:bg-blue-500 border-none text-white h-9 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-blue-600/30 gap-2 px-5 hover:scale-[1.02] active:scale-95 transition-all"
+                            className="bg-slate-900 hover:bg-slate-800 border-none text-white h-9 rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg shadow-slate-900/20 gap-2 px-5 hover:scale-[1.02] active:scale-95 transition-all"
                         >
                             <UserPlus className="h-4 w-4" />
                             Register Student
                         </Button>
                     </div>
                 </div>
-            </div>
 
             {/* Professional Filter Bar */}
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2.5 rounded-2xl flex flex-col lg:flex-row gap-3 items-center justify-between shadow-sm mt-4">
@@ -508,8 +489,8 @@ export const SchoolStudents = () => {
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
                         <Input
                             placeholder="Search Student..."
-                            value={localSearchTerm}
-                            onChange={(e) => setLocalSearchTerm(e.target.value)}
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
                             className="pl-9 h-9 border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 rounded-xl text-xs"
                         />
                     </div>
@@ -1182,6 +1163,7 @@ export const SchoolStudents = () => {
                     )}
                 </DialogContent>
             </Dialog>
+            </div>
         </div>
     );
 };

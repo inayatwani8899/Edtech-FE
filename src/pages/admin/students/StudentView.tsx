@@ -159,31 +159,42 @@ const StudentView: React.FC = () => {
     const fullName = `${student.firstName || ""} ${student.lastName || ""}`.trim() || "Student Profile";
 
     return (
-        <div className="min-h-screen w-full bg-[#FAFAFA] dark:bg-slate-950 px-4 py-6 flex flex-col items-center overflow-x-hidden">
-            <div className="max-w-4xl w-full flex flex-col gap-6">
-                
-                {/* Compact Header */}
-                <div className="flex items-center justify-between border-b border-slate-200/60 dark:border-slate-800 pb-3">
+        <div className="min-h-screen w-full bg-[#F8FAFC] relative overflow-hidden">
+            {/* Dynamic Background */}
+            <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-indigo-50/80 to-transparent pointer-events-none z-0" />
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+                <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] bg-purple-500/5 rounded-full blur-[120px] animate-pulse"></div>
+                <div className="absolute top-[10%] left-[-10%] w-[40%] h-[40%] bg-blue-500/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+            </div>
+
+            <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10 space-y-5 animate-in fade-in duration-500 max-w-4xl">
+                {/* Header Section */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
                     <div className="flex items-center gap-3">
                         <button 
                             onClick={() => navigate(redirectPath)}
-                            className="p-1.5 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                            className="p-1.5 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors shadow-sm"
                             type="button"
                         >
-                            <ArrowLeft className="h-4 w-4 text-slate-500" />
+                            <ArrowLeft className="h-4 w-4" />
                         </button>
                         <div>
-                            <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                                View Student
-                            </h2>
-                            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                            <div className="flex items-center gap-2 mb-0.5">
+                                <div className="h-px w-6 bg-primary/40"></div>
+                                <span className="text-[9px] font-black uppercase tracking-[0.25em] text-primary">Organization Console</span>
+                            </div>
+                            <h1 className="text-2xl font-black tracking-tight text-slate-900 flex items-center gap-2 mb-0.5">
+                                View <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-indigo-600">Student</span>
+                            </h1>
+                            <p className="text-xs font-medium text-slate-500 max-w-2xl">
                                 Manage and view student information
                             </p>
                         </div>
                     </div>
+
                     <Button 
                         onClick={() => navigate(isSchool ? `/school/students/edit/${student.id}` : `/students/edit/${student.id}`)} 
-                        className="h-9 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 text-white text-xs font-bold shadow-sm flex items-center gap-2"
+                        className="bg-slate-900 hover:bg-slate-800 border-none text-white h-9 rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg shadow-slate-900/20 gap-2 px-5 hover:scale-[1.02] active:scale-95 transition-all flex items-center"
                     >
                         <Edit3 className="h-3.5 w-3.5" />
                         Edit Student

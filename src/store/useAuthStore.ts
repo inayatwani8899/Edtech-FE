@@ -3,6 +3,7 @@ import { LoginResponse, User, Permission } from "@/types/auth";
 import api from "@/api/axios";
 import Swal from "sweetalert2";
 import { usePaymentStore } from "./paymentStore";
+import { usePermissionStore } from "./permissionStore";
 
 export interface StudentSession {
   token: string | null;
@@ -22,7 +23,7 @@ const getTenantFromHostname = () => {
   // const parts = hostname.split('.');
   // if (parts.length > 0) {
   //   const subdomain = parts[0].toLowerCase();
-  //   if (subdomain !== "www" && subdomain !== "nervous-dubinsky" && subdomain !== "charming-bohr") {
+  //   if (subdomain !== "www" && subdomain !== "nervous-dubinsky") {
   //     return subdomain;
   //   }
   // }
@@ -43,6 +44,7 @@ interface AuthState {
   studentSession: StudentSession | null;
 
   login: (email: string, password: string, tenantName?: string | null) => Promise<void>;
+  loginWithGoogle: (idToken: string, tenantName?: string | null) => Promise<void>;
   logout: () => string;
   registerStudent: (payload: any) => Promise<{ success: boolean, message?: string, error?: any }>;
   registerCounsellor: (firstName: string, lastName: string, email: string, password: string, dateOfBirth: string, grade: string, phone: string, role: string) => Promise<void>;
@@ -70,6 +72,34 @@ export const useAuthStore = create<AuthState>(
 
     loadFromStorage: () => {
       const token = localStorage.getItem("accessToken") || localStorage.getItem("auth_token");
+
+      // Recover tenant and organizationId from JWT payload claims if missing
+      if (token) {
+        try {
+          const parts = token.split('.');
+          if (parts.length > 1) {
+            const base64Url = parts[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            const payload = JSON.parse(jsonPayload);
+            
+            const tenantVal = payload.tenant || payload.Tenant || payload.tenantName || payload.tenantDb || payload.TenantDb || "";
+            if (tenantVal && !localStorage.getItem("tenantName")) {
+              localStorage.setItem("tenantName", tenantVal);
+            }
+            
+            const orgIdVal = payload.orgId || payload.organizationId || payload.tenantId || payload.TenantId || payload.org || "";
+            if (orgIdVal && !localStorage.getItem("organizationId")) {
+              localStorage.setItem("organizationId", String(orgIdVal));
+            }
+          }
+        } catch (e) {
+          console.warn("Failed to extract claims from active JWT token:", e);
+        }
+      }
+
       const userData = localStorage.getItem("userData") || localStorage.getItem("user_data");
       const permissionsData = localStorage.getItem("user_permissions");
       const storedTenantData = localStorage.getItem("organizationData");
@@ -105,15 +135,28 @@ export const useAuthStore = create<AuthState>(
         }
       }
 
+      const isAuthenticated = !!(token && userData);
       set({
         token: token || null,
         user: userData ? JSON.parse(userData) : null,
         permissions: permissionsData ? JSON.parse(permissionsData) : [],
         tenantData: storedTenantData ? JSON.parse(storedTenantData) : null,
         studentSession,
-        isAuthenticated: !!(token && userData),
+        isAuthenticated,
         isLoading: false,
       });
+
+      if (isAuthenticated) {
+        const currentMenus = usePermissionStore.getState().menus;
+        if (!currentMenus || currentMenus.length === 0) {
+          const roleId = localStorage.getItem("roleId") || get().user?.roleId;
+          if (roleId) {
+            usePermissionStore.getState().fetchMenus(roleId).catch((e) => {
+              console.error("Failed to restore permissions:", e);
+            });
+          }
+        }
+      }
     },
 
     login: async (email, password, routeTenant?: string | null) => {
@@ -129,37 +172,12 @@ export const useAuthStore = create<AuthState>(
           tenant: resolvedTenant
         };
 
-        let loginSuccess = false;
-        let responseData: any = null;
-        let firstError: any = null;
+        const res = await api.post<LoginResponse>("/Auth/login", payload, {
+          baseURL: import.meta.env.VITE_ORG_API_BASE_URL || "https://nervous-dubinsky.180-179-213-167.plesk.page/api/"
+        });
+        const responseData = res.data;
 
-        // Attempt 1: Try the Super Admin / Org API first (nervous-dubinsky)
-        try {
-          const res = await api.post<LoginResponse>("/Auth/login", payload, {
-            baseURL: import.meta.env.VITE_ORG_API_BASE_URL || "https://nervous-dubinsky.180-179-213-167.plesk.page/api/"
-          });
-          responseData = res.data;
-          loginSuccess = true;
-        } catch (orgErr) {
-          firstError = orgErr;
-          console.warn("Login failed on the primary/org API, attempting fallback to the old API...", orgErr);
-
-          // Attempt 2: Try the fallback/old URL (charming-bohr)
-          try {
-            const res = await api.post<LoginResponse>("/Auth/login", payload, {
-              baseURL: import.meta.env.VITE_API_BASE_URL || "https://charming-bohr.180-179-213-167.plesk.page/api/"
-            });
-            responseData = res.data;
-            loginSuccess = true;
-          } catch (fallbackErr: any) {
-            if (firstError && firstError.response) {
-              throw firstError;
-            }
-            throw fallbackErr;
-          }
-        }
-
-        if (loginSuccess && responseData) {
+        if (responseData) {
           const { access_Token, user, permissions = [] } = responseData.data;
           const tenant = responseData.data.tenant || resolvedTenant;
           const rawLoginUrl = responseData.data.loginUrl || `/login/${tenant}`;
@@ -176,16 +194,18 @@ export const useAuthStore = create<AuthState>(
             }
           }
 
-          let organizationId = "";
-          const storedTenantData = localStorage.getItem("organizationData");
-          if (storedTenantData) {
-            try {
-              const org = JSON.parse(storedTenantData);
-              if (org && org.id) {
-                organizationId = String(org.id);
+          let organizationId = responseData.data.tenantId ? String(responseData.data.tenantId) : "";
+          if (!organizationId) {
+            const storedTenantData = localStorage.getItem("organizationData");
+            if (storedTenantData) {
+              try {
+                const org = JSON.parse(storedTenantData);
+                if (org && org.id) {
+                  organizationId = String(org.id);
+                }
+              } catch (e) {
+                console.error("Error parsing stored organization data:", e);
               }
-            } catch (e) {
-              console.error("Error parsing stored organization data:", e);
             }
           }
 
@@ -218,6 +238,112 @@ export const useAuthStore = create<AuthState>(
           localStorage.setItem("studentId", String(studentSession.studentId || ""));
           localStorage.setItem("gradeId", String(studentSession.gradeId || ""));
           localStorage.setItem("grade", studentSession.grade || "");
+
+          // Fetch permissions from backend using the active token
+          try {
+            await usePermissionStore.getState().fetchMenus(user.roleId, true);
+          } catch (e) {
+            console.error("Failed to fetch permissions on login:", e);
+          }
+
+          set({
+            user,
+            token: access_Token,
+            permissions,
+            studentSession,
+            isAuthenticated: true,
+            isLoading: false,
+          });
+        }
+      } catch (err) {
+        set({ user: null, token: null, permissions: [], isAuthenticated: false, isLoading: false });
+        throw err;
+      }
+    },
+
+    loginWithGoogle: async (idToken, routeTenant?: string | null) => {
+      set({ isLoading: true });
+      try {
+        const storedTenant = localStorage.getItem("tenantName");
+        const resolvedTenant = routeTenant || getTenantFromHostname() || storedTenant || null;
+
+        const payload: any = {
+          idToken,
+          tenant: resolvedTenant
+        };
+
+        const res = await api.post<LoginResponse>("/Auth/google", payload, {
+          baseURL: import.meta.env.VITE_ORG_API_BASE_URL || "https://nervous-dubinsky.180-179-213-167.plesk.page/api/"
+        });
+        const responseData = res.data;
+
+        if (responseData) {
+          const { access_Token, user, permissions = [] } = responseData.data;
+          const tenant = responseData.data.tenant || resolvedTenant;
+          const rawLoginUrl = responseData.data.loginUrl || `/login/${tenant}`;
+          let loginUrl = rawLoginUrl;
+          if (loginUrl.includes("{tenantDb}") && tenant && tenant !== "{tenantDb}") {
+            loginUrl = loginUrl.replace("{tenantDb}", tenant);
+          }
+          if (loginUrl.startsWith("http")) {
+            try {
+              const parsedUrl = new URL(loginUrl);
+              loginUrl = parsedUrl.pathname;
+            } catch {
+              loginUrl = tenant ? `/login/${tenant}` : "/login";
+            }
+          }
+
+          let organizationId = responseData.data.tenantId ? String(responseData.data.tenantId) : "";
+          if (!organizationId) {
+            const storedTenantData = localStorage.getItem("organizationData");
+            if (storedTenantData) {
+              try {
+                const org = JSON.parse(storedTenantData);
+                if (org && org.id) {
+                  organizationId = String(org.id);
+                }
+              } catch (e) {
+                console.error("Error parsing stored organization data:", e);
+              }
+            }
+          }
+
+          const studentSession: StudentSession = {
+            token: access_Token,
+            tenant: tenant || "",
+            studentId: user.id ? Number(user.id) : null,
+            gradeId: user.gradeId ? Number(user.gradeId) : null,
+            grade: user.grade || "",
+            role: user.role || "",
+            email: user.email || ""
+          };
+
+          // Save required session keys
+          localStorage.setItem("accessToken", access_Token);
+          localStorage.setItem("auth_token", access_Token);
+          localStorage.setItem("tenantName", tenant || "");
+          localStorage.setItem("userId", String(user.id));
+          localStorage.setItem("role", user.role || "");
+          localStorage.setItem("roleId", String(user.roleId));
+          localStorage.setItem("userData", JSON.stringify(user));
+          localStorage.setItem("user_data", JSON.stringify(user));
+          localStorage.setItem("loginUrl", loginUrl);
+          localStorage.setItem("user_permissions", JSON.stringify(permissions));
+          if (organizationId) {
+            localStorage.setItem("organizationId", organizationId);
+          }
+
+          localStorage.setItem("studentSession", JSON.stringify(studentSession));
+          localStorage.setItem("studentId", String(studentSession.studentId || ""));
+          localStorage.setItem("gradeId", String(studentSession.gradeId || ""));
+          localStorage.setItem("grade", studentSession.grade || "");
+
+          try {
+            await usePermissionStore.getState().fetchMenus(user.roleId, true);
+          } catch (e) {
+            console.error("Failed to fetch permissions on google login:", e);
+          }
 
           set({
             user,
@@ -348,7 +474,8 @@ export const useAuthStore = create<AuthState>(
         loginUrl = "/login";
       }
 
-      // 2. Clear session/localStorage
+      // 2. Clear session/localStorage & permissions
+      usePermissionStore.getState().clearMenus();
       sessionStorage.clear();
       localStorage.clear();
 

@@ -1,8 +1,59 @@
-import { Outlet, Navigate } from "react-router-dom";
+import { Outlet, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "../../store/useAuthStore";
 import { SchoolSidebar } from "../sidebars/SchoolSidebar";
 import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Menu, Brain, Loader2 } from "lucide-react";
+import Swal from "sweetalert2";
+import React, { useEffect } from "react";
+import { usePermissionStore, matchPermission } from "@/store/permissionStore";
+
+const SchoolPermissionGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const location = useLocation();
+    const { user } = useAuthStore();
+    const permissions = usePermissionStore((s) => s.permissions);
+    const loading = usePermissionStore((s) => s.loading);
+    const loaded = usePermissionStore((s) => s.loaded);
+    const fetchMenus = usePermissionStore((s) => s.fetchMenus);
+
+    useEffect(() => {
+        const roleId = user?.roleId || localStorage.getItem("roleId");
+        if (roleId && !loaded) {
+            fetchMenus(roleId);
+        }
+    }, [fetchMenus, user?.roleId, loaded]);
+
+    // Bypass checking for base dashboard/profile/settings route
+    if (
+        location.pathname === "/school/dashboard" ||
+        location.pathname === "/school/profile" ||
+        location.pathname === "/school/settings" ||
+        location.pathname === "/organization/dashboard"
+    ) {
+        return <>{children}</>;
+    }
+
+    // SuperAdmin bypass
+    if (user?.role === "SuperAdmin") {
+        return <>{children}</>;
+    }
+
+    if (loading && !loaded) {
+        return (
+            <div className="flex flex-col items-center justify-center py-20 w-full">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-500 mb-2" />
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">Verifying School Permissions...</span>
+            </div>
+        );
+    }
+
+    const match = matchPermission(location.pathname, permissions);
+
+    if (loaded && (!match || !match.canView)) {
+        return <Navigate to="/unauthorized" replace />;
+    }
+
+    return <>{children}</>;
+};
 
 export const SchoolLayout = () => {
     const { user, isAuthenticated, isLoading } = useAuthStore();
@@ -22,7 +73,8 @@ export const SchoolLayout = () => {
                      user?.roleId === 3 ||
                      user?.role?.toLowerCase() === "school" || 
                      user?.role?.toLowerCase() === "organization" ||
-                     user?.role?.toLowerCase() === "organizationadmin";
+                     user?.role?.toLowerCase() === "organizationadmin" ||
+                     user?.role === "SuperAdmin";
 
     if (!isAuthenticated || !isSchool) {
         return <Navigate to="/login" replace />;
@@ -35,15 +87,77 @@ export const SchoolLayout = () => {
                 
                 <VisibleSidebarRail />
 
-                <div className="flex-1 flex flex-col">
+                <div className="flex-1 flex flex-col min-w-0">
+                    {/* Mobile Header */}
+                    <MobileHeader />
+
                     <main className="flex-1 overflow-auto p-4 md:p-8">
-                        <Outlet />
+                        <SchoolPermissionGuard>
+                            <Outlet />
+                        </SchoolPermissionGuard>
                     </main>
                 </div>
             </div>
         </SidebarProvider>
     );
 };
+
+// Responsive Mobile Header component for School module
+function MobileHeader() {
+    try {
+        const { setOpenMobile, isMobile } = useSidebar();
+        const { logout } = useAuthStore();
+        const navigate = useNavigate();
+
+        if (!isMobile) return null;
+
+        return (
+            <header className="sticky top-0 z-40 flex h-14 w-full items-center justify-between border-b border-slate-200/80 bg-white/95 px-4 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:border-slate-800 dark:bg-[#0b0d11]/95 shrink-0">
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => setOpenMobile(true)}
+                        className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 dark:border-slate-850 dark:bg-slate-900/50 dark:hover:bg-slate-800/80 transition-colors shadow-sm"
+                        aria-label="Open navigation menu"
+                    >
+                        <Menu className="h-4.5 w-4.5 text-slate-700 dark:text-slate-200" />
+                    </button>
+                    
+                    <div className="flex items-center gap-2">
+                        <Brain className="h-5 w-5 text-blue-500" />
+                        <span className="font-black text-slate-900 dark:text-white text-base">
+                            Cognify<span className="text-blue-500 italic">IQ</span>
+                        </span>
+                    </div>
+                </div>
+
+                <button
+                    onClick={() => {
+                        Swal.fire({
+                            title: 'Sign Out?',
+                            text: 'Are you sure you want to end your administrative session?',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#3b82f6',
+                            cancelButtonColor: '#94a3b8',
+                            confirmButtonText: 'Yes, sign out',
+                            cancelButtonText: 'Cancel'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                const redirectUrl = logout();
+                                navigate(redirectUrl);
+                            }
+                        });
+                    }}
+                    className="text-[10px] font-black uppercase tracking-wider text-slate-400 hover:text-red-500 transition-colors"
+                >
+                    Sign Out
+                </button>
+            </header>
+        );
+    } catch {
+        return null;
+    }
+}
 
 function VisibleSidebarRail() {
     try {

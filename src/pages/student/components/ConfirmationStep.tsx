@@ -181,8 +181,8 @@ export const ConfirmationStep = ({
                         />
                     </div>
 
-                    {/* Camera Preview Card (600px width, 350px height, rounded 20px, soft shadow) */}
-                    <div className="w-full max-w-[600px] h-[350px] rounded-[20px] overflow-hidden bg-slate-900 border border-[#E5E7EB] shadow-sm relative mx-auto flex items-center justify-center">
+                    {/* Camera Preview Card (600px width, responsive height, rounded 20px, soft shadow) */}
+                    <div className="w-full max-w-[600px] h-[200px] sm:h-[350px] rounded-[20px] overflow-hidden bg-slate-900 border border-[#E5E7EB] shadow-sm relative mx-auto flex items-center justify-center">
                         {streamError ? (
                             <div className="text-center p-6 space-y-3">
                                 <div className="h-10 w-10 rounded-[12px] bg-rose-500/10 border border-rose-500/20 text-rose-500 flex items-center justify-center mx-auto">

@@ -57,12 +57,30 @@ export const SchoolSettings = () => {
     ];
 
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-top-4 duration-1000">
-            {/* Minimal Header */}
-            <div>
-                <h1 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">Portal Configurations</h1>
-                <p className="text-slate-500 font-medium mt-1">Fine-tune your organization's digital workspace and security parameters.</p>
+        <div className="min-h-screen w-full bg-[#F8FAFC] relative overflow-hidden">
+            {/* Dynamic Background */}
+            <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-indigo-50/80 to-transparent pointer-events-none z-0" />
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+                <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] bg-purple-500/5 rounded-full blur-[120px] animate-pulse"></div>
+                <div className="absolute top-[10%] left-[-10%] w-[40%] h-[40%] bg-blue-500/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1.5s' }}></div>
             </div>
+
+            <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10 space-y-5 animate-in fade-in duration-500">
+                {/* Header Section */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+                    <div>
+                        <div className="flex items-center gap-2 mb-0.5">
+                            <div className="h-px w-6 bg-primary/40"></div>
+                            <span className="text-[9px] font-black uppercase tracking-[0.25em] text-primary">Organization Console</span>
+                        </div>
+                        <h1 className="text-2xl font-black tracking-tight text-slate-900 flex items-center gap-2 mb-0.5">
+                            Portal <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-indigo-600">Configurations</span>
+                        </h1>
+                        <p className="text-xs font-medium text-slate-500 max-w-2xl">
+                            Fine-tune your organization's digital workspace and security parameters.
+                        </p>
+                    </div>
+                </div>
 
             <div className="flex flex-col lg:flex-row gap-8">
                 {/* Navigation Sidebar */}
@@ -301,6 +319,7 @@ export const SchoolSettings = () => {
                         </div>
                     </Card>
                 </div>
+            </div>
             </div>
         </div>
     );

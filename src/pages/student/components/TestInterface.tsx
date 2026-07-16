@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Button } from "@/components/ui/button";
 import {
     ChevronLeft,
     ChevronRight,
@@ -9,11 +8,11 @@ import {
     Brain,
     LogOut,
     CameraOff,
-    ChevronUp,
-    ChevronDown,
-    AlertCircle
+    AlertCircle,
+    BookOpen,
+    CheckCircle2,
+    BarChart3,
 } from "lucide-react";
-
 import {
     AlertDialog,
     AlertDialogAction,
@@ -35,11 +34,16 @@ export interface Option {
     order_No?: number;
 }
 
+export interface TheoryInfo {
+    name: string;
+    description: string;
+}
+
 export interface Question {
     question_Id: number | string;
     question_Text: string;
     category?: string;
-    theory?: string;
+    theory?: string | TheoryInfo;
     tag?: string;
     options: Option[];
     [key: string]: any;
@@ -50,6 +54,7 @@ export interface TestInterfaceProps {
     questionsContainerRef: React.RefObject<HTMLDivElement>;
     currentCategory: string;
     testQuestions: Question[];
+    allTestQuestions?: Question[];
     currentPage: number;
     totalPages: number;
     hasNext: boolean;
@@ -69,13 +74,91 @@ export interface TestInterfaceProps {
     formatTime: (seconds: number) => string;
     testTakingLoading?: boolean;
     hasAnswers: boolean;
+    theories?: TheoryInfo[];
+    perCategory?: Record<string, number>;
+    testName?: string;
+    totalQuestions?: number;
 }
 
+// --- Helpers ---
+const getTheoryName = (theoryField: any): string => {
+    if (!theoryField) return "";
+    if (typeof theoryField === "object") return theoryField.name || theoryField.theoryName || "";
+    return String(theoryField);
+};
+
+// Build a map: theory name → TheoryInfo (description)
+const buildTheoryMap = (theories: TheoryInfo[]): Map<string, TheoryInfo> => {
+    const map = new Map<string, TheoryInfo>();
+    theories.forEach(t => {
+        if (t.name) map.set(t.name.trim().toLowerCase(), t);
+    });
+    return map;
+};
+
+// Category-to-emoji mapping (dynamic fallback)
+const getCategoryEmoji = (cat: string) => {
+    const lower = cat.toLowerCase();
+    if (lower.includes("interest")) return "🎯";
+    if (lower.includes("work") || lower.includes("personality") || lower.includes("style")) return "🧩";
+    if (lower.includes("ability")) return "⚡";
+    if (lower.includes("knowledge")) return "📚";
+    if (lower.includes("creative")) return "🎨";
+    if (lower.includes("social")) return "👥";
+    return "🧠";
+};
+
+const categoryColors: Record<string, { bg: string; border: string; accent: string; badge: string }> = {};
+const colorPalette = [
+    { bg: "from-indigo-50 to-violet-50", border: "border-indigo-100", accent: "text-indigo-600", badge: "bg-indigo-100 text-indigo-700" },
+    { bg: "from-emerald-50 to-teal-50", border: "border-emerald-100", accent: "text-emerald-600", badge: "bg-emerald-100 text-emerald-700" },
+    { bg: "from-amber-50 to-orange-50", border: "border-amber-100", accent: "text-amber-600", badge: "bg-amber-100 text-amber-700" },
+    { bg: "from-rose-50 to-pink-50", border: "border-rose-100", accent: "text-rose-600", badge: "bg-rose-100 text-rose-700" },
+    { bg: "from-sky-50 to-blue-50", border: "border-sky-100", accent: "text-sky-600", badge: "bg-sky-100 text-sky-700" },
+    { bg: "from-purple-50 to-fuchsia-50", border: "border-purple-100", accent: "text-purple-600", badge: "bg-purple-100 text-purple-700" },
+];
+let colorIndex = 0;
+const getCategoryColor = (cat: string) => {
+    if (!categoryColors[cat]) {
+        categoryColors[cat] = colorPalette[colorIndex % colorPalette.length];
+        colorIndex++;
+    }
+    return categoryColors[cat];
+};
+
+// Skeleton Loading
+const SkeletonCard = () => (
+    <div className="bg-white border border-slate-100 rounded-xl p-3 animate-pulse shadow-sm">
+        <div className="flex items-center gap-3">
+            <div className="w-6 h-6 rounded-full bg-slate-100 shrink-0" />
+            <div className="flex-1 h-3.5 bg-slate-100 rounded-full w-1/2" />
+            <div className="flex gap-2 flex-1">
+                {[1,2,3,4,5].map(i => <div key={i} className="flex-1 h-8 bg-slate-50 border border-slate-100 rounded-lg" />)}
+            </div>
+        </div>
+    </div>
+);
+
+const SkeletonTheoryCard = () => (
+    <div className="bg-gradient-to-r from-slate-50 to-slate-100/50 border border-slate-100 rounded-xl p-3 animate-pulse mb-2">
+        <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-slate-200 shrink-0" />
+            <div className="space-y-1.5 flex-1">
+                <div className="h-4 bg-slate-200 rounded-full w-1/3" />
+                <div className="h-2.5 bg-slate-100 rounded-full w-3/4" />
+                <div className="h-2.5 bg-slate-100 rounded-full w-2/3" />
+            </div>
+        </div>
+    </div>
+);
+
+// --- Main Component ---
 export const TestInterface = ({
     testContainerRef,
     questionsContainerRef,
     currentCategory,
     testQuestions,
+    allTestQuestions = [],
     currentPage,
     totalPages,
     hasNext,
@@ -95,824 +178,806 @@ export const TestInterface = ({
     formatTime,
     testTakingLoading,
     hasAnswers,
+    theories = [],
+    perCategory = {},
+    testName,
+    totalQuestions,
 }: TestInterfaceProps) => {
+
+    const theoryMap = buildTheoryMap(theories);
+
+    // Group current page questions by category
+    const groupedByCategory = testQuestions.reduce((acc, q) => {
+        const cat = q.category || "General";
+        if (!acc[cat]) acc[cat] = [];
+        acc[cat].push(q);
+        return acc;
+    }, {} as Record<string, Question[]>);
+
+    // Answered count across ALL questions
+    const answeredCount = allTestQuestions.filter(q =>
+        !!getCurrentAnswer(q.question_Id.toString())
+    ).length;
+
+    const effectiveTotalQuestions = totalQuestions || allTestQuestions.length || testQuestions.length;
+
+    // Modal states
     const [showExitModal, setShowExitModal] = useState(false);
     const [showSubmitModal, setShowSubmitModal] = useState(false);
 
-    // Floating Proctored Camera States
-    const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
-    const [camError, setCamError] = useState(false);
-    const [isCamCollapsed, setIsCamCollapsed] = useState(false);
-    const interfaceVideoRef = useRef<HTMLVideoElement>(null);
-    const [hudCoords, setHudCoords] = useState({ x: 135.2, y: 78.4 });
-    const streamRef = useRef<MediaStream | null>(null);
+    // ── CAMERA & PROCTOR STATES ── (temporarily disabled – re-enable when needed)
+    // const [camError, setCamError] = useState(false);
+    // const [isCamCollapsed, setIsCamCollapsed] = useState(false);
+    // const interfaceVideoRef = useRef<HTMLVideoElement>(null);
+    // const [hudCoords, setHudCoords] = useState({ x: 135.2, y: 78.4 });
+    // const streamRef = useRef<MediaStream | null>(null);
 
-    // Draggable and Resizable Camera coordinates
-    const [cameraPos, setCameraPos] = useState(() => {
-        const saved = localStorage.getItem("camera-position");
-        if (saved) {
-            try {
-                const parsed = JSON.parse(saved);
-                if (typeof parsed.x === "number" && typeof parsed.y === "number" && typeof parsed.width === "number" && typeof parsed.height === "number") {
-                    return parsed;
-                }
-            } catch (e) {}
+    // const [cameraPos, setCameraPos] = useState(() => {
+    //     const saved = localStorage.getItem("camera-position");
+    //     if (saved) {
+    //         try {
+    //             const parsed = JSON.parse(saved);
+    //             if (typeof parsed.x === "number" && typeof parsed.y === "number" && typeof parsed.width === "number" && typeof parsed.height === "number") {
+    //                 return parsed;
+    //             }
+    //         } catch (e) {}
+    //     }
+    //     const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+    //     return { x: 10, y: 80, width: isMobile ? 120 : 220, height: isMobile ? 90 : 150 };
+    // });
+
+    // ── PROCTOR VIOLATION STATES ── (temporarily disabled)
+    // const [violations, setViolations] = useState(0);
+    // const [warningActive, setWarningActive] = useState(false);
+    // const [warningCountdown, setWarningCountdown] = useState(5);
+    // const [lastViolationMsg, setLastViolationMsg] = useState<string | null>(null);
+    // const [lastViolationLevel, setLastViolationLevel] = useState<"yellow" | "orange" | "red" | null>(null);
+    // const [showResumeMsg, setShowResumeMsg] = useState(false);
+    // const warningCountdownRef = useRef<number>(5);
+    // const autoSubmitTriggeredRef = useRef<boolean>(false);
+
+    // ── CAMERA RESIZE LISTENER ── (temporarily disabled)
+    // useEffect(() => {
+    //     const handleResize = () => {
+    //         setCameraPos((prev: typeof cameraPos) => {
+    //             const maxX = window.innerWidth - prev.width;
+    //             const maxY = window.innerHeight - prev.height;
+    //             return { ...prev, x: Math.max(0, Math.min(maxX, prev.x)), y: Math.max(0, Math.min(maxY, prev.y)) };
+    //         });
+    //     };
+    //     window.addEventListener("resize", handleResize);
+    //     return () => window.removeEventListener("resize", handleResize);
+    // }, []);
+
+    // ── CAMERA DRAG HANDLER ── (temporarily disabled)
+    // const handleHeaderMouseDown = (e: React.MouseEvent) => { ... };
+
+    // ── CAMERA RESIZE HANDLE HANDLER ── (temporarily disabled)
+    // const handleResizeMouseDown = (e: React.MouseEvent) => { ... };
+
+    // ── TAB/FOCUS VISIBILITY PROCTOR ── (temporarily disabled – auto-submission on tab switch)
+    // useEffect(() => {
+    //     let isLeaving = false;
+    //     const handleUserLeave = () => {
+    //         if (isLeaving || autoSubmitTriggeredRef.current) return;
+    //         isLeaving = true;
+    //         setWarningActive(true);
+    //         setWarningCountdown(5);
+    //         warningCountdownRef.current = 5;
+    //         setShowResumeMsg(false);
+    //     };
+    //     const handleUserReturn = () => {
+    //         if (!isLeaving || autoSubmitTriggeredRef.current) return;
+    //         isLeaving = false;
+    //         if (warningCountdownRef.current > 0) {
+    //             setWarningActive(false);
+    //             setShowResumeMsg(true);
+    //             const timer = setTimeout(() => setShowResumeMsg(false), 3000);
+    //             setViolations(prev => {
+    //                 const next = prev + 1;
+    //                 if (next >= 3 && !autoSubmitTriggeredRef.current) {
+    //                     autoSubmitTriggeredRef.current = true;
+    //                     Swal.fire({ ... }).then(() => handleSubmitTest());
+    //                 }
+    //                 return next;
+    //             });
+    //             return () => clearTimeout(timer);
+    //         }
+    //     };
+    //     const onVisibilityChange = () => document.hidden ? handleUserLeave() : handleUserReturn();
+    //     document.addEventListener("visibilitychange", onVisibilityChange);
+    //     window.addEventListener("blur", handleUserLeave);
+    //     window.addEventListener("focus", handleUserReturn);
+    //     return () => {
+    //         document.removeEventListener("visibilitychange", onVisibilityChange);
+    //         window.removeEventListener("blur", handleUserLeave);
+    //         window.removeEventListener("focus", handleUserReturn);
+    //     };
+    // }, [handleSubmitTest]);
+
+    // ── WARNING COUNTDOWN AUTO-SUBMIT ── (temporarily disabled)
+    // useEffect(() => {
+    //     if (!warningActive) return;
+    //     const interval = setInterval(() => {
+    //         setWarningCountdown(prev => {
+    //             const next = prev - 1;
+    //             warningCountdownRef.current = next;
+    //             if (next <= 0) {
+    //                 clearInterval(interval);
+    //                 setWarningActive(false);
+    //                 if (!autoSubmitTriggeredRef.current) {
+    //                     autoSubmitTriggeredRef.current = true;
+    //                     Swal.fire({ ... }).then(() => handleSubmitTest());
+    //                 }
+    //             }
+    //             return next;
+    //         });
+    //     }, 1000);
+    //     return () => clearInterval(interval);
+    // }, [warningActive, handleSubmitTest]);
+
+    // ── CAMERA INIT & CLEANUP ── (temporarily disabled)
+    // useEffect(() => {
+    //     acquireCameraStream();
+    //     return () => {
+    //         if (streamRef.current) {
+    //             streamRef.current.getTracks().forEach(t => t.stop());
+    //             streamRef.current = null;
+    //         }
+    //     };
+    // }, []);
+
+    // ── CAMERA COLLAPSED RESTORE ── (temporarily disabled)
+    // useEffect(() => {
+    //     if (!isCamCollapsed && interfaceVideoRef.current) {
+    //         if (streamRef.current) {
+    //             interfaceVideoRef.current.srcObject = streamRef.current;
+    //             interfaceVideoRef.current.play().catch(() => {});
+    //         } else acquireCameraStream();
+    //     }
+    // }, [isCamCollapsed]);
+
+    // ── CAMERA MAXIMIZE ── (temporarily disabled)
+    // const handleMaximize = async () => {
+    //     setIsCamCollapsed(false);
+    //     if (interfaceVideoRef.current) {
+    //         if (streamRef.current) {
+    //             interfaceVideoRef.current.srcObject = streamRef.current;
+    //             interfaceVideoRef.current.play().catch(() => {});
+    //         } else await acquireCameraStream();
+    //     }
+    // };
+
+    // ── HUD COORDINATES INTERVAL ── (temporarily disabled)
+    // useEffect(() => {
+    //     const t = setInterval(() => {
+    //         setHudCoords({
+    //             x: parseFloat((130 + Math.random() * 12).toFixed(1)),
+    //             y: parseFloat((74 + Math.random() * 8).toFixed(1))
+    //         });
+    //     }, 500);
+    //     return () => clearInterval(t);
+    // }, []);
+
+    const handleOptionKeyDown = (
+        e: React.KeyboardEvent<HTMLButtonElement>,
+        questionId: string,
+        options: Option[],
+        currentIndex: number
+    ) => {
+        let nextIndex = -1;
+        if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+            nextIndex = (currentIndex + 1) % options.length;
+        } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+            nextIndex = (currentIndex - 1 + options.length) % options.length;
         }
-        return { x: 20, y: 100, width: 220, height: 150 };
-    });
 
-    const acquireCameraStream = async () => {
-        try {
-            if (streamRef.current) {
-                if (interfaceVideoRef.current && interfaceVideoRef.current.srcObject !== streamRef.current) {
-                    interfaceVideoRef.current.srcObject = streamRef.current;
-                    interfaceVideoRef.current.play().catch(e => console.error("Play error on re-use:", e));
-                }
-                return streamRef.current;
-            }
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: { width: 320, height: 240, facingMode: "user" }
-            });
-            streamRef.current = stream;
-            setCameraStream(stream);
-            setCamError(false);
-            if (interfaceVideoRef.current) {
-                interfaceVideoRef.current.srcObject = stream;
-                interfaceVideoRef.current.play().catch(e => console.error("Play error on setup:", e));
-            }
-            return stream;
-        } catch (err) {
-            console.error("Proctor camera load failed:", err);
-            setCamError(true);
-            return null;
-        }
-    };
+        if (nextIndex !== -1) {
+            e.preventDefault();
+            const nextOption = options[nextIndex];
+            setAnswerLocally(questionId, String(nextOption.option_Id));
 
-    // Face / Gaze Detection violations states
-    const [violations, setViolations] = useState(0);
-    const [warningActive, setWarningActive] = useState(false);
-    const [warningCountdown, setWarningCountdown] = useState(5);
-    const [lastViolationMsg, setLastViolationMsg] = useState<string | null>(null);
-    const [lastViolationLevel, setLastViolationLevel] = useState<"yellow" | "orange" | "red" | null>(null);
-    const [showResumeMsg, setShowResumeMsg] = useState(false);
-    const warningCountdownRef = useRef<number>(5);
-    const autoSubmitTriggeredRef = useRef<boolean>(false);
-
-    // Keep camera in bounds on window resize
-    useEffect(() => {
-        const handleResize = () => {
-            setCameraPos(prev => {
-                const maxX = window.innerWidth - prev.width;
-                const maxY = window.innerHeight - prev.height;
-                const x = Math.max(0, Math.min(maxX, prev.x));
-                const y = Math.max(0, Math.min(maxY, prev.y));
-                return { ...prev, x, y };
-            });
-        };
-        window.addEventListener("resize", handleResize);
-        return () => window.removeEventListener("resize", handleResize);
-    }, []);
-
-    // Drag handler
-    const handleHeaderMouseDown = (e: React.MouseEvent) => {
-        if (e.button !== 0) return;
-        if ((e.target as HTMLElement).closest('button')) return;
-        e.preventDefault();
-        
-        const startX = e.clientX;
-        const startY = e.clientY;
-        const initialX = cameraPos.x;
-        const initialY = cameraPos.y;
-        
-        const handleMouseMove = (moveEvent: MouseEvent) => {
-            const deltaX = moveEvent.clientX - startX;
-            const deltaY = moveEvent.clientY - startY;
-            
-            let newX = initialX + deltaX;
-            let newY = initialY + deltaY;
-            
-            const maxX = window.innerWidth - (isCamCollapsed ? 170 : cameraPos.width);
-            const maxY = window.innerHeight - (isCamCollapsed ? 40 : cameraPos.height);
-            
-            newX = Math.max(0, Math.min(maxX, newX));
-            newY = Math.max(0, Math.min(maxY, newY));
-            
-            const updated = { ...cameraPos, x: newX, y: newY };
-            setCameraPos(updated);
-            localStorage.setItem("camera-position", JSON.stringify(updated));
-        };
-        
-        const handleMouseUp = () => {
-            document.removeEventListener("mousemove", handleMouseMove);
-            document.removeEventListener("mouseup", handleMouseUp);
-        };
-        
-        document.addEventListener("mousemove", handleMouseMove);
-        document.addEventListener("mouseup", handleMouseUp);
-    };
-
-    // Resize handler
-    const handleResizeMouseDown = (e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        const startX = e.clientX;
-        const startY = e.clientY;
-        const initialWidth = cameraPos.width;
-        const initialHeight = cameraPos.height;
-        
-        const handleMouseMove = (moveEvent: MouseEvent) => {
-            const deltaX = moveEvent.clientX - startX;
-            const deltaY = moveEvent.clientY - startY;
-            
-            let newWidth = initialWidth + deltaX;
-            let newHeight = initialHeight + deltaY;
-            
-            newWidth = Math.max(180, Math.min(320, newWidth));
-            newHeight = Math.max(120, Math.min(240, newHeight));
-            
-            const updated = { ...cameraPos, width: newWidth, height: newHeight };
-            setCameraPos(updated);
-            localStorage.setItem("camera-position", JSON.stringify(updated));
-        };
-        
-        const handleMouseUp = () => {
-            document.removeEventListener("mousemove", handleMouseMove);
-            document.removeEventListener("mouseup", handleMouseUp);
-        };
-        
-        document.addEventListener("mousemove", handleMouseMove);
-        document.addEventListener("mouseup", handleMouseUp);
-    };
-
-    // Bottom-left resize handler
-    const handleResizeLeftMouseDown = (e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        const startX = e.clientX;
-        const startY = e.clientY;
-        const initialWidth = cameraPos.width;
-        const initialHeight = cameraPos.height;
-        const initialX = cameraPos.x;
-        
-        const handleMouseMove = (moveEvent: MouseEvent) => {
-            const deltaX = moveEvent.clientX - startX;
-            const deltaY = moveEvent.clientY - startY;
-            
-            let newWidth = initialWidth - deltaX;
-            let newHeight = initialHeight + deltaY;
-            let newX = initialX + deltaX;
-            
-            if (newWidth < 180) {
-                newX = initialX + (initialWidth - 180);
-                newWidth = 180;
-            } else if (newWidth > 320) {
-                newX = initialX - (320 - initialWidth);
-                newWidth = 320;
-            }
-            
-            newHeight = Math.max(120, Math.min(240, newHeight));
-            
-            const updated = { x: newX, y: cameraPos.y, width: newWidth, height: newHeight };
-            setCameraPos(prev => ({ ...prev, x: newX, width: newWidth, height: newHeight }));
-            localStorage.setItem("camera-position", JSON.stringify(updated));
-        };
-        
-        const handleMouseUp = () => {
-            document.removeEventListener("mousemove", handleMouseMove);
-            document.removeEventListener("mouseup", handleMouseUp);
-        };
-        
-        document.addEventListener("mousemove", handleMouseMove);
-        document.addEventListener("mouseup", handleMouseUp);
-    };
-
-    // Tab visibility detector & blur focus checks
-    useEffect(() => {
-        let isLeaving = false;
-
-        const handleUserLeave = () => {
-            if (isLeaving || autoSubmitTriggeredRef.current) return;
-            isLeaving = true;
-            setWarningActive(true);
-            setWarningCountdown(5);
-            warningCountdownRef.current = 5;
-            setShowResumeMsg(false);
-        };
-
-        const handleUserReturn = () => {
-            if (!isLeaving || autoSubmitTriggeredRef.current) return;
-            isLeaving = false;
-
-            if (warningCountdownRef.current > 0) {
-                setWarningActive(false);
-                setShowResumeMsg(true);
-                const timer = setTimeout(() => setShowResumeMsg(false), 3000);
-
-                setViolations(prev => {
-                    const next = prev + 1;
-                    if (next >= 3) {
-                        if (!autoSubmitTriggeredRef.current) {
-                            autoSubmitTriggeredRef.current = true;
-                            Swal.fire({
-                                title: 'Assessment Terminated',
-                                html: `
-                                  <div class="text-center space-y-3 p-2">
-                                    <div class="text-rose-500 font-bold text-lg mb-2">🚫 Violation Limit Reached</div>
-                                    <div class="text-slate-700 text-sm font-semibold">Assessment submitted automatically.</div>
-                                    <div class="text-slate-550 text-xs mt-2">
-                                      <b>Reason:</b><br/>Candidate exceeded the maximum allowed security violations (3/3 violations).
-                                    </div>
-                                  </div>
-                                `,
-                                icon: 'error',
-                                confirmButtonText: 'Acknowledge',
-                                confirmButtonColor: '#4F46E5',
-                                allowOutsideClick: false,
-                                allowEscapeKey: false
-                            }).then(() => {
-                                handleSubmitTest();
-                            });
-                        }
-                    } else {
-                        if (next === 1) {
-                            setLastViolationMsg("Violation 1/3: Please remain visible.");
-                            setLastViolationLevel("yellow");
-                        } else if (next === 2) {
-                            setLastViolationMsg("Violation 2/3: Repeated movement detected.");
-                            setLastViolationLevel("orange");
-                        }
-                        setTimeout(() => {
-                            setLastViolationMsg(null);
-                            setLastViolationLevel(null);
-                        }, 5000);
-                    }
-                    return next;
-                });
-
-                return () => {
-                    clearTimeout(timer);
-                };
-            }
-        };
-
-        const onVisibilityChange = () => {
-            if (document.hidden) {
-                handleUserLeave();
-            } else {
-                handleUserReturn();
-            }
-        };
-
-        const onBlur = () => {
-            handleUserLeave();
-        };
-
-        const onFocus = () => {
-            handleUserReturn();
-        };
-
-        document.addEventListener("visibilitychange", onVisibilityChange);
-        window.addEventListener("blur", onBlur);
-        window.addEventListener("focus", onFocus);
-
-        return () => {
-            document.removeEventListener("visibilitychange", onVisibilityChange);
-            window.removeEventListener("blur", onBlur);
-            window.removeEventListener("focus", onFocus);
-        };
-    }, [handleSubmitTest]);
-
-    // Warning countdown timer
-    useEffect(() => {
-        if (!warningActive) return;
-
-        const interval = setInterval(() => {
-            setWarningCountdown(prev => {
-                const next = prev - 1;
-                warningCountdownRef.current = next;
-                if (next <= 0) {
-                    clearInterval(interval);
-                    setWarningActive(false);
-                    if (!autoSubmitTriggeredRef.current) {
-                        autoSubmitTriggeredRef.current = true;
-                        Swal.fire({
-                            title: 'Assessment Terminated',
-                            html: `
-                              <div class="text-center space-y-3 p-2">
-                                <div class="text-rose-500 font-bold text-lg mb-2">⚠ Face not detected / Focus lost</div>
-                                <div class="text-slate-700 text-sm font-semibold">Assessment submitted automatically.</div>
-                                <div class="text-slate-500 text-xs mt-2">
-                                  <b>Reason:</b><br/>Face was not detected for more than 5 seconds.
-                                </div>
-                              </div>
-                            `,
-                            icon: 'error',
-                            confirmButtonText: 'Acknowledge',
-                            confirmButtonColor: '#4F46E5',
-                            allowOutsideClick: false,
-                            allowEscapeKey: false
-                        }).then(() => {
-                            handleSubmitTest();
-                        });
-                    }
-                }
-                return next;
-            });
-        }, 1000);
-
-        return () => clearInterval(interval);
-    }, [warningActive, handleSubmitTest]);
-
-    // Enable camera preview in active test
-    useEffect(() => {
-        acquireCameraStream();
-        return () => {
-            if (streamRef.current) {
-                streamRef.current.getTracks().forEach(track => track.stop());
-                streamRef.current = null;
-            }
-        };
-    }, []);
-
-    // Watch collapsed state to restore camera stream automatically
-    useEffect(() => {
-        if (!isCamCollapsed && interfaceVideoRef.current) {
-            if (streamRef.current) {
-                interfaceVideoRef.current.srcObject = streamRef.current;
-                interfaceVideoRef.current.play().catch(e => console.error("Play error on restore watcher:", e));
-            } else {
-                acquireCameraStream();
-            }
-        }
-    }, [isCamCollapsed]);
-
-    const handleMaximize = async () => {
-        setIsCamCollapsed(false);
-        if (interfaceVideoRef.current) {
-            if (streamRef.current) {
-                interfaceVideoRef.current.srcObject = streamRef.current;
-                interfaceVideoRef.current.play().catch(e => console.error("Play error on maximize:", e));
-            } else {
-                await acquireCameraStream();
+            const rowElement = e.currentTarget.closest('[role="radiogroup"]');
+            if (rowElement) {
+                const buttons = rowElement.querySelectorAll('button[role="radio"]');
+                const targetButton = buttons[nextIndex] as HTMLButtonElement | undefined;
+                targetButton?.focus();
             }
         }
     };
 
-    // Telemetry simulation
-    useEffect(() => {
-        const t = setInterval(() => {
-            setHudCoords({
-                x: parseFloat((130 + Math.random() * 12).toFixed(1)),
-                y: parseFloat((74 + Math.random() * 8).toFixed(1))
-            });
-        }, 500);
-        return () => clearInterval(t);
-    }, []);
-
-    const currentCategoryLabel = currentCategory || "Assessment Matrix";
+    const progressPercent = effectiveTotalQuestions > 0 ? Math.round((answeredCount / effectiveTotalQuestions) * 100) : 0;
+    const isLastPage = !hasNext;
 
     return (
-        <div ref={testContainerRef} className="h-[100dvh] overflow-hidden flex flex-col bg-[#F8FAFC] font-sans selection:bg-indigo-100 relative">
+        <div
+            ref={testContainerRef}
+            className="h-[100dvh] overflow-hidden flex flex-col font-sans selection:bg-indigo-100 relative"
+            style={{ background: "linear-gradient(135deg, #F5F7FA 0%, #EBF0F5 100%)" }}
+        >
             <style>{`
-                .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-                .custom-scrollbar::-webkit-scrollbar-track { background: #F8FAFC; }
-                .custom-scrollbar::-webkit-scrollbar-thumb { 
-                    background: #E5E7EB; 
-                    border-radius: 4px;
+                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;950&display=swap');
+                * { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+
+                .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+                .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+                .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+                @keyframes slide-up-fade {
+                    from { opacity: 0; transform: translateY(8px); }
+                    to { opacity: 1; transform: translateY(0); }
                 }
-                .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #CBD5E1; }
-                @keyframes scan-line-v {
-                    0% { top: 0%; opacity: 0.2; }
-                    50% { top: 100%; opacity: 0.7; }
-                    100% { top: 0%; opacity: 0.2; }
+
+                .theory-card {
+                    animation: slide-up-fade 0.3s ease both;
                 }
-                .question-card {
-                    position: relative;
-                    transition: all .25s ease;
-                    border: 1px solid #E5E7EB;
-                    background: #ffffff;
+                .category-section {
+                    animation: slide-up-fade 0.25s ease both;
                 }
-                .question-card::before {
+                .progress-bar-fill {
+                    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                }
+                .next-btn {
+                    background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+                    border: none;
+                    color: white;
+                    font-weight: 700;
+                    font-size: 12px;
+                    padding: 8px 18px;
+                    border-radius: 8px;
+                    display: flex; align-items: center; gap: 4px;
+                    cursor: pointer;
+                    transition: all 0.15s ease;
+                    box-shadow: 0 2px 10px rgba(99,102,241,0.25);
+                }
+                .next-btn:hover:not(:disabled) {
+                    background: linear-gradient(135deg, #4338CA 0%, #6D28D9 100%);
+                    transform: translateY(-1px);
+                    box-shadow: 0 4px 14px rgba(99,102,241,0.35);
+                }
+                .next-btn:active:not(:disabled) { transform: translateY(0); }
+                .next-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+                .submit-btn {
+                    background: linear-gradient(135deg, #059669 0%, #0D9488 100%);
+                    box-shadow: 0 2px 10px rgba(5,150,105,0.25);
+                }
+                .submit-btn:hover:not(:disabled) {
+                    background: linear-gradient(135deg, #047857 0%, #0F766E 100%);
+                    box-shadow: 0 4px 14px rgba(5,150,105,0.35);
+                }
+
+                /* Premium Row Styling */
+                .question-row {
+                    transition: background-color 150ms ease;
+                }
+                .question-row:hover {
+                    background-color: rgba(99, 102, 241, 0.035) !important;
+                }
+
+                /* Circular Radio Styles */
+                .custom-radio {
+                    width: 15px;
+                    height: 15px;
+                    border-radius: 50%;
+                    border: 2.2px solid #CBD5E1;
+                    background: white;
+                    transition: all 120ms cubic-bezier(0.4, 0, 0.2, 1);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    outline: none;
+                }
+                .custom-radio:hover {
+                    border-color: #6366F1;
+                    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+                }
+                .custom-radio.selected {
+                    border-color: #6366F1;
+                    background: #6366F1;
+                }
+                .custom-radio.selected::after {
                     content: '';
-                    position: absolute;
-                    left: 0;
-                    top: 0;
-                    bottom: 0;
-                    width: 0px;
-                    background: #4f6bff;
-                    border-top-left-radius: 12px;
-                    border-bottom-left-radius: 12px;
-                    transition: all .25s ease;
-                    z-index: 20;
+                    width: 5px;
+                    height: 5px;
+                    border-radius: 50%;
+                    background: white;
                 }
-                .question-card:hover {
-                    border-color: #4f6bff;
-                    box-shadow:
-                        0 0 0 1px rgba(79,107,255,.15),
-                        0 12px 30px rgba(79,107,255,.18);
-                    transform: translateY(-2px) scale(1.01);
-                    background:
-                        linear-gradient(
-                            90deg,
-                            rgba(79,107,255,.04),
-                            rgba(79,107,255,.08)
-                        );
+                .custom-radio:focus-visible {
+                    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
                 }
-                .question-card:hover::before {
-                    width: 4px;
-                    background: #4f6bff;
-                    box-shadow: 0 0 12px #4f6bff;
+
+                /* Mobile Option Pill */
+                .mobile-option-pill {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    padding: 8px 12px;
+                    border: 1.5px solid #E2E8F0;
+                    border-radius: 8px;
+                    background: #FAFAFA;
+                    cursor: pointer;
+                    font-size: 12px;
+                    font-weight: 500;
+                    color: #475569;
+                    transition: all 150ms ease;
+                    text-align: left;
+                    width: 100%;
+                }
+                .mobile-option-pill:hover {
+                    border-color: #CBD5E1;
+                    background: #F8FAFC;
+                }
+                .mobile-option-pill.selected {
+                    border-color: #6366F1;
+                    background: #EEF2FF;
+                    color: #4338CA;
+                    font-weight: 600;
                 }
             `}</style>
 
-            {/* AI Warning Overlay Countdown */}
-            {warningActive && (
-                <div className="absolute inset-0 bg-[#0f1117]/85 backdrop-blur-sm z-55 flex items-center justify-center p-4">
-                    <div className="bg-white border-2 border-rose-500 rounded-[16px] max-w-md w-full p-6 text-center space-y-4 shadow-xl animate-in zoom-in duration-300">
-                        <div className="w-16 h-16 rounded-full bg-rose-50 flex items-center justify-center mx-auto text-rose-500 animate-bounce">
-                            <AlertCircle className="w-8 h-8" />
-                        </div>
-                        <div className="space-y-1">
-                            <h3 className="text-[18px] font-bold text-[#991B1B] uppercase tracking-wider flex items-center justify-center gap-1.5">
-                                <span>⚠</span> Face not detected.
-                            </h3>
-                            <p className="text-[14px] font-semibold text-[#111827]">
-                                Please return to the screen.
-                            </p>
-                        </div>
-                        <div className="bg-rose-50 border border-rose-100 rounded-[12px] py-4">
-                            <span className="text-[12px] font-bold text-[#991B1B] uppercase tracking-wider block">
-                                Test will be auto-submitted in
-                            </span>
-                            <span className="text-[54px] font-black text-rose-600 font-mono block leading-none my-2 animate-pulse">
-                                {warningCountdown}...
-                            </span>
-                            <span className="text-[11px] font-bold text-slate-550 uppercase tracking-wider block mt-1">
-                                Violation {violations + 1} of 3
-                            </span>
-                        </div>
-                        <p className="text-[11px] text-slate-400">
-                            Ensure proper lighting, remain in front of the camera, and keep this window active.
-                        </p>
+            {/* ── Proctor Warning Overlay ── (temporarily disabled) */}
+            {/* {warningActive && (
+                <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white border-2 border-rose-500 rounded-2xl max-w-md w-full p-8 text-center space-y-5 shadow-2xl">
+                        ...
                     </div>
                 </div>
-            )}
+            )} */}
 
-            {/* Top Bar */}
-            <div className="flex-none bg-[#111827] text-white z-20 shadow-sm">
-                <div className="max-w-7xl mx-auto px-4 py-2.5 md:py-3 flex items-center justify-between">
+            {/* ── Top Navigation Bar ── */}
+            <header className="flex-none z-20 shadow-sm" style={{ background: "linear-gradient(135deg, #0F172A 0%, #1E1B4B 100%)" }}>
+                <div className="max-w-[98%] mx-auto px-4 py-2 flex items-center justify-between gap-4">
+
+                    {/* Left: Brand + Timer */}
                     <div className="flex items-center gap-4 min-w-0">
-                        <div className="flex items-center gap-2 min-w-0">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-[8px] bg-white/5 border border-white/10">
-                                <Brain className="h-4 w-4 text-indigo-400" />
+                        <div className="flex items-center gap-2 shrink-0">
+                            <div className="flex h-7.5 w-7.5 items-center justify-center rounded-lg bg-indigo-500/20 border border-indigo-500/30">
+                                <Brain className="h-3.5 w-3.5 text-indigo-400" />
                             </div>
-                            <span className="text-[14px] font-bold text-white tracking-tight uppercase">
+                            <span className="text-[13px] font-black text-white tracking-tight hidden sm:block">
                                 Cognify<span className="text-indigo-400 italic">IQ</span>
                             </span>
                         </div>
 
+                        {/* Test name */}
+                        {testName && (
+                            <div className="hidden md:flex items-center gap-2 px-3 border-l border-white/10">
+                                <span className="text-[11px] font-semibold text-slate-400 truncate max-w-[250px]">{testName}</span>
+                            </div>
+                        )}
+
                         {/* Timer */}
                         <div className="flex items-center gap-1.5 px-3 border-l border-white/15">
-                            <Timer className={cn("h-4 w-4", timeRemaining && timeRemaining < 300 ? "text-rose-500 animate-pulse" : "text-indigo-400")} />
-                            <span className="text-[13px] font-mono font-bold tracking-wider text-indigo-100">
-                                {timeRemaining ? formatTime(timeRemaining) : '--:--'}
+                            <Timer className={cn("h-3.5 w-3.5", timeRemaining && timeRemaining < 300 ? "text-rose-400 animate-pulse" : "text-indigo-400")} />
+                            <span className={cn("text-[12px] font-mono font-bold tracking-wider", timeRemaining && timeRemaining < 300 ? "text-rose-300" : "text-indigo-100")}>
+                                {timeRemaining ? formatTime(timeRemaining) : "--:--"}
                             </span>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        <button 
-                            onClick={isFullScreen ? exitFullScreen : enterFullScreen} 
-                            className="p-2 hover:bg-white/5 rounded-[8px] transition-colors text-slate-400 hover:text-white hidden sm:block" 
+                    {/* Center: Overall Progress (desktop) */}
+                    <div className="hidden lg:flex flex-col items-center gap-0.5 flex-1 max-w-xs">
+                        <div className="flex items-center gap-2 text-[10px] font-semibold text-slate-400">
+                            <BarChart3 className="w-3 h-3 text-indigo-400" />
+                            <span className="text-white font-bold">{answeredCount}</span>
+                            <span>/ {effectiveTotalQuestions} Answered</span>
+                            <span className="text-indigo-300 font-bold ml-1">{progressPercent}%</span>
+                        </div>
+                        <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                            <div
+                                className="progress-bar-fill h-full rounded-full"
+                                style={{
+                                    width: `${progressPercent}%`,
+                                    background: "linear-gradient(90deg, #6366F1, #8B5CF6)"
+                                }}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Right: Controls */}
+                    <div className="flex items-center gap-2 shrink-0">
+                        <button
+                            onClick={isFullScreen ? exitFullScreen : enterFullScreen}
+                            className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-slate-400 hover:text-white hidden sm:flex items-center"
                             title="Toggle Fullscreen"
                         >
-                            {isFullScreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+                            {isFullScreen ? <Minimize className="h-3.5 w-3.5" /> : <Maximize className="h-3.5 w-3.5" />}
                         </button>
-
-                        <div className="h-4 w-px bg-white/10 hidden sm:block" />
-
-                        <button 
-                            onClick={() => setShowExitModal(true)} 
-                            className="flex items-center gap-1 bg-rose-500/10 hover:bg-rose-600 text-rose-400 hover:text-white px-2.5 py-1.5 rounded-[8px] text-[12px] font-bold uppercase transition-all border border-rose-500/20"
+                        <div className="h-3.5 w-px bg-white/10 hidden sm:block" />
+                        <button
+                            onClick={() => setShowExitModal(true)}
+                            className="flex items-center gap-1.5 bg-rose-500/15 hover:bg-rose-500 text-rose-400 hover:text-white px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase transition-all border border-rose-500/25"
                         >
-                            <LogOut className="w-3.5 h-3.5" />
-                            <span>Terminate</span>
+                            <LogOut className="w-3 h-3" />
+                            <span className="hidden xs:inline">Terminate</span>
                         </button>
                     </div>
                 </div>
-            </div>
+            </header>
 
-            {/* Resumed Message Banner */}
-            {showResumeMsg && (
-                <div className="mx-4 mt-4 p-3 bg-[#DCFCE7] border border-[#BBF7D0] text-[#166534] rounded-[12px] flex items-center gap-2 text-[12px] font-semibold animate-in slide-in-from-top duration-300">
-                    <span className="h-2.5 w-2.5 rounded-full bg-[#22C55E] animate-ping shrink-0" />
-                    <span>✅ Face detected. Assessment resumed.</span>
-                </div>
+            {/* ── Violation/Resume Banners ── (temporarily disabled) */}
+            {/* {showResumeMsg && (
+                <div className="...">✅ Face detected. Assessment resumed.</div>
             )}
-
-            {/* Violation Alert Banner */}
             {lastViolationMsg && (
-                <div className={cn(
-                    "mx-4 mt-4 p-3 border rounded-[12px] flex items-center gap-2 text-[12px] font-semibold animate-in slide-in-from-top duration-300",
-                    lastViolationLevel === "yellow" && "bg-yellow-50 border-yellow-200 text-yellow-800",
-                    lastViolationLevel === "orange" && "bg-orange-50 border-orange-200 text-orange-850",
-                    lastViolationLevel === "red" && "bg-rose-50 border-rose-250 text-rose-800"
-                )}>
-                    <span className={cn(
-                        "h-2 w-2 rounded-full animate-ping shrink-0",
-                        lastViolationLevel === "yellow" && "bg-yellow-500",
-                        lastViolationLevel === "orange" && "bg-orange-500",
-                        lastViolationLevel === "red" && "bg-rose-500"
-                    )} />
-                    <span>{lastViolationMsg}</span>
-                </div>
-            )}
+                <div className="...">Violation message</div>
+            )} */}
 
-            {/* Main Area */}
-            <main className="flex-1 overflow-hidden flex flex-col max-w-7xl mx-auto w-full p-2 md:p-4">
-                <div className="flex-1 min-h-0 bg-white rounded-[12px] shadow-sm border border-[#E5E7EB] overflow-hidden flex flex-col relative">
-                    
-                    {/* Themed Loader Overlay */}
+            {/* ── Main Content ── */}
+            <main className="flex-1 overflow-hidden flex flex-col w-[98%] mx-auto px-2 md:px-4 pt-2.5 pb-1.5">
+
+                {/* Mobile progress bar */}
+                <div className="lg:hidden flex items-center gap-3 mb-2">
+                    <div className="flex-1 h-1.5 bg-white/60 rounded-full overflow-hidden border border-indigo-100">
+                        <div
+                            className="progress-bar-fill h-full rounded-full"
+                            style={{ width: `${progressPercent}%`, background: "linear-gradient(90deg, #6366F1, #8B5CF6)" }}
+                        />
+                    </div>
+                    <span className="text-[10px] font-bold text-indigo-700 shrink-0 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">
+                        {answeredCount} / {effectiveTotalQuestions}
+                    </span>
+                </div>
+
+                <div className="flex-1 min-h-0 rounded-xl overflow-hidden flex flex-col relative bg-white border border-slate-200/80 shadow-md">
+
+                    {/* Loading skeleton overlay */}
                     {testTakingLoading && (
-                        <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/70 backdrop-blur-sm transition-all duration-300">
-                            <div className="flex flex-col items-center gap-3">
-                                <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-                                <span className="text-[12px] font-bold text-[#4F46E5] uppercase tracking-wider">Syncing assessment questions...</span>
-                            </div>
+                        <div className="absolute inset-0 z-50 bg-white/95 backdrop-blur-sm overflow-y-auto p-3 space-y-2">
+                            <SkeletonTheoryCard />
+                            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => <SkeletonCard key={i} />)}
                         </div>
                     )}
 
-                    {/* Table Header */}
-                    <div className="flex-none grid grid-cols-[1fr_repeat(5,60px)] sm:grid-cols-[1fr_repeat(5,80px)] md:grid-cols-[1fr_repeat(5,100px)] bg-[#F8FAFC] border-b border-[#E5E7EB] sticky top-0 z-30 min-w-[500px] sm:min-w-[700px] md:min-w-0">
-                        <div className="p-3 text-[12px] font-bold text-[#111827] pl-4 md:pl-6 self-center uppercase tracking-wider truncate">
-                            {currentCategoryLabel}
-                        </div>
-                        {testQuestions.length > 0 && testQuestions[0].options.map((option) => (
-                            <div key={option.option_Id} className="p-2 text-center font-bold text-[11px] text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB] flex items-center justify-center">
-                                {option.option_Text}
-                            </div>
-                        ))}
-                    </div>
+                    {/* Questions scroll area */}
+                    <div ref={questionsContainerRef} className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-4">
 
-                    {/* Table Questions Body */}
-                    <div ref={questionsContainerRef} className="flex-1 overflow-y-auto w-full custom-scrollbar scroll-smooth p-4 space-y-3">
-                        <div className={cn("min-w-[500px] sm:min-w-[700px] md:min-w-0 space-y-3", isFullScreen && "h-full flex flex-col")}>
-                            {testQuestions.map((question, qIdx) => (
-                                <div
-                                    key={question.question_Id}
-                                    className={cn(
-                                        "question-card grid grid-cols-[1fr_repeat(5,60px)] sm:grid-cols-[1fr_repeat(5,80px)] md:grid-cols-[1fr_repeat(5,100px)] items-center rounded-[12px] group",
-                                        isFullScreen && "flex-1"
-                                    )}
-                                >
-                                    <div className="text-[13px] font-semibold text-[#111827] pl-4 md:pl-6 p-3 flex gap-2 relative z-10">
-                                        <span className="text-slate-400 font-mono text-[12px]">{(currentPage - 1) * 10 + (qIdx + 1)}.</span>
-                                        <span>{question.question_Text}</span>
+                        {Object.entries(groupedByCategory).map(([category, catQuestions], catIdx) => {
+                            const color = getCategoryColor(category);
+                            const emoji = getCategoryEmoji(category);
+                            const catTotal = perCategory[category] ?? catQuestions.length;
+                            const catAnswered = allTestQuestions.filter(q =>
+                                (q.category || "General") === category && !!getCurrentAnswer(q.question_Id.toString())
+                            ).length;
+
+                            // Resolve theory for this category
+                            const theoryName = catQuestions[0] ? getTheoryName(catQuestions[0].theory) : "";
+                            const theoryInfo = theoryName ? (theoryMap.get(theoryName.trim().toLowerCase()) ?? { name: theoryName, description: "" }) : null;
+
+                            // Dynamic options extraction from first question
+                            const firstQuestionOptions = catQuestions[0]?.options || [];
+                            const hasOptions = firstQuestionOptions.length > 0;
+
+                            return (
+                                <div key={category} className="category-section space-y-2.5" style={{ animationDelay: `${catIdx * 40}ms` }}>
+
+                                    {/* ── Compact Category Header ── */}
+                                    <div className={cn("rounded-xl border px-3.5 py-1.5 shadow-sm", `bg-gradient-to-r ${color.bg}`, color.border)}>
+                                        <div className="flex items-center justify-between gap-3 flex-wrap">
+                                            {/* Left: Category name + Total Questions */}
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[16px] leading-none">{emoji}</span>
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                    <h2 className={cn("text-[13px] font-black tracking-tight", color.accent)}>
+                                                        {category.replace(/_/g, " / ")} Assessment
+                                                    </h2>
+                                                    <span className={cn("text-[9.5px] font-bold px-2 py-0.5 rounded-full border bg-white/90", color.badge, color.border)}>
+                                                        {catTotal} Questions
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            {/* Right: Answered Progress */}
+                                            <div className="flex items-center gap-2">
+                                                <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-550">
+                                                    <span>Answered:</span>
+                                                    <span className="font-bold text-slate-800">{catAnswered}</span>
+                                                    <span className="text-slate-300">/</span>
+                                                    <span className="text-slate-650">{catTotal}</span>
+                                                    <span className={cn("font-bold ml-1 text-[10px] px-1.5 py-0.5 rounded bg-white border border-slate-100", color.accent)}>
+                                                        {catTotal > 0 ? Math.round((catAnswered / catTotal) * 100) : 0}%
+                                                    </span>
+                                                </div>
+                                                <div className="w-7 h-7 flex-shrink-0">
+                                                    <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
+                                                        <circle cx="18" cy="18" r="14" fill="none" stroke="white" strokeWidth="4" />
+                                                        <circle cx="18" cy="18" r="14" fill="none" stroke="currentColor" strokeWidth="4"
+                                                            strokeDasharray={`${catTotal > 0 ? (catAnswered / catTotal) * 88 : 0} 88`}
+                                                            strokeLinecap="round" className={color.accent} />
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
 
-                                    {question.options.map((option) => {
-                                        const optionIdStr = String(option.option_Id);
-                                        const isSelected = getCurrentAnswer(question.question_Id.toString()) === optionIdStr;
-                                        return (
-                                            <div key={option.option_Id} className="flex justify-center border-l border-[#E5E7EB]/50 p-1 relative z-10">
-                                                <button
-                                                    className={cn(
-                                                        "relative h-5 w-5 rounded-full border flex items-center justify-center transition-all duration-200",
-                                                        isSelected 
-                                                            ? "bg-[#4F46E5] border-[#4F46E5] shadow-sm scale-105" 
-                                                            : "bg-white border-[#CBD5E1] hover:border-[#4F46E5] scale-95"
-                                                    )}
-                                                    onClick={() => {
-                                                        setAnswerLocally(question.question_Id.toString(), optionIdStr);
-                                                    }}
-                                                >
-                                                    {isSelected && (
-                                                        <div className="h-2 w-2 rounded-full bg-white animate-in zoom-in duration-200" />
-                                                    )}
-                                                </button>
+                                    {/* ── Compact Theory Card ── */}
+                                    {theoryInfo && (
+                                        <div className="theory-card bg-slate-50/70 border-l-3 border-indigo-500 rounded-r-lg px-3.5 py-2 space-y-0.5 my-1">
+                                            <div className="flex items-center gap-1.5">
+                                                <span className="text-[9px] font-black uppercase tracking-widest text-indigo-650">Theory</span>
+                                                <span className="text-[11px] font-bold text-slate-850">{theoryInfo.name}</span>
                                             </div>
-                                        );
-                                    })}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+                                            {theoryInfo.description && (
+                                                <p className="text-[11px] leading-relaxed text-slate-500 font-medium">
+                                                    {theoryInfo.description}
+                                                </p>
+                                            )}
+                                        </div>
+                                    )}
 
+                                    {/* ── Question Grid Container ── */}
+                                    <div className="border border-slate-200/80 rounded-xl overflow-hidden bg-white shadow-sm">
+                                        
+                                        {/* Sticky Response Header (Desktop Only) */}
+                                        {hasOptions && (
+                                            <div className="hidden md:grid grid-cols-[45px_1fr_repeat(5,minmax(90px,130px))] gap-1 px-4 py-2 bg-slate-50 border-b border-slate-200 sticky top-0 z-10 text-[10.5px] font-bold text-slate-500 text-center uppercase tracking-wider items-center">
+                                                <div className="text-center font-bold text-[9px] text-slate-400">#</div>
+                                                <div className="text-left pl-2 font-bold text-slate-600">Question Text</div>
+                                                {firstQuestionOptions.map((option, idx) => (
+                                                    <div key={option.option_Id} className="truncate px-0.5 text-slate-500" title={option.option_Text}>
+                                                        {option.option_Text}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {/* Question Rows */}
+                                        <div className="divide-y divide-slate-100">
+                                            {catQuestions.map((question, qIdx) => {
+                                                const globalIdx = allTestQuestions.indexOf(question);
+                                                const displayNum = globalIdx >= 0 ? globalIdx + 1 : qIdx + 1;
+                                                const currentAnswer = getCurrentAnswer(question.question_Id.toString());
+                                                const answered = !!currentAnswer;
+
+                                                const isEven = qIdx % 2 === 1;
+
+                                                return (
+                                                    <div key={question.question_Id} className="w-full">
+                                                        {/* Desktop Layout: Clean horizontal row */}
+                                                        <div 
+                                                            role="radiogroup" 
+                                                            aria-label={question.question_Text}
+                                                            className={cn(
+                                                                "question-row hidden md:grid grid-cols-[45px_1fr_repeat(5,minmax(90px,130px))] gap-1 px-4 py-1.5 items-center",
+                                                                isEven ? "bg-slate-50/30" : "bg-white"
+                                                            )}
+                                                        >
+                                                            {/* Circle Badge Number */}
+                                                            <div className="flex justify-center">
+                                                                <span className={cn(
+                                                                    "w-[19px] h-[19px] rounded-full flex items-center justify-center text-[10px] font-semibold transition-all duration-150",
+                                                                    answered ? "bg-indigo-600 text-white" : "bg-slate-150 text-slate-500 bg-slate-100"
+                                                                )}>
+                                                                    {displayNum}
+                                                                </span>
+                                                            </div>
+
+                                                            {/* Question Text */}
+                                                            <div className="text-[12.5px] font-medium text-slate-700 pl-2 pr-4 leading-snug truncate" title={question.question_Text}>
+                                                                {question.question_Text}
+                                                            </div>
+
+                                                            {/* Options columns */}
+                                                            {question.options.map((option, oIdx) => {
+                                                                const optionIdStr = String(option.option_Id);
+                                                                const isSelected = currentAnswer === optionIdStr;
+
+                                                                return (
+                                                                    <div 
+                                                                        key={option.option_Id} 
+                                                                        className={cn(
+                                                                            "flex justify-center items-center py-1.5 transition-colors duration-150 rounded", 
+                                                                            isSelected && "bg-indigo-50/20"
+                                                                        )}
+                                                                    >
+                                                                        <button
+                                                                            type="button"
+                                                                            role="radio"
+                                                                            aria-checked={isSelected}
+                                                                            tabIndex={isSelected || (!answered && oIdx === 0) ? 0 : -1}
+                                                                            onClick={() => setAnswerLocally(question.question_Id.toString(), optionIdStr)}
+                                                                            onKeyDown={(e) => handleOptionKeyDown(e, question.question_Id.toString(), question.options, oIdx)}
+                                                                            className={cn("custom-radio", isSelected && "selected")}
+                                                                            title={option.option_Text}
+                                                                        />
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+
+                                                        {/* Mobile/Tablet Layout: Stacked options vertically */}
+                                                        <div 
+                                                            role="radiogroup"
+                                                            aria-label={question.question_Text}
+                                                            className={cn(
+                                                                "md:hidden p-4 space-y-3",
+                                                                isEven ? "bg-slate-50/30" : "bg-white"
+                                                            )}
+                                                        >
+                                                            <div className="flex gap-2.5 items-start">
+                                                                <span className={cn(
+                                                                    "w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5",
+                                                                    answered ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-500"
+                                                                )}>
+                                                                    {displayNum}
+                                                                </span>
+                                                                <p className="text-[13px] font-medium text-slate-800 leading-snug">
+                                                                    {question.question_Text}
+                                                                </p>
+                                                            </div>
+                                                            <div className="space-y-1.5 pl-7">
+                                                                {question.options.map((option, oIdx) => {
+                                                                    const optionIdStr = String(option.option_Id);
+                                                                    const isSelected = currentAnswer === optionIdStr;
+                                                                    return (
+                                                                        <button
+                                                                            key={option.option_Id}
+                                                                            type="button"
+                                                                            role="radio"
+                                                                            aria-checked={isSelected}
+                                                                            tabIndex={isSelected || (!answered && oIdx === 0) ? 0 : -1}
+                                                                            onClick={() => setAnswerLocally(question.question_Id.toString(), optionIdStr)}
+                                                                            onKeyDown={(e) => handleOptionKeyDown(e, question.question_Id.toString(), question.options, oIdx)}
+                                                                            className={cn("mobile-option-pill", isSelected && "selected")}
+                                                                        >
+                                                                            <span className={cn("custom-radio shrink-0 pointer-events-none", isSelected && "selected")} />
+                                                                            <span>{option.option_Text}</span>
+                                                                        </button>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+
+                        {/* Empty state */}
+                        {!testTakingLoading && testQuestions.length === 0 && (
+                            <div className="flex flex-col items-center justify-center h-full py-16 text-center animate-in fade-in duration-200">
+                                <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center mb-3">
+                                    <BookOpen className="w-6 h-6 text-indigo-400" />
+                                </div>
+                                <h3 className="text-sm font-bold text-slate-700">No questions on this page</h3>
+                                <p className="text-[12px] text-slate-400 mt-0.5">Navigate using the controls below.</p>
+                            </div>
+                        )}
+
+                        {/* Spacer so last question doesn't hide behind footer */}
+                        <div className="h-4" />
+                    </div>
                 </div>
             </main>
 
-            {/* Draggable & Resizable Floating proctored camera widget */}
-            <div 
+            {/* ── Footer Navigation ── */}
+            <footer className="flex-none bg-white/90 backdrop-blur-sm border-t border-slate-200 z-20 px-4 py-2.5">
+                <div className="max-w-[98%] mx-auto flex items-center justify-between gap-3">
+
+                    {/* Previous */}
+                    <button
+                        onClick={handlePreviousQuestion}
+                        disabled={!hasPrevious}
+                        className={cn(
+                            "flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all",
+                            hasPrevious
+                                ? "bg-slate-100 hover:bg-slate-200 text-slate-750"
+                                : "bg-slate-50 text-slate-300 cursor-not-allowed"
+                        )}
+                    >
+                        <ChevronLeft className="h-4 w-4" />
+                        <span>Previous</span>
+                    </button>
+
+                    {/* Page dots / progress */}
+                    <div className="flex items-center gap-1.5 flex-wrap justify-center">
+                        {totalPages <= 12 ? (
+                            Array.from({ length: totalPages }).map((_, i) => (
+                                <div
+                                    key={i}
+                                    className={cn(
+                                        "rounded-full transition-all duration-300",
+                                        i + 1 === currentPage
+                                            ? "w-5 h-1.5 bg-indigo-650"
+                                            : "w-1.5 h-1.5 bg-slate-200 hover:bg-slate-350"
+                                    )}
+                                />
+                            ))
+                        ) : (
+                            <span className="text-[11px] font-semibold text-slate-550">
+                                Page {currentPage} / {totalPages}
+                            </span>
+                        )}
+                    </div>
+
+                    {/* Next / Submit */}
+                    <button
+                        className={cn("next-btn", isLastPage && "submit-btn")}
+                        onClick={isLastPage ? () => setShowSubmitModal(true) : handleNextQuestion}
+                        disabled={isSubmitting}
+                    >
+                        {isLastPage ? (
+                            <>
+                                <CheckCircle2 className="h-3.5 w-3.5" />
+                                <span>Submit Assessment</span>
+                            </>
+                        ) : (
+                            <>
+                                <span>Next Page</span>
+                                <ChevronRight className="h-3.5 w-3.5" />
+                            </>
+                        )}
+                    </button>
+                </div>
+            </footer>
+
+            {/* ── Floating Proctored Camera Widget ── (temporarily disabled – re-enable when needed) */}
+            {/* <div
                 style={{
                     position: "fixed",
                     left: `${cameraPos.x}px`,
                     top: `${cameraPos.y}px`,
-                    width: isCamCollapsed ? "170px" : `${cameraPos.width}px`,
+                    width: isCamCollapsed ? ... : `${cameraPos.width}px`,
                     height: isCamCollapsed ? "40px" : `${cameraPos.height}px`,
                 }}
-                className={cn(
-                    "z-50 rounded-[16px] bg-slate-900/60 backdrop-blur-md border border-slate-800/80 shadow-xl overflow-hidden flex flex-col transition-[width,height] duration-150 select-none"
-                )}
+                className="z-50 rounded-2xl bg-slate-900/70 ..."
             >
-                {/* Header bar handles dragging */}
-                <div 
-                    onMouseDown={handleHeaderMouseDown}
-                    className="flex items-center justify-between px-3 py-2 bg-slate-950/60 border-b border-slate-850/60 shrink-0 cursor-move h-10"
-                >
-                    {isCamCollapsed ? (
-                        <div className="flex items-center justify-between w-full">
-                            <span className="text-[11px] font-semibold text-slate-200 flex items-center gap-1.5">
-                                <span className="text-[12px]">📷</span> AI Monitoring
-                            </span>
-                            <button 
-                                onClick={handleMaximize}
-                                className="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 uppercase tracking-wider transition-colors ml-2"
-                            >
-                                Maximize
-                            </button>
-                        </div>
-                    ) : (
-                        <>
-                            <span className="text-[10px] font-bold text-slate-355 uppercase tracking-widest flex items-center gap-1">
-                                <span className="text-[11px]">📷</span> AI Monitoring
-                            </span>
-                            <button 
-                                onClick={() => setIsCamCollapsed(true)}
-                                className="text-slate-400 hover:text-white transition-colors"
-                                title="Minimize camera"
-                            >
-                                <Minimize className="h-3.5 w-3.5" />
-                            </button>
-                        </>
-                    )}
-                </div>
+                ... camera widget contents ...
+            </div> */}
 
-                {/* Video Body & Resize Handle - ALWAYS MOUNTED to keep stream alive */}
-                <div className={cn(
-                    "flex-1 relative bg-slate-950 flex flex-col overflow-hidden",
-                    isCamCollapsed && "hidden"
-                )}>
-                    {/* Status indicators */}
-                    <div className="flex items-center gap-2.5 px-2.5 py-1 bg-slate-900/50 border-b border-slate-850/60 text-[9px] font-medium text-slate-400 shrink-0 select-none">
-                        <span className="flex items-center gap-1 text-[#22C55E]">
-                            <span className="h-1.5 w-1.5 rounded-full bg-[#22C55E] inline-block" />
-                            Face Detected
-                        </span>
-                        <span className="flex items-center gap-1 text-indigo-400">
-                            <span className="h-1.5 w-1.5 rounded-full bg-indigo-500 animate-pulse inline-block" />
-                            Tracking Active
-                        </span>
-                    </div>
-
-                    <div className="flex-1 relative flex items-center justify-center overflow-hidden">
-                        {camError ? (
-                            <CameraOff className="w-5 h-5 text-slate-700" />
-                        ) : (
-                            <>
-                                <video 
-                                    ref={interfaceVideoRef} 
-                                    autoPlay 
-                                    playsInline 
-                                    muted 
-                                    className="w-full h-full object-cover scale-x-[-1]" 
-                                />
-                                <div className="absolute left-0 right-0 h-[1px] bg-indigo-500/30 shadow-[0_0_4px_rgba(99,102,241,0.5)] top-0 animate-[scan-line-v_2s_linear_infinite]" />
-                                
-                                <div className="absolute bottom-1 left-1 right-1 flex justify-between text-[8px] font-mono text-slate-400 bg-slate-900/90 px-1.5 py-0.5 rounded-[4px] border border-white/5 pointer-events-none">
-                                    <span className="flex items-center gap-0.5">
-                                        <span className="h-1 w-1 bg-[#22C55E] rounded-full animate-pulse" />
-                                        X:{hudCoords.x} Y:{hudCoords.y}
-                                    </span>
-                                    <span>Gaze OK</span>
-                                </div>
-                            </>
-                        )}
-
-                        {/* Bottom-right Resize Handle */}
-                        <div 
-                            onMouseDown={handleResizeMouseDown}
-                            className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize flex items-end justify-end p-0.5 z-55 pointer-events-auto"
-                        >
-                            <svg className="w-2.5 h-2.5 text-slate-600 hover:text-indigo-400" viewBox="0 0 6 6" fill="currentColor">
-                                <path d="M6 6H0V4.5H4.5V0H6V6Z" />
-                            </svg>
-                        </div>
-
-                        {/* Bottom-left Resize Handle */}
-                        <div 
-                            onMouseDown={handleResizeLeftMouseDown}
-                            className="absolute bottom-0 left-0 w-4 h-4 cursor-sw-resize flex items-end justify-start p-0.5 z-55 pointer-events-auto"
-                        >
-                            <svg className="w-2.5 h-2.5 text-slate-600 hover:text-indigo-400" viewBox="0 0 6 6" fill="currentColor">
-                                <path d="M0 6H6V4.5H1.5V0H0V6Z" />
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Bottom Footer */}
-            <div className="flex-none bg-white border-t border-[#E5E7EB] z-40 pb-2">
-                <div className="max-w-7xl mx-auto px-4 md:px-6 py-2.5 flex justify-between items-center gap-2">
-                    <Button 
-                        variant="ghost" 
-                        onClick={handlePreviousQuestion} 
-                        disabled={!hasPrevious} 
-                        className="h-[38px] px-3.5 text-[12px] font-semibold text-[#6B7280] hover:text-[#111827] transition-all rounded-[10px]"
-                    >
-                        <ChevronLeft className="h-4 w-4 mr-1" /> 
-                        <span>Previous</span>
-                    </Button>
-
-                    {/* Progress Dots */}
-                    <div className="hidden xs:flex items-center gap-1.5">
-                        {Array.from({ length: totalPages }).map((_, i) => (
-                            <div 
-                                key={i} 
-                                className={cn(
-                                    "h-1 rounded-full transition-all duration-300", 
-                                    i + 1 === currentPage ? "w-6 bg-[#4F46E5]" : "w-1.5 bg-slate-200"
-                                )} 
-                            />
-                        ))}
-                    </div>
-
-                    <Button
-                        onClick={hasNext ? handleNextQuestion : () => setShowSubmitModal(true)}
-                        disabled={isSubmitting}
-                        className={cn(
-                            "h-[38px] px-5 text-[12px] font-semibold rounded-[10px] transition-all active:scale-[0.98] shadow-sm",
-                            hasNext 
-                                ? "bg-[#111827] text-white hover:bg-black" 
-                                : "bg-[#4F46E5] text-white hover:bg-[#4338CA]"
-                        )}
-                    >
-                        {hasNext ? (
-                            <>
-                                <span>Next Page</span>
-                                <ChevronRight className="h-4 w-4 ml-1" />
-                            </>
-                        ) : "Submit Assessment"} 
-                    </Button>
-                </div>
-            </div>
-
-            {/* Exit dialog */}
+            {/* ── Exit Dialog ── */}
             <AlertDialog open={showExitModal} onOpenChange={setShowExitModal}>
-                <AlertDialogContent className="bg-white border-[#E5E7EB] rounded-[12px]">
+                <AlertDialogContent className="bg-white border-slate-200 rounded-2xl">
                     <AlertDialogHeader>
-                        <AlertDialogTitle className="text-[#111827] font-bold">
-                            {hasAnswers ? "Confirm Exit & Submit?" : "Exit Assessment?"}
+                        <AlertDialogTitle className="text-slate-900 font-black text-lg">
+                            {hasAnswers ? "Submit & Exit Assessment?" : "Exit Assessment?"}
                         </AlertDialogTitle>
-                        <AlertDialogDescription className="text-[#6B7280]">
+                        <AlertDialogDescription className="text-slate-500">
                             {hasAnswers
                                 ? "All current responses will be submitted as your final assessment. You won't be able to resume later."
                                 : "You haven't answered any questions yet. Do you really want to return to the dashboard?"}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel className="rounded-[10px] border-[#E5E7EB] text-[13px] font-semibold">
-                            No, Stay
-                        </AlertDialogCancel>
-                        <AlertDialogAction 
-                            className={cn(
-                                "rounded-[10px] text-[13px] font-semibold text-white",
-                                hasAnswers ? "bg-[#4F46E5] hover:bg-[#4338CA]" : "bg-[#111827] hover:bg-black"
-                            )} 
-                            onClick={() => {
-                                setShowExitModal(false);
-                                handleExitTest();
-                            }}
+                        <AlertDialogCancel className="rounded-xl border-slate-200 text-[13px] font-semibold">No, Stay</AlertDialogCancel>
+                        <AlertDialogAction
+                            className={cn("rounded-xl text-[13px] font-semibold text-white", hasAnswers ? "bg-indigo-600 hover:bg-indigo-700" : "bg-slate-900 hover:bg-black")}
+                            onClick={() => { setShowExitModal(false); handleExitTest(); }}
                         >
-                            {hasAnswers ? "Yes, Submit" : "Yes, Exit"}
+                            {hasAnswers ? "Yes, Submit & Exit" : "Yes, Exit"}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
 
-            {/* Submit dialog */}
+            {/* ── Submit Dialog ── */}
             <AlertDialog open={showSubmitModal} onOpenChange={setShowSubmitModal}>
-                <AlertDialogContent className="bg-white border-[#E5E7EB] rounded-[12px]">
+                <AlertDialogContent className="bg-white border-slate-200 rounded-2xl">
                     <AlertDialogHeader>
-                        <AlertDialogTitle className="text-[#111827] font-bold">
-                            Submit Assessment?
-                        </AlertDialogTitle>
-                        <AlertDialogDescription className="text-[#6B7280]">
-                            Are you ready to submit your psychometric responses for grading?
+                        <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center mb-2">
+                            <CheckCircle2 className="w-8 h-8 text-emerald-600" />
+                        </div>
+                        <AlertDialogTitle className="text-slate-900 font-black text-lg">Submit Assessment?</AlertDialogTitle>
+                        <AlertDialogDescription className="text-slate-500">
+                            You have answered <span className="font-bold text-indigo-600">{answeredCount}</span> of <span className="font-bold">{effectiveTotalQuestions}</span> questions.
+                            {answeredCount < effectiveTotalQuestions && (
+                                <span className="block mt-1 text-amber-600 font-medium">
+                                    ⚠ {effectiveTotalQuestions - answeredCount} question(s) are unanswered.
+                                </span>
+                            )}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel className="rounded-[10px] border-[#E5E7EB] text-[13px] font-semibold">
-                            Cancel
-                        </AlertDialogCancel>
-                        <AlertDialogAction 
-                            className="bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-[10px] text-[13px] font-semibold"
-                            onClick={() => {
-                                setShowSubmitModal(false);
-                                handleSubmitTest();
-                            }}
+                        <AlertDialogCancel className="rounded-xl border-slate-200 text-[13px] font-semibold">Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[13px] font-semibold"
+                            onClick={() => { setShowSubmitModal(false); handleSubmitTest(); }}
                         >
                             Confirm Submit
                         </AlertDialogAction>

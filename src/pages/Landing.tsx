@@ -4,11 +4,11 @@ import {
   Award, BarChart3, Target, Lightbulb, CheckCircle,
   ArrowRight, Star, ArrowUpRight, BookOpen,
   FileText, GraduationCap, Briefcase, School,
-  Headphones, UserCheck, Activity, Zap
+  Headphones, UserCheck, Activity, Zap, Menu, X
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTestStore } from "@/store/testStore";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { landingStyles } from "./LandingStyles";
 import {
   AIAssessmentMockup,
@@ -28,7 +28,13 @@ import {
 export const Landing = () => {
   const navigate = useNavigate();
   const { getPublicPublishedTests, publicPublishedTests } = useTestStore();
-  useEffect(() => { getPublicPublishedTests(); }, [getPublicPublishedTests]);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (!publicPublishedTests || publicPublishedTests.length === 0) {
+      getPublicPublishedTests();
+    }
+  }, [getPublicPublishedTests, publicPublishedTests]);
 
   return (
     <>
@@ -37,7 +43,7 @@ export const Landing = () => {
 
         {/* ═══════════ NAVBAR ═══════════ */}
         <nav className="lp-nav">
-          <div className="nav-logo">
+          <div className="nav-logo" onClick={() => navigate("/")} style={{ cursor: 'pointer' }}>
             Cognify<span>IQ</span>
           </div>
           <div className="nav-links">
@@ -51,8 +57,37 @@ export const Landing = () => {
           <div className="nav-actions">
             {/* <Link to="/login" className="btn-nav-ghost">Sign in</Link> */}
             <Link to="/login" className="btn-nav-primary">Get started</Link>
+
+            <button 
+              className="mobile-menu-toggle" 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle navigation menu"
+            >
+              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
           </div>
         </nav>
+
+        {/* Mobile Slide-out Drawer */}
+        <div 
+          className={`mobile-drawer-overlay ${mobileMenuOpen ? 'open' : ''}`} 
+          onClick={() => setMobileMenuOpen(false)} 
+        />
+        <div className={`mobile-drawer ${mobileMenuOpen ? 'open' : ''}`}>
+          <div className="mobile-drawer-links">
+            <Link to="/assessments" onClick={() => setMobileMenuOpen(false)}>Assessments</Link>
+            <Link to="/counselors" onClick={() => setMobileMenuOpen(false)}>Counselors</Link>
+            <Link to="/about" onClick={() => setMobileMenuOpen(false)}>About</Link>
+            <Link to="/pricing" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
+            <Link to="/privacy" onClick={() => setMobileMenuOpen(false)}>Privacy</Link>
+            <Link to="/terms" onClick={() => setMobileMenuOpen(false)}>Terms</Link>
+          </div>
+          <div className="mobile-drawer-actions">
+            <Link to="/login" className="btn-nav-primary" style={{ width: '100%', justifyContent: 'center', textAlign: 'center' }} onClick={() => setMobileMenuOpen(false)}>
+              Get started
+            </Link>
+          </div>
+        </div>
 
         {/* ═══════════ HERO ═══════════ */}
         <section className="hero-section">

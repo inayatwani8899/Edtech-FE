@@ -67,6 +67,9 @@ const initialFormData: UserFormData = {
     dateOfBirth: ""
 };
 
+let searchTimeout: any = null;
+let fetchCounselorsController: AbortController | null = null;
+
 export const useCounselorStore = create<counselorState>((set, get) => ({
     // Counselor list state
     counselors: [],
@@ -101,12 +104,21 @@ export const useCounselorStore = create<counselorState>((set, get) => ({
 
     setSearchTerm: (term) => {
         set({ searchTerm: term });
-        setTimeout(() => {
+        if (searchTimeout) {
+            clearTimeout(searchTimeout);
+        }
+        searchTimeout = setTimeout(() => {
             set({ debouncedSearchTerm: term, currentPage: 1 });
             get().fetchCounselors();
         }, 500);
     },
     fetchCounselors: async () => {
+        if (fetchCounselorsController) {
+            fetchCounselorsController.abort();
+        }
+        fetchCounselorsController = new AbortController();
+        const currentController = fetchCounselorsController;
+
         set({ loading: true, error: null });
         const { currentPage, limit, debouncedSearchTerm } = get();
         try {
@@ -116,7 +128,10 @@ export const useCounselorStore = create<counselorState>((set, get) => ({
                     limit,
                     search: debouncedSearchTerm || undefined
                 },
+                signal: currentController.signal
             });
+
+            if (currentController !== fetchCounselorsController) return;
 
             const totalCount = response.data.data.totalCount;
             const calculatedTotalPages = Math.ceil(totalCount / limit);
@@ -128,14 +143,21 @@ export const useCounselorStore = create<counselorState>((set, get) => ({
                 currentPage: currentPage > calculatedTotalPages ? 1 : currentPage,
             });
         } catch (err: any) {
-            set({
-                error: err.response?.data?.message || "Failed to fetch counselors.",
-                counselors: [],
-                totalPages: 1,
-                totalCount: 0
-            });
+            if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') {
+                return;
+            }
+            if (currentController === fetchCounselorsController) {
+                set({
+                    error: err.response?.data?.message || "Failed to fetch counselors.",
+                    counselors: [],
+                    totalPages: 1,
+                    totalCount: 0
+                });
+            }
         } finally {
-            set({ loading: false });
+            if (currentController === fetchCounselorsController) {
+                set({ loading: false });
+            }
         }
     },
 

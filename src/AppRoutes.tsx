@@ -2,79 +2,88 @@ import { Routes, Route, Navigate, useParams } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { Landing } from "@/pages/Landing";
 import { Login } from "@/pages/auth/Login";
-// import { Dashboard } from "@/pages/Dashboard";
-import { ManageTests } from "./pages/admin/tests/Tests";
-import { Profile } from "@/pages/Profile";
-import { Settings } from "@/pages/Settings";
-import { Results } from "@/pages/student/Results";
-import { Manage } from "@/pages/Manage";
-import { TestDetail } from "@/pages/student/TestDetail";
-import NotFound from "./pages/NotFound";
-import RoleSelection from "./pages/auth/RoleSelection";
-import StudentRegister from "./pages/auth/register/StudentRegister";
-import CounsellorRegister from "./pages/auth/register/CounsellorRegister";
-import SchoolRegister from "./pages/auth/register/SchoolRegister";
 import { StudentLayout } from "./components/layout/StudentLayout";
-import { StudentDashboard } from "./pages/student/StudentDashboard";
 import { AdminLayout } from "./components/layout/AdminLayout";
-import { AdminDashboard } from "./pages/dashboards/AdminDashboard";
 import { CounselorLayout } from "./components/layout/CounselorLayout";
-import { CounselorDashboard } from "./pages/dashboards/CounselorDashboard";
-import { Tests } from "./pages/student/Tests";
-import Students from "./pages/admin/students/Students";
-import StudentForm from "./pages/admin/students/StudentForm";
-import StudentView from "./pages/admin/students/StudentView";
 import { SchoolLayout } from "./components/layout/SchoolLayout";
-import { SchoolDashboard } from "./pages/dashboards/SchoolDashboard";
-import { SchoolStudents } from "./pages/school/SchoolStudents";
-import { SchoolStaff } from "./pages/school/SchoolStaff";
-import { SchoolProfile } from "./pages/school/SchoolProfile";
-import { SchoolSettings } from "./pages/school/SchoolSettings";
-import CreateTestPage from "./pages/admin/CreateTest";
-import { useAuthStore } from "./store/useAuthStore";
-import Users from "./pages/admin/users/Users";
-import UserForm from "./pages/admin/users/UserForm";
-import { ConfigurableTestForm } from "./pages/admin/tests/ConfigurableTestForm";
-import { AIQuestionGeneration } from "./pages/admin/tests/AIQuestionGeneration";
-import { Loader2 } from "lucide-react";
-import Counselors from "./pages/admin/counselors/Counselors";
-import ActiveCounselors from "./pages/public/ActiveCounselors";
-import CounselorForm from "./pages/admin/counselors/CounselorForm";
-import StudentProfile from "./pages/student/StudentProfile";
-import Organizations from "./pages/admin/organizations/Organizations";
-import OrganizationForm from "./pages/admin/organizations/OrganizationForm";
-import OrganizationView from "./pages/admin/organizations/OrganizationView";
-import { TestConfigurationsList } from "./pages/admin/test-configuration/TestConfigurationsList";
-import { TestConfigurationForm } from "./pages/admin/test-configuration/TestConfigurationForm";
-import { CategoryForm } from "./pages/admin/categories/CategoryForm";
-import { CategoriesList } from "./pages/admin/categories/CategoriesList";
-import { LearningPath } from "./pages/student/LearningPath";
-import { CareerGuidance } from "./pages/student/CareerGuidance";
-import { ProgressTracking } from "./pages/student/ProgressTracking";
-import { Scholarships } from "./pages/student/Scholarships";
-import { Schedule } from "./pages/student/Schedule";
-import { Messages } from "./pages/student/Messages";
 import { PublicLayout } from "./components/layout/PublicLayout";
-import PublicAbout from "./pages/public/PublicAbout";
-import PublicPricing from "./pages/public/PublicPricing";
-import PublicAssessments from "./pages/public/PublicAssessments";
-import PublicPrivacy from "./pages/public/PublicPrivacy";
-import PublicTerms from "./pages/public/PublicTerms";
+import { useAuthStore } from "./store/useAuthStore";
+import { Loader2 } from "lucide-react";
+import { lazy, Suspense } from "react";
+
+// Lazy imports for pages
+const ManageTests = lazy(() => import("./pages/admin/tests/Tests").then(m => ({ default: m.ManageTests })));
+const Profile = lazy(() => import("@/pages/Profile").then(m => ({ default: m.Profile })));
+const Settings = lazy(() => import("@/pages/Settings").then(m => ({ default: m.Settings })));
+const Results = lazy(() => import("@/pages/student/Results").then(m => ({ default: m.Results })));
+const Manage = lazy(() => import("@/pages/Manage").then(m => ({ default: m.Manage })));
+const TestDetail = lazy(() => import("@/pages/student/TestDetail").then(m => ({ default: m.TestDetail })));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const RoleSelection = lazy(() => import("./pages/auth/RoleSelection"));
+const StudentRegister = lazy(() => import("./pages/auth/register/StudentRegister"));
+const CounsellorRegister = lazy(() => import("./pages/auth/register/CounsellorRegister"));
+const SchoolRegister = lazy(() => import("./pages/auth/register/SchoolRegister"));
+const StudentDashboard = lazy(() => import("./pages/student/StudentDashboard").then(m => ({ default: m.StudentDashboard })));
+const AdminDashboard = lazy(() => import("./pages/dashboards/AdminDashboard").then(m => ({ default: m.AdminDashboard })));
+const CounselorDashboard = lazy(() => import("./pages/dashboards/CounselorDashboard").then(m => ({ default: m.CounselorDashboard })));
+const Tests = lazy(() => import("./pages/student/Tests").then(m => ({ default: m.Tests })));
+const Students = lazy(() => import("./pages/admin/students/Students"));
+const StudentForm = lazy(() => import("./pages/admin/students/StudentForm"));
+const StudentView = lazy(() => import("./pages/admin/students/StudentView"));
+const SchoolDashboard = lazy(() => import("./pages/dashboards/SchoolDashboard").then(m => ({ default: m.SchoolDashboard })));
+const SchoolStudents = lazy(() => import("./pages/school/SchoolStudents").then(m => ({ default: m.SchoolStudents })));
+const SchoolStaff = lazy(() => import("./pages/school/SchoolStaff").then(m => ({ default: m.SchoolStaff })));
+const SchoolProfile = lazy(() => import("./pages/school/SchoolProfile").then(m => ({ default: m.SchoolProfile })));
+const SchoolSettings = lazy(() => import("./pages/school/SchoolSettings").then(m => ({ default: m.SchoolSettings })));
+const CreateTestPage = lazy(() => import("./pages/admin/CreateTest"));
+const Users = lazy(() => import("./pages/admin/users/Users"));
+const UserForm = lazy(() => import("./pages/admin/users/UserForm"));
+const ConfigurableTestForm = lazy(() => import("./pages/admin/tests/ConfigurableTestForm").then(m => ({ default: m.ConfigurableTestForm })));
+const AIQuestionGeneration = lazy(() => import("./pages/admin/tests/AIQuestionGeneration").then(m => ({ default: m.AIQuestionGeneration })));
+const Counselors = lazy(() => import("./pages/admin/counselors/Counselors"));
+const ActiveCounselors = lazy(() => import("./pages/public/ActiveCounselors"));
+const CounselorForm = lazy(() => import("./pages/admin/counselors/CounselorForm"));
+const StudentProfile = lazy(() => import("./pages/student/StudentProfile"));
+const Organizations = lazy(() => import("./pages/admin/organizations/Organizations"));
+const OrganizationForm = lazy(() => import("./pages/admin/organizations/OrganizationForm"));
+const OrganizationView = lazy(() => import("./pages/admin/organizations/OrganizationView"));
+const TestConfigurationsList = lazy(() => import("./pages/admin/test-configuration/TestConfigurationsList").then(m => ({ default: m.TestConfigurationsList })));
+const TestConfigurationForm = lazy(() => import("./pages/admin/test-configuration/TestConfigurationForm").then(m => ({ default: m.TestConfigurationForm })));
+const CategoryForm = lazy(() => import("./pages/admin/categories/CategoryForm").then(m => ({ default: m.CategoryForm })));
+const CategoriesList = lazy(() => import("./pages/admin/categories/CategoriesList").then(m => ({ default: m.CategoriesList })));
+const LearningPath = lazy(() => import("./pages/student/LearningPath").then(m => ({ default: m.LearningPath })));
+const CareerGuidance = lazy(() => import("./pages/student/CareerGuidance").then(m => ({ default: m.CareerGuidance })));
+const ProgressTracking = lazy(() => import("./pages/student/ProgressTracking").then(m => ({ default: m.ProgressTracking })));
+const Scholarships = lazy(() => import("./pages/student/Scholarships").then(m => ({ default: m.Scholarships })));
+const Schedule = lazy(() => import("./pages/student/Schedule").then(m => ({ default: m.Schedule })));
+const Messages = lazy(() => import("./pages/student/Messages").then(m => ({ default: m.Messages })));
+const PublicAbout = lazy(() => import("./pages/public/PublicAbout"));
+const PublicPricing = lazy(() => import("./pages/public/PublicPricing"));
+const PublicAssessments = lazy(() => import("./pages/public/PublicAssessments"));
+const PublicPrivacy = lazy(() => import("./pages/public/PublicPrivacy"));
+const PublicTerms = lazy(() => import("./pages/public/PublicTerms"));
+const ForgotPassword = lazy(() => import("./pages/auth/ForgotPassword").then(m => ({ default: m.ForgotPassword })));
+const ResetPassword = lazy(() => import("./pages/auth/ResetPassword").then(m => ({ default: m.ResetPassword })));
+const GradesList = lazy(() => import("./pages/admin/grades/GradesList").then(m => ({ default: m.GradesList })));
+const GradeForm = lazy(() => import("./pages/admin/grades/GradeForm").then(m => ({ default: m.GradeForm })));
+const QuestionBankList = lazy(() => import("./pages/admin/question-bank/QuestionBankList").then(m => ({ default: m.QuestionBankList })));
+const QuestionsList = lazy(() => import("./pages/admin/questions/QuestionsList").then(m => ({ default: m.QuestionsList })));
+const QuestionForm = lazy(() => import("./pages/admin/questions/QuestionForm").then(m => ({ default: m.QuestionForm })));
 
 // 🔐 RBAC Module Pages
-import RBACDashboard from "./modules/rbac/pages/RBACDashboard";
-import RolesList from "./modules/rbac/pages/RolesList";
-import RoleForm from "./modules/rbac/pages/RoleForm";
-import RoleDetail from "./modules/rbac/pages/RoleDetail";
-import PermissionsList from "./modules/rbac/pages/PermissionsList";
-import PermissionForm from "./modules/rbac/pages/PermissionForm";
-import RBACUsersList from "./modules/rbac/pages/RBACUsersList";
-import RBACUserForm from "./modules/rbac/pages/RBACUserForm";
-import RBACUserDetail from "./modules/rbac/pages/RBACUserDetail";
-import RolePermissionMapping from "./modules/rbac/pages/RolePermissionMapping";
-import UserPermissionMapping from "./modules/rbac/pages/UserPermissionMapping";
-import { ForgotPassword } from "./pages/auth/ForgotPassword";
-import { ResetPassword } from "./pages/auth/ResetPassword";
+const RBACDashboard = lazy(() => import("./modules/rbac/pages/RBACDashboard"));
+const RolesList = lazy(() => import("./modules/rbac/pages/RolesList"));
+const RoleForm = lazy(() => import("./modules/rbac/pages/RoleForm"));
+const RoleDetail = lazy(() => import("./modules/rbac/pages/RoleDetail"));
+const PermissionsList = lazy(() => import("./modules/rbac/pages/PermissionsList"));
+const PermissionForm = lazy(() => import("./modules/rbac/pages/PermissionForm"));
+const RBACUsersList = lazy(() => import("./modules/rbac/pages/RBACUsersList"));
+const RBACUserForm = lazy(() => import("./modules/rbac/pages/RBACUserForm"));
+const RBACUserDetail = lazy(() => import("./modules/rbac/pages/RBACUserDetail"));
+const RolePermissionMapping = lazy(() => import("./modules/rbac/pages/RolePermissionMapping"));
+const UserPermissionMapping = lazy(() => import("./modules/rbac/pages/UserPermissionMapping"));
+const Unauthorized = lazy(() => import("./pages/Unauthorized"));
+const OrganizationPermissionMapping = lazy(() => import("./modules/rbac/pages/OrganizationPermissionMapping"));
 
 
 // 🔒 Protected Route
@@ -83,13 +92,13 @@ interface ProtectedRouteProps {
     role?: "Admin" | "Student" | "School" | "Counselor" | "Professional";
 }
 
-const isCounselorRole = (user: any) => {
+const isCounselorRole = (user: { role?: string } | null | undefined) => {
     if (!user) return false;
     const roleName = (user.role || "").toLowerCase();
     return roleName.includes("counselor") || roleName.includes("counsellor") || roleName === "professional";
 };
 
-const isSchoolRole = (user: any) => {
+const isSchoolRole = (user: { role?: string } | null | undefined) => {
     if (!user) return false;
     const roleName = (user.role || "").toLowerCase();
     return roleName === "school" || roleName === "organization" || roleName === "organizationadmin";
@@ -116,13 +125,13 @@ const ProtectedRoute = ({ children, role }: ProtectedRouteProps) => {
     }
 
     if (role && (
-        (role === "Student" && user?.role !== "Student") ||
+        (role === "Student" && user?.role !== "Student" && user?.role !== "SuperAdmin") ||
         (role === "Admin" && user?.role !== "Admin" && user?.role !== "SuperAdmin") ||
-        (role === "School" && !isSchoolRole(user)) ||
-        (role === "Counselor" && !isCounselorRole(user))
+        (role === "School" && !isSchoolRole(user) && user?.role !== "SuperAdmin") ||
+        (role === "Counselor" && !isCounselorRole(user) && user?.role !== "SuperAdmin")
     )) {
         let redirectPath = "/student/dashboard";
-        if (user?.role === "Admin" || user?.role === "SuperAdmin") redirectPath = "/dashboard";
+        if (user?.role === "Admin" || (user?.role as string) === "SuperAdmin") redirectPath = "/dashboard";
         else if (isSchoolRole(user)) redirectPath = "/school/dashboard";
         else if (isCounselorRole(user)) redirectPath = "/counselor/dashboard";
 
@@ -169,9 +178,16 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
     return <>{children}</>;
 };
 
+const RouteLoader = () => (
+    <div className="min-h-screen flex items-center justify-center bg-[#0a0c10]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    </div>
+);
+
 const AppRoutes = () => {
     return (
-        <Routes>
+        <Suspense fallback={<RouteLoader />}>
+            <Routes>
             {/* Public Routes */}
             <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
             <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
@@ -182,6 +198,7 @@ const AppRoutes = () => {
             <Route path="/register/school" element={<SchoolRegister />} />
             <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
             <Route path="/reset-password" element={<PublicRoute><ResetPassword /></PublicRoute>} />
+            <Route path="/unauthorized" element={<Unauthorized />} />
 
 
             {/* Public Themed Layout for subpages */}
@@ -208,6 +225,7 @@ const AppRoutes = () => {
                 {/* 🔐 Access Control Mapping (Prioritized) */}
                 <Route path="/rbac/role-permissions" element={<RolePermissionMapping />} />
                 <Route path="/rbac/user-permissions" element={<UserPermissionMapping />} />
+                <Route path="/rbac/organization-permissions" element={<OrganizationPermissionMapping />} />
 
                 <Route path="/manage/users" element={<Users />} />
                 <Route path="/counselors/add" element={<CounselorForm />} />
@@ -230,9 +248,19 @@ const AppRoutes = () => {
                 <Route path="/manage/categories" element={<CategoriesList />} />
                 <Route path="/manage/categories/add" element={<CategoryForm />} />
                 <Route path="/manage/categories/edit/:id" element={<CategoryForm />} />
+                <Route path="/manage/categories/view/:id" element={<CategoryForm />} />
                 <Route path="/manage/configurations" element={<TestConfigurationsList />} />
                 <Route path="/manage/configurations/add" element={<TestConfigurationForm />} />
                 <Route path="/manage/configurations/edit/:id" element={<TestConfigurationForm />} />
+                <Route path="/manage/grades" element={<GradesList />} />
+                <Route path="/manage/grades/add" element={<GradeForm />} />
+                <Route path="/manage/grades/edit/:id" element={<GradeForm />} />
+                <Route path="/manage/grades/view/:id" element={<GradeForm />} />
+                <Route path="/manage/question-bank" element={<QuestionBankList />} />
+                <Route path="/manage/questions" element={<QuestionsList />} />
+                <Route path="/manage/questions/add" element={<QuestionForm />} />
+                <Route path="/manage/questions/edit/:id" element={<QuestionForm />} />
+                <Route path="/manage/questions/view/:id" element={<QuestionForm />} />
 
                 {/* 🔐 Role-Based Access Control (RBAC) Routes */}
                 <Route path="/rbac" element={<RBACDashboard />} />
@@ -280,7 +308,7 @@ const AppRoutes = () => {
             </Route>
             <Route path="/test/:id" element={<TestDetail />} />
 
-            {/* Counselor Routes */}
+            {/* Counselor Routes (Temporarily commented out)
             <Route
                 element={
                     <ProtectedRoute role="Counselor">
@@ -297,6 +325,7 @@ const AppRoutes = () => {
                 <Route path="/counselor/resources" element={<div className="p-4">Counseling Resources (Coming Soon)</div>} />
                 <Route path="/counselor/search" element={<div className="p-4">Search Students (Coming Soon)</div>} />
             </Route>
+            */}
 
             {/* School/Organization Routes */}
             <Route
@@ -308,6 +337,7 @@ const AppRoutes = () => {
             >
                 <Route path="/school/dashboard" element={<SchoolDashboard />} />
                 <Route path="/organization/dashboard" element={<SchoolDashboard />} />
+                <Route path="/school/role-permissions" element={<RolePermissionMapping />} />
                 <Route path="/school/students" element={<SchoolStudents />} />
                 <Route path="/school/students/add" element={<StudentForm />} />
                 <Route path="/school/students/edit/:id" element={<StudentForm />} />
@@ -324,6 +354,7 @@ const AppRoutes = () => {
             {/* Global Catch-all 404 */}
             <Route path="*" element={<NotFound />} />
         </Routes>
+        </Suspense>
     );
 };
 

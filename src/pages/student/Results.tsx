@@ -492,7 +492,7 @@ export const Results = () => {
                   {/* Pagination Controls */}
                   {/* Pagination Controls */}
                   {userSubmissions && userSubmissions.totalRecords > 0 && (
-                    <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100 bg-slate-50/30">
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 border-t border-slate-100 bg-slate-50/30">
                       <div className="text-xs font-medium text-slate-500">
                         Showing {(userSubmissions.pageNumber - 1) * userSubmissions.pageSize + 1} to {Math.min(userSubmissions.pageNumber * userSubmissions.pageSize, userSubmissions.totalRecords)} of {userSubmissions.totalRecords} results
                       </div>

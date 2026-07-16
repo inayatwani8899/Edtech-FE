@@ -41,8 +41,10 @@ export const Tests = () => {
 
   // Fetch tests once on mount
   useEffect(() => {
-    getPublishedTests();
-  }, []);
+    if (!publishedTests || publishedTests.length === 0) {
+      getPublishedTests();
+    }
+  }, [getPublishedTests, publishedTests]);
 
   // Fetch paid statuses in parallel
   useEffect(() => {
