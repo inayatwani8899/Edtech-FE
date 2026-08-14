@@ -697,8 +697,7 @@ export const TestInterface = ({
                                     {theoryInfo && (
                                         <div className="theory-card bg-slate-50/70 border-l-3 border-indigo-500 rounded-r-lg px-3.5 py-2 space-y-0.5 my-1">
                                             <div className="flex items-center gap-1.5">
-                                                <span className="text-[9px] font-black uppercase tracking-widest text-indigo-650">Theory</span>
-                                                <span className="text-[11px] font-bold text-slate-850">{theoryInfo.name}</span>
+                                                <span className="text-[11.5px] font-black text-slate-800">{theoryInfo.name}</span>
                                             </div>
                                             {theoryInfo.description && (
                                                 <p className="text-[11px] leading-relaxed text-slate-500 font-medium">

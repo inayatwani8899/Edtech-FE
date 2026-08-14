@@ -242,16 +242,16 @@ export const Results = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 relative z-10 space-y-6 md:space-y-8">
 
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-6">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <div className="h-px w-6 bg-primary/30"></div>
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">Performance Insights</span>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-[#E5E7EB]">
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2">
+              <div className="h-px w-6 bg-[#4F46E5]/30"></div>
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#4F46E5]">Performance Insights</span>
             </div>
-            <h1 className="text-3xl font-black tracking-tight text-slate-900 mb-1">
-              Performance <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Dashboard</span>
+            <h1 className="text-3xl font-black tracking-tight text-[#111827]">
+              Performance <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4F46E5] to-indigo-600">Dashboard</span>
             </h1>
-            <p className="text-sm text-slate-500 font-medium">
+            <p className="text-[13px] font-medium text-[#6B7280]">
               Analyze your assessments and track your growth
             </p>
           </div>

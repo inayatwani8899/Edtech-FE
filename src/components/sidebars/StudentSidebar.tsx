@@ -259,11 +259,11 @@ export function StudentSidebar() {
                                         {!isCollapsed && children && children.map((child) => {
                                             const ChildIcon = iconMap[child.icon] ?? Circle;
                                             return (
-                                                <SidebarMenuItem key={child.menuId} className="pl-4 mt-0.5">
-                                                    <SidebarMenuButton asChild isActive={isActive(child.url)} className={`transition-all duration-200 rounded-lg ${theme === "dark" ? "hover:bg-slate-800/60" : "hover:bg-slate-50/60"} group h-8`}>
-                                                        <NavLink to={child.url} title={child.title} className="flex items-center gap-2.5 px-3 py-1.5 w-full">
-                                                            <ChildIcon className={`h-4.5 w-4.5 ${isActive(child.url) ? (child.color || "text-indigo-500") : theme === "dark" ? "text-slate-400" : "text-slate-400"} group-hover:scale-105 transition-transform duration-200`} />
-                                                            <span className="text-xs font-normal opacity-90">{child.title}</span>
+                                                <SidebarMenuItem key={child.menuId}>
+                                                    <SidebarMenuButton asChild isActive={isActive(child.url)} className={`transition-all duration-200 rounded-lg ${theme === "dark" ? "hover:bg-slate-800" : "hover:bg-slate-50"} group h-9`}>
+                                                        <NavLink to={child.url} title={child.title} className={`flex items-center gap-3 px-3 py-1.5 ${isCollapsed ? "justify-center" : ""} w-full`}>
+                                                            <ChildIcon className={`h-5 w-5 ${isActive(child.url) ? (child.color || "text-indigo-500") : theme === "dark" ? "text-slate-300" : "text-slate-500"} group-hover:scale-105 transition-transform duration-200`} />
+                                                            <span className={`${isCollapsed ? "hidden" : "text-sm font-medium"}`}>{child.title}</span>
                                                         </NavLink>
                                                     </SidebarMenuButton>
                                                 </SidebarMenuItem>
