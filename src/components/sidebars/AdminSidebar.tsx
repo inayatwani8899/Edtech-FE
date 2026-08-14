@@ -88,6 +88,48 @@ export function AdminSidebar() {
         ];
     }
 
+    // Ensure Psychometric Theories is present for Admin / SuperAdmin
+    const hasTheoriesPerm = viewablePerms.some(p => p.url === "/manage/theories");
+    if (!hasTheoriesPerm && (user?.role === "Admin" || user?.role === "SuperAdmin")) {
+        viewablePerms = [
+            ...viewablePerms,
+            {
+                menuId: 9998,
+                title: "Psychometric Theories",
+                url: "/manage/theories",
+                icon: "Brain",
+                color: "text-indigo-500",
+                sortOrder: 7,
+                parentId: null,
+                canView: true,
+                canCreate: true,
+                canEdit: true,
+                canDelete: true,
+            } as any
+        ];
+    }
+
+    // Ensure Psychometric Tags is present for Admin / SuperAdmin
+    const hasTagsPerm = viewablePerms.some(p => p.url === "/manage/tags");
+    if (!hasTagsPerm && (user?.role === "Admin" || user?.role === "SuperAdmin")) {
+        viewablePerms = [
+            ...viewablePerms,
+            {
+                menuId: 9997,
+                title: "Psychometric Tags",
+                url: "/manage/tags",
+                icon: "Tag",
+                color: "text-purple-500",
+                sortOrder: 8,
+                parentId: null,
+                canView: true,
+                canCreate: true,
+                canEdit: true,
+                canDelete: true,
+            } as any
+        ];
+    }
+
     const childrenByParent: Record<number | string, any[]> = {};
 
     // Build hierarchy from flat permissions list loaded from backend by roleId
