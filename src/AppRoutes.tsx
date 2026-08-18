@@ -51,6 +51,10 @@ const TestConfigurationsList = lazy(() => import("./pages/admin/test-configurati
 const TestConfigurationForm = lazy(() => import("./pages/admin/test-configuration/TestConfigurationForm").then(m => ({ default: m.TestConfigurationForm })));
 const CategoryForm = lazy(() => import("./pages/admin/categories/CategoryForm").then(m => ({ default: m.CategoryForm })));
 const CategoriesList = lazy(() => import("./pages/admin/categories/CategoriesList").then(m => ({ default: m.CategoriesList })));
+const TheoryForm = lazy(() => import("./pages/admin/theories/TheoryForm").then(m => ({ default: m.TheoryForm })));
+const TheoriesList = lazy(() => import("./pages/admin/theories/TheoriesList").then(m => ({ default: m.TheoriesList })));
+const TagForm = lazy(() => import("./pages/admin/tags/TagForm").then(m => ({ default: m.TagForm })));
+const TagsList = lazy(() => import("./pages/admin/tags/TagsList").then(m => ({ default: m.TagsList })));
 const LearningPath = lazy(() => import("./pages/student/LearningPath").then(m => ({ default: m.LearningPath })));
 const CareerGuidance = lazy(() => import("./pages/student/CareerGuidance").then(m => ({ default: m.CareerGuidance })));
 const ProgressTracking = lazy(() => import("./pages/student/ProgressTracking").then(m => ({ default: m.ProgressTracking })));
@@ -261,6 +265,14 @@ const AppRoutes = () => {
                 <Route path="/manage/questions/add" element={<QuestionForm />} />
                 <Route path="/manage/questions/edit/:id" element={<QuestionForm />} />
                 <Route path="/manage/questions/view/:id" element={<QuestionForm />} />
+                <Route path="/manage/theories" element={<TheoriesList />} />
+                <Route path="/manage/theories/add" element={<TheoryForm />} />
+                <Route path="/manage/theories/edit/:id" element={<TheoryForm />} />
+                <Route path="/manage/theories/view/:id" element={<TheoryForm />} />
+                <Route path="/manage/tags" element={<TagsList />} />
+                <Route path="/manage/tags/add" element={<TagForm />} />
+                <Route path="/manage/tags/edit/:id" element={<TagForm />} />
+                <Route path="/manage/tags/view/:id" element={<TagForm />} />
 
                 {/* 🔐 Role-Based Access Control (RBAC) Routes */}
                 <Route path="/rbac" element={<RBACDashboard />} />

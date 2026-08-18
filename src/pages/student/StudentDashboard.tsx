@@ -195,7 +195,7 @@ export const StudentDashboard = () => {
   const otherTests = publishedTests.filter(t => t.id !== psychometricTest?.id);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] relative overflow-hidden pb-12">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 text-slate-900 dark:text-slate-100 relative overflow-hidden pb-12 transition-colors duration-200">
       {/* Background Ambience */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] -z-10 animate-pulse" />
 
@@ -204,17 +204,17 @@ export const StudentDashboard = () => {
         {/* 1. Compact Greeting Header */}
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-xl md:text-2xl font-black tracking-tight text-slate-900">
+            <h1 className="text-xl md:text-2xl font-black tracking-tight text-slate-900 dark:text-white">
               {greeting}, <span className="text-primary">{user?.firstName?.split(' ')[0] || 'Scholar'}!</span>
             </h1>
-            <p className="text-[11px] text-slate-500 font-medium -mt-1">
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium -mt-1">
               Your psychometric profile is currently <span className="text-primary font-bold">{testsCompleted > 0 ? "100%" : "0%"} Complete</span>
             </p>
           </div>
         </div>
 
         {/* 3. Career Roadmap (Now on top and smaller) */}
-        <div className="mb-8 p-4 md:p-5 rounded-[1.5rem] bg-slate-900 shadow-xl relative overflow-hidden group">
+        <div className="mb-8 p-4 md:p-5 rounded-[1.5rem] bg-slate-900 dark:bg-slate-950 shadow-xl relative overflow-hidden group border border-slate-800/10 dark:border-slate-800">
           <div className="absolute top-0 right-0 p-4 opacity-10 rotate-12 pointer-events-none">
             <Compass className="h-24 w-24 text-white" />
           </div>
@@ -247,8 +247,8 @@ export const StudentDashboard = () => {
                             {completed ? <CheckCircle2 className="h-4 w-4 text-white" /> : <span className="text-xs font-black text-white">{i + 1}</span>}
                           </div>
                           <div className="text-center">
-                            <p className="text-[8px] font-bold uppercase tracking-widest text-slate-500 mb-0.5">{item.step}</p>
-                            <p className={`text-[11px] font-bold ${completed || active ? 'text-white' : 'text-slate-600'}`}>{item.title}</p>
+                            <p className="text-[8px] font-bold uppercase tracking-widest text-slate-550 mb-0.5">{item.step}</p>
+                            <p className={`text-[11px] font-bold ${completed || active ? 'text-white' : 'text-slate-500 dark:text-slate-400'}`}>{item.title}</p>
                           </div>
                         </div>
                       );
@@ -264,35 +264,35 @@ export const StudentDashboard = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {isStatsLoading ? (
             Array.from({ length: 4 }).map((_, idx) => (
-              <Card key={idx} className="border-none shadow-sm bg-white/90 backdrop-blur-md rounded-2xl p-4">
+              <Card key={idx} className="border border-slate-100 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md rounded-2xl p-4">
                 <div className="flex items-center gap-3 mb-3">
-                  <Skeleton className="h-8 w-8 rounded-lg bg-slate-200" />
+                  <Skeleton className="h-8 w-8 rounded-lg bg-slate-200 dark:bg-slate-800" />
                   <div className="space-y-2 flex-1">
-                    <Skeleton className="h-3 w-16 bg-slate-200" />
-                    <Skeleton className="h-6 w-10 bg-slate-200" />
+                    <Skeleton className="h-3 w-16 bg-slate-200 dark:bg-slate-800" />
+                    <Skeleton className="h-6 w-10 bg-slate-200 dark:bg-slate-800" />
                   </div>
                 </div>
-                <Skeleton className="h-1 w-full rounded-full bg-slate-200" />
+                <Skeleton className="h-1 w-full rounded-full bg-slate-200 dark:bg-slate-800" />
               </Card>
             ))
           ) : (
             statsSummary.map((stat, i) => (
-              <Card key={i} className="group relative border-none shadow-sm bg-white/90 backdrop-blur-md hover:shadow-md transition-all duration-300 cursor-pointer overflow-hidden rounded-2xl" onClick={() => navigate(stat.route)}>
+              <Card key={i} className="group relative border border-slate-100/70 dark:border-slate-800/80 shadow-sm bg-white/90 dark:bg-slate-900/90 hover:border-slate-200 dark:hover:border-slate-700 hover:shadow-md transition-all duration-300 cursor-pointer overflow-hidden rounded-2xl" onClick={() => navigate(stat.route)}>
                 <div className={`absolute top-0 left-0 w-1 h-full opacity-0 group-hover:opacity-100 transition-all duration-300 ${stat.accent}`} />
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3 mb-3">
                     <div className={`${stat.bg} p-2 rounded-lg transition-transform group-hover:scale-110`}><stat.icon className={`h-4 w-4 ${stat.color}`} /></div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight truncate">{stat.label}</p>
-                      <p className="text-xl font-black text-slate-900 tracking-tighter">{stat.value}</p>
+                      <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tight truncate">{stat.label}</p>
+                      <p className="text-xl font-black text-slate-900 dark:text-white tracking-tighter">{stat.value}</p>
                     </div>
                   </div>
                   {stat.progress !== undefined ? (
-                    <Progress value={stat.progress} className="h-1 bg-slate-100 rounded-full" />
+                    <Progress value={stat.progress} className="h-1 bg-slate-100 dark:bg-slate-800 rounded-full" />
                   ) : (
-                    <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-slate-50 border border-slate-100/50 w-fit">
+                    <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-slate-50 dark:bg-slate-800/50 border border-slate-100/50 dark:border-slate-700/50 w-fit">
                       <Sparkles className="h-3 w-3 text-amber-500 animate-pulse" />
-                      <span className="text-[9px] font-bold text-slate-500 uppercase">{stat.sub}</span>
+                      <span className="text-[9px] font-bold text-slate-505 dark:text-slate-400 uppercase">{stat.sub}</span>
                     </div>
                   )}
                 </CardContent>
@@ -303,15 +303,15 @@ export const StudentDashboard = () => {
 
         {/* 4. Deep Visualizations (Radar & Area Charts) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-10">
-          <Card className="lg:col-span-8 border-none shadow-xl bg-white/80 backdrop-blur-md rounded-3xl overflow-hidden">
+          <Card className="lg:col-span-8 border border-slate-100 dark:border-slate-800 shadow-xl bg-white/80 dark:bg-slate-900/85 backdrop-blur-md rounded-3xl overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
-                <CardTitle className="text-xl font-black text-slate-800 flex items-center gap-2">
+                <CardTitle className="text-xl font-black text-slate-800 dark:text-white flex items-center gap-2">
                   <TrendingUp className="h-5 w-5 text-emerald-500" /> Performance Momentum
                 </CardTitle>
-                <CardDescription>Actual score vs. AI projected growth</CardDescription>
+                <CardDescription className="dark:text-slate-400">Actual score vs. AI projected growth</CardDescription>
               </div>
-              <Badge className="bg-emerald-50 text-emerald-600 border-none font-bold">+12% Target</Badge>
+              <Badge className="bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-450 border-none font-bold">+12% Target</Badge>
             </CardHeader>
             <CardContent className="h-[280px] w-full pt-4 relative flex items-center justify-center">
               {testsCompleted > 0 ? (
@@ -333,20 +333,20 @@ export const StudentDashboard = () => {
                 </ResponsiveContainer>
               ) : (
                 <div className="text-center p-6">
-                  <BarChart3 className="h-10 w-10 text-slate-300 mx-auto mb-2" />
-                  <p className="text-sm font-bold text-slate-500">No Analytics Data</p>
-                  <p className="text-xs text-slate-400 max-w-[250px] mx-auto mt-1">Complete an assessment to generate your momentum trend.</p>
+                  <BarChart3 className="h-10 w-10 text-slate-305 dark:text-slate-600 mx-auto mb-2" />
+                  <p className="text-sm font-bold text-slate-500 dark:text-slate-400">No Analytics Data</p>
+                  <p className="text-xs text-slate-405 dark:text-slate-500 max-w-[250px] mx-auto mt-1">Complete an assessment to generate your momentum trend.</p>
                 </div>
               )}
             </CardContent>
           </Card>
 
-          <Card className="lg:col-span-4 border-none shadow-xl bg-white/80 backdrop-blur-md rounded-3xl overflow-hidden flex flex-col">
+          <Card className="lg:col-span-4 border border-slate-100 dark:border-slate-800 shadow-xl bg-white/80 dark:bg-slate-900/85 backdrop-blur-md rounded-3xl overflow-hidden flex flex-col">
             <CardHeader className="text-center pb-0">
-              <CardTitle className="text-lg font-black text-slate-800 flex items-center justify-center gap-2">
+              <CardTitle className="text-lg font-black text-slate-800 dark:text-white flex items-center justify-center gap-2">
                 <Brain className="h-5 w-5 text-primary" /> Neural DNA
               </CardTitle>
-              <CardDescription>Cognitive Strengths Mapping</CardDescription>
+              <CardDescription className="dark:text-slate-400">Cognitive Strengths Mapping</CardDescription>
             </CardHeader>
             <CardContent className="flex-1 min-h-[300px] w-full relative flex items-center justify-center">
               {testsCompleted > 0 ? (
@@ -359,9 +359,9 @@ export const StudentDashboard = () => {
                 </ResponsiveContainer>
               ) : (
                 <div className="text-center p-6">
-                  <Brain className="h-10 w-10 text-slate-300 mx-auto mb-2" />
-                  <p className="text-sm font-bold text-slate-500">No Cognitive Mapping</p>
-                  <p className="text-xs text-slate-400 max-w-[200px] mx-auto mt-1">Your neural DNA strengths will populate here after evaluation.</p>
+                  <Brain className="h-10 w-10 text-slate-305 dark:text-slate-600 mx-auto mb-2" />
+                  <p className="text-sm font-bold text-slate-500 dark:text-slate-400">No Cognitive Mapping</p>
+                  <p className="text-xs text-slate-405 dark:text-slate-500 max-w-[200px] mx-auto mt-1">Your neural DNA strengths will populate here after evaluation.</p>
                 </div>
               )}
             </CardContent>
@@ -372,10 +372,10 @@ export const StudentDashboard = () => {
         <div className="mt-12 space-y-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div className="space-y-1">
-              <h2 className="text-3xl font-black text-slate-900 tracking-tight">Assessment Ecosystem</h2>
-              <p className="text-slate-500 font-medium">Curated modules powered by the CognifyIQ engine</p>
+              <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Assessment Ecosystem</h2>
+              <p className="text-slate-500 dark:text-slate-400 font-medium">Curated modules powered by the CognifyIQ engine</p>
             </div>
-            <Button variant="outline" className="rounded-2xl font-bold border-slate-200 bg-white hover:bg-slate-50 px-6 h-11 transition-all">
+            <Button variant="outline" className="rounded-2xl font-bold border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 px-6 h-11 transition-all text-slate-700 dark:text-slate-350">
               Browse Full Library <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
@@ -384,25 +384,25 @@ export const StudentDashboard = () => {
             {/* Featured Psychometric Card */}
             <div className="lg:col-span-8 group">
               {testTakingLoading ? (
-                <Skeleton className="h-[400px] w-full rounded-[2.5rem] bg-slate-200" />
+                <Skeleton className="h-[400px] w-full rounded-[2.5rem] bg-slate-200 dark:bg-slate-800" />
               ) : psychometricTest ? (
-                <Card className="h-full bg-white border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden rounded-[2.5rem] transition-all duration-500 hover:shadow-[0_20px_40px_rgb(0,0,0,0.06)] hover:-translate-y-1">
+                <Card className="h-full bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden rounded-[2.5rem] transition-all duration-500 hover:shadow-[0_20px_40px_rgb(0,0,0,0.06)] hover:-translate-y-1">
                   <div className="md:flex h-full">
                     <div className="p-8 md:p-10 md:w-2/3 flex flex-col">
                       <div className="flex items-center gap-3 mb-6">
                         <Badge className="bg-primary/10 text-primary border-none font-black px-4 py-1.5 uppercase tracking-wider text-[10px]">
                           Core Assessment
                         </Badge>
-                        <div className="flex items-center text-slate-400 text-xs font-bold">
+                        <div className="flex items-center text-slate-400 dark:text-slate-500 text-xs font-bold">
                           <Users className="h-3.5 w-3.5 mr-1" /> 12k+ Scholars Taken
                         </div>
                       </div>
 
                       <div className="flex-1 space-y-4">
-                        <h3 className="text-3xl font-black text-slate-900 leading-tight group-hover:text-primary transition-colors">
+                        <h3 className="text-3xl font-black text-slate-900 dark:text-white leading-tight group-hover:text-primary transition-colors">
                           {psychometricTest.title}
                         </h3>
-                        <p className="text-slate-500 text-lg leading-relaxed line-clamp-3 font-medium">
+                        <p className="text-slate-500 dark:text-slate-400 text-lg leading-relaxed line-clamp-3 font-medium">
                           {psychometricTest.description}
                         </p>
                       </div>
@@ -416,31 +416,31 @@ export const StudentDashboard = () => {
                           {paidStatus[psychometricTest.id] ? 'Begin Assessment' : `Unlock Access - ₹${psychometricTest.price}`}
                         </Button>
                         <div className="flex items-center gap-4 py-2">
-                          <div className="flex items-center text-slate-500 font-bold text-sm">
+                          <div className="flex items-center text-slate-500 dark:text-slate-405 font-bold text-sm">
                             <Clock className="mr-2 h-5 w-5 text-primary/60" /> {psychometricTest.timeDuration}m
                           </div>
-                          <div className="h-4 w-px bg-slate-200" />
-                          <div className="flex items-center text-slate-500 font-bold text-sm">
+                          <div className="h-4 w-px bg-slate-200 dark:bg-slate-800" />
+                          <div className="flex items-center text-slate-500 dark:text-slate-405 font-bold text-sm">
                             <Zap className="mr-2 h-5 w-5 text-primary/60" /> AI Insights
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="hidden md:flex md:w-1/3 bg-slate-50/50 items-center justify-center border-l border-slate-100 group-hover:bg-primary/5 transition-colors duration-500">
+                    <div className="hidden md:flex md:w-1/3 bg-slate-50/50 dark:bg-slate-950/20 items-center justify-center border-l border-slate-100 dark:border-slate-800 group-hover:bg-primary/5 transition-colors duration-500">
                       <div className="relative">
                         <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-150 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                        <Brain className="h-32 w-32 text-slate-200 group-hover:text-primary transition-all duration-700 group-hover:scale-110 relative z-10" />
+                        <Brain className="h-32 w-32 text-slate-200 dark:text-slate-800 group-hover:text-primary transition-all duration-700 group-hover:scale-110 relative z-10" />
                       </div>
                     </div>
                   </div>
                 </Card>
               ) : (
-                <Card className="h-full bg-white border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden rounded-[2.5rem] flex items-center justify-center p-8">
+                <Card className="h-full bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden rounded-[2.5rem] flex items-center justify-center p-8">
                   <div className="text-center max-w-sm">
-                    <BookOpen className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-                    <h4 className="text-lg font-bold text-slate-800 mb-2">No Core Assessments</h4>
-                    <p className="text-sm text-slate-500">There are no core psychometric assessments available at this moment.</p>
+                    <BookOpen className="h-12 w-12 text-slate-305 dark:text-slate-650 mx-auto mb-4" />
+                    <h4 className="text-lg font-bold text-slate-800 dark:text-white mb-2">No Core Assessments</h4>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">There are no core psychometric assessments available at this moment.</p>
                   </div>
                 </Card>
               )}
@@ -449,24 +449,24 @@ export const StudentDashboard = () => {
             {/* Sidebar Cards */}
             <div className="lg:col-span-4 space-y-6">
               {/* Achievement/Milestone Card */}
-              <Card className="border-none shadow-xl rounded-[2.5rem] bg-white p-8 flex flex-col justify-between h-[210px] group hover:-translate-y-1 transition-all">
+              <Card className="border border-slate-100 dark:border-slate-800 shadow-xl rounded-[2.5rem] bg-white dark:bg-slate-900 p-8 flex flex-col justify-between h-[210px] group hover:-translate-y-1 transition-all">
                 <div className="flex justify-between items-start">
                   <div className="h-12 w-12 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500">
                     <Trophy className="h-6 w-6 group-hover:animate-bounce" />
                   </div>
-                  <Badge variant="outline" className="border-slate-100 text-slate-400 font-bold">Level 4</Badge>
+                  <Badge variant="outline" className="border-slate-105 dark:border-slate-805 text-slate-400 dark:text-slate-505 font-bold">Level 4</Badge>
                 </div>
                 <div className="space-y-4">
                   <div className="flex justify-between items-end">
-                    <p className="text-sm font-black text-slate-800 tracking-tight">Certification Progress</p>
+                    <p className="text-sm font-black text-slate-800 dark:text-white tracking-tight">Certification Progress</p>
                     <span className="text-xs font-bold text-primary">80%</span>
                   </div>
-                  <Progress value={80} className="h-2.5 bg-slate-100 rounded-full" />
+                  <Progress value={80} className="h-2.5 bg-slate-100 dark:bg-slate-850 rounded-full" />
                 </div>
               </Card>
 
               {/* Quick Actions Card */}
-              <Card className="border-none shadow-2xl rounded-[2.5rem] bg-slate-900 p-2 overflow-hidden">
+              <Card className="border-none shadow-2xl rounded-[2.5rem] bg-slate-900 dark:bg-slate-950 p-2 overflow-hidden">
                 <CardContent className="p-4 space-y-2">
                   <Button variant="ghost" className="w-full justify-start text-slate-400 hover:text-white hover:bg-white/5 rounded-2xl h-14 group" asChild>
                     <Link to="/results">
@@ -489,23 +489,23 @@ export const StudentDashboard = () => {
           {testTakingLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
               {Array.from({ length: 4 }).map((_, idx) => (
-                <Skeleton key={idx} className="h-[150px] w-full rounded-3xl bg-slate-200" />
+                <Skeleton key={idx} className="h-[150px] w-full rounded-3xl bg-slate-200 dark:bg-slate-800" />
               ))}
             </div>
           ) : otherTests.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
               {otherTests.slice(0, 4).map((test) => (
-                <Card key={test.id} className="group border-none shadow-sm bg-white/60 backdrop-blur-sm rounded-3xl hover:shadow-xl hover:-translate-y-2 transition-all duration-500 overflow-hidden">
+                <Card key={test.id} className="group border border-slate-100/50 dark:border-slate-800/80 shadow-sm bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm rounded-3xl hover:shadow-xl hover:-translate-y-2 transition-all duration-500 overflow-hidden">
                   <CardHeader className="p-5 pb-3">
                     <div className="flex justify-between items-center mb-3">
-                      <Badge variant="secondary" className="bg-slate-100 text-slate-600 border-none font-bold text-[9px] uppercase tracking-tighter">
+                      <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-350 border-none font-bold text-[9px] uppercase tracking-tighter">
                         {test.difficulty || 'Intermediate'}
                       </Badge>
-                      <div className="text-[10px] font-bold text-slate-400 flex items-center">
+                      <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 flex items-center">
                         <Clock className="h-3 w-3 mr-1" /> {test.timeDuration}m
                       </div>
                     </div>
-                    <CardTitle className="text-base font-black text-slate-800 line-clamp-1 group-hover:text-primary transition-colors">
+                    <CardTitle className="text-base font-black text-slate-800 dark:text-white line-clamp-1 group-hover:text-primary transition-colors">
                       {test.title}
                     </CardTitle>
                   </CardHeader>
@@ -513,7 +513,7 @@ export const StudentDashboard = () => {
                     <Button
                       onClick={() => !paidStatus[test.id] ? handlePayment(test) : navigate(`/test/${test.id}`)}
                       variant="outline"
-                      className="w-full rounded-xl font-bold border-slate-200 hover:bg-primary hover:text-white hover:border-primary transition-all duration-300"
+                      className="w-full rounded-xl font-bold border-slate-200 dark:border-slate-800 hover:bg-primary dark:hover:bg-primary hover:text-white dark:hover:text-white hover:border-primary dark:hover:border-primary transition-all duration-300 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900"
                     >
                       {paidStatus[test.id] ? 'Start Assessment' : `Unlock Test`}
                     </Button>
@@ -522,10 +522,10 @@ export const StudentDashboard = () => {
               ))}
             </div>
           ) : (
-            <Card className="border-none shadow-sm bg-white/60 backdrop-blur-sm rounded-3xl p-8 text-center mt-8">
-              <BookOpen className="h-8 w-8 text-slate-300 mx-auto mb-2" />
-              <p className="text-sm font-bold text-slate-500">No Additional Modules</p>
-              <p className="text-xs text-slate-400">All available assessments are listed above.</p>
+            <Card className="border border-slate-100 dark:border-slate-800 shadow-sm bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm rounded-3xl p-8 text-center mt-8">
+              <BookOpen className="h-8 w-8 text-slate-305 dark:text-slate-650 mx-auto mb-2" />
+              <p className="text-sm font-bold text-slate-500 dark:text-slate-400">No Additional Modules</p>
+              <p className="text-xs text-slate-405 dark:text-slate-500">All available assessments are listed above.</p>
             </Card>
           )}
         </div>

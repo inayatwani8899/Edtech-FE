@@ -51,10 +51,10 @@ export const TestDetail = () => {
 
   if (isInitialLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center transition-colors duration-200">
         <div className="text-center space-y-4">
-          <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-slate-600 font-medium">Loading your assessment...</p>
+          <div className="w-12 h-12 border-4 border-indigo-650 dark:border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-slate-605 dark:text-slate-400 font-medium">Loading your assessment...</p>
         </div>
       </div>
     );
@@ -157,7 +157,7 @@ export const TestDetail = () => {
               </div>
             </div>
 
-            <p className="text-[9px] text-slate-600 font-mono uppercase tracking-tighter pt-4 border-t border-white/5">
+            <p className="text-[9px] text-slate-650 font-mono uppercase tracking-tighter pt-4 border-t border-white/5">
               Secure Neural Uplink Established • Node_0x{testId?.slice(-4) || "7C1"}
             </p>
           </CardContent>
@@ -198,15 +198,15 @@ export const TestDetail = () => {
   // No questions available - Full page error
   if (!currentQuestion && !testTakingLoading && currentStep === 2) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <Card className="max-w-md w-full border-0 shadow-lg bg-white">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-4 transition-colors duration-200">
+        <Card className="max-w-md w-full border border-[#E5E7EB] dark:border-slate-800 shadow-lg bg-white dark:bg-slate-900">
           <CardContent className="p-12 text-center space-y-6">
-            <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
-              <AlertCircle className="h-8 w-8 text-red-600" />
+            <div className="w-16 h-16 bg-red-50 dark:bg-red-950/30 rounded-full flex items-center justify-center mx-auto mb-4">
+              <AlertCircle className="h-8 w-8 text-red-650 dark:text-red-400" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-slate-900 mb-2">No Questions Found</h2>
-              <p className="text-slate-500">
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">No Questions Found</h2>
+              <p className="text-slate-500 dark:text-slate-400">
                 We couldn't retrieve questions for this assessment. Please contact support.
               </p>
             </div>
@@ -214,7 +214,7 @@ export const TestDetail = () => {
               onClick={() => {
                 navigate("/tests");
               }}
-              className="w-full bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-lg font-semibold transition-colors"
+              className="w-full bg-slate-900 dark:bg-slate-950 border border-transparent dark:border-slate-850 hover:bg-slate-800 dark:hover:bg-slate-900 text-white py-3 rounded-lg font-semibold transition-colors"
             >
               Back to Overview
             </button>

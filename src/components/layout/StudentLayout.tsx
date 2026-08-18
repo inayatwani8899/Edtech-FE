@@ -63,7 +63,7 @@ export const StudentLayout = () => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-slate-50 dark:bg-[#0b0d11]">
+      <div className="min-h-screen flex w-full bg-[#F8FAFC] dark:bg-[#0b0d11]">
         <StudentSidebar />
         
         <VisibleSidebarRail />

@@ -64,36 +64,21 @@ export const ConfirmationStep = ({
         return () => clearInterval(interval);
     }, []);
 
-    // Camera initializer
+    // Camera initializer - temporarily bypassed per user request to disable camera monitoring
     useEffect(() => {
+        const currentVideo = videoRef.current;
         async function enableCamera() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { width: 640, height: 480, facingMode: "user" }
-                });
-                if (mediaStreamRef) mediaStreamRef.current = stream;
-                if (videoRef.current) videoRef.current.srcObject = stream;
-                
-                setStatusIndicators(prev => ({ 
-                    ...prev, 
-                    cameraConnected: "success",
-                    environmentOk: "success"
-                }));
-            } catch (err) {
-                console.error("Camera loading failed:", err);
-                setStreamError(true);
-                setStatusIndicators({
-                    cameraConnected: "error",
-                    faceDetected: "error",
-                    gazeStable: "error",
-                    environmentOk: "error"
-                });
-            }
+            // Camera stream acquisition bypassed to avoid green light and irritation
+            setStatusIndicators(prev => ({ 
+                ...prev, 
+                cameraConnected: "success",
+                environmentOk: "success"
+            }));
         }
         enableCamera();
         
         return () => {
-            if (videoRef.current) videoRef.current.srcObject = null;
+            if (currentVideo) currentVideo.srcObject = null;
         };
     }, [mediaStreamRef]);
 
@@ -129,18 +114,18 @@ export const ConfirmationStep = ({
     }, [streamError]);
 
     return (
-        <div className="min-h-screen w-full bg-[#F8FAFC] flex flex-col items-center justify-between p-4 md:p-6 font-sans">
-            <div className="w-full max-w-4xl bg-white rounded-[12px] border border-[#E5E7EB] shadow-sm overflow-hidden flex flex-col flex-1">
+        <div className="min-h-screen w-full bg-[#F8FAFC] dark:bg-slate-950 flex flex-col items-center justify-between p-4 md:p-6 font-sans transition-colors duration-200">
+            <div className="w-full max-w-4xl bg-white dark:bg-slate-900 rounded-[12px] border border-[#E5E7EB] dark:border-slate-800 shadow-sm overflow-hidden flex flex-col flex-1">
                 
                 {/* 1. Header */}
-                <div className="border-b border-[#E5E7EB] p-4 md:p-5 flex items-center justify-between shrink-0">
+                <div className="border-b border-[#E5E7EB] dark:border-slate-800 p-4 md:p-5 flex items-center justify-between shrink-0">
                     <div className="space-y-0.5">
-                        <h1 className="text-[20px] md:text-[24px] font-bold text-[#111827] tracking-tight">Biometric Setup</h1>
-                        <p className="text-[13px] md:text-[14px] font-medium text-[#6B7280]">Psychometric Validation</p>
+                        <h1 className="text-[20px] md:text-[24px] font-bold text-[#111827] dark:text-white tracking-tight">Biometric Setup</h1>
+                        <p className="text-[13px] md:text-[14px] font-medium text-[#6B7280] dark:text-slate-400">Psychometric Validation</p>
                     </div>
-                    <div className="bg-[#EEF2F6] px-3 py-1 rounded-[8px] flex items-center gap-1.5 shrink-0">
+                    <div className="bg-[#EEF2F6] dark:bg-slate-950 px-3 py-1 rounded-[8px] border border-transparent dark:border-slate-850 flex items-center gap-1.5 shrink-0">
                         <div className={cn("h-2 w-2 rounded-full", isCalibrated ? "bg-[#22C55E]" : "bg-[#F59E0B] animate-pulse")} />
-                        <span className="text-[12px] font-semibold text-[#111827]">
+                        <span className="text-[12px] font-semibold text-[#111827] dark:text-white">
                             {isCalibrated ? "Ready to Start" : `Calibrating: ${calibrationProgress}%`}
                         </span>
                     </div>
@@ -182,7 +167,7 @@ export const ConfirmationStep = ({
                     </div>
 
                     {/* Camera Preview Card (600px width, responsive height, rounded 20px, soft shadow) */}
-                    <div className="w-full max-w-[600px] h-[200px] sm:h-[350px] rounded-[20px] overflow-hidden bg-slate-900 border border-[#E5E7EB] shadow-sm relative mx-auto flex items-center justify-center">
+                    <div className="w-full max-w-[600px] h-[200px] sm:h-[350px] rounded-[20px] overflow-hidden bg-slate-900 border border-[#E5E7EB] dark:border-slate-800 shadow-sm relative mx-auto flex items-center justify-center">
                         {streamError ? (
                             <div className="text-center p-6 space-y-3">
                                 <div className="h-10 w-10 rounded-[12px] bg-rose-500/10 border border-rose-500/20 text-rose-500 flex items-center justify-center mx-auto">
@@ -195,13 +180,15 @@ export const ConfirmationStep = ({
                             </div>
                         ) : (
                             <>
-                                <video 
-                                    ref={videoRef} 
-                                    autoPlay 
-                                    playsInline 
-                                    muted 
-                                    className="w-full h-full object-cover scale-x-[-1]" 
-                                />
+                                <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 space-y-2 bg-slate-955 bg-slate-950">
+                                    <div className="h-12 w-12 rounded-[16px] bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center">
+                                        <CameraOff className="w-6 h-6 animate-pulse" />
+                                    </div>
+                                    <p className="text-[13px] font-bold text-white tracking-wide uppercase">Camera Bypassed</p>
+                                    <p className="text-[11px] text-slate-400 max-w-[280px] leading-relaxed">
+                                        Camera monitoring is temporarily disabled. You can proceed normally.
+                                    </p>
+                                </div>
                                 
                                 {/* HUD Laser Overlay */}
                                 <div className="absolute inset-4 rounded-[12px] border border-dashed border-indigo-400/20 pointer-events-none flex items-center justify-center">
@@ -230,7 +217,7 @@ export const ConfirmationStep = ({
                     </div>
 
                     {/* Validation Checks Checklist */}
-                    <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[13px] text-[#6B7280] font-semibold mt-3 max-w-xl mx-auto border-t border-[#E5E7EB] pt-4">
+                    <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[13px] text-[#6B7280] dark:text-slate-400 font-semibold mt-3 max-w-xl mx-auto border-t border-[#E5E7EB] dark:border-slate-800 pt-4">
                         <CheckItem checked={statusIndicators.faceDetected === "success"} label="Face Detected" />
                         <CheckItem checked={isCalibrated} label="Lighting Good" />
                         <CheckItem checked={statusIndicators.gazeStable === "success"} label="Looking at Screen" />
@@ -240,11 +227,11 @@ export const ConfirmationStep = ({
                 </div>
 
                 {/* 3. Footer */}
-                <div className="border-t border-[#E5E7EB] bg-[#F8FAFC] p-4 flex items-center justify-between shrink-0">
+                <div className="border-t border-[#E5E7EB] dark:border-slate-800 bg-[#F8FAFC] dark:bg-slate-950/80 p-4 flex items-center justify-between shrink-0">
                     <Button 
                         onClick={onBack} 
                         variant="ghost" 
-                        className="text-[#6B7280] hover:text-[#111827] text-[13px] font-semibold h-[42px] px-4 rounded-[12px] flex items-center gap-1.5"
+                        className="text-[#6B7280] dark:text-slate-400 hover:text-[#111827] dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 text-[13px] font-semibold h-[42px] px-4 rounded-[12px] flex items-center gap-1.5"
                     >
                         <ArrowLeft className="w-4 h-4" />
                         PREV
@@ -283,23 +270,23 @@ export const ConfirmationStep = ({
 };
 
 const MonitoringCard = ({ icon, title, status, statusColor, desc }: { icon: React.ReactNode; title: string; status: string; statusColor: "success" | "warning" | "error"; desc: string }) => (
-    <div className="h-[120px] rounded-[16px] p-[18px] bg-white border border-[#E5E7EB] flex flex-col justify-between hover:shadow-sm transition-shadow">
+    <div className="h-[120px] rounded-[16px] p-[18px] bg-white dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-800 flex flex-col justify-between hover:shadow-sm transition-shadow">
         <div className="flex items-center justify-between">
-            <div className="w-8 h-8 rounded-[8px] bg-[#F8FAFC] flex items-center justify-center border border-[#E5E7EB]">
+            <div className="w-8 h-8 rounded-[8px] bg-[#F8FAFC] dark:bg-slate-950 flex items-center justify-center border border-[#E5E7EB] dark:border-slate-800">
                 {icon}
             </div>
             <span className={cn(
                 "text-[11px] font-bold px-2 py-0.5 rounded-[6px]",
-                statusColor === "success" && "bg-[#DCFCE7] text-[#166534]",
-                statusColor === "warning" && "bg-[#FEF3C7] text-[#92400E] animate-pulse",
-                statusColor === "error" && "bg-[#FEE2E2] text-[#991B1B]"
+                statusColor === "success" && "bg-[#DCFCE7] dark:bg-emerald-950/30 text-[#166534] dark:text-emerald-450",
+                statusColor === "warning" && "bg-[#FEF3C7] dark:bg-amber-950/30 text-[#92400E] dark:text-amber-450 animate-pulse",
+                statusColor === "error" && "bg-[#FEE2E2] dark:bg-red-950/30 text-[#991B1B] dark:text-red-450"
             )}>
                 {status}
             </span>
         </div>
         <div className="space-y-0.5">
-            <span className="text-[13px] font-bold text-[#111827] block leading-none">{title}</span>
-            <span className="text-[12px] text-[#6B7280] leading-none block">{desc}</span>
+            <span className="text-[13px] font-bold text-[#111827] dark:text-white block leading-none">{title}</span>
+            <span className="text-[12px] text-[#6B7280] dark:text-slate-400 leading-none block">{desc}</span>
         </div>
     </div>
 );
@@ -311,6 +298,6 @@ const CheckItem = ({ checked, label }: { checked: boolean; label: string }) => (
         ) : (
             <AlertTriangle className="w-4.5 h-4.5 text-[#F59E0B] fill-[#F59E0B]/10 animate-pulse" />
         )}
-        <span className={cn(checked ? "text-[#111827]" : "text-[#6B7280]")}>{label}</span>
+        <span className={cn(checked ? "text-[#111827] dark:text-white" : "text-[#6B7280] dark:text-slate-400")}>{label}</span>
     </div>
 );

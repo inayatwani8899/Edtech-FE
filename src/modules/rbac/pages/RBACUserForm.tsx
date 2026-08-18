@@ -97,8 +97,8 @@ const RBACUserForm: React.FC = () => {
                     }
                 />
 
-                <Card className="glass-card border-none shadow-elegant rounded-2xl overflow-hidden">
-                    <CardContent className="p-6">
+                <Card className="glass-card border-none shadow-elegant rounded-xl overflow-hidden">
+                    <CardContent className="p-4">
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="flex justify-center">
                                 <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg">
@@ -115,7 +115,7 @@ const RBACUserForm: React.FC = () => {
                                     value={form.name}
                                     onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                                     placeholder="e.g., John Doe"
-                                    className={`h-11 rounded-xl border ${errors.name ? 'border-rose-300' : 'border-slate-200'}`}
+                                    className={`h-8 rounded-lg border text-xs font-semibold ${errors.name ? 'border-rose-300' : 'border-slate-200'}`}
                                 />
                                 {errors.name && <p className="text-[10px] font-bold text-rose-500">{errors.name}</p>}
                             </div>
@@ -130,7 +130,7 @@ const RBACUserForm: React.FC = () => {
                                     value={form.email}
                                     onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
                                     placeholder="e.g., john@example.com"
-                                    className={`h-11 rounded-xl border ${errors.email ? 'border-rose-300' : 'border-slate-200'}`}
+                                    className={`h-8 rounded-lg border text-xs font-semibold ${errors.email ? 'border-rose-300' : 'border-slate-200'}`}
                                 />
                                 {errors.email && <p className="text-[10px] font-bold text-rose-500">{errors.email}</p>}
                             </div>
@@ -141,10 +141,10 @@ const RBACUserForm: React.FC = () => {
                                     Role <span className="text-rose-500">*</span>
                                 </Label>
                                 <Select value={form.roleId} onValueChange={v => setForm(f => ({ ...f, roleId: v }))}>
-                                    <SelectTrigger className={`h-11 rounded-xl border ${errors.roleId ? 'border-rose-300' : 'border-slate-200'}`}>
+                                    <SelectTrigger className={`h-8 rounded-lg border text-xs font-semibold ${errors.roleId ? 'border-rose-300' : 'border-slate-200'}`}>
                                         <SelectValue placeholder="Select a role" />
                                     </SelectTrigger>
-                                    <SelectContent className="rounded-xl">
+                                    <SelectContent className="rounded-lg">
                                         {roles.filter(r => r.status === 'active').map(role => (
                                             <SelectItem key={role.id} value={role.id} className="rounded-lg">
                                                 {role.name}
@@ -172,11 +172,11 @@ const RBACUserForm: React.FC = () => {
 
                             {/* Actions */}
                             <div className="flex items-center gap-3 pt-2">
-                                <Button type="button" variant="outline" onClick={() => navigate('/rbac/users')} className="flex-1 h-11 rounded-xl border-slate-200 font-bold text-xs uppercase tracking-wider">
+                                <Button type="button" variant="outline" onClick={() => navigate('/rbac/users')} className="flex-1 h-8 rounded-lg border-slate-200 font-bold text-xs uppercase tracking-wider">
                                     Cancel
                                 </Button>
-                                <Button type="submit" disabled={loading} className="flex-1 h-11 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-blue-500/20">
-                                    {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+                                <Button type="submit" disabled={loading} className="flex-1 h-8 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-blue-500/20">
+                                    {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" /> : <Save className="h-3.5 w-3.5 mr-2" />}
                                     {isEdit ? 'Update User' : 'Create User'}
                                 </Button>
                             </div>

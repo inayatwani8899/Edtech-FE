@@ -10,9 +10,9 @@ import {
     TrendingUp,
     Users,
     Lightbulb,
-    ChevronRight,
-    ArrowUpRight
+    ChevronRight
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export const CareerGuidance: React.FC = () => {
     const recommendations = [
@@ -43,61 +43,56 @@ export const CareerGuidance: React.FC = () => {
     ];
 
     return (
-        <div className="min-h-screen relative overflow-hidden bg-slate-50/50">
-            {/* Dynamic Background */}
-            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-                <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-emerald-400/10 rounded-full blur-[120px] animate-pulse"></div>
-                <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-400/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }}></div>
-            </div>
-
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative z-10">
-                {/* Header Section */}
-                <div className="mb-12">
-                    <div className="flex items-center gap-2 mb-3">
-                        <div className="h-px w-6 bg-success/30"></div>
-                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-success">Future Mapping</span>
+        <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-8 font-sans transition-colors duration-200">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+                
+                {/* Compact Standardized Header */}
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-[#E5E7EB] dark:border-slate-800">
+                    <div className="space-y-1.5">
+                        <div className="flex items-center gap-2">
+                            <div className="h-px w-6 bg-[#4F46E5]/30"></div>
+                            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#4F46E5]">Future Mapping</span>
+                        </div>
+                        <h1 className="text-3xl font-black tracking-tight text-[#111827] dark:text-white">
+                            Career <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4F46E5] to-indigo-600">Guidance</span>
+                        </h1>
+                        <p className="text-[13px] font-medium text-[#6B7280] dark:text-slate-400">AI-powered career recommendations and expert mentorship based on your unique profile</p>
                     </div>
-                    <h1 className="text-4xl font-black tracking-tight mb-4">
-                        <span className="text-slate-900">Career</span> <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-indigo-600">Guidance</span>
-                    </h1>
-                    <p className="text-slate-500 font-medium text-base max-w-2xl">
-                        AI-powered career recommendations and expert mentorship based on your unique psychometric profile.
-                    </p>
                 </div>
 
-                <div className="grid lg:grid-cols-12 gap-8">
+                <div className="grid lg:grid-cols-12 gap-6">
                     {/* Main Panel - Recommendations */}
                     <div className="lg:col-span-8 space-y-6">
                         <div className="flex items-center justify-between mb-2">
-                            <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
-                                <Compass className="h-4 w-4 text-emerald-500" />
+                            <h3 className="text-xs font-bold text-slate-505 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                <Compass className="h-4 w-4 text-[#4F46E5]" />
                                 AI Career Matches
                             </h3>
-                            <Badge variant="outline" className="border-emerald-100 text-emerald-600 font-bold text-[9px] uppercase tracking-widest px-2 py-0.5">Top Alignment</Badge>
+                            <Badge className="bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-450 border-none font-bold text-[9px] uppercase tracking-wider px-2 py-0.5">Top Alignment</Badge>
                         </div>
 
                         <div className="grid gap-4">
                             {recommendations.map((job, i) => (
-                                <Card key={i} className="glass-card border-none hover:shadow-elegant transition-all duration-300 group overflow-hidden">
-                                    <CardContent className="p-6">
-                                        <div className="flex flex-col md:flex-row items-center gap-6">
-                                            <div className={`p-4 rounded-2xl ${job.bg} group-hover:scale-110 transition-transform duration-500`}>
-                                                <job.icon className={`h-8 w-8 ${job.color}`} />
+                                <Card key={i} className="bg-white dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-800 hover:shadow-md hover:scale-[1.01] transition-all duration-300 overflow-hidden">
+                                    <CardContent className="p-4">
+                                        <div className="flex flex-col md:flex-row items-center gap-4">
+                                            <div className={cn("p-3 rounded-xl shrink-0 group-hover:scale-105 transition-transform duration-300 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-850")}>
+                                                <job.icon className={cn("h-6 w-6", job.color)} />
                                             </div>
-                                            <div className="flex-1 text-center md:text-left">
-                                                <h4 className="text-lg font-black text-slate-900 mb-1">{job.role}</h4>
+                                            <div className="flex-1 text-center md:text-left min-w-0">
+                                                <h4 className="text-[15px] font-bold text-slate-800 dark:text-white mb-1 truncate">{job.role}</h4>
                                                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
-                                                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                                                        <Star className="h-3 w-3 text-warning fill-warning" />
-                                                        Match Score: <span className="text-slate-700">{job.match}%</span>
+                                                    <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400 dark:text-slate-505 uppercase tracking-wider">
+                                                        <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
+                                                        Match Score: <span className="text-slate-700 dark:text-slate-300">{job.match}%</span>
                                                     </div>
-                                                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                                                        <Briefcase className="h-3 w-3" />
-                                                        Market Demand: <span className="text-emerald-500">{job.demand}</span>
+                                                    <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400 dark:text-slate-550 uppercase tracking-wider">
+                                                        <Briefcase className="h-3.5 w-3.5" />
+                                                        Market Demand: <span className="text-emerald-600 dark:text-emerald-450">{job.demand}</span>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <Button className="h-10 px-6 rounded-xl bg-slate-900 text-white hover:bg-slate-800 text-[10px] font-bold uppercase tracking-widest">
+                                            <Button className="h-[36px] px-4 rounded-xl bg-slate-900 dark:bg-slate-950 hover:bg-slate-800 dark:hover:bg-slate-900 text-white border border-transparent dark:border-slate-800 text-[11px] font-bold uppercase tracking-wider transition-all">
                                                 View Roadmap
                                             </Button>
                                         </div>
@@ -107,27 +102,27 @@ export const CareerGuidance: React.FC = () => {
                         </div>
 
                         {/* Mentor Section */}
-                        <div className="mt-12 space-y-6">
-                            <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
-                                <Users className="h-4 w-4 text-primary" />
+                        <div className="mt-8 space-y-4">
+                            <h3 className="text-xs font-bold text-slate-505 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                <Users className="h-4 w-4 text-[#4F46E5]" />
                                 Specialized Mentors
                             </h3>
                             <div className="grid md:grid-cols-2 gap-4">
                                 {[
-                                    { name: "Dr. Sarah Chen", expertise: "Data Science Lead", sessions: 120 },
-                                    { name: "Marcus Thorne", expertise: "Senior Product Architect", sessions: 85 }
+                                    { name: "Dr. Sarah Chen", expertise: "Data Science Lead" },
+                                    { name: "Marcus Thorne", expertise: "Marcus Thorne" }
                                 ].map((mentor, i) => (
-                                    <Card key={i} className="glass-card border-none shadow-soft p-5 group hover:shadow-elegant transition-all">
-                                        <div className="flex items-center gap-4">
-                                            <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center">
-                                                <Users className="h-6 w-6 text-slate-400" />
+                                    <Card key={i} className="bg-white dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-800 rounded-[12px] p-4 hover:shadow-md transition-all duration-300">
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-10 w-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
+                                                <Users className="h-5 w-5 text-slate-500 dark:text-slate-400" />
                                             </div>
-                                            <div className="flex-1">
-                                                <h5 className="text-sm font-black text-slate-800">{mentor.name}</h5>
-                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{mentor.expertise}</p>
+                                            <div className="flex-1 min-w-0">
+                                                <h5 className="text-[13.5px] font-bold text-slate-800 dark:text-white truncate">{mentor.name}</h5>
+                                                <p className="text-[9.5px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider truncate">{mentor.expertise}</p>
                                             </div>
-                                            <Button variant="ghost" size="icon" className="group-hover:translate-x-1 transition-transform">
-                                                <ChevronRight className="h-4 w-4 text-slate-300" />
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg shrink-0">
+                                                <ChevronRight className="h-4 w-4 text-slate-400 dark:text-slate-500" />
                                             </Button>
                                         </div>
                                     </Card>
@@ -138,32 +133,34 @@ export const CareerGuidance: React.FC = () => {
 
                     {/* Sidebar */}
                     <div className="lg:col-span-4 space-y-6">
-                        <Card className="glass-card border-none shadow-soft p-6 rounded-3xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white overflow-hidden relative">
-                            <div className="absolute -right-8 -bottom-8 opacity-10">
-                                <Lightbulb className="h-32 w-32" />
+                        <Card className="bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-5 rounded-[12px] relative overflow-hidden">
+                            <div className="absolute -right-6 -bottom-6 opacity-5 pointer-events-none">
+                                <Lightbulb className="h-24 w-24" />
                             </div>
-                            <h4 className="text-xl font-black tracking-tight mb-3">Daily Insight</h4>
-                            <p className="text-emerald-50 text-sm font-medium leading-relaxed mb-6 italic">
+                            <h4 className="text-[15px] font-bold tracking-tight mb-2">Daily Insight</h4>
+                            <p className="text-emerald-50 text-[12.5px] font-medium leading-relaxed mb-4 italic">
                                 "Technical skills get you the interview, but cross-domain adaptability builds the career. Focus on logic fundamentals."
                             </p>
                             <div className="flex items-center gap-2">
                                 <div className="h-px w-6 bg-white/30"></div>
-                                <span className="text-[9px] font-bold uppercase tracking-widest text-emerald-100">AI Counselor</span>
+                                <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-100">AI Counselor</span>
                             </div>
                         </Card>
 
-                        <Card className="glass-card border-none shadow-soft p-6 rounded-3xl">
-                            <h4 className="text-xs font-black text-slate-800 uppercase tracking-widest mb-4">Skills Discovery</h4>
-                            <div className="space-y-4">
+                        <Card className="bg-white dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-800 rounded-[12px] p-5">
+                            <h4 className="text-[12px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-4">Skills Discovery</h4>
+                            <div className="space-y-3.5">
                                 {['Critical Thinking', 'Pattern Recognition', 'Adaptive Logic'].map((skill, i) => (
-                                    <div key={i} className="flex items-center gap-3">
-                                        <div className="h-1.5 w-1.5 rounded-full bg-emerald-500"></div>
-                                        <span className="text-sm font-bold text-slate-600">{skill}</span>
-                                        <Badge variant="outline" className="ml-auto text-[8px] border-emerald-50 text-emerald-600">High Growth</Badge>
+                                    <div key={i} className="flex items-center justify-between gap-3 text-xs font-semibold">
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-1.5 w-1.5 rounded-full bg-emerald-500"></div>
+                                            <span className="text-slate-650 dark:text-slate-300 font-bold">{skill}</span>
+                                        </div>
+                                        <Badge variant="outline" className="text-[8px] border-emerald-150 dark:border-emerald-950 text-emerald-600 dark:text-emerald-450 font-semibold bg-emerald-50/30">High Growth</Badge>
                                     </div>
                                 ))}
                             </div>
-                            <Button variant="outline" className="w-full mt-6 h-10 border-slate-200 text-slate-500 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-slate-50">
+                            <Button variant="outline" className="w-full mt-5 h-[38px] border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 rounded-[12px] text-[11px] font-bold uppercase tracking-wider hover:bg-slate-50 dark:hover:bg-slate-800">
                                 Explore All Skills
                             </Button>
                         </Card>

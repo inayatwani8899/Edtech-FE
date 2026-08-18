@@ -232,7 +232,7 @@ const UserForm: React.FC = () => {
                                         value={formData.roleId !== 0 ? String(formData.roleId) : ""}
                                         onValueChange={handleRoleChange}
                                     >
-                                        <SelectTrigger className="w-full h-9 bg-slate-100/50 border-transparent rounded-xl px-3 text-[10px] font-bold text-slate-600 focus:ring-0">
+                                        <SelectTrigger className="w-full h-8 bg-slate-100/50 border-transparent rounded-lg px-3 text-xs font-bold text-slate-600 focus:ring-0">
                                             <SelectValue placeholder="System Role" />
                                         </SelectTrigger>
                                         <SelectContent className="rounded-xl border-slate-200">
@@ -261,58 +261,58 @@ const UserForm: React.FC = () => {
                                     <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Relay Connection Encrypted</span>
                                 </div>
                             </div>
-                            <CardContent className="p-6 space-y-6">
+                            <CardContent className="p-4 space-y-4">
                                 {/* PRIMARY IDENTITY GRID */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                                    <div className="space-y-1.5">
-                                        <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">Given Name</Label>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
+                                    <div className="space-y-1">
+                                        <Label className="text-[9px] font-bold text-slate-500 uppercase tracking-tight ml-1">Given Name</Label>
                                         <div className="relative group">
-                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300 group-focus-within:text-indigo-500 transition-colors" />
+                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-slate-300 group-focus-within:text-indigo-500 transition-colors" />
                                             <Input 
                                                 name="firstName"
                                                 value={formData.firstName} 
                                                 onChange={handleFormChange} 
-                                                className="h-10 pl-9 bg-slate-50/50 border-slate-200/50 focus:bg-white focus:ring-2 focus:ring-indigo-100 rounded-xl font-bold text-sm transition-all" 
+                                                className="h-8 pl-8 bg-slate-50/50 border-slate-200/50 focus:bg-white focus:ring-2 focus:ring-indigo-100 rounded-lg font-bold text-xs transition-all" 
                                                 placeholder="First Name" 
                                             />
                                         </div>
                                     </div>
-                                    <div className="space-y-1.5">
-                                        <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">Family Surname</Label>
+                                    <div className="space-y-1">
+                                        <Label className="text-[9px] font-bold text-slate-500 uppercase tracking-tight ml-1">Family Surname</Label>
                                         <div className="relative group">
-                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300 group-focus-within:text-indigo-500 transition-colors" />
+                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-slate-300 group-focus-within:text-indigo-500 transition-colors" />
                                             <Input 
                                                 name="lastName"
                                                 value={formData.lastName} 
                                                 onChange={handleFormChange} 
-                                                className="h-10 pl-9 bg-slate-50/50 border-slate-200/50 focus:bg-white focus:ring-2 focus:ring-indigo-100 rounded-xl font-bold text-sm transition-all" 
+                                                className="h-8 pl-8 bg-slate-50/50 border-slate-200/50 focus:bg-white focus:ring-2 focus:ring-indigo-100 rounded-lg font-bold text-xs transition-all" 
                                                 placeholder="Last Name" 
                                             />
                                         </div>
                                     </div>
 
-                                    <div className="space-y-1.5">
-                                        <Label className="text-[10px] font-bold text-indigo-600 uppercase tracking-tight ml-1">System Mailbox</Label>
+                                    <div className="space-y-1">
+                                        <Label className="text-[9px] font-bold text-indigo-650 uppercase tracking-tight ml-1">System Mailbox</Label>
                                         <div className="relative group">
-                                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-indigo-300 group-focus-within:text-indigo-600 transition-colors" />
+                                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-indigo-300 group-focus-within:text-indigo-600 transition-colors" />
                                             <Input
                                                 name="email"
                                                 value={formData.email}
                                                 onChange={handleFormChange}
-                                                className="h-10 pl-9 bg-indigo-50/30 border-indigo-100/50 focus:bg-white focus:ring-2 focus:ring-indigo-100 rounded-xl font-bold text-sm transition-all"
+                                                className="h-8 pl-8 bg-indigo-50/30 border-indigo-100/50 focus:bg-white focus:ring-2 focus:ring-indigo-100 rounded-lg font-bold text-xs transition-all"
                                                 placeholder="user@institution.com"
                                             />
                                         </div>
                                     </div>
-                                    <div className="space-y-1.5">
-                                        <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">Encryption Signal (Phone)</Label>
+                                    <div className="space-y-1">
+                                        <Label className="text-[9px] font-bold text-slate-500 uppercase tracking-tight ml-1">Encryption Signal (Phone)</Label>
                                         <div className="relative group">
-                                            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300 group-focus-within:text-indigo-500 transition-colors" />
+                                            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-slate-300 group-focus-within:text-indigo-500 transition-colors" />
                                             <Input 
                                                 name="phoneNumber"
                                                 value={formData.phoneNumber} 
                                                 onChange={handleFormChange} 
-                                                className="h-10 pl-9 bg-slate-50/50 border-slate-200/50 focus:bg-white focus:ring-2 focus:ring-indigo-100 rounded-xl font-bold text-sm transition-all" 
+                                                className="h-8 pl-8 bg-slate-50/50 border-slate-200/50 focus:bg-white focus:ring-2 focus:ring-indigo-100 rounded-lg font-bold text-xs transition-all" 
                                                 placeholder="+1 (000) 000-0000" 
                                             />
                                         </div>
@@ -321,29 +321,29 @@ const UserForm: React.FC = () => {
                                     {/* DYNAMIC ROLE FIELDS: STUDENT */}
                                     {isStudent && (
                                         <>
-                                            <div className="space-y-1.5">
-                                                <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">Academic Stratum (Grade)</Label>
+                                            <div className="space-y-1">
+                                                <Label className="text-[9px] font-bold text-slate-500 uppercase tracking-tight ml-1">Academic Stratum (Grade)</Label>
                                                 <Select value={formData.gradeLevel} onValueChange={(val) => setFormData({ gradeLevel: val })}>
-                                                    <SelectTrigger className="h-10 bg-slate-50/50 border-slate-200/50 rounded-xl font-bold text-sm px-4">
+                                                    <SelectTrigger className="h-8 bg-slate-50/50 border-slate-200/50 rounded-lg font-bold text-xs px-3">
                                                         <SelectValue placeholder="Select Grade" />
                                                     </SelectTrigger>
-                                                    <SelectContent className="rounded-xl">
+                                                    <SelectContent className="rounded-lg">
                                                         {["Kindergarten", "1st Grade", "2nd Grade", "3rd Grade", "4th Grade", "5th Grade", "6th Grade", "7th Grade", "8th Grade", "9th Grade", "10th Grade", "11th Grade", "12th Grade"].map((g) => (
-                                                            <SelectItem key={g} value={g} className="text-sm font-bold">{g}</SelectItem>
+                                                            <SelectItem key={g} value={g} className="text-xs font-bold">{g}</SelectItem>
                                                         ))}
                                                     </SelectContent>
                                                 </Select>
                                             </div>
-                                            <div className="space-y-1.5">
-                                                <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">Solar Cycle Birth</Label>
+                                            <div className="space-y-1">
+                                                <Label className="text-[9px] font-bold text-slate-500 uppercase tracking-tight ml-1">Solar Cycle Birth</Label>
                                                 <div className="relative group">
-                                                    <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300" />
+                                                    <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-slate-300" />
                                                     <Input 
                                                         type="date" 
                                                         name="dateOfBirth"
                                                         value={formData.dateOfBirth || ""} 
                                                         onChange={handleFormChange} 
-                                                        className="h-10 pl-9 bg-slate-50/50 border-slate-200/50 rounded-xl font-bold text-sm" 
+                                                        className="h-8 pl-8 bg-slate-50/50 border-slate-200/50 rounded-lg font-bold text-xs" 
                                                     />
                                                 </div>
                                             </div>
@@ -353,41 +353,41 @@ const UserForm: React.FC = () => {
                                     {/* DYNAMIC ROLE FIELDS: COUNSELOR */}
                                     {isCounselor && (
                                         <>
-                                            <div className="space-y-1.5">
-                                                <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">Highest Credential</Label>
-                                                <Input name="highestQualification" value={formData.highestQualification} onChange={handleFormChange} className="h-10 bg-slate-50/50 border-slate-200/50 rounded-xl font-bold text-sm" placeholder="e.g. Masters in Psychology" />
+                                            <div className="space-y-1">
+                                                <Label className="text-[9px] font-bold text-slate-500 uppercase tracking-tight ml-1">Highest Credential</Label>
+                                                <Input name="highestQualification" value={formData.highestQualification} onChange={handleFormChange} className="h-8 bg-slate-50/50 border-slate-200/50 rounded-lg font-bold text-xs px-3" placeholder="e.g. Masters in Psychology" />
                                             </div>
-                                            <div className="space-y-1.5">
-                                                <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">Years of Practice</Label>
-                                                <Input name="yearsOfExperience" type="number" value={formData.yearsOfExperience} onChange={handleFormChange} className="h-10 bg-slate-50/50 border-slate-200/50 rounded-xl font-bold text-sm" />
+                                            <div className="space-y-1">
+                                                <Label className="text-[9px] font-bold text-slate-500 uppercase tracking-tight ml-1">Years of Practice</Label>
+                                                <Input name="yearsOfExperience" type="number" value={formData.yearsOfExperience} onChange={handleFormChange} className="h-8 bg-slate-50/50 border-slate-200/50 rounded-lg font-bold text-xs px-3" />
                                             </div>
-                                            <div className="space-y-1.5">
-                                                <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">Specialization Core</Label>
-                                                <Input name="areaOfSpecialization" value={formData.areaOfSpecialization} onChange={handleFormChange} className="h-10 bg-slate-50/50 border-slate-200/50 rounded-xl font-bold text-sm shadow-sm" placeholder="Academic / Career Guidance" />
+                                            <div className="space-y-1">
+                                                <Label className="text-[9px] font-bold text-slate-500 uppercase tracking-tight ml-1">Specialization Core</Label>
+                                                <Input name="areaOfSpecialization" value={formData.areaOfSpecialization} onChange={handleFormChange} className="h-8 bg-slate-50/50 border-slate-200/50 rounded-lg font-bold text-xs px-3 shadow-sm" placeholder="Academic / Career Guidance" />
                                             </div>
-                                            <div className="space-y-1.5">
-                                                <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">Verification License</Label>
-                                                <Input name="licenseNumber" value={formData.licenseNumber} onChange={handleFormChange} className="h-10 bg-slate-50/50 border-slate-200/50 rounded-xl font-bold text-sm" placeholder="LIC-990-22" />
+                                            <div className="space-y-1">
+                                                <Label className="text-[9px] font-bold text-slate-500 uppercase tracking-tight ml-1">Verification License</Label>
+                                                <Input name="licenseNumber" value={formData.licenseNumber} onChange={handleFormChange} className="h-8 bg-slate-50/50 border-slate-200/50 rounded-lg font-bold text-xs px-3" placeholder="LIC-990-22" />
                                             </div>
                                         </>
                                     )}
 
                                     {/* SECURITY OVERRIDE (ADMIN) */}
                                     {isAdminRole && (
-                                        <div className="col-span-full pt-4 border-t border-slate-50">
-                                            <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-900 text-white shadow-lg overflow-hidden relative">
+                                        <div className="col-span-full pt-3 border-t border-slate-55 border-slate-100">
+                                            <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-900 text-white shadow-lg overflow-hidden relative">
                                                 <Checkbox
                                                     id="isAdmin"
                                                     checked={formData.isAdmin}
                                                     onCheckedChange={(val) => setFormData({ isAdmin: !!val })}
-                                                    className="h-6 w-6 border-white/20 data-[state=checked]:bg-emerald-500"
+                                                    className="h-5 w-5 border-white/20 data-[state=checked]:bg-emerald-500"
                                                 />
                                                 <div className="relative z-10">
-                                                    <Label htmlFor="isAdmin" className="text-sm font-black cursor-pointer flex items-center gap-2">
+                                                    <Label htmlFor="isAdmin" className="text-xs font-black cursor-pointer flex items-center gap-2">
                                                         Grant Terminal Administrator Privileges
                                                         <Sparkles className="h-3 w-3 text-amber-400" />
                                                     </Label>
-                                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Full access to system overrides and settings</p>
+                                                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Full access to system overrides and settings</p>
                                                 </div>
                                                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-3xl" />
                                             </div>
@@ -397,35 +397,35 @@ const UserForm: React.FC = () => {
                                     {/* PASSWORDS (NEW USERS) */}
                                     {!id && (
                                         <>
-                                            <div className="space-y-1.5 pt-4">
-                                                <Label className="text-[10px] font-bold text-amber-600 uppercase tracking-tight ml-1">Secure Passkey</Label>
+                                            <div className="space-y-1 pt-3">
+                                                <Label className="text-[9px] font-bold text-amber-600 uppercase tracking-tight ml-1">Secure Passkey</Label>
                                                 <div className="relative group">
                                                     <Input
                                                         type={showPassword ? "text" : "password"}
                                                         name="password"
                                                         value={formData.password}
                                                         onChange={handleFormChange}
-                                                        className="h-10 bg-amber-50/30 border-amber-100/50 rounded-xl font-bold text-sm px-4 transition-all focus:bg-white"
+                                                        className="h-8 bg-amber-50/30 border-amber-100/50 rounded-lg font-bold text-xs px-3 transition-all focus:bg-white"
                                                         placeholder="••••••••"
                                                     />
                                                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
-                                                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                                        {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                                                     </button>
                                                 </div>
                                             </div>
-                                            <div className="space-y-1.5 pt-4">
-                                                <Label className="text-[10px] font-bold text-amber-600 uppercase tracking-tight ml-1">Confirm Integrity</Label>
+                                            <div className="space-y-1 pt-3">
+                                                <Label className="text-[9px] font-bold text-amber-600 uppercase tracking-tight ml-1">Confirm Integrity</Label>
                                                 <div className="relative group">
                                                     <Input
                                                         type={showConfirmPassword ? "text" : "password"}
                                                         name="confirmPassword"
                                                         value={formData.confirmPassword}
                                                         onChange={handleFormChange}
-                                                        className="h-10 bg-amber-50/30 border-amber-100/50 rounded-xl font-bold text-sm px-4 transition-all focus:bg-white"
+                                                        className="h-8 bg-amber-50/30 border-amber-100/50 rounded-lg font-bold text-xs px-3 transition-all focus:bg-white"
                                                         placeholder="••••••••"
                                                     />
                                                     <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
-                                                        {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                                        {showConfirmPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                                                     </button>
                                                 </div>
                                             </div>
@@ -435,13 +435,13 @@ const UserForm: React.FC = () => {
 
                                 {/* BIO AREA FOR COUNSELORS */}
                                 {isCounselor && (
-                                    <div className="space-y-2 pt-4 border-t border-slate-50">
-                                        <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block">Professional Narrative</Label>
+                                    <div className="space-y-1.5 pt-3 border-t border-slate-50">
+                                        <Label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1 block">Professional Narrative</Label>
                                         <Textarea 
                                             name="professionalBio" 
                                             value={formData.professionalBio} 
                                             onChange={(e) => setFormData({ professionalBio: e.target.value })} 
-                                            className="w-full min-h-[100px] bg-slate-50/50 border-slate-200/50 rounded-2xl p-4 text-sm font-medium leading-relaxed resize-none transition-all focus:bg-white focus:ring-2 focus:ring-indigo-100" 
+                                            className="w-full min-h-[80px] bg-slate-50/50 border-slate-200/50 rounded-xl p-3 text-xs font-medium leading-relaxed resize-none transition-all focus:bg-white focus:ring-2 focus:ring-indigo-100" 
                                             placeholder="Overview of expert background..." 
                                         />
                                     </div>

@@ -101,19 +101,19 @@ const Counselors: React.FC = () => {
                 {/* Main Content Card */}
                 <Card className="glass-card border-none shadow-elegant rounded-2xl overflow-hidden">
                     <CardHeader className="p-3 border-b border-slate-50">
-                        <div className="flex flex-col md:flex-row gap-3 justify-between items-center">
-                            <div className="relative group w-full md:w-80">
+                        <div className="flex flex-col sm:flex-row gap-2.5 justify-between items-center">
+                            <div className="relative group w-full sm:w-80">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500 group-focus-within:text-primary transition-colors" />
                                 <Input
                                     placeholder="Search by name, email or specialization..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="h-9 pl-9 bg-white border border-slate-200 rounded-lg font-medium text-xs text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all w-full"
+                                    className="h-8 pl-9 bg-white border border-slate-200 rounded-lg font-medium text-[11px] text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all w-full"
                                 />
                             </div>
                             <div className="flex items-center gap-2">
-                                <Button variant="ghost" className="h-9 px-3 rounded-lg bg-slate-100 border border-slate-200 font-semibold text-slate-700 hover:text-primary hover:bg-slate-50 transition-all text-xs">
-                                    <Filter className="h-3.5 w-3.5 mr-2" />
+                                <Button variant="ghost" className="h-8 px-2.5 rounded-lg bg-slate-100 border border-slate-200 font-bold text-slate-700 hover:text-primary hover:bg-slate-50 transition-all text-[10px] uppercase tracking-wider">
+                                    <Filter className="h-3.5 w-3.5 mr-1.5" />
                                     Filter Matrix
                                 </Button>
                             </div>
@@ -154,27 +154,27 @@ const Counselors: React.FC = () => {
                                     <Table>
                                         <TableHeader className="bg-slate-50">
                                             <TableRow className="border-slate-200 hover:bg-transparent">
-                                                <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[35%]">Counselor Identity</TableHead>
-                                                <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[25%]">Email</TableHead>
-                                                <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[20%]">Phone</TableHead>
-                                                <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider text-center w-[20%]">Actions</TableHead>
+                                                <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider w-[35%]">Counselor Identity</TableHead>
+                                                <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider w-[25%]">Email</TableHead>
+                                                <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider w-[20%]">Phone</TableHead>
+                                                <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider text-center w-[20%]">Actions</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
                                             {normalizedCounselors(counselors).map((counselor) => (
                                                 <TableRow key={counselor?.id} className="border-slate-100 hover:bg-slate-50 transition-all duration-200 group">
-                                                    <TableCell className="px-4 py-2">
-                                                        <div className="flex items-center gap-3">
+                                                    <TableCell className="px-3 py-1.5 align-middle">
+                                                        <div className="flex items-center gap-2.5">
                                                             <div className="h-6 w-6 rounded-md bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center font-bold text-white text-[10px] shadow-sm shadow-emerald-500/20 border border-white/20 ring-1 ring-slate-50 group-hover:scale-105 transition-transform flex-shrink-0">
                                                                 {counselor?.firstName?.[0]}{counselor?.lastName?.[0]}
                                                             </div>
                                                             <div className="min-w-0 flex-1">
-                                                                <p className="text-xs font-bold text-slate-900 leading-none mb-0.5 group-hover:text-primary transition-colors truncate">
+                                                                <p className="text-[11px] font-bold text-slate-900 leading-none mb-0.5 group-hover:text-primary transition-colors truncate">
                                                                     {`${counselor?.firstName} ${counselor?.lastName}`}
                                                                 </p>
                                                                 <div className="flex items-center gap-1.5">
                                                                     {counselor?.hireDate && (
-                                                                        <span className="text-[9px] text-slate-400 font-medium hidden sm:inline-block">
+                                                                        <span className="text-[8.5px] text-slate-400 font-medium hidden sm:inline-block">
                                                                             Since {new Date(counselor.hireDate).getFullYear()}
                                                                         </span>
                                                                     )}
@@ -182,42 +182,42 @@ const Counselors: React.FC = () => {
                                                             </div>
                                                         </div>
                                                     </TableCell>
-                                                    <TableCell className="px-4 py-2">
+                                                    <TableCell className="px-3 py-1.5 align-middle">
                                                         <div className="flex items-center gap-1.5 max-w-[200px]">
-                                                            <span className="text-xs font-semibold text-slate-700 truncate block" title={counselor?.email}>{counselor?.email}</span>
+                                                            <span className="text-[11px] font-medium text-slate-700 truncate block" title={counselor?.email}>{counselor?.email}</span>
                                                         </div>
                                                     </TableCell>
-                                                    <TableCell className="px-4 py-2">
+                                                    <TableCell className="px-3 py-1.5 align-middle">
                                                         {counselor?.phoneNumber ? (
                                                             <div className="flex items-center gap-1.5">
-                                                                <div className="h-4 w-4 rounded-full bg-slate-50 flex items-center justify-center flex-shrink-0">
+                                                                <div className="h-3.5 w-3.5 rounded-full bg-slate-50 flex items-center justify-center flex-shrink-0">
                                                                     <Phone className="h-2.5 w-2.5 text-slate-400" />
                                                                 </div>
-                                                                <span className="text-xs font-semibold text-slate-600">{counselor.phoneNumber}</span>
+                                                                <span className="text-[11px] font-medium text-slate-600">{counselor.phoneNumber}</span>
                                                             </div>
                                                         ) : (
-                                                            <span className="text-[10px] text-slate-400 italic">Not provided</span>
+                                                            <span className="text-[9.5px] text-slate-400 italic">Not provided</span>
                                                         )}
                                                     </TableCell>
-                                                    <TableCell className="px-4 py-2">
-                                                        <div className="flex justify-center gap-2 opacity-100 transition-all duration-200">
+                                                    <TableCell className="px-3 py-1.5 align-middle">
+                                                        <div className="flex justify-center gap-1.5 opacity-100 transition-all duration-200">
                                                             <Button
                                                                 variant="ghost"
                                                                 size="icon"
                                                                 onClick={() => navigate(`/counselors/edit/${counselor.id}`)}
-                                                                className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 transition-all"
+                                                                className="h-6 w-6 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 transition-all flex items-center justify-center"
                                                                 title="Edit Profile"
                                                             >
-                                                                <Edit className="h-3.5 w-3.5" />
+                                                                <Edit className="h-3 w-3" />
                                                             </Button>
                                                             <Button
                                                                 variant="ghost"
                                                                 size="icon"
                                                                 onClick={() => openDeleteDialog(counselor.id)}
-                                                                className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-300 transition-all"
+                                                                className="h-6 w-6 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-300 transition-all flex items-center justify-center"
                                                                 title="Revoke Access"
                                                             >
-                                                                <Trash2 className="h-3.5 w-3.5" />
+                                                                <Trash2 className="h-3 w-3" />
                                                             </Button>
                                                         </div>
                                                     </TableCell>

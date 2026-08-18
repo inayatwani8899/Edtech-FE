@@ -185,12 +185,12 @@ export const QuestionBankList: React.FC = () => {
                                     <Table>
                                         <TableHeader className="bg-slate-50">
                                             <TableRow className="border-slate-200 hover:bg-transparent">
-                                                <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-8" />
-                                                <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider">#</TableHead>
-                                                <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[50%]">Question</TableHead>
-                                                <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider">Category</TableHead>
-                                                <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider">Options</TableHead>
-                                                <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider">Status</TableHead>
+                                                <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider w-8" />
+                                                <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider">#</TableHead>
+                                                <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider w-[50%]">Question</TableHead>
+                                                <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider">Category</TableHead>
+                                                <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider">Options</TableHead>
+                                                <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider">Status</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
@@ -200,36 +200,36 @@ export const QuestionBankList: React.FC = () => {
                                                         className="border-slate-100 hover:bg-slate-50/70 transition-all duration-200 cursor-pointer"
                                                         onClick={() => toggleExpand(q.id)}
                                                     >
-                                                        <TableCell className="px-4 py-2 w-8">
+                                                        <TableCell className="px-3 py-1.5 w-8">
                                                             <div className="text-slate-400 transition-transform duration-200">
                                                                 {expandedId === q.id
-                                                                    ? <ChevronDown className="h-3.5 w-3.5 text-primary" />
-                                                                    : <ChevronRight className="h-3.5 w-3.5" />}
+                                                                    ? <ChevronDown className="h-3 w-3 text-primary" />
+                                                                    : <ChevronRight className="h-3 w-3" />}
                                                             </div>
                                                         </TableCell>
-                                                        <TableCell className="px-4 py-2 text-xs font-bold text-slate-400">
+                                                        <TableCell className="px-3 py-1.5 text-[10px] font-bold text-slate-400">
                                                             {(currentPage - 1) * limit + idx + 1}
                                                         </TableCell>
-                                                        <TableCell className="px-4 py-2">
+                                                        <TableCell className="px-3 py-1.5">
                                                             <div className="flex items-center gap-2">
                                                                 <div className="h-6 w-6 rounded-md bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
                                                                     <BookOpen className="h-3 w-3 text-white" />
                                                                 </div>
-                                                                <p className="text-xs font-semibold text-slate-800 line-clamp-2 max-w-sm">
+                                                                <p className="text-[11px] font-semibold text-slate-800 line-clamp-2 max-w-sm">
                                                                     {q.questionText}
                                                                 </p>
                                                             </div>
                                                         </TableCell>
-                                                        <TableCell className="px-4 py-2">
+                                                        <TableCell className="px-3 py-1.5">
                                                             {q.categoryName
-                                                                ? <Badge variant="secondary" className="bg-indigo-50 text-indigo-700 border-none text-[9px] font-bold">{q.categoryName}</Badge>
-                                                                : <span className="text-slate-300 text-xs italic">—</span>}
+                                                                ? <Badge variant="secondary" className="bg-indigo-50 text-indigo-700 border-none text-[8px] font-bold px-1.5 py-0.5 pointer-events-none">{q.categoryName}</Badge>
+                                                                : <span className="text-slate-350 text-[10px] italic">—</span>}
                                                         </TableCell>
-                                                        <TableCell className="px-4 py-2">
-                                                            <span className="text-xs font-bold text-slate-600">{q.options?.length ?? 0}</span>
+                                                        <TableCell className="px-3 py-1.5">
+                                                            <span className="text-[11px] font-bold text-slate-600">{q.options?.length ?? 0}</span>
                                                         </TableCell>
-                                                        <TableCell className="px-4 py-2">
-                                                            <span className={`px-2 py-0.5 text-[9px] uppercase rounded-full font-bold ${q.isActive !== false ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>
+                                                        <TableCell className="px-3 py-1.5">
+                                                            <span className={`px-1.5 py-0.5 text-[8px] uppercase rounded-full font-bold pointer-events-none ${q.isActive !== false ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>
                                                                 {q.isActive !== false ? "Active" : "Inactive"}
                                                             </span>
                                                         </TableCell>

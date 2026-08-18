@@ -288,7 +288,7 @@ export const QuestionsList: React.FC = () => {
         {/* Filters Panel Card */}
         <Card className="glass-card border-none shadow-elegant rounded-2xl mb-4 overflow-hidden">
           <CardContent className="p-4 space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2.5">
               
               {/* Test Filter */}
               <div className="space-y-1">
@@ -298,7 +298,7 @@ export const QuestionsList: React.FC = () => {
                   onValueChange={(val) => setFilterTestId(val === "all" ? "" : val)}
                   disabled={loadingTests}
                 >
-                  <SelectTrigger className="h-8 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:ring-1 focus:ring-primary">
+                  <SelectTrigger className="h-8 bg-white border border-slate-200 rounded-lg text-[10px] font-semibold text-slate-700 focus:ring-1 focus:ring-primary">
                     <SelectValue placeholder="All Tests" />
                   </SelectTrigger>
                   <SelectContent className="rounded-lg max-h-60">
@@ -320,7 +320,7 @@ export const QuestionsList: React.FC = () => {
                   onValueChange={(val) => setFilterCategoryId(val === "all" ? "" : val)}
                   disabled={!filters.testId || loadingCategories}
                 >
-                  <SelectTrigger className="h-8 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:ring-1 focus:ring-primary disabled:bg-slate-100/50">
+                  <SelectTrigger className="h-8 bg-white border border-slate-200 rounded-lg text-[10px] font-semibold text-slate-700 focus:ring-1 focus:ring-primary disabled:bg-slate-100/50">
                     <SelectValue placeholder={!filters.testId ? "Select Test First" : "All Categories"} />
                   </SelectTrigger>
                   <SelectContent className="rounded-lg max-h-60">
@@ -342,7 +342,7 @@ export const QuestionsList: React.FC = () => {
                   onValueChange={(val) => setFilterTheoryId(val === "all" ? "" : val)}
                   disabled={!filters.categoryId || loadingTheories}
                 >
-                  <SelectTrigger className="h-8 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:ring-1 focus:ring-primary disabled:bg-slate-100/50">
+                  <SelectTrigger className="h-8 bg-white border border-slate-200 rounded-lg text-[10px] font-semibold text-slate-700 focus:ring-1 focus:ring-primary disabled:bg-slate-100/50">
                     <SelectValue placeholder={!filters.categoryId ? "Select Category First" : "All Theories"} />
                   </SelectTrigger>
                   <SelectContent className="rounded-lg max-h-60">
@@ -364,7 +364,7 @@ export const QuestionsList: React.FC = () => {
                   onValueChange={(val) => setFilterTagId(val === "all" ? "" : val)}
                   disabled={!filters.theoryId || loadingTags}
                 >
-                  <SelectTrigger className="h-8 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:ring-1 focus:ring-primary disabled:bg-slate-100/50">
+                  <SelectTrigger className="h-8 bg-white border border-slate-200 rounded-lg text-[10px] font-semibold text-slate-700 focus:ring-1 focus:ring-primary disabled:bg-slate-100/50">
                     <SelectValue placeholder={!filters.theoryId ? "Select Theory First" : "All Tags"} />
                   </SelectTrigger>
                   <SelectContent className="rounded-lg max-h-60">
@@ -386,7 +386,7 @@ export const QuestionsList: React.FC = () => {
                   onValueChange={(val) => setFilterGradeId(val === "all" ? "" : val)}
                   disabled={loadingGrades}
                 >
-                  <SelectTrigger className="h-8 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:ring-1 focus:ring-primary">
+                  <SelectTrigger className="h-8 bg-white border border-slate-200 rounded-lg text-[10px] font-semibold text-slate-700 focus:ring-1 focus:ring-primary">
                     <SelectValue placeholder="All Grades" />
                   </SelectTrigger>
                   <SelectContent className="rounded-lg max-h-60">
@@ -407,7 +407,7 @@ export const QuestionsList: React.FC = () => {
                   value={filters.isActive}
                   onValueChange={setFilterIsActive}
                 >
-                  <SelectTrigger className="h-8 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:ring-1 focus:ring-primary">
+                  <SelectTrigger className="h-8 bg-white border border-slate-200 rounded-lg text-[10px] font-semibold text-slate-700 focus:ring-1 focus:ring-primary">
                     <SelectValue placeholder="All Statuses" />
                   </SelectTrigger>
                   <SelectContent className="rounded-lg max-h-60">
@@ -419,21 +419,21 @@ export const QuestionsList: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 justify-between items-center pt-2 border-t border-slate-100">
+            <div className="flex flex-col sm:flex-row gap-2.5 justify-between items-center pt-2 border-t border-slate-100">
               <div className="relative group w-full sm:max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500 group-focus-within:text-primary transition-colors" />
                 <Input
                   placeholder="Search question text..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="h-9 pl-9 bg-white border border-slate-200 rounded-lg font-medium text-xs text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all w-full"
+                  className="h-8 pl-9 bg-white border border-slate-200 rounded-lg font-medium text-[11px] text-slate-900 placeholder:text-slate-405 focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all w-full"
                 />
               </div>
 
               <Button
                 variant="ghost"
                 onClick={resetFilters}
-                className="text-xs text-slate-500 hover:text-slate-800 transition-colors h-8 px-3 rounded-lg"
+                className="text-[11px] text-slate-505 hover:text-slate-800 transition-colors h-8 px-3 rounded-lg"
               >
                 Clear Filters
               </Button>
@@ -476,87 +476,87 @@ export const QuestionsList: React.FC = () => {
                       <TableRow className="border-slate-200 hover:bg-transparent">
                         <TableHead 
                           onClick={() => handleSort('questiontext')}
-                          className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors w-[25%]"
+                          className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors w-[25%]"
                         >
                           <span className="flex items-center gap-1.5">
                             Question Text <ArrowUpDown className="h-3 w-3" />
                           </span>
                         </TableHead>
-                        <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[12%]">Test</TableHead>
-                        <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[12%]">Category</TableHead>
-                        <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[12%]">Theory</TableHead>
-                        <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[12%]">Tag</TableHead>
-                        <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[10%]">Grade</TableHead>
-                        <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[7%]">Status</TableHead>
-                        <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider text-center w-[10%]">Actions</TableHead>
+                        <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider w-[12%]">Test</TableHead>
+                        <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider w-[12%]">Category</TableHead>
+                        <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider w-[12%]">Theory</TableHead>
+                        <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider w-[12%]">Tag</TableHead>
+                        <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider w-[10%]">Grade</TableHead>
+                        <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider w-[7%]">Status</TableHead>
+                        <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider text-center w-[10%]">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {questions?.map((question) => (
                         <TableRow key={question.id} className="border-slate-100 hover:bg-slate-50/80 transition-all duration-200 group">
-                          <TableCell className="px-4 py-3">
-                            <div className="flex items-center gap-3">
+                          <TableCell className="px-3 py-1.5 align-middle">
+                            <div className="flex items-center gap-2.5">
                               <div className="h-6 w-6 rounded-md bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white text-[10px] shadow-sm group-hover:scale-105 transition-transform flex-shrink-0">
                                 <FileText className="h-3 w-3" />
                               </div>
                               <div className="min-w-0 flex-1">
-                                <p className="text-xs font-bold text-slate-900 leading-tight group-hover:text-primary transition-colors line-clamp-2">
+                                <p className="text-[11px] font-bold text-slate-900 leading-tight group-hover:text-primary transition-colors line-clamp-2">
                                   {question.questionText}
                                 </p>
                               </div>
                             </div>
                           </TableCell>
-                          <TableCell className="px-4 py-3 text-xs font-semibold text-slate-600 truncate max-w-[120px]" title={question.testName}>
+                          <TableCell className="px-3 py-1.5 align-middle text-[11px] font-semibold text-slate-650 truncate max-w-[120px]" title={question.testName}>
                             {question.testName || "-"}
                           </TableCell>
-                          <TableCell className="px-4 py-3 text-xs font-semibold text-slate-600 truncate max-w-[120px]" title={question.categoryName}>
+                          <TableCell className="px-3 py-1.5 align-middle text-[11px] font-semibold text-slate-650 truncate max-w-[120px]" title={question.categoryName}>
                             {question.categoryName || "-"}
                           </TableCell>
-                          <TableCell className="px-4 py-3 text-xs font-semibold text-slate-600 truncate max-w-[120px]" title={question.theoryName}>
+                          <TableCell className="px-3 py-1.5 align-middle text-[11px] font-semibold text-slate-655 truncate max-w-[120px]" title={question.theoryName}>
                             {question.theoryName || "-"}
                           </TableCell>
-                          <TableCell className="px-4 py-3 text-xs font-semibold text-slate-600 truncate max-w-[120px]" title={question.tagName}>
+                          <TableCell className="px-3 py-1.5 align-middle text-[11px] font-semibold text-slate-650 truncate max-w-[120px]" title={question.tagName}>
                             {question.tagName || "-"}
                           </TableCell>
-                          <TableCell className="px-4 py-3 text-xs font-semibold text-slate-600">
+                          <TableCell className="px-3 py-1.5 align-middle text-[11px] font-semibold text-slate-655">
                             {question.gradeName || "-"}
                           </TableCell>
-                          <TableCell className="px-4 py-3">
-                            <span className={`px-2 py-0.5 text-[9px] uppercase rounded-full font-bold ${question.isActive
+                          <TableCell className="px-3 py-1.5 align-middle">
+                            <span className={`px-1.5 py-0.5 text-[8px] uppercase rounded-full font-bold pointer-events-none ${question.isActive
                               ? "bg-emerald-100 text-emerald-700"
                               : "bg-slate-100 text-slate-500"
                               }`}>
                               {question.isActive ? "Active" : "Inactive"}
                             </span>
                           </TableCell>
-                          <TableCell className="px-4 py-3">
-                            <div className="flex justify-center gap-2">
+                          <TableCell className="px-3 py-1.5 align-middle">
+                            <div className="flex justify-center gap-1.5">
                               <Button
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => navigate(`/manage/questions/view/${question.id}`)}
-                                className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-primary hover:bg-primary/5 hover:border-primary/30 transition-all"
+                                className="h-6 w-6 rounded-lg bg-slate-100 border border-slate-200 text-slate-650 hover:text-primary hover:bg-primary/5 hover:border-primary/30 transition-all flex items-center justify-center"
                                 title="View Details"
                               >
-                                <Eye className="h-3.5 w-3.5" />
+                                <Eye className="h-3 w-3" />
                               </Button>
                               <Button
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => navigate(`/manage/questions/edit/${question.id}`)}
-                                className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 transition-all"
+                                className="h-6 w-6 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 transition-all flex items-center justify-center"
                                 title="Edit Question"
                               >
-                                <Edit className="h-3.5 w-3.5" />
+                                <Edit className="h-3 w-3" />
                               </Button>
                               <Button
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => openDeleteDialog(question.id)}
-                                className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-300 transition-all"
+                                className="h-6 w-6 rounded-lg bg-slate-100 border border-slate-200 text-slate-655 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-300 transition-all flex items-center justify-center"
                                 title="Delete Question"
                               >
-                                <Trash2 className="h-3.5 w-3.5" />
+                                <Trash2 className="h-3 w-3" />
                               </Button>
                             </div>
                           </TableCell>

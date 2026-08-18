@@ -107,30 +107,30 @@ export const Tests = () => {
   const isSyncingData = paidLoading;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pb-8 font-sans">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-8 font-sans transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         
         {/* Compact Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#E5E7EB]">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#E5E7EB] dark:border-slate-800">
           <div className="space-y-0.5">
-            <h1 className="text-[24px] font-bold text-[#111827] tracking-tight">Assessments</h1>
-            <p className="text-[14px] font-medium text-[#6B7280]">Professional evaluations and psychometric tests</p>
+            <h1 className="text-[24px] font-bold text-[#111827] dark:text-white tracking-tight">Assessments</h1>
+            <p className="text-[14px] font-medium text-[#6B7280] dark:text-slate-400">Professional evaluations and psychometric tests</p>
           </div>
           
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             {/* Search Input */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6B7280]" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6B7280] dark:text-slate-500" />
               <Input
                 placeholder="Search..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 pr-3 h-[42px] w-full sm:w-[180px] md:w-[220px] border-[#E5E7EB] bg-white rounded-[12px] text-[13px] text-[#111827] placeholder:text-[#6B7280] focus-visible:ring-[#4F46E5]"
+                className="pl-9 pr-3 h-[42px] w-full sm:w-[180px] md:w-[220px] border-[#E5E7EB] dark:border-slate-800 bg-white dark:bg-slate-900 text-[#111827] dark:text-white placeholder:text-[#6B7280] dark:placeholder:text-slate-500 focus-visible:ring-[#4F46E5] rounded-[12px] text-[13px]"
               />
             </div>
 
             {/* Filter Tabs */}
-            <div className="flex items-center bg-[#F1F5F9] p-1 rounded-[12px] border border-[#E5E7EB]">
+            <div className="flex items-center bg-[#F1F5F9] dark:bg-slate-900 p-1 rounded-[12px] border border-[#E5E7EB] dark:border-slate-800">
               {[
                 { id: "all", label: "All" },
                 { id: "available", label: "Available" },
@@ -142,8 +142,8 @@ export const Tests = () => {
                   className={cn(
                     "px-3 py-1.5 rounded-[8px] text-[12px] font-medium transition-all",
                     activeTab === tab.id
-                      ? "bg-white text-[#4F46E5] shadow-sm font-semibold"
-                      : "text-[#6B7280] hover:text-[#111827]"
+                      ? "bg-white dark:bg-slate-800 text-[#4F46E5] dark:text-indigo-400 shadow-sm font-semibold"
+                      : "text-[#6B7280] dark:text-slate-400 hover:text-[#111827] dark:hover:text-white"
                   )}
                 >
                   {tab.label}
@@ -156,20 +156,20 @@ export const Tests = () => {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
-                  className="h-[42px] rounded-[12px] border-[#E5E7EB] bg-white text-[12px] font-semibold text-[#111827] px-3 gap-1.5"
+                  className="h-[42px] rounded-[12px] border-[#E5E7EB] dark:border-slate-800 bg-white dark:bg-slate-900 text-[12px] font-semibold text-[#111827] dark:text-white px-3 gap-1.5 hover:bg-slate-50 dark:hover:bg-slate-800"
                 >
-                  <TrendingUp className="h-4 w-4 text-[#6B7280]" />
+                  <TrendingUp className="h-4 w-4 text-[#6B7280] dark:text-slate-400" />
                   <span>Sort</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="rounded-[12px] border-[#E5E7EB] bg-white">
-                <DropdownMenuItem onClick={() => setSortBy("latest")} className="text-[12px] font-medium text-[#111827]">
+              <DropdownMenuContent align="end" className="rounded-[12px] border-[#E5E7EB] dark:border-slate-800 bg-white dark:bg-slate-900">
+                <DropdownMenuItem onClick={() => setSortBy("latest")} className="text-[12px] font-medium text-[#111827] dark:text-white hover:bg-slate-50 dark:hover:bg-slate-850">
                   Latest
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSortBy("az")} className="text-[12px] font-medium text-[#111827]">
+                <DropdownMenuItem onClick={() => setSortBy("az")} className="text-[12px] font-medium text-[#111827] dark:text-white hover:bg-slate-50 dark:hover:bg-slate-850">
                   A-Z
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSortBy("duration")} className="text-[12px] font-medium text-[#111827]">
+                <DropdownMenuItem onClick={() => setSortBy("duration")} className="text-[12px] font-medium text-[#111827] dark:text-white hover:bg-slate-50 dark:hover:bg-slate-850">
                   Duration
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -183,30 +183,30 @@ export const Tests = () => {
             {Array.from({ length: 4 }).map((_, i) => (
               <div
                 key={i}
-                className="bg-white border border-[#E5E7EB] rounded-[12px] p-4 h-[220px] w-full max-w-[320px] flex flex-col justify-between animate-pulse"
+                className="bg-white dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-800 rounded-[12px] p-4 h-[220px] w-full max-w-[320px] flex flex-col justify-between animate-pulse"
               >
                 <div className="space-y-3">
                   <div className="flex justify-between">
-                    <div className="h-4 w-16 bg-slate-200 rounded" />
-                    <div className="h-4 w-12 bg-slate-200 rounded" />
+                    <div className="h-4 w-16 bg-slate-250 dark:bg-slate-800 rounded" />
+                    <div className="h-4 w-12 bg-slate-250 dark:bg-slate-800 rounded" />
                   </div>
-                  <div className="h-5 w-32 bg-slate-200 rounded" />
-                  <div className="h-3.5 w-full bg-slate-200 rounded" />
-                  <div className="h-3.5 w-2/3 bg-slate-200 rounded" />
+                  <div className="h-5 w-32 bg-slate-250 dark:bg-slate-800 rounded" />
+                  <div className="h-3.5 w-full bg-slate-250 dark:bg-slate-800 rounded" />
+                  <div className="h-3.5 w-2/3 bg-slate-250 dark:bg-slate-800 rounded" />
                 </div>
-                <div className="h-[36px] w-full bg-slate-200 rounded-[12px]" />
+                <div className="h-[36px] w-full bg-slate-250 dark:bg-slate-800 rounded-[12px]" />
               </div>
             ))}
           </div>
         ) : (!publishedTests || publishedTests.length === 0) ? (
-          <div className="flex flex-col items-center justify-center py-12 px-4 text-center border border-dashed border-[#E5E7EB] rounded-[12px] bg-white">
-            <div className="h-12 w-12 rounded-[12px] bg-indigo-50 flex items-center justify-center text-[#4F46E5] mb-3">
+          <div className="flex flex-col items-center justify-center py-12 px-4 text-center border border-dashed border-[#E5E7EB] dark:border-slate-800 rounded-[12px] bg-white dark:bg-slate-900">
+            <div className="h-12 w-12 rounded-[12px] bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center text-[#4F46E5] mb-3">
               <BookOpen className="h-6 w-6" />
             </div>
-            <h3 className="text-[14px] font-bold text-[#111827] mb-1">
+            <h3 className="text-[14px] font-bold text-[#111827] dark:text-white mb-1">
               No Assessments Available
             </h3>
-            <p className="text-[13px] text-[#6B7280] max-w-sm mb-4">
+            <p className="text-[13px] text-[#6B7280] dark:text-slate-400 max-w-sm mb-4">
               You currently do not have any assessments assigned. Please check again later.
             </p>
             <Button
@@ -218,14 +218,14 @@ export const Tests = () => {
             </Button>
           </div>
         ) : sorted.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 px-4 text-center border border-dashed border-[#E5E7EB] rounded-[12px] bg-white">
-            <div className="h-12 w-12 rounded-[12px] bg-indigo-50 flex items-center justify-center text-[#4F46E5] mb-3">
+          <div className="flex flex-col items-center justify-center py-12 px-4 text-center border border-dashed border-[#E5E7EB] dark:border-slate-800 rounded-[12px] bg-white dark:bg-slate-900">
+            <div className="h-12 w-12 rounded-[12px] bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center text-[#4F46E5] mb-3">
               <AlertTriangle className="h-6 w-6" />
             </div>
-            <h3 className="text-[14px] font-bold text-[#111827] mb-1">
+            <h3 className="text-[14px] font-bold text-[#111827] dark:text-white mb-1">
               No Results Found
             </h3>
-            <p className="text-[13px] text-[#6B7280] max-w-sm mb-4">
+            <p className="text-[13px] text-[#6B7280] dark:text-slate-400 max-w-sm mb-4">
               No assessments match your current filters or search terms.
             </p>
             <Button
@@ -248,23 +248,23 @@ export const Tests = () => {
               const inProgress = !(test as any).completed && ((test as any).inProgress || (test as any).attempts > 0 || (test as any).progress > 0);
               
               let statusLabel = "Available";
-              let statusBadgeCls = "bg-[#E0E7FF] text-[#3730A3]";
+              let statusBadgeCls = "bg-[#E0E7FF] text-[#3730A3] dark:bg-indigo-950/50 dark:text-indigo-300";
               if (completed) {
                 statusLabel = "Completed";
-                statusBadgeCls = "bg-[#DCFCE7] text-[#166534]";
+                statusBadgeCls = "bg-[#DCFCE7] text-[#166534] dark:bg-emerald-950/50 dark:text-emerald-300";
               } else if (inProgress) {
                 statusLabel = "In Progress";
-                statusBadgeCls = "bg-[#FEF3C7] text-[#92400E]";
+                statusBadgeCls = "bg-[#FEF3C7] text-[#92400E] dark:bg-amber-950/50 dark:text-amber-300";
               }
 
               return (
                 <div
                   key={test.id}
-                  className="group bg-white border border-[#E5E7EB] rounded-[12px] p-4 h-[220px] w-full max-w-[320px] flex flex-col justify-between transition-all duration-300 hover:shadow-md hover:scale-[1.02] relative overflow-hidden"
+                  className="group bg-white dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-800 rounded-[12px] p-4 h-[220px] w-full max-w-[320px] flex flex-col justify-between transition-all duration-300 hover:shadow-md dark:hover:shadow-none hover:scale-[1.02] relative overflow-hidden"
                 >
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-semibold text-[#6B7280] uppercase tracking-wider bg-[#F1F5F9] px-2 py-0.5 rounded-[6px]">
+                      <span className="text-[11px] font-semibold text-[#6B7280] dark:text-slate-350 uppercase tracking-wider bg-[#F1F5F9] dark:bg-slate-800 px-2 py-0.5 rounded-[6px]">
                         {test.category || "Standard"}
                       </span>
                       <Badge variant="outline" className={cn("text-[11px] font-semibold px-2 py-0.5 rounded-[6px] border-0", statusBadgeCls)}>
@@ -272,34 +272,34 @@ export const Tests = () => {
                       </Badge>
                     </div>
 
-                    <h3 className="text-[14px] font-bold text-[#111827] line-clamp-1 group-hover:text-[#4F46E5] transition-colors leading-tight">
+                    <h3 className="text-[14px] font-bold text-[#111827] dark:text-white line-clamp-1 group-hover:text-[#4F46E5] transition-colors leading-tight">
                       {test.title}
                     </h3>
-                    <p className="text-[12px] text-[#6B7280] line-clamp-2 leading-relaxed">
+                    <p className="text-[12px] text-[#6B7280] dark:text-slate-400 line-clamp-2 leading-relaxed">
                       {test.description || "Evaluate your cognitive skills and personality traits with this assessment."}
                     </p>
                   </div>
 
                   <div className="space-y-2.5">
-                    <div className="border-t border-[#E5E7EB]" />
+                    <div className="border-t border-[#E5E7EB] dark:border-slate-800" />
 
-                    <div className="flex items-center justify-between text-[12px] text-[#6B7280] font-medium">
+                    <div className="flex items-center justify-between text-[12px] text-[#6B7280] dark:text-slate-400 font-medium">
                       <span className="flex items-center gap-1">
-                        <Clock className="h-3.5 w-3.5 text-[#6B7280]" />
+                        <Clock className="h-3.5 w-3.5 text-[#6B7280] dark:text-slate-500" />
                         {test.timeDuration} min
                       </span>
                       <span>•</span>
                       <span className="flex items-center gap-1">
-                        <FileText className="h-3.5 w-3.5 text-[#6B7280]" />
+                        <FileText className="h-3.5 w-3.5 text-[#6B7280] dark:text-slate-500" />
                         {test.questionCount || test.totalQuestions || "80"} Questions
                       </span>
                       <span>•</span>
-                      <span className={cn("font-bold", completed ? "text-[#22C55E]" : "text-[#4F46E5]")}>
+                      <span className={cn("font-bold", completed ? "text-[#22C55E]" : "text-[#4F46E5] dark:text-indigo-400")}>
                         {statusLabel}
                       </span>
                     </div>
 
-                    <div className="border-t border-[#E5E7EB]" />
+                    <div className="border-t border-[#E5E7EB] dark:border-slate-800" />
 
                     <div>
                       {!user ? (
@@ -313,7 +313,7 @@ export const Tests = () => {
                       ) : completed ? (
                         <Button
                           onClick={() => navigate("/results")}
-                          className="w-full bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#111827] rounded-[12px] h-[36px] text-[12px] font-semibold gap-1.5 border border-[#E5E7EB]"
+                          className="w-full bg-[#F1F5F9] dark:bg-slate-800 hover:bg-[#E2E8F0] dark:hover:bg-slate-700 text-[#111827] dark:text-white rounded-[12px] h-[36px] text-[12px] font-semibold gap-1.5 border border-[#E5E7EB] dark:border-slate-800"
                         >
                           <FileText className="h-3.5 w-3.5 text-[#22C55E]" />
                           View Report

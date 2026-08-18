@@ -602,7 +602,7 @@ const OrganizationForm: React.FC = () => {
 
   // Input styling dynamic feedback
   const getInputClass = (fieldName: string) => {
-    const base = "h-10 bg-slate-50/50 border-slate-200 focus:bg-white rounded-xl font-bold text-sm transition-all focus-visible:ring-2 focus-visible:ring-indigo-100 focus-visible:border-indigo-500 w-full";
+    const base = "h-8 bg-slate-50/50 border-slate-200 focus:bg-white rounded-lg font-bold text-xs transition-all focus-visible:ring-2 focus-visible:ring-indigo-100 focus-visible:border-indigo-500 w-full";
     if (!touchedFields[fieldName]) return base;
     if (errors[fieldName]) {
       return `${base} border-rose-300 bg-rose-50/10 focus-visible:ring-rose-100 focus-visible:border-rose-500 text-slate-800`;
@@ -899,15 +899,15 @@ const OrganizationForm: React.FC = () => {
                           )}
                         </div>
                         <Select value={formData.organizationType} onValueChange={handleSelectChange}>
-                          <SelectTrigger className={`h-10 bg-slate-50/50 border-slate-200/50 focus:bg-white rounded-xl font-bold text-sm text-slate-700 w-full ${touchedFields.organizationType && errors.organizationType ? 'border-rose-300' : ''}`}>
+                          <SelectTrigger className={`h-8 bg-slate-50/50 border-slate-200/50 focus:bg-white rounded-lg font-bold text-xs text-slate-700 w-full ${touchedFields.organizationType && errors.organizationType ? 'border-rose-300' : ''}`}>
                             <SelectValue placeholder="Select type" />
                           </SelectTrigger>
-                          <SelectContent className="rounded-xl border-slate-200">
-                            <SelectItem value="School" className="text-sm font-medium">School</SelectItem>
-                            <SelectItem value="College" className="text-sm font-medium">College</SelectItem>
-                            <SelectItem value="University" className="text-sm font-medium">University</SelectItem>
-                            <SelectItem value="Coaching Centre" className="text-sm font-medium">Coaching Centre</SelectItem>
-                            <SelectItem value="Other" className="text-sm font-medium">Other</SelectItem>
+                          <SelectContent className="rounded-lg border-slate-200">
+                            <SelectItem value="School" className="text-xs font-medium">School</SelectItem>
+                            <SelectItem value="College" className="text-xs font-medium">College</SelectItem>
+                            <SelectItem value="University" className="text-xs font-medium">University</SelectItem>
+                            <SelectItem value="Coaching Centre" className="text-xs font-medium">Coaching Centre</SelectItem>
+                            <SelectItem value="Other" className="text-xs font-medium">Other</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -915,14 +915,14 @@ const OrganizationForm: React.FC = () => {
                       <div className="space-y-1.5">
                         <Label className="text-[10px] font-black text-slate-500 uppercase tracking-wide ml-1">Approx Student Capacity</Label>
                         <div className="relative group">
-                          <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-450 text-slate-400" />
+                          <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-450 text-slate-400" />
                           <Input
                             type="number"
                             name="approxStudentCount"
                             value={formData.approxStudentCount || ""}
                             onChange={handleInputChange}
                             onBlur={handleInputBlur}
-                            className="h-10 pl-9 bg-slate-50/50 border-slate-200 focus:bg-white rounded-xl font-bold text-sm transition-all focus-visible:ring-2 focus-visible:ring-indigo-100 focus-visible:border-indigo-500 w-full"
+                            className="h-8 pl-8 bg-slate-50/50 border-slate-200 focus:bg-white rounded-lg font-bold text-xs transition-all focus-visible:ring-2 focus-visible:ring-indigo-100 focus-visible:border-indigo-500 w-full"
                             placeholder="e.g. 500"
                           />
                         </div>
@@ -931,13 +931,13 @@ const OrganizationForm: React.FC = () => {
                       <div className="space-y-1.5 md:col-span-2">
                         <Label className="text-[10px] font-black text-slate-500 uppercase tracking-wide ml-1 font-bold">Institution Website URL</Label>
                         <div className="relative group">
-                          <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                          <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
                           <Input
                             name="website"
                             value={formData.website}
                             onChange={handleInputChange}
                             onBlur={handleInputBlur}
-                            className="h-10 pl-9 bg-slate-50/50 border-slate-200 focus:bg-white rounded-xl font-bold text-sm transition-all focus-visible:ring-2 focus-visible:ring-indigo-100 focus-visible:border-indigo-500 w-full"
+                            className="h-8 pl-8 bg-slate-50/50 border-slate-200 focus:bg-white rounded-lg font-bold text-xs transition-all focus-visible:ring-2 focus-visible:ring-indigo-100 focus-visible:border-indigo-500 w-full"
                             placeholder="www.institute.edu"
                           />
                         </div>
@@ -982,7 +982,7 @@ const OrganizationForm: React.FC = () => {
                           name="contactPerson"
                           value={formData.contactPerson}
                           onChange={handleInputChange}
-                          className="h-10 bg-slate-50/50 border-slate-200 focus:bg-white rounded-xl font-bold text-sm w-full"
+                          className="h-8 bg-slate-50/50 border-slate-200 focus:bg-white rounded-lg font-bold text-xs w-full"
                           placeholder="e.g. Dean Johnson"
                         />
                       </div>
@@ -1111,12 +1111,12 @@ const OrganizationForm: React.FC = () => {
                       <div className="space-y-1.5 md:col-span-2">
                         <Label className="text-[10px] font-black text-slate-500 uppercase tracking-wide ml-1">Street Address</Label>
                         <div className="relative group">
-                          <MapPin className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
                           <Input
                             name="address"
                             value={formData.address}
                             onChange={handleInputChange}
-                            className="pl-9 h-10 bg-slate-50/50 border-slate-200 focus:bg-white rounded-xl font-bold text-sm w-full focus-visible:ring-2 focus-visible:ring-indigo-150 focus-visible:border-indigo-500"
+                            className="pl-8 h-8 bg-slate-50/50 border-slate-200 focus:bg-white rounded-lg font-bold text-xs w-full focus-visible:ring-2 focus-visible:ring-indigo-150 focus-visible:border-indigo-500"
                             placeholder="e.g. 450 Serra Mall"
                           />
                         </div>
@@ -1128,7 +1128,7 @@ const OrganizationForm: React.FC = () => {
                           name="city"
                           value={formData.city}
                           onChange={handleInputChange}
-                          className="h-10 bg-slate-50/50 border-slate-200 focus:bg-white rounded-xl font-bold text-sm w-full focus-visible:ring-2 focus-visible:ring-indigo-150 focus-visible:border-indigo-500"
+                          className="h-8 bg-slate-50/50 border-slate-200 focus:bg-white rounded-lg font-bold text-xs w-full focus-visible:ring-2 focus-visible:ring-indigo-150 focus-visible:border-indigo-500"
                           placeholder="Stanford"
                         />
                       </div>
@@ -1139,7 +1139,7 @@ const OrganizationForm: React.FC = () => {
                           name="state"
                           value={formData.state}
                           onChange={handleInputChange}
-                          className="h-10 bg-slate-50/50 border-slate-200 focus:bg-white rounded-xl font-bold text-sm w-full focus-visible:ring-2 focus-visible:ring-indigo-150 focus-visible:border-indigo-500"
+                          className="h-8 bg-slate-50/50 border-slate-200 focus:bg-white rounded-lg font-bold text-xs w-full focus-visible:ring-2 focus-visible:ring-indigo-150 focus-visible:border-indigo-500"
                           placeholder="California"
                         />
                       </div>
@@ -1150,7 +1150,7 @@ const OrganizationForm: React.FC = () => {
                           name="country"
                           value={formData.country}
                           onChange={handleInputChange}
-                          className="h-10 bg-slate-50/50 border-slate-200 focus:bg-white rounded-xl font-bold text-sm w-full focus-visible:ring-2 focus-visible:ring-indigo-150 focus-visible:border-indigo-500"
+                          className="h-8 bg-slate-50/50 border-slate-200 focus:bg-white rounded-lg font-bold text-xs w-full focus-visible:ring-2 focus-visible:ring-indigo-150 focus-visible:border-indigo-500"
                           placeholder="United States"
                         />
                       </div>
@@ -1161,7 +1161,7 @@ const OrganizationForm: React.FC = () => {
                           name="postalCode"
                           value={formData.postalCode}
                           onChange={handleInputChange}
-                          className="h-10 bg-slate-50/50 border-slate-200 focus:bg-white rounded-xl font-bold text-sm w-full focus-visible:ring-2 focus-visible:ring-indigo-150 focus-visible:border-indigo-500"
+                          className="h-8 bg-slate-50/50 border-slate-200 focus:bg-white rounded-lg font-bold text-xs w-full focus-visible:ring-2 focus-visible:ring-indigo-150 focus-visible:border-indigo-500"
                           placeholder="94305"
                         />
                       </div>

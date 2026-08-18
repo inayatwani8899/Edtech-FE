@@ -198,12 +198,12 @@ const Students: React.FC = () => {
                 type="button"
                 onClick={() => handleSort(columnKey)}
                 className={cn(
-                    "text-[10px] font-black uppercase tracking-wider hover:text-primary transition-colors inline-flex items-center gap-1.5 focus:outline-none select-none",
+                    "text-[9px] font-black uppercase tracking-wider hover:text-primary transition-colors inline-flex items-center gap-1.5 focus:outline-none select-none",
                     active ? "text-primary font-extrabold" : "text-slate-500"
                 )}
             >
                 {label}
-                <span className="text-[9px] font-bold">
+                <span className="text-[8px] font-bold">
                     {active ? (sortDirection === "asc" ? "↑" : "↓") : "↕"}
                 </span>
             </button>
@@ -214,7 +214,7 @@ const Students: React.FC = () => {
         const active = isActive !== false;
         return (
             <span className={cn(
-                "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider",
+                "inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider pointer-events-none",
                 active 
                     ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-450 border border-emerald-100 dark:border-emerald-900/30"
                     : "bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-455 border border-rose-100 dark:border-rose-900/30"
@@ -252,7 +252,7 @@ const Students: React.FC = () => {
                 </div>
 
                 {/* Organization Selection Panel */}
-                <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-4 rounded-2xl shadow-sm mb-4">
+                <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-3.5 rounded-2xl shadow-sm mb-4">
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                         <div className="flex items-center gap-2 shrink-0">
                             <Building className="h-4 w-4 text-indigo-500" />
@@ -261,13 +261,13 @@ const Students: React.FC = () => {
                         
                         <div className="w-full sm:w-80">
                             {orgsLoading ? (
-                                <div className="flex items-center gap-2 text-xs text-slate-400 font-semibold px-3 py-2 border border-slate-200 rounded-lg bg-slate-50">
+                                <div className="flex items-center gap-2 text-xs text-slate-400 font-semibold px-3 py-1.5 border border-slate-200 rounded-lg bg-slate-50">
                                     <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
                                     Loading organizations...
                                 </div>
                             ) : (
                                 <Select value={selectedOrgId} onValueChange={setSelectedOrgId}>
-                                    <SelectTrigger className="h-9 bg-white border-slate-200 rounded-lg text-xs font-semibold text-slate-700">
+                                    <SelectTrigger className="h-8 bg-white border-slate-200 rounded-lg text-[11px] font-semibold text-slate-700">
                                         <SelectValue placeholder="Select Organization" />
                                     </SelectTrigger>
                                     <SelectContent className="rounded-lg max-h-60">
@@ -285,27 +285,27 @@ const Students: React.FC = () => {
 
                 {/* Main Card */}
                 <Card className="glass-card border-none shadow-elegant rounded-2xl overflow-hidden">
-                    <CardHeader className="p-4 border-b border-slate-50 space-y-3">
+                    <CardHeader className="p-3 border-b border-slate-50 space-y-3">
                         {/* Search and Statistics Strip */}
-                        <div className="flex flex-col lg:flex-row gap-3 justify-between items-start lg:items-center">
+                        <div className="flex flex-col sm:flex-row gap-2.5 justify-between items-start sm:items-center">
                             {/* Search box */}
-                            <div className="relative group w-full lg:w-80">
+                            <div className="relative group w-full sm:w-80">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500 group-focus-within:text-primary transition-colors" />
                                 <Input
                                     placeholder="Search by name, email or phone..."
                                     value={searchVal}
                                     onChange={(e) => setSearchVal(e.target.value)}
-                                    className="h-9 pl-9 bg-white border border-slate-200 rounded-lg font-medium text-xs text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all w-full"
+                                    className="h-8 pl-9 bg-white border border-slate-200 rounded-lg font-medium text-[11px] text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all w-full"
                                 />
                             </div>
 
                             {/* Statistics Strip */}
                             {selectedOrgId && (
-                                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 font-semibold bg-slate-50/65 dark:bg-slate-950/20 px-3 py-2 rounded-xl border border-slate-100 dark:border-slate-800 w-full lg:w-auto">
+                                <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-slate-500 font-semibold bg-slate-50/65 dark:bg-slate-950/20 px-2.5 py-1.5 rounded-xl border border-slate-100 dark:border-slate-800 w-full sm:w-auto">
                                     <span>Selected Org: <span className="text-slate-900 dark:text-white font-extrabold">{getSelectedOrgName()}</span></span>
-                                    <span className="text-slate-350 dark:text-slate-800">•</span>
+                                    <span className="text-slate-300 dark:text-slate-800">•</span>
                                     <span>Total Students: <span className="text-blue-600 dark:text-blue-400 font-extrabold">{totalCount}</span></span>
-                                    <span className="text-slate-355 dark:text-slate-800">•</span>
+                                    <span className="text-slate-300 dark:text-slate-800">•</span>
                                     <span>Page: <span className="text-slate-900 dark:text-white font-extrabold">{currentPage} of {totalPages}</span></span>
                                 </div>
                             )}
@@ -368,74 +368,131 @@ const Students: React.FC = () => {
                                 </p>
                             </div>
                         ) : (
-                            <div className="overflow-x-auto">
-                                <Table>
-                                    <TableHeader className="bg-slate-50">
-                                        <TableRow className="border-slate-200 hover:bg-transparent">
-                                            <TableHead className="px-4 py-2.5 w-[22%]">{renderSortHeaderLabel("Student", "fullname")}</TableHead>
-                                            <TableHead className="px-4 py-2.5 w-[12%]">{renderSortHeaderLabel("Grade", "grade")}</TableHead>
-                                            <TableHead className="px-4 py-2.5 w-[18%] text-[10px] font-black text-slate-500 uppercase tracking-wider">Organization</TableHead>
-                                            <TableHead className="px-4 py-2.5 w-[18%] text-[10px] font-black text-slate-500 uppercase tracking-wider">Contact</TableHead>
-                                            <TableHead className="px-4 py-2.5 w-[10%] text-[10px] font-black text-slate-500 uppercase tracking-wider">Gender</TableHead>
-                                            <TableHead className="px-4 py-2.5 w-[10%] text-[10px] font-black text-slate-500 uppercase tracking-wider">Status</TableHead>
-                                            <TableHead className="px-4 py-2.5 w-[10%]">{renderSortHeaderLabel("Created Date", "createddate")}</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {students.map((student) => (
-                                            <TableRow key={student.id} className="border-slate-100 hover:bg-slate-50 transition-colors group">
-                                                <TableCell className="px-4 py-2">
+                            <div>
+                                {/* Desktop Table View */}
+                                <div className="hidden md:block overflow-x-auto">
+                                    <Table>
+                                        <TableHeader className="bg-slate-50">
+                                            <TableRow className="border-slate-200 hover:bg-transparent">
+                                                <TableHead className="px-3 py-2 w-[22%]">{renderSortHeaderLabel("Student", "fullname")}</TableHead>
+                                                <TableHead className="px-3 py-2 w-[12%]">{renderSortHeaderLabel("Grade", "grade")}</TableHead>
+                                                <TableHead className="px-3 py-2 w-[18%] text-[9px] font-black text-slate-500 uppercase tracking-wider">Organization</TableHead>
+                                                <TableHead className="px-3 py-2 w-[18%] text-[9px] font-black text-slate-500 uppercase tracking-wider">Contact</TableHead>
+                                                <TableHead className="px-3 py-2 w-[10%] text-[9px] font-black text-slate-500 uppercase tracking-wider">Gender</TableHead>
+                                                <TableHead className="px-3 py-2 w-[10%] text-[9px] font-black text-slate-500 uppercase tracking-wider">Status</TableHead>
+                                                <TableHead className="px-3 py-2 w-[10%]">{renderSortHeaderLabel("Created Date", "createddate")}</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {students.map((student) => (
+                                                <TableRow key={student.id} className="border-slate-100 hover:bg-slate-50 transition-colors group">
+                                                    <TableCell className="px-3 py-1.5 align-middle">
+                                                        <div className="flex items-center gap-2.5">
+                                                            <div className={cn(
+                                                                "h-6 w-6 rounded-md bg-gradient-to-tr flex items-center justify-center font-bold text-white text-[9px] shadow-sm transition-transform duration-200 group-hover:scale-105 flex-shrink-0",
+                                                                getAvatarGradient(student.email, student.fullName)
+                                                            )}>
+                                                                {student.fullName ? student.fullName.split(" ").map(w => w[0]).join("").substring(0, 2).toUpperCase() : "ST"}
+                                                            </div>
+                                                            <span className="font-extrabold text-[11px] text-slate-900 leading-tight truncate group-hover:text-primary transition-colors">
+                                                                {student.fullName}
+                                                            </span>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell className="px-3 py-1.5 align-middle">
+                                                        <Badge variant="outline" className="bg-slate-50 border-slate-200 text-slate-650 font-black px-1.5 py-0.5 text-[8px] rounded-md pointer-events-none">
+                                                            {student.grade ? (student.grade.toLowerCase().includes("grade") ? student.grade : `${student.grade} Grade`) : "N/A"}
+                                                        </Badge>
+                                                    </TableCell>
+                                                    <TableCell className="px-3 py-1.5 align-middle">
+                                                        <span className="text-[11px] font-semibold text-slate-700 truncate block max-w-[150px]">
+                                                            {student.organizationName || "-"}
+                                                        </span>
+                                                    </TableCell>
+                                                    <TableCell className="px-3 py-1.5 align-middle">
+                                                        <div className="flex flex-col gap-0.5 max-w-[200px] text-[10px]">
+                                                            <span className="font-bold text-slate-700 truncate flex items-center gap-1 leading-tight">
+                                                                <span className="text-xs">📧</span>
+                                                                <span className="truncate">{student.email}</span>
+                                                            </span>
+                                                            <span className="text-slate-400 font-semibold flex items-center gap-1 leading-tight">
+                                                                <span className="text-xs">📞</span>
+                                                                <span>{student.phoneNumber || "N/A"}</span>
+                                                            </span>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell className="px-3 py-1.5 align-middle">
+                                                        <span className="text-[11px] font-semibold text-slate-700 capitalize">
+                                                            {student.gender || "-"}
+                                                        </span>
+                                                    </TableCell>
+                                                    <TableCell className="px-3 py-1.5 align-middle">
+                                                        {renderStatusBadge(student.isActive)}
+                                                    </TableCell>
+                                                    <TableCell className="px-3 py-1.5 align-middle">
+                                                        <span className="text-[11px] font-medium text-slate-500">
+                                                            {formatDate(student.createdAt)}
+                                                        </span>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+
+                                {/* Mobile Card View */}
+                                <div className="grid grid-cols-1 gap-3 p-3 md:hidden">
+                                    {students.map((student) => (
+                                        <Card key={student.id} className="border border-slate-200/60 shadow-sm overflow-hidden rounded-xl bg-white">
+                                            <CardContent className="p-3 space-y-2.5 text-left">
+                                                <div className="flex items-center justify-between">
                                                     <div className="flex items-center gap-2.5">
                                                         <div className={cn(
-                                                            "h-7 w-7 rounded-md bg-gradient-to-tr flex items-center justify-center font-bold text-white text-[10px] shadow-sm transition-transform duration-200 group-hover:scale-105",
+                                                            "h-8 w-8 rounded-md bg-gradient-to-tr flex items-center justify-center font-bold text-white text-[10px] shadow-sm",
                                                             getAvatarGradient(student.email, student.fullName)
                                                         )}>
                                                             {student.fullName ? student.fullName.split(" ").map(w => w[0]).join("").substring(0, 2).toUpperCase() : "ST"}
                                                         </div>
-                                                        <span className="font-extrabold text-xs text-slate-900 leading-tight truncate group-hover:text-primary transition-colors">
-                                                            {student.fullName}
-                                                        </span>
+                                                        <div className="min-w-0">
+                                                            <p className="text-[11px] font-extrabold text-slate-900 leading-none mb-1">
+                                                                {student.fullName}
+                                                            </p>
+                                                            <span className="text-[9px] font-semibold text-slate-400 block truncate max-w-[170px]">{student.email}</span>
+                                                        </div>
                                                     </div>
-                                                </TableCell>
-                                                <TableCell className="px-4 py-2">
-                                                    <Badge variant="outline" className="bg-slate-50 border-slate-200 text-slate-650 font-black px-2 py-0.5 text-[9px] rounded-md">
-                                                        {student.grade ? (student.grade.toLowerCase().includes("grade") ? student.grade : `${student.grade} Grade`) : "N/A"}
-                                                    </Badge>
-                                                </TableCell>
-                                                <TableCell className="px-4 py-2">
-                                                    <span className="text-xs font-semibold text-slate-700 truncate block max-w-[150px]">
-                                                        {student.organizationName || "-"}
-                                                    </span>
-                                                </TableCell>
-                                                <TableCell className="px-4 py-2">
-                                                    <div className="flex flex-col gap-0.5 max-w-[200px] text-[11px]">
-                                                        <span className="font-bold text-slate-700 truncate flex items-center gap-1 leading-tight">
-                                                            <span className="text-xs">📧</span>
-                                                            <span className="truncate">{student.email}</span>
-                                                        </span>
-                                                        <span className="text-slate-400 font-semibold flex items-center gap-1 leading-tight">
-                                                            <span className="text-xs">📞</span>
-                                                            <span>{student.phoneNumber || "N/A"}</span>
-                                                        </span>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell className="px-4 py-2">
-                                                    <span className="text-xs font-semibold text-slate-700 capitalize">
-                                                        {student.gender || "-"}
-                                                    </span>
-                                                </TableCell>
-                                                <TableCell className="px-4 py-2">
                                                     {renderStatusBadge(student.isActive)}
-                                                </TableCell>
-                                                <TableCell className="px-4 py-2">
-                                                    <span className="text-xs font-medium text-slate-500">
-                                                        {formatDate(student.createdAt)}
-                                                    </span>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
+                                                </div>
+
+                                                <div className="grid grid-cols-2 gap-2 border-t border-slate-50 pt-2 text-[10px]">
+                                                    <div className="space-y-0.5">
+                                                        <p className="text-[7.5px] font-black text-slate-400 uppercase tracking-wider">Grade</p>
+                                                        <span className="font-bold text-slate-700">
+                                                            {student.grade || "N/A"}
+                                                        </span>
+                                                    </div>
+                                                    <div className="space-y-0.5">
+                                                        <p className="text-[7.5px] font-black text-slate-400 uppercase tracking-wider">Phone</p>
+                                                        <span className="font-bold text-slate-700">
+                                                            {student.phoneNumber || "N/A"}
+                                                        </span>
+                                                    </div>
+                                                    <div className="space-y-0.5">
+                                                        <p className="text-[7.5px] font-black text-slate-400 uppercase tracking-wider">Gender</p>
+                                                        <span className="font-bold text-slate-700 capitalize">
+                                                            {student.gender || "-"}
+                                                        </span>
+                                                    </div>
+                                                    <div className="space-y-0.5">
+                                                        <p className="text-[7.5px] font-black text-slate-400 uppercase tracking-wider">Created Date</p>
+                                                        <span className="font-bold text-slate-700">
+                                                            {formatDate(student.createdAt)}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    ))}
+                                </div>
                             </div>
                         )}
 

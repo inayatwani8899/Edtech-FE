@@ -231,10 +231,8 @@ export const Results = () => {
         </div>
       </div>
     );
-  }
-
-  return (
-    <div className="min-h-screen bg-[#F8FAFC] relative overflow-hidden font-sans">
+  }  return (
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-200">
       {/* Dynamic Background Elements */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[100px] -z-10 animate-pulse"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-400/5 rounded-full blur-[100px] -z-10 animate-pulse" style={{ animationDelay: '2s' }}></div>
@@ -242,28 +240,28 @@ export const Results = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 relative z-10 space-y-6 md:space-y-8">
 
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-6">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <div className="h-px w-6 bg-primary/30"></div>
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">Performance Insights</span>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-[#E5E7EB] dark:border-slate-800">
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2">
+              <div className="h-px w-6 bg-[#4F46E5]/30"></div>
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#4F46E5]">Performance Insights</span>
             </div>
-            <h1 className="text-3xl font-black tracking-tight text-slate-900 mb-1">
-              Performance <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Dashboard</span>
+            <h1 className="text-3xl font-black tracking-tight text-[#111827] dark:text-white">
+              Performance <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4F46E5] to-indigo-600">Dashboard</span>
             </h1>
-            <p className="text-sm text-slate-500 font-medium">
+            <p className="text-[13px] font-medium text-[#6B7280] dark:text-slate-400">
               Analyze your assessments and track your growth
             </p>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4">
             {/* View Mode Toggle */}
-            <div className="bg-white p-1 rounded-xl shadow-sm border border-slate-100 flex w-full sm:w-auto">
+            <div className="bg-white dark:bg-slate-900 p-1 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 flex w-full sm:w-auto">
               <Button
                 variant={viewMode === 'table' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setViewMode('table')}
-                className={`flex-1 sm:flex-none rounded-lg px-4 gap-2 transition-all duration-300 ${viewMode === 'table' ? 'shadow-md font-bold' : 'text-slate-500 hover:text-slate-700'}`}
+                className={`flex-1 sm:flex-none rounded-lg px-4 gap-2 transition-all duration-300 ${viewMode === 'table' ? 'shadow-md font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white'}`}
               >
                 <Table className="h-4 w-4" />
                 <span className="hidden xs:inline">Table</span>
@@ -272,7 +270,7 @@ export const Results = () => {
                 variant={viewMode === 'cards' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setViewMode('cards')}
-                className={`flex-1 sm:flex-none rounded-lg px-4 gap-2 transition-all duration-300 ${viewMode === 'cards' ? 'shadow-md font-bold' : 'text-slate-500 hover:text-slate-700'}`}
+                className={`flex-1 sm:flex-none rounded-lg px-4 gap-2 transition-all duration-300 ${viewMode === 'cards' ? 'shadow-md font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white'}`}
               >
                 <List className="h-4 w-4" />
                 <span className="hidden xs:inline">Cards</span>
@@ -297,10 +295,10 @@ export const Results = () => {
                   search: val === 'all' ? '' : (searchMap[val] || val)
                 });
               }}>
-                <SelectTrigger className="w-full bg-white border-slate-200 rounded-xl shadow-sm h-10 ring-offset-0 focus:ring-0">
+                <SelectTrigger className="w-full bg-white dark:bg-slate-900 border-slate-205 dark:border-slate-800 rounded-xl shadow-sm h-10 ring-offset-0 focus:ring-0 text-slate-800 dark:text-slate-200">
                   <SelectValue placeholder="Filter by category" />
                 </SelectTrigger>
-                <SelectContent className="rounded-xl border-slate-100 shadow-xl">
+                <SelectContent className="rounded-xl border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl">
                   <SelectItem value="all">All Categories</SelectItem>
                   <SelectItem value="aptitude">Aptitude</SelectItem>
                   <SelectItem value="personality">Personality</SelectItem>
@@ -315,19 +313,19 @@ export const Results = () => {
         {/* Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
           {[
-            { label: 'Total Attempts', value: totalAttempts, icon: Target, color: 'text-purple-600', bg: 'bg-purple-50' },
-            { label: 'Unique Tests', value: uniqueTests, icon: BarChart3, color: 'text-blue-600', bg: 'bg-blue-50' },
-            { label: 'Avg. Questions', value: averageQuestions, icon: TrendingUp, color: 'text-teal-600', bg: 'bg-teal-50' }
+            { label: 'Total Attempts', value: totalAttempts, icon: Target, color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-950/30' },
+            { label: 'Unique Tests', value: uniqueTests, icon: BarChart3, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-950/30' },
+            { label: 'Avg. Questions', value: averageQuestions, icon: TrendingUp, color: 'text-teal-600', bg: 'bg-teal-50 dark:bg-teal-950/30' }
           ].map((stat, i) => (
-            <Card key={i} className="border-none shadow-sm backdrop-blur-md bg-white/70 group hover:translate-y-[-2px] transition-all duration-300 rounded-xl">
+            <Card key={i} className="border border-slate-100 dark:border-slate-800/80 shadow-sm backdrop-blur-md bg-white/70 dark:bg-slate-900/70 group hover:translate-y-[-2px] transition-all duration-300 rounded-xl">
               <CardContent className="p-4">
                 <div className="flex items-center gap-4">
                   <div className={`${stat.bg} p-2 rounded-lg transition-transform group-hover:scale-105`}>
                     <stat.icon className={`h-4 w-4 ${stat.color}`} />
                   </div>
                   <div>
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">{stat.label}</p>
-                    <p className="text-xl font-black text-slate-800">{stat.value}</p>
+                    <p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-0.5">{stat.label}</p>
+                    <p className="text-xl font-black text-slate-800 dark:text-white">{stat.value}</p>
                   </div>
                 </div>
               </CardContent>
@@ -336,22 +334,22 @@ export const Results = () => {
         </div>
 
         <Tabs defaultValue="detailed" className="space-y-6 md:space-y-8">
-          <TabsList className="bg-slate-100/50 p-1 rounded-2xl w-full justify-start overflow-x-auto no-scrollbar md:w-auto">
+          <TabsList className="bg-slate-100/50 dark:bg-slate-900 p-1 rounded-2xl w-full justify-start overflow-x-auto no-scrollbar md:w-auto">
             <TabsTrigger
               value="detailed"
-              className="rounded-xl px-4 md:px-6 whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all text-xs md:text-sm"
+              className="rounded-xl px-4 md:px-6 whitespace-nowrap data-[state=active]:bg-white dark:data-[state=active]:bg-slate-800 data-[state=active]:text-primary dark:data-[state=active]:text-indigo-400 data-[state=active]:shadow-sm transition-all text-xs md:text-sm text-slate-500 dark:text-slate-400"
             >
               Detailed Results
             </TabsTrigger>
             <TabsTrigger
               value="overview"
-              className="rounded-xl px-4 md:px-6 whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all text-xs md:text-sm"
+              className="rounded-xl px-4 md:px-6 whitespace-nowrap data-[state=active]:bg-white dark:data-[state=active]:bg-slate-800 data-[state=active]:text-primary dark:data-[state=active]:text-indigo-400 data-[state=active]:shadow-sm transition-all text-xs md:text-sm text-slate-500 dark:text-slate-400"
             >
               Overview
             </TabsTrigger>
             <TabsTrigger
               value="insights"
-              className="rounded-xl px-4 md:px-6 whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all text-xs md:text-sm"
+              className="rounded-xl px-4 md:px-6 whitespace-nowrap data-[state=active]:bg-white dark:data-[state=active]:bg-slate-800 data-[state=active]:text-primary dark:data-[state=active]:text-indigo-400 data-[state=active]:shadow-sm transition-all text-xs md:text-sm text-slate-500 dark:text-slate-400"
             >
               AI Insights
             </TabsTrigger>
@@ -360,20 +358,20 @@ export const Results = () => {
           <TabsContent value="detailed" className="space-y-4">
             {viewMode === 'table' ? (
               /* Table View */
-              <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden">
-                <CardHeader className="bg-white/50 border-b border-slate-100 py-5 px-6">
-                  <CardTitle className="text-lg font-bold text-slate-800">Test Submissions</CardTitle>
-                  <CardDescription className="text-sm text-slate-500 font-medium">
+              <Card className="border border-slate-100 dark:border-slate-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl overflow-hidden">
+                <CardHeader className="bg-white/50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-850 py-5 px-6">
+                  <CardTitle className="text-lg font-bold text-slate-800 dark:text-white">Test Submissions</CardTitle>
+                  <CardDescription className="text-sm text-slate-500 dark:text-slate-400 font-medium">
                     Your complete test history with detailed reports
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="p-0">
                   <div className="overflow-x-auto w-full">
                     <table className="min-w-[800px] md:min-w-full text-sm text-left">
-                      <thead className="bg-slate-50/80 text-slate-500 font-bold uppercase text-[10px] tracking-wider">
+                      <thead className="bg-slate-50/80 dark:bg-slate-950/80 text-slate-500 dark:text-slate-400 font-bold uppercase text-[10px] tracking-wider">
                         <tr>
                           <th
-                            className="h-12 px-6 align-middle cursor-pointer hover:bg-slate-100/50 transition-colors"
+                            className="h-12 px-6 align-middle cursor-pointer hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors"
                             onClick={() => handleSort('testName')}
                           >
                             <div className="flex items-center gap-2">
@@ -384,7 +382,7 @@ export const Results = () => {
                             </div>
                           </th>
                           <th
-                            className="h-12 px-6 align-middle cursor-pointer hover:bg-slate-100/50 transition-colors"
+                            className="h-12 px-6 align-middle cursor-pointer hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors"
                             onClick={() => handleSort('category')}
                           >
                             <div className="flex items-center gap-2">
@@ -395,19 +393,18 @@ export const Results = () => {
                             </div>
                           </th>
                           <th
-                            className="h-12 px-6 align-middle cursor-pointer hover:bg-slate-100/50 transition-colors"
+                            className="h-12 px-6 align-middle cursor-pointer hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors"
                             onClick={() => handleSort('attemptNumber')}
                           >
                             <div className="flex items-center gap-2">
                               Attempt #
                               {sortConfig.key === 'attemptNumber' && (
-
                                 sortConfig.direction === 'asc' ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />
                               )}
                             </div>
                           </th>
                           <th
-                            className="h-12 px-6 align-middle cursor-pointer hover:bg-slate-100/50 transition-colors"
+                            className="h-12 px-6 align-middle cursor-pointer hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors"
                             onClick={() => handleSort('createdDate')}
                           >
                             <div className="flex items-center gap-2">
@@ -421,16 +418,16 @@ export const Results = () => {
                           <th className="h-12 px-6 align-middle text-right">Actions</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100">
+                      <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                         {sortedSubmissions.map((submission) => {
                           const category = getCategoryBadge(submission.testName);
                           const isDownloading = downloadingReports[submission.reportId];
 
                           return (
-                            <tr key={submission.reportId} className="hover:bg-blue-50/30 transition-colors duration-200">
+                            <tr key={submission.reportId} className="hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-colors duration-200">
                               <td className="px-6 py-4 align-middle">
                                 <div className="max-w-[300px]">
-                                  <div className="font-bold text-slate-800 text-sm">{submission.testName}</div>
+                                  <div className="font-bold text-slate-800 dark:text-white text-sm">{submission.testName}</div>
                                 </div>
                               </td>
                               <td className="px-6 py-4 align-middle">
@@ -440,25 +437,25 @@ export const Results = () => {
                               </td>
                               <td className="px-6 py-4 align-middle">
                                 <div className="flex items-center gap-2">
-                                  <span className="font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded text-xs">
+                                  <span className="font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-850 px-2 py-0.5 rounded text-xs">
                                     Attempt {submission.attemptNumber}
                                   </span>
                                 </div>
                               </td>
                               <td className="px-6 py-4 align-middle">
-                                <div className="flex items-center gap-1.5 text-xs font-medium text-slate-600">
+                                <div className="flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-350">
                                   <Calendar className="h-3.5 w-3.5 text-slate-400" />
                                   {formatDate(submission.createdDate)}
                                 </div>
                               </td>
-                              <td className="px-6 py-4 align-middle text-xs font-medium text-slate-600">
+                              <td className="px-6 py-4 align-middle text-xs font-medium text-slate-600 dark:text-slate-350">
                                 {submission.totalQuestions}
                               </td>
                               <td className="px-6 py-4 align-middle text-right">
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className="rounded-xl hover:bg-primary hover:text-white transition-all gap-2"
+                                  className="rounded-xl hover:bg-primary dark:hover:bg-primary hover:text-white transition-all gap-2 border-slate-205 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300"
                                   onClick={() => downloadReportWithReportId(submission.reportId, submission.testName)}
                                   disabled={isDownloading}
                                 >
@@ -480,7 +477,7 @@ export const Results = () => {
                         })}
                         {sortedSubmissions.length === 0 && (
                           <tr>
-                            <td colSpan={6} className="p-12 text-center text-slate-500 font-medium">
+                            <td colSpan={6} className="p-12 text-center text-slate-500 dark:text-slate-400 font-medium">
                               No test submissions found for the selected filters
                             </td>
                           </tr>
@@ -490,10 +487,9 @@ export const Results = () => {
                   </div>
 
                   {/* Pagination Controls */}
-                  {/* Pagination Controls */}
                   {userSubmissions && userSubmissions.totalRecords > 0 && (
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 border-t border-slate-100 bg-slate-50/30">
-                      <div className="text-xs font-medium text-slate-500">
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-950/20">
+                      <div className="text-xs font-medium text-slate-500 dark:text-slate-400">
                         Showing {(userSubmissions.pageNumber - 1) * userSubmissions.pageSize + 1} to {Math.min(userSubmissions.pageNumber * userSubmissions.pageSize, userSubmissions.totalRecords)} of {userSubmissions.totalRecords} results
                       </div>
                       <div className="flex gap-2">
@@ -502,12 +498,11 @@ export const Results = () => {
                           size="sm"
                           disabled={userSubmissions.pageNumber <= 1}
                           onClick={() => handlePageChange(userSubmissions.pageNumber - 1)}
-                          className="rounded-lg h-8 text-xs font-bold"
+                          className="rounded-lg h-8 text-xs font-bold border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
                         >
                           Previous
                         </Button>
                         {Array.from({ length: Math.min(5, userSubmissions.totalPages) }, (_, i) => {
-                          // Simple pagination logic to show limited page numbers
                           let pageNum = i + 1;
                           if (userSubmissions.totalPages > 5 && userSubmissions.pageNumber > 3) {
                             pageNum = userSubmissions.pageNumber - 2 + i;
@@ -521,7 +516,7 @@ export const Results = () => {
                               variant={userSubmissions.pageNumber === pageNum ? "default" : "outline"}
                               size="sm"
                               onClick={() => handlePageChange(pageNum)}
-                              className="rounded-lg h-8 w-8 p-0 text-xs font-bold shadow-sm"
+                              className="rounded-lg h-8 w-8 p-0 text-xs font-bold shadow-sm border-slate-200 dark:border-slate-800"
                             >
                               {pageNum}
                             </Button>
@@ -532,7 +527,7 @@ export const Results = () => {
                           size="sm"
                           disabled={userSubmissions.pageNumber >= userSubmissions.totalPages}
                           onClick={() => handlePageChange(userSubmissions.pageNumber + 1)}
-                          className="rounded-lg h-8 text-xs font-bold"
+                          className="rounded-lg h-8 text-xs font-bold border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
                         >
                           Next
                         </Button>
@@ -549,7 +544,7 @@ export const Results = () => {
                   const isDownloading = downloadingReports[submission.reportId];
 
                   return (
-                    <Card key={submission.reportId} className="group hover:shadow-2xl transition-all duration-300 border-none shadow-soft bg-white rounded-2xl overflow-hidden">
+                    <Card key={submission.reportId} className="group hover:shadow-2xl hover:border-slate-200 dark:hover:border-slate-700 transition-all duration-300 border border-slate-100 dark:border-slate-800/80 shadow-soft bg-white dark:bg-slate-900 rounded-2xl overflow-hidden">
                       <CardHeader className="pb-4 relative">
                         <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-primary to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         <div className="flex items-start justify-between">
@@ -559,15 +554,15 @@ export const Results = () => {
                                 {category.label}
                               </Badge>
                             </div>
-                            <CardTitle className="text-lg font-bold text-slate-800 line-clamp-1 mb-2 group-hover:text-primary transition-colors" title={submission.testName}>
+                            <CardTitle className="text-lg font-bold text-slate-800 dark:text-white line-clamp-1 mb-2 group-hover:text-primary transition-colors" title={submission.testName}>
                               {submission.testName}
                             </CardTitle>
                           </div>
-                          <div className="text-center bg-slate-50 p-3 rounded-xl border border-slate-100">
+                          <div className="text-center bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
                             <div className="text-xl font-black text-primary">
                               #{submission.attemptNumber}
                             </div>
-                            <p className="text-[10px] uppercase font-bold text-slate-400">
+                            <p className="text-[10px] uppercase font-bold text-slate-405 dark:text-slate-500">
                               Attempt
                             </p>
                           </div>
@@ -575,14 +570,14 @@ export const Results = () => {
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-5">
-                          <div className="bg-slate-50 rounded-xl p-3 text-sm space-y-2">
+                          <div className="bg-slate-50 dark:bg-slate-950 rounded-xl p-3 text-sm space-y-2 border border-transparent dark:border-slate-850">
                             <div className="flex justify-between">
-                              <span className="text-slate-500 font-medium">Questions:</span>
-                              <span className="text-slate-800 font-bold">{submission.totalQuestions}</span>
+                              <span className="text-slate-500 dark:text-slate-400 font-medium">Questions:</span>
+                              <span className="text-slate-800 dark:text-white font-bold">{submission.totalQuestions}</span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-slate-500 font-medium">Date:</span>
-                              <span className="text-slate-800 font-bold">{formatDate(submission.createdDate)}</span>
+                              <span className="text-slate-500 dark:text-slate-400 font-medium">Date:</span>
+                              <span className="text-slate-800 dark:text-white font-bold">{formatDate(submission.createdDate)}</span>
                             </div>
                           </div>
 
@@ -614,10 +609,10 @@ export const Results = () => {
 
           <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white rounded-2xl overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-slate-50 to-white py-4 px-6 border-b border-slate-100">
-                  <CardTitle className="flex items-center text-lg font-bold text-slate-800">
-                    <div className="p-2 bg-blue-100 text-blue-600 rounded-lg mr-3">
+              <Card className="border border-slate-100 dark:border-slate-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white dark:bg-slate-900 rounded-2xl overflow-hidden">
+                <CardHeader className="bg-gradient-to-r from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 py-4 px-6 border-b border-slate-100 dark:border-slate-800">
+                  <CardTitle className="flex items-center text-lg font-bold text-slate-800 dark:text-white">
+                    <div className="p-2 bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 rounded-lg mr-3">
                       <PieChart className="h-4 w-4" />
                     </div>
                     Attempts Overview
@@ -628,26 +623,26 @@ export const Results = () => {
                     {sortedSubmissions.slice(0, 5).map((submission, idx) => (
                       <div key={submission?.reportId} className="group">
                         <div className="flex justify-between mb-1.5 items-center">
-                          <span className="text-xs font-bold text-slate-700 truncate group-hover:text-primary transition-colors" title={submission?.testName}>
+                          <span className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate group-hover:text-primary transition-colors" title={submission?.testName}>
                             {idx + 1}. {submission?.testName}
                           </span>
-                          <Badge variant="outline" className="text-[10px] text-slate-500 bg-slate-50 h-5 border-slate-100">Attempt {submission?.attemptNumber}</Badge>
+                          <Badge variant="outline" className="text-[10px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 h-5 border-slate-100 dark:border-slate-800">Attempt {submission?.attemptNumber}</Badge>
                         </div>
                         <Progress
                           value={Math.min((submission?.attemptNumber / 10) * 100, 100)}
-                          className="h-1.5 bg-slate-100 [&>div]:bg-gradient-to-r from-blue-500 to-indigo-500"
+                          className="h-1.5 bg-slate-100 dark:bg-slate-800 [&>div]:bg-gradient-to-r from-blue-500 to-indigo-500"
                         />
                       </div>
                     ))}
-                    {sortedSubmissions.length === 0 && <p className="text-center text-slate-500 py-4 text-sm font-medium">No data available</p>}
+                    {sortedSubmissions.length === 0 && <p className="text-center text-slate-500 dark:text-slate-400 py-4 text-sm font-medium">No data available</p>}
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white rounded-2xl overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-slate-50 to-white py-4 px-6 border-b border-slate-100">
-                  <CardTitle className="flex items-center text-lg font-bold text-slate-800">
-                    <div className="p-2 bg-emerald-100 text-emerald-600 rounded-lg mr-3">
+              <Card className="border border-slate-100 dark:border-slate-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white dark:bg-slate-900 rounded-2xl overflow-hidden">
+                <CardHeader className="bg-gradient-to-r from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 py-4 px-6 border-b border-slate-100 dark:border-slate-800">
+                  <CardTitle className="flex items-center text-lg font-bold text-slate-800 dark:text-white">
+                    <div className="p-2 bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 rounded-lg mr-3">
                       <Clock className="h-4 w-4" />
                     </div>
                     Recent Activity
@@ -658,10 +653,10 @@ export const Results = () => {
                     {sortedSubmissions.slice(0, 4).map((submission) => {
                       const category = getCategoryBadge(submission?.testName);
                       return (
-                        <div key={submission.reportId} className="flex items-center justify-between p-3 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors cursor-default">
+                        <div key={submission.reportId} className="flex items-center justify-between p-3 rounded-xl border border-slate-105 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-default">
                           <div className="flex-1 min-w-0 mr-4">
                             <div className="flex items-center gap-2 mb-0.5">
-                              <p className="font-bold text-slate-800 text-xs truncate" title={submission?.testName}>
+                              <p className="font-bold text-slate-800 dark:text-white text-xs truncate" title={submission?.testName}>
                                 {submission.testName}
                               </p>
                             </div>
@@ -669,19 +664,19 @@ export const Results = () => {
                               <Badge variant={category?.variant} className="text-[9px] px-1.5 py-0 h-4 font-bold rounded">
                                 {category?.label}
                               </Badge>
-                              <p className="text-[10px] text-slate-500 font-medium flex items-center">
+                              <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium flex items-center">
                                 <Calendar className="h-3 w-3 mr-1" />
                                 {formatDate(submission?.createdDate)}
                               </p>
                             </div>
                           </div>
-                          <div className="h-8 w-8 flex items-center justify-center rounded-lg bg-slate-100 font-bold text-slate-600 text-[10px]">
+                          <div className="h-8 w-8 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 font-bold text-slate-600 dark:text-slate-300 text-[10px]">
                             #{submission.attemptNumber}
                           </div>
                         </div>
                       );
                     })}
-                    {sortedSubmissions.length === 0 && <p className="text-center text-slate-500 py-4 text-sm font-medium">No recent activity</p>}
+                    {sortedSubmissions.length === 0 && <p className="text-center text-slate-500 dark:text-slate-400 py-4 text-sm font-medium">No recent activity</p>}
                   </div>
                 </CardContent>
               </Card>
@@ -689,7 +684,7 @@ export const Results = () => {
           </TabsContent>
 
           <TabsContent value="insights" className="space-y-4">
-            <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.08)] bg-slate-900 text-white rounded-2xl overflow-hidden relative">
+            <Card className="border border-slate-100 dark:border-slate-800 shadow-[0_8px_30px_rgb(0,0,0,0.08)] bg-slate-900 dark:bg-slate-950 text-white rounded-2xl overflow-hidden relative">
               <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
 
               <CardHeader className="relative z-10 py-6 px-8">
@@ -699,28 +694,28 @@ export const Results = () => {
                   </div>
                   Performance Insights
                 </CardTitle>
-                <CardDescription className="text-slate-400 text-sm font-medium mt-1">
+                <CardDescription className="text-slate-400 dark:text-slate-500 text-sm font-medium mt-1">
                   AI-driven analysis of your test submission patterns
                 </CardDescription>
               </CardHeader>
               <CardContent className="relative z-10 p-8 pt-0 space-y-6">
                 <div className="grid md:grid-cols-3 gap-6">
-                  <div className="p-5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+                  <div className="p-5 rounded-xl bg-white/5 dark:bg-slate-900 border border-white/10 dark:border-slate-800 hover:bg-white/10 dark:hover:bg-slate-800/80 transition-colors">
                     <h4 className="font-bold text-sm mb-2 flex items-center gap-2 text-primary">
                       <BarChart3 className="h-4 w-4" />
                       Engagement
                     </h4>
-                    <p className="text-slate-300 text-xs leading-relaxed">
+                    <p className="text-slate-350 dark:text-slate-400 text-xs leading-relaxed">
                       You've completed <span className="font-bold text-white text-sm mx-0.5">{totalAttempts}</span> attempts across <span className="font-bold text-white text-sm mx-0.5">{uniqueTests}</span> assessments.
                     </p>
                   </div>
 
-                  <div className="p-5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+                  <div className="p-5 rounded-xl bg-white/5 dark:bg-slate-900 border border-white/10 dark:border-slate-800 hover:bg-white/10 dark:hover:bg-slate-800/80 transition-colors">
                     <h4 className="font-bold text-sm mb-2 flex items-center gap-2 text-emerald-400">
                       <Target className="h-4 w-4" />
                       Consistency
                     </h4>
-                    <p className="text-slate-300 text-xs leading-relaxed">
+                    <p className="text-slate-350 dark:text-slate-400 text-xs leading-relaxed">
                       {submissions && submissions.length > 0
                         ? `Your activity shows steady progress. You're building a strong assessment profile.`
                         : `Start taking assessments to build your performance history.`
@@ -728,12 +723,12 @@ export const Results = () => {
                     </p>
                   </div>
 
-                  <div className="p-5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+                  <div className="p-5 rounded-xl bg-white/5 dark:bg-slate-900 border border-white/10 dark:border-slate-800 hover:bg-white/10 dark:hover:bg-slate-800/80 transition-colors">
                     <h4 className="font-bold text-sm mb-2 flex items-center gap-2 text-yellow-400">
                       <Brain className="h-4 w-4" />
                       Strategy
                     </h4>
-                    <p className="text-slate-300 text-xs leading-relaxed">
+                    <p className="text-slate-350 dark:text-slate-400 text-xs leading-relaxed">
                       {submissions && submissions.length > 1
                         ? `Persistence pays off! Your multiple attempts show commitment to mastery.`
                         : `Consider retaking key assessments to track your improvement over time.`

@@ -212,7 +212,7 @@ export const GradeForm: React.FC<{ gradeId?: string }> = ({ gradeId }) => {
                     {/* RIGHT — Form fields */}
                     <div className="lg:col-span-9">
                         <Card className="border-none shadow-elegant bg-white rounded-3xl border border-slate-100/50 overflow-hidden h-full">
-                            <div className="px-6 py-4 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
+                            <div className="px-4 py-2.5 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
                                 <div className="flex items-center gap-2.5">
                                     <Settings2 className="h-4 w-4 text-indigo-600" />
                                     <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest">Grade Information</h3>
@@ -222,41 +222,41 @@ export const GradeForm: React.FC<{ gradeId?: string }> = ({ gradeId }) => {
                                     <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Ready</span>
                                 </div>
                             </div>
-                            <CardContent className="p-6 space-y-6">
-                                <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-y-5">
+                            <CardContent className="p-4 space-y-4">
+                                <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-y-3.5">
                                     {/* Grade Name */}
-                                    <div className="space-y-1.5">
-                                        <Label htmlFor="gradeName" className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">
+                                    <div className="space-y-1">
+                                        <Label htmlFor="gradeName" className="text-[9px] font-bold text-slate-500 uppercase tracking-tight ml-1">
                                             Grade Name <span className="text-rose-500">*</span>
                                         </Label>
                                         <div className="relative group">
-                                            <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300 group-focus-within:text-indigo-500 transition-colors" />
+                                            <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-slate-300 group-focus-within:text-indigo-500 transition-colors" />
                                             <Input
                                                 disabled={isViewMode}
                                                 id="gradeName"
                                                 name="gradeName"
                                                 value={formData.gradeName}
                                                 onChange={(e) => handleChange("gradeName", e.target.value)}
-                                                className="h-10 pl-9 bg-slate-50/50 border-slate-200/50 focus:bg-white focus:ring-2 focus:ring-indigo-100 rounded-xl font-bold text-sm transition-all shadow-sm"
+                                                className="h-8 pl-8 bg-slate-50/50 border-slate-200/50 focus:bg-white focus:ring-2 focus:ring-indigo-100 rounded-lg font-bold text-xs transition-all shadow-sm"
                                                 placeholder="e.g. Grade 10, Class XII, Foundation Level"
                                             />
                                         </div>
                                     </div>
 
                                     {/* Description */}
-                                    <div className="space-y-1.5">
-                                        <Label htmlFor="gradeDescription" className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block">
-                                            Description <span className="text-slate-300 text-[9px] font-medium normal-case">(optional)</span>
+                                    <div className="space-y-1">
+                                        <Label htmlFor="gradeDescription" className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1 block">
+                                            Description <span className="text-slate-300 text-[8px] font-medium normal-case">(optional)</span>
                                         </Label>
                                         <div className="relative group">
-                                            <Sparkles className="absolute left-4 top-4 h-4 w-4 text-slate-300 group-focus-within:text-indigo-500 transition-colors" />
+                                            <Sparkles className="absolute left-4 top-3.5 h-3.5 w-3.5 text-slate-300 group-focus-within:text-indigo-500 transition-colors" />
                                             <Textarea
                                                 disabled={isViewMode}
                                                 id="gradeDescription"
                                                 name="description"
                                                 value={formData.description}
                                                 onChange={(e) => handleChange("description", e.target.value)}
-                                                className="w-full min-h-[120px] pl-10 bg-slate-50/50 border-slate-200/50 rounded-2xl p-4 text-sm font-medium leading-relaxed resize-none transition-all focus:bg-white focus:ring-2 focus:ring-indigo-100 shadow-sm"
+                                                className="w-full min-h-[90px] pl-10 bg-slate-50/50 border-slate-200/50 rounded-xl p-3 text-xs font-medium leading-relaxed resize-none transition-all focus:bg-white focus:ring-2 focus:ring-indigo-100 shadow-sm"
                                                 placeholder="Describe the academic level, expected competencies, or any notes..."
                                             />
                                         </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +31,7 @@ export const Login = () => {
   const clearTenantDetails = useAuthStore((state) => state.clearTenantDetails);
 
   const navigate = useNavigate();
+  const lastFetchedRef = useRef<string | null>(null);
 
   const { user, isAuthenticated } = useAuthStore();
 
@@ -47,19 +48,21 @@ export const Login = () => {
         }
       }
       
-      // Only fetch tenant details if not already loaded for the current tenantName
-      if (!tenantData || tenantData.tenantName !== tenantName) {
+      // Fetch tenant details once per tenantName change
+      if (lastFetchedRef.current !== tenantName) {
+        lastFetchedRef.current = tenantName;
         fetchTenantDetails(tenantName).catch((err) => {
           console.error("Failed to load tenant details:", err);
         });
       }
     } else {
+      lastFetchedRef.current = null;
       // Only clear tenant details if they are currently set
       if (tenantData || tenantError) {
         clearTenantDetails();
       }
     }
-  }, [tenantName, fetchTenantDetails, clearTenantDetails, tenantData, tenantError]);
+  }, [tenantName, fetchTenantDetails, clearTenantDetails]);
 
   useEffect(() => {
     if (isAuthenticated && user) {
