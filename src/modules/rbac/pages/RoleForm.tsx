@@ -92,8 +92,8 @@ const RoleForm: React.FC = () => {
                     }
                 />
 
-                <Card className="glass-card border-none shadow-elegant rounded-2xl overflow-hidden">
-                    <CardContent className="p-6">
+                <Card className="glass-card border-none shadow-elegant rounded-xl overflow-hidden">
+                    <CardContent className="p-4">
                         <form onSubmit={handleSubmit} className="space-y-6">
                             {/* Icon */}
                             <div className="flex justify-center">
@@ -111,7 +111,7 @@ const RoleForm: React.FC = () => {
                                     value={form.name}
                                     onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                                     placeholder="e.g., Content Manager"
-                                    className={`h-11 rounded-xl border ${errors.name ? 'border-rose-300 focus:ring-rose-200' : 'border-slate-200 focus:ring-primary/20'}`}
+                                    className={`h-8 rounded-lg border text-xs font-semibold ${errors.name ? 'border-rose-300 focus:ring-rose-200' : 'border-slate-200 focus:ring-primary/20'}`}
                                 />
                                 {errors.name && <p className="text-[10px] font-bold text-rose-500">{errors.name}</p>}
                             </div>
@@ -126,7 +126,7 @@ const RoleForm: React.FC = () => {
                                     onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                                     placeholder="Describe what this role can do..."
                                     rows={3}
-                                    className={`rounded-xl border resize-none ${errors.description ? 'border-rose-300 focus:ring-rose-200' : 'border-slate-200 focus:ring-primary/20'}`}
+                                    className={`rounded-lg border resize-none text-xs font-semibold ${errors.description ? 'border-rose-300 focus:ring-rose-200' : 'border-slate-200 focus:ring-primary/20'}`}
                                 />
                                 {errors.description && <p className="text-[10px] font-bold text-rose-500">{errors.description}</p>}
                             </div>
@@ -154,14 +154,14 @@ const RoleForm: React.FC = () => {
                                     type="button"
                                     variant="outline"
                                     onClick={() => navigate('/rbac/roles')}
-                                    className="flex-1 h-11 rounded-xl border-slate-200 font-bold text-xs uppercase tracking-wider"
+                                    className="flex-1 h-8 rounded-lg border-slate-200 font-bold text-xs uppercase tracking-wider"
                                 >
                                     Cancel
                                 </Button>
                                 <Button
                                     type="submit"
                                     disabled={loading}
-                                    className="flex-1 h-11 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-indigo-500/20 transition-all hover:shadow-xl"
+                                    className="flex-1 h-8 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-indigo-500/20 transition-all hover:shadow-xl"
                                 >
                                     {loading ? (
                                         <Loader2 className="h-4 w-4 animate-spin mr-2" />

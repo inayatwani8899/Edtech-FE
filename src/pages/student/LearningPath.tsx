@@ -58,58 +58,58 @@ export const LearningPath: React.FC = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] pb-8 font-sans">
+        <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-8 font-sans transition-colors duration-200">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
                 
                 {/* Compact Standardized Header */}
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-[#E5E7EB]">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-[#E5E7EB] dark:border-slate-800">
                     <div className="space-y-1.5">
                         <div className="flex items-center gap-2">
                             <div className="h-px w-6 bg-[#4F46E5]/30"></div>
                             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#4F46E5]">Educational Roadmap</span>
                         </div>
-                        <h1 className="text-3xl font-black tracking-tight text-[#111827]">
+                        <h1 className="text-3xl font-black tracking-tight text-[#111827] dark:text-white">
                             Learning <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4F46E5] to-indigo-600">Path</span>
                         </h1>
-                        <p className="text-[13px] font-medium text-[#6B7280]">Track your milestones and navigate your personalized educational journey</p>
+                        <p className="text-[13px] font-medium text-[#6B7280] dark:text-slate-400">Track your milestones and navigate your personalized educational journey</p>
                     </div>
                 </div>
 
                 <div className="grid lg:grid-cols-12 gap-6">
                     {/* Main Roadmap */}
                     <div className="lg:col-span-8 space-y-6">
-                        <div className="relative pl-8 space-y-6 before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200 before:content-['']">
+                        <div className="relative pl-8 space-y-6 before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200 dark:before:bg-slate-800 before:content-['']">
                             {milestones.map((milestone) => (
                                 <div key={milestone.id} className="relative group">
                                     {/* Status Indicator */}
                                     <div className={cn(
-                                        "absolute -left-[32px] top-2.5 p-1 rounded-full border-4 border-white shadow-sm z-20 transition-all duration-300",
+                                        "absolute -left-[32px] top-2.5 p-1 rounded-full border-4 border-white dark:border-slate-950 shadow-sm z-20 transition-all duration-300",
                                         milestone.status === 'completed' && 'bg-emerald-500',
                                         milestone.status === 'current' && 'bg-[#4F46E5] ring-2 ring-indigo-500/20',
-                                        milestone.status === 'upcoming' && 'bg-slate-300'
+                                        milestone.status === 'upcoming' && 'bg-slate-300 dark:bg-slate-700'
                                     )}>
                                         <milestone.icon className="h-3 w-3 text-white" />
                                     </div>
 
                                     <Card className={cn(
-                                        "bg-white border border-[#E5E7EB] rounded-[12px] p-4 transition-all duration-300 hover:shadow-md hover:scale-[1.01] overflow-hidden",
-                                        milestone.status === 'current' && 'border-indigo-300 bg-indigo-50/10'
+                                        "bg-white dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-800 rounded-[12px] p-4 transition-all duration-300 hover:shadow-md hover:scale-[1.01] overflow-hidden",
+                                        milestone.status === 'current' && 'border-indigo-300 dark:border-indigo-850 bg-indigo-50/10 dark:bg-indigo-950/20'
                                     )}>
                                         <CardContent className="p-0">
                                             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                                                 <div className="space-y-1">
                                                     <div className="flex items-center gap-2">
-                                                        <h3 className="text-[15px] font-bold text-slate-800 tracking-tight">{milestone.title}</h3>
+                                                        <h3 className="text-[15px] font-bold text-slate-800 dark:text-white tracking-tight">{milestone.title}</h3>
                                                         {milestone.status === 'current' && (
-                                                            <Badge className="bg-indigo-50 text-[#4F46E5] border-none text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5">Active</Badge>
+                                                            <Badge className="bg-indigo-50 dark:bg-indigo-950/40 text-[#4F46E5] dark:text-indigo-400 border-none text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5">Active</Badge>
                                                         )}
                                                     </div>
-                                                    <p className="text-[12.5px] text-[#6B7280] font-medium">{milestone.description}</p>
+                                                    <p className="text-[12.5px] text-[#6B7280] dark:text-slate-400 font-medium">{milestone.description}</p>
                                                 </div>
                                                 <div className="flex flex-col md:items-end gap-1 shrink-0">
-                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{milestone.date}</span>
+                                                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{milestone.date}</span>
                                                     {milestone.status === 'current' && (
-                                                        <Button variant="ghost" className="h-8 text-xs font-semibold text-[#4F46E5] p-0 hover:bg-transparent flex items-center gap-1">
+                                                        <Button variant="ghost" className="h-8 text-xs font-semibold text-[#4F46E5] dark:text-indigo-455 p-0 hover:bg-transparent flex items-center gap-1">
                                                             Continue Track <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                                                         </Button>
                                                     )}
@@ -124,35 +124,35 @@ export const LearningPath: React.FC = () => {
 
                     {/* Sidebar - Quick Stats & Info */}
                     <div className="lg:col-span-4 space-y-6">
-                        <Card className="bg-white border border-[#E5E7EB] rounded-[12px] overflow-hidden shadow-sm">
+                        <Card className="bg-white dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-800 rounded-[12px] overflow-hidden shadow-sm">
                             <div className="h-1 bg-gradient-to-r from-amber-500 to-orange-500"></div>
                             <CardContent className="p-5">
                                 <div className="flex items-center gap-2.5 mb-5">
-                                    <div className="p-2 rounded-lg bg-orange-50">
+                                    <div className="p-2 rounded-lg bg-orange-50 dark:bg-orange-950/30">
                                         <Map className="h-4 w-4 text-orange-500" />
                                     </div>
-                                    <h4 className="text-[12px] font-bold text-slate-700 uppercase tracking-wider">Path Statistics</h4>
+                                    <h4 className="text-[12px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Path Statistics</h4>
                                 </div>
 
                                 <div className="space-y-4">
-                                    <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
+                                    <div className="flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400">
                                         <span>COMPLETED</span>
-                                        <span className="text-slate-800 font-bold">1 / 4</span>
+                                        <span className="text-slate-800 dark:text-white font-bold">1 / 4</span>
                                     </div>
-                                    <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                    <div className="w-full h-1.5 bg-slate-105 dark:bg-slate-800 rounded-full overflow-hidden">
                                         <div className="h-full bg-orange-500 w-[25%] rounded-full"></div>
                                     </div>
                                     <div className="pt-2">
-                                        <div className="p-3 rounded-lg bg-slate-50 border border-slate-100">
-                                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Next Target</p>
-                                            <p className="text-[12px] font-bold text-slate-700">Skill Profiling Session</p>
+                                        <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-850">
+                                            <p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 tracking-widest mb-1 uppercase">Next Target</p>
+                                            <p className="text-[12px] font-bold text-slate-700 dark:text-slate-300">Skill Profiling Session</p>
                                         </div>
                                     </div>
                                 </div>
                             </CardContent>
                         </Card>
 
-                        <Card className="bg-slate-900 border-none text-white p-5 rounded-[12px] relative overflow-hidden">
+                        <Card className="bg-slate-900 dark:bg-slate-950 border border-slate-800 text-white p-5 rounded-[12px] relative overflow-hidden">
                             <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
                                 <Sparkles className="h-20 w-20 text-white" />
                             </div>

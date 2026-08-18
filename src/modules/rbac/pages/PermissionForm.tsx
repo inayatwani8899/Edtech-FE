@@ -140,8 +140,8 @@ export const PermissionForm: React.FC = () => {
           }
         />
 
-        <Card className="glass-card border-none shadow-elegant rounded-2xl overflow-hidden">
-          <CardContent className="p-6">
+        <Card className="glass-card border-none shadow-elegant rounded-xl overflow-hidden">
+          <CardContent className="p-4">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="flex justify-center">
                 <div className="h-16 w-16 rounded-2xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30 flex items-center justify-center">
@@ -158,7 +158,7 @@ export const PermissionForm: React.FC = () => {
                     placeholder="e.g. Question Bank"
                     value={form.title}
                     onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                    className="h-11 rounded-xl border-slate-200 bg-white"
+                    className="h-8 rounded-lg border-slate-200 bg-white text-xs font-semibold"
                   />
                   {errors.title && <p className="text-[10px] text-rose-500 font-semibold">{errors.title}</p>}
                 </div>
@@ -171,7 +171,7 @@ export const PermissionForm: React.FC = () => {
                     placeholder="e.g. /manage/questions"
                     value={form.url}
                     onChange={e => setForm(f => ({ ...f, url: e.target.value }))}
-                    className="h-11 rounded-xl border-slate-200 bg-white"
+                    className="h-8 rounded-lg border-slate-200 bg-white text-xs font-semibold"
                   />
                   {errors.url && <p className="text-[10px] text-rose-500 font-semibold">{errors.url}</p>}
                 </div>
@@ -183,10 +183,10 @@ export const PermissionForm: React.FC = () => {
                     value={form.icon}
                     onValueChange={val => setForm(f => ({ ...f, icon: val }))}
                   >
-                    <SelectTrigger className="h-11 rounded-xl border-slate-200 bg-white">
+                    <SelectTrigger className="h-8 rounded-lg border-slate-200 bg-white text-xs font-semibold">
                       <SelectValue placeholder="Choose an icon..." />
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl">
+                    <SelectContent className="rounded-lg">
                       {STANDARD_ICONS.map(ic => (
                         <SelectItem key={ic} value={ic} className="rounded-lg">
                           <div className="flex items-center gap-2">
@@ -208,7 +208,7 @@ export const PermissionForm: React.FC = () => {
                     placeholder="1"
                     value={form.sortOrder}
                     onChange={e => setForm(f => ({ ...f, sortOrder: e.target.value }))}
-                    className="h-11 rounded-xl border-slate-200 bg-white"
+                    className="h-8 rounded-lg border-slate-200 bg-white text-xs font-semibold"
                   />
                   {errors.sortOrder && <p className="text-[10px] text-rose-500 font-semibold">{errors.sortOrder}</p>}
                 </div>
@@ -220,10 +220,10 @@ export const PermissionForm: React.FC = () => {
                     value={form.parentId}
                     onValueChange={val => setForm(f => ({ ...f, parentId: val }))}
                   >
-                    <SelectTrigger className="h-11 rounded-xl border-slate-200 bg-white">
+                    <SelectTrigger className="h-8 rounded-lg border-slate-200 bg-white text-xs font-semibold">
                       <SelectValue placeholder="None (Make this a Root Option)" />
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl">
+                    <SelectContent className="rounded-lg">
                       <SelectItem value="none" className="rounded-lg font-bold text-slate-500">None (Make this a Root Option)</SelectItem>
                       {availableParents.map(parent => (
                         <SelectItem key={parent.id} value={String(parent.id)} className="rounded-lg">
@@ -283,16 +283,16 @@ export const PermissionForm: React.FC = () => {
                   type="button"
                   variant="outline"
                   onClick={() => navigate('/rbac/permissions')}
-                  className="rounded-xl border-slate-250 font-bold text-xs uppercase tracking-wider h-11 px-6"
+                  className="rounded-lg border-slate-250 font-bold text-xs uppercase tracking-wider h-8 px-5"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   disabled={saving}
-                  className="rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-wider h-11 px-6 gap-2"
+                  className="rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-wider h-8 px-5 gap-2"
                 >
-                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                  {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
                   {isEdit ? 'Save Changes' : 'Create Option'}
                 </Button>
               </div>

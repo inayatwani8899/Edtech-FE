@@ -169,7 +169,7 @@ export const AdminDashboard = () => {
       icon: <HelpCircle className="h-5 w-5 text-blue-600 dark:text-blue-400" />,
       gradientClass: "bg-gradient-to-br from-blue-500/5 via-transparent to-transparent",
       iconBgClass: "bg-blue-50 dark:bg-blue-950/20 border-blue-100/30 dark:border-blue-900/30",
-      link: "/ai-generation",
+      link: "/manage/questions",
     },
     {
       label: "Total Tests",
@@ -196,7 +196,7 @@ export const AdminDashboard = () => {
       icon: <GraduationCap className="h-5 w-5 text-amber-600 dark:text-amber-500" />,
       gradientClass: "bg-gradient-to-br from-amber-500/5 via-transparent to-transparent",
       iconBgClass: "bg-amber-50 dark:bg-amber-950/20 border-amber-100/30 dark:border-amber-900/30",
-      link: "/manage/configurations",
+      link: "/manage/grades",
     }
   ];
 
@@ -327,7 +327,7 @@ export const AdminDashboard = () => {
             </Button>
             <Button
               variant="outline"
-              onClick={() => navigate("/ai-generation")}
+              onClick={() => navigate("/manage/questions")}
               className="w-full justify-start text-left h-10 px-3 rounded-xl border-slate-200 dark:border-slate-800 bg-slate-50/50 hover:bg-slate-100 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 font-extrabold text-[10px] tracking-wider uppercase transition-all"
             >
               <HelpCircle className="h-4 w-4 mr-2 text-blue-500 shrink-0" />

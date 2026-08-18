@@ -304,9 +304,9 @@ export const SchoolProfile = () => {
                 </div>
 
                 {/* Hero Profile Card */}
-                <div className="bg-gradient-to-br from-blue-500/10 via-indigo-500/5 to-purple-500/10 dark:from-blue-550/5 dark:via-indigo-550/2 dark:to-purple-550/5 bg-white dark:bg-[#0f1117] border border-slate-200/60 dark:border-slate-800 rounded-[2rem] shadow-elegant overflow-hidden relative group transition-all duration-300">
+                <div className="bg-gradient-to-br from-blue-500/10 via-indigo-500/5 to-purple-500/10 dark:from-blue-550/5 dark:via-indigo-550/2 dark:to-purple-550/5 bg-white dark:bg-[#0f1117] border border-slate-200/60 dark:border-slate-800 rounded-3xl shadow-elegant overflow-hidden relative group transition-all duration-300">
                     <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-600 via-indigo-650 to-purple-600 z-10" />
-                <div className="p-6 sm:p-8 flex flex-col md:flex-row items-center md:items-start gap-6 relative z-0">
+                <div className="p-5 sm:p-6 flex flex-col md:flex-row items-center md:items-start gap-5 relative z-0">
                     
                     {/* Left: Organization Logo */}
                     <div className="relative group/avatar shrink-0">
@@ -402,8 +402,8 @@ export const SchoolProfile = () => {
             </div>
 
             {/* Information Grid Container */}
-            <div className="bg-white dark:bg-[#0f1117] border border-slate-200/60 dark:border-slate-800 rounded-[2rem] shadow-elegant overflow-hidden p-6 sm:p-8">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-8">
+            <div className="bg-white dark:bg-[#0f1117] border border-slate-200/60 dark:border-slate-800 rounded-3xl shadow-elegant overflow-hidden p-5 sm:p-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-6">
                     
                     {/* Left Column */}
                     <div className="space-y-8">

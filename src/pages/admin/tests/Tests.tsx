@@ -28,13 +28,13 @@ import { Toggle } from "@/components/ui/toggle";
 const getStatusBadge = (status: string) => {
     switch (status) {
         case "active":
-            return <Badge variant="default" className="bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border-none px-2 py-0.5 text-[9px] uppercase font-bold">Active</Badge>;
+            return <Badge variant="default" className="bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border-none px-1.5 py-0.5 text-[8px] uppercase font-bold pointer-events-none">Active</Badge>;
         case "draft":
-            return <Badge variant="outline" className="bg-slate-100 text-slate-500 border-slate-200 px-2 py-0.5 text-[9px] uppercase font-bold">Draft</Badge>;
+            return <Badge variant="outline" className="bg-slate-100 text-slate-500 border-slate-200 px-1.5 py-0.5 text-[8px] uppercase font-bold pointer-events-none">Draft</Badge>;
         case "archived":
-            return <Badge variant="destructive" className="bg-rose-100 text-rose-700 hover:bg-rose-200 border-none px-2 py-0.5 text-[9px] uppercase font-bold">Archived</Badge>;
+            return <Badge variant="destructive" className="bg-rose-100 text-rose-700 hover:bg-rose-200 border-none px-1.5 py-0.5 text-[8px] uppercase font-bold pointer-events-none">Archived</Badge>;
         default:
-            return <Badge variant="secondary" className="text-[9px] uppercase font-bold">{status}</Badge>;
+            return <Badge variant="secondary" className="text-[8px] uppercase font-bold pointer-events-none">{status}</Badge>;
     }
 };
 
@@ -145,19 +145,19 @@ export const ManageTests: React.FC = () => {
 
                 <Card className="glass-card border-none shadow-elegant rounded-2xl overflow-hidden">
                     <CardHeader className="p-3 border-b border-slate-50">
-                        <div className="flex flex-col md:flex-row gap-3 justify-between items-center">
-                            <div className="relative group w-full md:flex-1">
+                        <div className="flex flex-col sm:flex-row gap-2.5 justify-between items-center">
+                            <div className="relative group w-full sm:flex-1">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500 group-focus-within:text-primary transition-colors" />
                                 <Input
                                     placeholder="Search tests..."
                                     value={searchInput}
                                     onChange={(e) => setSearchInput(e.target.value)}
-                                    className="h-9 pl-9 bg-white border border-slate-200 rounded-lg font-medium text-xs text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all w-full"
+                                    className="h-8 pl-9 bg-white border border-slate-200 rounded-lg font-medium text-[11px] text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all w-full"
                                 />
                             </div>
-                            <div className="flex items-center gap-2 w-full md:w-auto">
+                            <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
                                 <Select value={filters.status} onValueChange={handleStatusFilter}>
-                                    <SelectTrigger className="h-9 w-[140px] rounded-lg bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700">
+                                    <SelectTrigger className="h-8 w-[120px] rounded-lg bg-slate-50 border border-slate-200 text-[10px] font-semibold text-slate-700">
                                         <SelectValue placeholder="Status" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -170,8 +170,8 @@ export const ManageTests: React.FC = () => {
                                 </Select>
 
                                 <Select value={filters.category} onValueChange={handleCategoryFilter}>
-                                    <SelectTrigger className="h-9 w-[160px] rounded-lg bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700">
-                                        <Filter className="h-3 w-3 mr-2 text-slate-400" />
+                                    <SelectTrigger className="h-8 w-[130px] rounded-lg bg-slate-50 border border-slate-200 text-[10px] font-semibold text-slate-700">
+                                        <Filter className="h-3 w-3 mr-1.5 text-slate-400" />
                                         <SelectValue placeholder="Category" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -217,74 +217,74 @@ export const ManageTests: React.FC = () => {
                                         <Table>
                                             <TableHeader className="bg-slate-50">
                                                 <TableRow className="border-slate-200 hover:bg-transparent">
-                                                    <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[30%]">Test Details</TableHead>
-                                                    <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[15%]">Category</TableHead>
-                                                    <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[15%]">Duration</TableHead>
-                                                    <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[15%]">Status</TableHead>
-                                                    <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[10%]">Results</TableHead>
-                                                    <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider text-center w-[15%]">Actions</TableHead>
+                                                    <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider w-[30%]">Test Details</TableHead>
+                                                    <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider w-[15%]">Category</TableHead>
+                                                    <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider w-[15%]">Duration</TableHead>
+                                                    <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider w-[15%]">Status</TableHead>
+                                                    <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider w-[10%]">Results</TableHead>
+                                                    <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider text-center w-[15%]">Actions</TableHead>
                                                 </TableRow>
                                             </TableHeader>
                                             <TableBody>
                                                 {tests?.map((test) => (
                                                     <TableRow key={test?.id} className="border-slate-100 hover:bg-slate-50 transition-all duration-200 group">
-                                                        <TableCell className="px-4 py-2">
-                                                            <div className="flex items-center gap-3">
+                                                        <TableCell className="px-3 py-1.5 align-middle">
+                                                            <div className="flex items-center gap-2.5">
                                                                 <div className="h-6 w-6 rounded-md bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center font-bold text-white text-[10px] shadow-sm shadow-blue-500/20 border border-white/20 ring-1 ring-slate-50 group-hover:scale-105 transition-transform flex-shrink-0">
                                                                     <FileText className="h-3 w-3" />
                                                                 </div>
                                                                 <div className="min-w-0 flex-1">
-                                                                    <p className="text-xs font-bold text-slate-900 leading-none mb-0.5 group-hover:text-primary transition-colors truncate">
+                                                                    <p className="text-[11px] font-bold text-slate-900 leading-none mb-0.5 group-hover:text-primary transition-colors truncate">
                                                                         {test?.title}
                                                                     </p>
                                                                 </div>
                                                             </div>
                                                         </TableCell>
-                                                        <TableCell className="px-4 py-2">
-                                                            <Badge variant="secondary" className="bg-slate-100 text-[9px] font-bold text-slate-600 border border-slate-200 px-2 py-0.5 pointer-events-none capitalize">
+                                                        <TableCell className="px-3 py-1.5 align-middle">
+                                                            <Badge variant="secondary" className="bg-slate-100 text-[8px] font-bold text-slate-600 border border-slate-200 px-1.5 py-0.5 pointer-events-none capitalize">
                                                                 {test?.category}
                                                             </Badge>
                                                         </TableCell>
-                                                        <TableCell className="px-4 py-2">
-                                                            <span className="text-xs font-semibold text-slate-700">{test?.timeDuration} min</span>
+                                                        <TableCell className="px-3 py-1.5 align-middle">
+                                                            <span className="text-[11px] font-semibold text-slate-700">{test?.timeDuration} min</span>
                                                         </TableCell>
-                                                        <TableCell className="px-4 py-2">
+                                                        <TableCell className="px-3 py-1.5 align-middle">
                                                             {getStatusBadge(test.status)}
                                                         </TableCell>
-                                                        <TableCell className="px-4 py-2">
-                                                            <span className="text-xs font-bold text-slate-700">{test?.completions}</span>
+                                                        <TableCell className="px-3 py-1.5 align-middle">
+                                                            <span className="text-[11px] font-bold text-slate-700">{test?.completions}</span>
                                                         </TableCell>
-                                                        <TableCell className="px-4 py-2">
-                                                            <div className="flex justify-center gap-2 opacity-100 transition-all duration-200">
+                                                        <TableCell className="px-3 py-1.5 align-middle">
+                                                            <div className="flex justify-center gap-1.5 opacity-100 transition-all duration-200">
                                                                 <Button
                                                                     variant="ghost"
                                                                     size="icon"
-                                                                    className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-primary hover:bg-primary/5 hover:border-primary/30 transition-all"
+                                                                    className="h-6 w-6 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-primary hover:bg-primary/5 hover:border-primary/30 transition-all flex items-center justify-center"
                                                                     title="View Analytics"
                                                                 >
-                                                                    <BarChart3 className="h-3.5 w-3.5" />
+                                                                    <BarChart3 className="h-3 w-3" />
                                                                 </Button>
                                                                 <Button
                                                                     variant="ghost"
                                                                     size="icon"
                                                                     onClick={() => navigate(`/edit-test/${test.id}`)}
-                                                                    className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 transition-all"
+                                                                    className="h-6 w-6 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 transition-all flex items-center justify-center"
                                                                     title="Edit Test"
                                                                 >
-                                                                    <Edit className="h-3.5 w-3.5" />
+                                                                    <Edit className="h-3 w-3" />
                                                                 </Button>
 
                                                                 <Toggle
                                                                     pressed={test?.isPublished}
                                                                     onPressedChange={(state) => handlePublish(test.id, state)}
                                                                     size="sm"
-                                                                    className="h-7 w-7 rounded-lg data-[state=on]:bg-emerald-100 data-[state=on]:border-emerald-200 data-[state=on]:text-emerald-700 bg-slate-100 border border-slate-200 text-slate-400 hover:text-slate-600 transition-all"
+                                                                    className="h-6 w-6 p-0 rounded-lg data-[state=on]:bg-emerald-100 data-[state=on]:border-emerald-200 data-[state=on]:text-emerald-700 bg-slate-100 border border-slate-200 text-slate-400 hover:text-slate-600 transition-all flex items-center justify-center"
                                                                     title={test?.isPublished ? "Unpublish Test" : "Publish Test"}
                                                                 >
                                                                     {test?.isPublished ? (
-                                                                        <ToggleRight className="h-3.5 w-3.5" />
+                                                                        <ToggleRight className="h-3 w-3" />
                                                                     ) : (
-                                                                        <ToggleLeft className="h-3.5 w-3.5" />
+                                                                        <ToggleLeft className="h-3 w-3" />
                                                                     )}
                                                                 </Toggle>
 
@@ -292,10 +292,10 @@ export const ManageTests: React.FC = () => {
                                                                     variant="ghost"
                                                                     size="icon"
                                                                     onClick={() => openDeleteDialog(test.id)}
-                                                                    className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-300 transition-all"
+                                                                    className="h-6 w-6 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-300 transition-all flex items-center justify-center"
                                                                     title="Delete Test"
                                                                 >
-                                                                    <Trash2 className="h-3.5 w-3.5" />
+                                                                    <Trash2 className="h-3 w-3" />
                                                                 </Button>
                                                             </div>
                                                         </TableCell>

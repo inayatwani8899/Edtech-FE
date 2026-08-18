@@ -503,6 +503,7 @@ export const SchoolDashboard = () => {
                         const cardContent = (
                             <div className={cn(
                                 "bg-white dark:bg-[#0f1117] border border-slate-200/60 dark:border-slate-850 rounded-2xl p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-elegant relative overflow-hidden h-full flex flex-col justify-between",
+                                card.link !== "#" && "cursor-pointer",
                                 card.gradientClass
                             )}>
                                 <div>
@@ -510,9 +511,13 @@ export const SchoolDashboard = () => {
                                         <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center shrink-0 border", card.iconBgClass)}>
                                             {card.icon}
                                         </div>
-                                        <Badge variant="outline" className="text-[8px] font-black uppercase tracking-wider border-slate-150 dark:border-slate-800 text-slate-400 bg-white/50 dark:bg-white/5 px-2 py-0.5">
-                                            LIVE
-                                        </Badge>
+                                        {card.link !== "#" ? (
+                                            <ArrowUpRight className="h-3.5 w-3.5 text-slate-300 dark:text-slate-700 group-hover:text-slate-500 dark:group-hover:text-slate-400 transition-colors" />
+                                        ) : (
+                                            <Badge variant="outline" className="text-[8px] font-black uppercase tracking-wider border-slate-150 dark:border-slate-800 text-slate-400 bg-white/50 dark:bg-white/5 px-2 py-0.5">
+                                                LIVE
+                                            </Badge>
+                                        )}
                                     </div>
                                     <div className="mt-3">
                                         <span className="text-[9px] font-black text-slate-450 dark:text-slate-550 uppercase tracking-wider block">
@@ -621,7 +626,11 @@ export const SchoolDashboard = () => {
                                         </TableHeader>
                                         <TableBody>
                                             {recentStudents.slice(0, 5).map((student: any) => (
-                                                <TableRow key={student.studentId || student.userId || student.id} className="border-slate-150 dark:border-slate-850 hover:bg-slate-50/50 dark:hover:bg-white/5 transition-all">
+                                                <TableRow 
+                                                    key={student.studentId || student.userId || student.id} 
+                                                    onClick={() => navigate(`/school/students/view/${student.id}`)}
+                                                    className="border-slate-150 dark:border-slate-855 hover:bg-slate-50/50 dark:hover:bg-white/5 transition-all cursor-pointer"
+                                                >
                                                     <TableCell className="py-2.5">
                                                         <div className="flex items-center gap-2.5">
                                                             <div className="h-7 w-7 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-[10px] font-black uppercase border border-indigo-150/20">

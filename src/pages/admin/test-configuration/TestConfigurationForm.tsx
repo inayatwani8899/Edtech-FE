@@ -260,12 +260,12 @@ export const TestConfigurationForm: React.FC<{ configId?: string }> = ({ configI
                         <div className="mt-8 space-y-1.5 text-left">
                             <Label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1 block">Target Resource</Label>
                             <Select value={formData.testId} onValueChange={(val) => handleChange("testId", val)}>
-                                <SelectTrigger className="w-full h-9 bg-slate-100/50 border-transparent rounded-xl px-3 text-[10px] font-bold text-slate-600 focus:ring-0">
+                                <SelectTrigger className="w-full h-8 bg-slate-100/50 border-transparent rounded-lg px-3 text-xs font-bold text-slate-600 focus:ring-0">
                                     <SelectValue placeholder="Link Assessment..." />
                                 </SelectTrigger>
-                                <SelectContent className="rounded-xl border-slate-200 shadow-xl">
+                                <SelectContent className="rounded-lg border-slate-200 shadow-xl">
                                     {tests.map(test => (
-                                        <SelectItem key={test?.id} value={String(test?.id)} className="text-[10px] font-bold">{test.title}</SelectItem>
+                                        <SelectItem key={test?.id} value={String(test?.id)} className="text-xs font-bold">{test.title}</SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
@@ -278,7 +278,7 @@ export const TestConfigurationForm: React.FC<{ configId?: string }> = ({ configI
             <div className="lg:col-span-9 space-y-6">
                 {/* PRICING MATRIX TABLE */}
                 <Card className="border-none shadow-elegant bg-white rounded-3xl border border-slate-100/50 overflow-hidden">
-                    <div className="px-6 py-4 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
+                    <div className="px-4 py-2.5 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
                         <div className="flex items-center gap-2.5">
                             <Coins className="h-4 w-4 text-emerald-500" />
                             <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest">Revenue Allocation Matrix</h3>
@@ -295,49 +295,49 @@ export const TestConfigurationForm: React.FC<{ configId?: string }> = ({ configI
                         <table className="w-full">
                             <thead className="bg-[#FAFAFA] border-b border-slate-50">
                                 <tr>
-                                    <th className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-left px-6 py-3 whitespace-nowrap">Participant Role</th>
-                                    <th className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-left px-6 py-3 whitespace-nowrap">Acquisition Price (₹)</th>
-                                    <th className="px-6 py-3"></th>
+                                    <th className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-left px-4 py-2 whitespace-nowrap">Participant Role</th>
+                                    <th className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-left px-4 py-2 whitespace-nowrap">Acquisition Price (₹)</th>
+                                    <th className="px-4 py-2"></th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-50">
                                 {formData.rolePrices.map((rolePrice, index) => (
                                     <tr key={index} className="group hover:bg-slate-50/50 transition-colors">
-                                        <td className="px-6 py-3">
+                                        <td className="px-4 py-2">
                                             <Select 
                                                 value={rolePrice.roleId} 
                                                 onValueChange={(val) => handleRolePriceChange(index, "roleId", val)}
                                             >
-                                                <SelectTrigger className="h-10 bg-slate-100/30 border-transparent hover:bg-white hover:border-slate-200 transition-all rounded-xl text-xs font-bold text-slate-700 w-full focus:ring-0">
+                                                <SelectTrigger className="h-8 bg-slate-100/30 border-transparent hover:bg-white hover:border-slate-200 transition-all rounded-lg text-xs font-bold text-slate-700 w-full focus:ring-0">
                                                     <SelectValue placeholder="Identify Role..." />
                                                 </SelectTrigger>
-                                                <SelectContent className="rounded-xl">
+                                                <SelectContent className="rounded-lg">
                                                     {getAvailableRoles(index).map(role => (
                                                         <SelectItem key={role.id} value={String(role.id)} className="text-xs font-bold">{role.name}</SelectItem>
                                                     ))}
                                                 </SelectContent>
                                             </Select>
                                         </td>
-                                        <td className="px-6 py-3">
+                                        <td className="px-4 py-2">
                                             <div className="relative group/price">
                                                 <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300 group-focus-within/price:text-emerald-500 transition-colors" />
                                                 <Input 
                                                     type="number"
                                                     value={rolePrice.price}
                                                     onChange={(e) => handleRolePriceChange(index, "price", parseFloat(e.target.value) || 0)}
-                                                    className="h-10 pl-9 bg-slate-100/30 border-transparent focus:bg-white focus:ring-2 focus:ring-emerald-100 rounded-xl font-black text-sm transition-all"
+                                                    className="h-8 pl-9 bg-slate-100/30 border-transparent focus:bg-white focus:ring-2 focus:ring-emerald-100 rounded-lg font-black text-xs transition-all"
                                                     placeholder="0.00"
                                                 />
                                             </div>
                                         </td>
-                                        <td className="px-6 py-3 text-right">
+                                        <td className="px-4 py-2 text-right">
                                             {formData.rolePrices.length > 1 && (
                                                 <button 
                                                     type="button" 
                                                     onClick={() => removeRolePrice(index)}
-                                                    className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                                    className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-md transition-all"
                                                 >
-                                                    <Trash2 className="h-4 w-4" />
+                                                    <Trash2 className="h-3.5 w-3.5" />
                                                 </button>
                                             )}
                                         </td>
@@ -346,55 +346,55 @@ export const TestConfigurationForm: React.FC<{ configId?: string }> = ({ configI
                             </tbody>
                         </table>
                         {formData.rolePrices.length === 0 && (
-                            <div className="p-8 text-center bg-slate-50/30 border-t border-slate-50">
+                            <div className="p-6 text-center bg-slate-50/30 border-t border-slate-50">
                                 <Sparkles className="h-8 w-8 text-slate-200 mx-auto mb-2" />
                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">No segments initialized</p>
                             </div>
                         )}
                     </CardContent>
                 </Card>
-
+ 
                 {/* DISTRIBUTION PARAMETERS */}
                 <Card className="border-none shadow-elegant bg-white rounded-3xl border border-slate-100/50 overflow-hidden">
-                    <div className="px-6 py-4 border-b border-slate-50 flex items-center gap-2.5 bg-slate-50/30">
-                        <Settings2 className="h-4 w-4 text-cyan-500" />
-                        <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest">Protocol Engine Parameters</h3>
+                    <div className="px-5 py-3 border-b border-slate-50 flex items-center gap-2 bg-slate-50/30">
+                        <Settings2 className="h-3.5 w-3.5 text-cyan-500" />
+                        <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-widest">Protocol Engine Parameters</h3>
                     </div>
-                    <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-1.5">
-                            <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">Distribution Mode</Label>
+                    <CardContent className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                            <Label className="text-[9px] font-bold text-slate-500 uppercase tracking-tight ml-1">Distribution Mode</Label>
                             <Select value={formData.submitType} onValueChange={(val: any) => handleChange("submitType", val)}>
-                                <SelectTrigger className="h-10 bg-slate-100/30 border-transparent rounded-xl px-4 text-xs font-bold text-slate-700 focus:ring-0">
+                                <SelectTrigger className="h-8 bg-slate-100/30 border-transparent rounded-lg px-3 text-xs font-bold text-slate-700 focus:ring-0">
                                     <SelectValue />
                                 </SelectTrigger>
-                                <SelectContent className="rounded-xl">
+                                <SelectContent className="rounded-lg">
                                     <SelectItem value="PerPage" className="text-xs font-bold">Paginated Stream (Per Page)</SelectItem>
                                     <SelectItem value="OneGo" className="text-xs font-bold">Holistic Execution (One Go)</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
-                        <div className="space-y-1.5">
-                            <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">Pagination Stratum</Label>
+                        <div className="space-y-1">
+                            <Label className="text-[9px] font-bold text-slate-500 uppercase tracking-tight ml-1">Pagination Stratum</Label>
                             <div className="relative group">
                                 <Hash className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300 group-focus-within:text-cyan-500 transition-colors" />
                                 <Input 
                                     type="number"
                                     value={formData.questionsPerPage}
                                     onChange={(e) => handleChange("questionsPerPage", parseInt(e.target.value) || 5)}
-                                    className="h-10 pl-9 bg-slate-100/30 border-transparent focus:bg-white focus:ring-2 focus:ring-cyan-100 rounded-xl font-black text-sm"
+                                    className="h-8 pl-9 bg-slate-100/30 border-transparent focus:bg-white focus:ring-2 focus:ring-cyan-100 rounded-lg font-black text-xs"
                                     min={1}
                                 />
                             </div>
                         </div>
-
-                        <div className="space-y-1.5 col-span-full">
-                            <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block">Candidate Directive (Instructions)</Label>
+ 
+                        <div className="space-y-1 col-span-full">
+                            <Label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1 block">Candidate Directive (Instructions)</Label>
                             <div className="relative group">
-                                <ScrollText className="absolute left-4 top-4 h-4 w-4 text-slate-300 group-focus-within:text-cyan-500 transition-colors" />
+                                <ScrollText className="absolute left-4 top-3.5 h-3.5 w-3.5 text-slate-300 group-focus-within:text-cyan-500 transition-colors" />
                                 <Textarea 
                                     value={formData.testInstructions}
                                     onChange={(e) => handleChange("testInstructions", e.target.value)}
-                                    className="w-full min-h-[120px] pl-10 bg-slate-100/30 border-transparent rounded-2xl p-4 text-sm font-medium leading-relaxed resize-none transition-all focus:bg-white focus:ring-2 focus:ring-cyan-100"
+                                    className="w-full min-h-[90px] pl-10 bg-slate-100/30 border-transparent rounded-xl p-3 text-xs font-medium leading-relaxed resize-none transition-all focus:bg-white focus:ring-2 focus:ring-cyan-100"
                                     placeholder="Outline the operational guidelines for participants..."
                                 />
                             </div>
@@ -413,7 +413,7 @@ export const TestConfigurationForm: React.FC<{ configId?: string }> = ({ configI
                             <p className="text-[9px] font-bold uppercase tracking-widest opacity-60">Rule defined for global deployment</p>
                         </div>
                     </div>
-                    <Button onClick={handleSubmit} className="bg-white text-cyan-600 font-black text-[10px] uppercase tracking-widest h-9 px-6 rounded-xl hover:bg-slate-50 transition-all shadow-lg active:scale-95">
+                    <Button onClick={handleSubmit} className="bg-white text-cyan-600 font-black text-[10px] uppercase tracking-widest h-8 px-6 rounded-lg hover:bg-slate-50 transition-all shadow-lg active:scale-95">
                         Push Strategy
                     </Button>
                 </div>

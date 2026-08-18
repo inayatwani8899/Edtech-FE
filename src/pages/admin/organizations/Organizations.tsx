@@ -75,43 +75,43 @@ const OrgMiniTable: React.FC<{
         <Table>
           <TableHeader className="bg-slate-50">
             <TableRow className="border-slate-200 hover:bg-transparent">
-              <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider">Institute Name</TableHead>
-              <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider">Contact</TableHead>
-              <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider">Location</TableHead>
-              <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider">Type</TableHead>
-              <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider text-center">Action</TableHead>
+              <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider">Institute Name</TableHead>
+              <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider">Contact</TableHead>
+              <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider">Location</TableHead>
+              <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider">Type</TableHead>
+              <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider text-center">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {orgs.map((org) => (
               <TableRow key={org.id} className="border-slate-100 hover:bg-slate-50 transition-all duration-200 group">
-                <TableCell className="px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white text-xs flex-shrink-0">
+                <TableCell className="px-3 py-2">
+                  <div className="flex items-center gap-2">
+                    <div className="h-6 w-6 rounded-md bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white text-[10px] flex-shrink-0">
                       {org.instituteName?.[0] || "I"}
                     </div>
-                    <p className="text-xs font-bold text-slate-900 truncate max-w-[180px]">{org.instituteName}</p>
+                    <p className="text-[11px] font-bold text-slate-900 truncate max-w-[150px]">{org.instituteName}</p>
                   </div>
                 </TableCell>
-                <TableCell className="px-4 py-3">
-                  <p className="text-xs font-semibold text-slate-700 truncate max-w-[160px]">{org.email}</p>
-                  <p className="text-[10px] text-slate-400">{org.contactNumber || "-"}</p>
+                <TableCell className="px-3 py-2">
+                  <p className="text-[11px] font-medium text-slate-700 truncate max-w-[140px]">{org.email}</p>
+                  <p className="text-[9px] text-slate-400">{org.contactNumber || "-"}</p>
                 </TableCell>
-                <TableCell className="px-4 py-3">
-                  <p className="text-xs text-slate-600 font-medium">{[org.city, org.state, org.country].filter(Boolean).join(", ") || "—"}</p>
+                <TableCell className="px-3 py-2">
+                  <p className="text-[11px] text-slate-600 font-medium truncate max-w-[150px]">{[org.city, org.state, org.country].filter(Boolean).join(", ") || "—"}</p>
                 </TableCell>
-                <TableCell className="px-4 py-3">
-                  <Badge variant="secondary" className="bg-slate-100 text-slate-600 text-[9px] font-bold border-none">{org.organizationType || "—"}</Badge>
+                <TableCell className="px-3 py-2">
+                  <Badge variant="secondary" className="bg-slate-100 text-slate-600 text-[8px] font-bold border-none px-1.5 py-0.5">{org.organizationType || "—"}</Badge>
                 </TableCell>
-                <TableCell className="px-4 py-3 text-center">
+                <TableCell className="px-3 py-2 text-center">
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => onView(String(org.id))}
-                    className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-primary hover:bg-primary/5 hover:border-primary/30 transition-all"
+                    className="h-6 w-6 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-primary hover:bg-primary/5 hover:border-primary/30 transition-all flex items-center justify-center mx-auto"
                     title="View Details"
                   >
-                    <Eye className="h-3.5 w-3.5" />
+                    <Eye className="h-3 w-3" />
                   </Button>
                 </TableCell>
               </TableRow>
@@ -119,11 +119,11 @@ const OrgMiniTable: React.FC<{
           </TableBody>
         </Table>
       </div>
-      <div className="p-2 border-t border-slate-200 bg-slate-50/50 flex items-center justify-between gap-2">
-        <p className="text-xs font-bold text-slate-600 ml-2">
+      <div className="p-1.5 border-t border-slate-200 bg-slate-50/50 flex items-center justify-between gap-2">
+        <p className="text-[10px] font-bold text-slate-600 ml-2">
           Showing <span className="text-primary">{((currentPage - 1) * limit) + 1}–{Math.min(currentPage * limit, totalCount)}</span> of {totalCount}
         </p>
-        <div className="bg-white p-1 rounded-lg shadow-sm border border-slate-200 scale-90 origin-right">
+        <div className="bg-white p-0.5 rounded-lg shadow-sm border border-slate-200 scale-90 origin-right">
           <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={onPage} limit={limit} onLimitChange={onLimit} />
         </div>
       </div>
@@ -250,26 +250,26 @@ const Organizations: React.FC = () => {
     switch (s) {
       case "completed":
       case "fully activated":
-        return <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold">Fully Activated</Badge>;
+        return <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[8px] font-bold px-1.5 py-0.5 pointer-events-none">Fully Activated</Badge>;
       case "verified":
       case "server verified":
-        return <Badge className="bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold">Server Verified</Badge>;
+        return <Badge className="bg-blue-50 text-blue-700 border border-blue-200 text-[8px] font-bold px-1.5 py-0.5 pointer-events-none">Server Verified</Badge>;
       case "registered":
-        return <Badge className="bg-sky-50 text-sky-700 border border-sky-200 text-[10px] font-bold">Registered</Badge>;
+        return <Badge className="bg-sky-50 text-sky-700 border border-sky-200 text-[8px] font-bold px-1.5 py-0.5 pointer-events-none">Registered</Badge>;
       case "database created":
-        return <Badge className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-bold">Database Created</Badge>;
+        return <Badge className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-[8px] font-bold px-1.5 py-0.5 pointer-events-none">Database Created</Badge>;
       case "data synced":
-        return <Badge className="bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-bold">Data Synced</Badge>;
+        return <Badge className="bg-purple-50 text-purple-700 border border-purple-200 text-[8px] font-bold px-1.5 py-0.5 pointer-events-none">Data Synced</Badge>;
       case "email sent":
-        return <Badge className="bg-teal-50 text-teal-700 border border-teal-200 text-[10px] font-bold">Email Sent</Badge>;
+        return <Badge className="bg-teal-50 text-teal-700 border border-teal-200 text-[8px] font-bold px-1.5 py-0.5 pointer-events-none">Email Sent</Badge>;
       case "pending":
       case "pending setup":
-        return <Badge className="bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold">Pending Setup</Badge>;
+        return <Badge className="bg-amber-50 text-amber-700 border border-amber-200 text-[8px] font-bold px-1.5 py-0.5 pointer-events-none">Pending Setup</Badge>;
       case "rejected":
       case "failed setup":
-        return <Badge className="bg-rose-50 text-rose-700 border border-rose-200 text-[10px] font-bold">Failed Setup</Badge>;
+        return <Badge className="bg-rose-50 text-rose-700 border border-rose-200 text-[8px] font-bold px-1.5 py-0.5 pointer-events-none">Failed Setup</Badge>;
       default:
-        return <Badge className="bg-slate-50 text-slate-700 border border-slate-200 text-[10px] font-bold">{status || "Pending"}</Badge>;
+        return <Badge className="bg-slate-50 text-slate-700 border border-slate-200 text-[8px] font-bold px-1.5 py-0.5 pointer-events-none">{status || "Pending"}</Badge>;
     }
   };
 
@@ -341,138 +341,138 @@ const Organizations: React.FC = () => {
           {/* TAB: All (existing full filter card) */}
           <TabsContent value="all" className="mt-0">
         <Card className="glass-card border-none shadow-elegant rounded-2xl overflow-hidden">
-          <CardHeader className="p-4 border-b border-slate-50 space-y-4">
+          <CardHeader className="p-3 border-b border-slate-50 space-y-3">
             {/* Search and Sort Toggle */}
-            <div className="flex flex-col md:flex-row gap-3 justify-between items-center">
-              <div className="relative group w-full md:w-80">
+            <div className="flex flex-col sm:flex-row gap-2.5 justify-between items-center">
+              <div className="relative group w-full sm:w-80">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500 group-focus-within:text-primary transition-colors" />
                 <Input
                   placeholder="Search by institute name, email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="h-9 pl-9 bg-white border border-slate-200 rounded-lg font-medium text-xs text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all w-full"
+                  className="h-8 pl-9 bg-white border border-slate-200 rounded-lg font-medium text-[11px] text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all w-full"
                 />
               </div>
 
-              <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+              <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
                 <Button 
                   variant="outline" 
                   onClick={handleSortToggle}
-                  className="h-9 px-3 rounded-lg bg-white border border-slate-200 font-semibold text-slate-700 hover:text-primary hover:bg-slate-50 transition-all text-xs"
+                  className="h-8 px-2.5 rounded-lg bg-white border border-slate-200 font-bold text-slate-700 hover:text-primary hover:bg-slate-50 transition-all text-[10px] uppercase tracking-wider"
                 >
-                  <ArrowUpDown className="h-3.5 w-3.5 mr-2" />
+                  <ArrowUpDown className="h-3.5 w-3.5 mr-1.5" />
                   Sort Order ({sortDirection.toUpperCase()})
                 </Button>
               </div>
             </div>
 
             {/* Filter Matrix Section */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3 bg-slate-50/50 p-3 rounded-xl border border-slate-100/80">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-2.5 bg-slate-50/50 p-2.5 rounded-xl border border-slate-100/80">
               {/* Filter 1: Status */}
               <div className="space-y-1">
-                <label className="text-[9px] font-black uppercase tracking-wider text-slate-400 block ml-0.5">Audit Status</label>
+                <label className="text-[8px] font-bold uppercase tracking-wider text-slate-400 block ml-0.5">Audit Status</label>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="h-8 bg-white border-slate-200 rounded-lg text-xs font-semibold text-slate-700">
+                  <SelectTrigger className="h-7.5 bg-white border-slate-200 rounded-lg text-[10px] font-semibold text-slate-700 px-2.5">
                     <SelectValue placeholder="All Statuses" />
                   </SelectTrigger>
                   <SelectContent className="rounded-lg">
-                    <SelectItem value="All" className="text-xs font-medium">All Statuses</SelectItem>
-                    <SelectItem value="Completed" className="text-xs font-medium">Completed</SelectItem>
-                    <SelectItem value="Pending" className="text-xs font-medium">Pending</SelectItem>
-                    <SelectItem value="Verified" className="text-xs font-medium">Verified</SelectItem>
-                    <SelectItem value="Rejected" className="text-xs font-medium">Rejected</SelectItem>
+                    <SelectItem value="All" className="text-[11px] font-medium">All Statuses</SelectItem>
+                    <SelectItem value="Completed" className="text-[11px] font-medium">Completed</SelectItem>
+                    <SelectItem value="Pending" className="text-[11px] font-medium">Pending</SelectItem>
+                    <SelectItem value="Verified" className="text-[11px] font-medium">Verified</SelectItem>
+                    <SelectItem value="Rejected" className="text-[11px] font-medium">Rejected</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               {/* Filter 2: Approval Status */}
               <div className="space-y-1">
-                <label className="text-[9px] font-black uppercase tracking-wider text-slate-400 block ml-0.5">Clearance Status</label>
+                <label className="text-[8px] font-bold uppercase tracking-wider text-slate-400 block ml-0.5">Clearance Status</label>
                 <Select value={approvalFilter} onValueChange={setApprovalFilter}>
-                  <SelectTrigger className="h-8 bg-white border-slate-200 rounded-lg text-xs font-semibold text-slate-700">
+                  <SelectTrigger className="h-7.5 bg-white border-slate-200 rounded-lg text-[10px] font-semibold text-slate-700 px-2.5">
                     <SelectValue placeholder="All Verification" />
                   </SelectTrigger>
                   <SelectContent className="rounded-lg">
-                    <SelectItem value="All" className="text-xs font-medium">All Verification</SelectItem>
-                    <SelectItem value="Approved" className="text-xs font-medium">Approved</SelectItem>
-                    <SelectItem value="Not Approved" className="text-xs font-medium">Not Approved</SelectItem>
+                    <SelectItem value="All" className="text-[11px] font-medium">All Verification</SelectItem>
+                    <SelectItem value="Approved" className="text-[11px] font-medium">Approved</SelectItem>
+                    <SelectItem value="Not Approved" className="text-[11px] font-medium">Not Approved</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               {/* Filter 3: Configuration */}
               <div className="space-y-1">
-                <label className="text-[9px] font-black uppercase tracking-wider text-slate-400 block ml-0.5">Configuration Status</label>
+                <label className="text-[8px] font-bold uppercase tracking-wider text-slate-400 block ml-0.5">Configuration Status</label>
                 <Select value={configFilter} onValueChange={setConfigFilter}>
-                  <SelectTrigger className="h-8 bg-white border-slate-200 rounded-lg text-xs font-semibold text-slate-700">
+                  <SelectTrigger className="h-7.5 bg-white border-slate-200 rounded-lg text-[10px] font-semibold text-slate-700 px-2.5">
                     <SelectValue placeholder="All Configs" />
                   </SelectTrigger>
                   <SelectContent className="rounded-lg">
-                    <SelectItem value="All" className="text-xs font-medium">All Configs</SelectItem>
-                    <SelectItem value="Configured" className="text-xs font-medium">Configured</SelectItem>
-                    <SelectItem value="Not Configured" className="text-xs font-medium">Not Configured</SelectItem>
+                    <SelectItem value="All" className="text-[11px] font-medium">All Configs</SelectItem>
+                    <SelectItem value="Configured" className="text-[11px] font-medium">Configured</SelectItem>
+                    <SelectItem value="Not Configured" className="text-[11px] font-medium">Not Configured</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               {/* Filter 4: Active Status */}
               <div className="space-y-1">
-                <label className="text-[9px] font-black uppercase tracking-wider text-slate-400 block ml-0.5">Active Status</label>
+                <label className="text-[8px] font-bold uppercase tracking-wider text-slate-400 block ml-0.5">Active Status</label>
                 <Select value={activeFilter} onValueChange={setActiveFilter}>
-                  <SelectTrigger className="h-8 bg-white border-slate-200 rounded-lg text-xs font-semibold text-slate-700">
+                  <SelectTrigger className="h-7.5 bg-white border-slate-200 rounded-lg text-[10px] font-semibold text-slate-700 px-2.5">
                     <SelectValue placeholder="All States" />
                   </SelectTrigger>
                   <SelectContent className="rounded-lg">
-                    <SelectItem value="All" className="text-xs font-medium">All States</SelectItem>
-                    <SelectItem value="Active" className="text-xs font-medium">Active</SelectItem>
-                    <SelectItem value="Inactive" className="text-xs font-medium">Inactive</SelectItem>
+                    <SelectItem value="All" className="text-[11px] font-medium">All States</SelectItem>
+                    <SelectItem value="Active" className="text-[11px] font-medium">Active</SelectItem>
+                    <SelectItem value="Inactive" className="text-[11px] font-medium">Inactive</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               {/* Filter 5: Organization Type */}
               <div className="space-y-1">
-                <label className="text-[9px] font-black uppercase tracking-wider text-slate-400 block ml-0.5">Org Type</label>
+                <label className="text-[8px] font-bold uppercase tracking-wider text-slate-400 block ml-0.5">Org Type</label>
                 <Select value={typeFilter} onValueChange={setTypeFilter}>
-                  <SelectTrigger className="h-8 bg-white border-slate-200 rounded-lg text-xs font-semibold text-slate-700">
+                  <SelectTrigger className="h-7.5 bg-white border-slate-200 rounded-lg text-[10px] font-semibold text-slate-700 px-2.5">
                     <SelectValue placeholder="All Types" />
                   </SelectTrigger>
                   <SelectContent className="rounded-lg">
-                    <SelectItem value="All" className="text-xs font-medium">All Types</SelectItem>
-                    <SelectItem value="School" className="text-xs font-medium">School</SelectItem>
-                    <SelectItem value="College" className="text-xs font-medium">College</SelectItem>
-                    <SelectItem value="University" className="text-xs font-medium">University</SelectItem>
-                    <SelectItem value="Institute" className="text-xs font-medium">Institute</SelectItem>
+                    <SelectItem value="All" className="text-[11px] font-medium">All Types</SelectItem>
+                    <SelectItem value="School" className="text-[11px] font-medium">School</SelectItem>
+                    <SelectItem value="College" className="text-[11px] font-medium">College</SelectItem>
+                    <SelectItem value="University" className="text-[11px] font-medium">University</SelectItem>
+                    <SelectItem value="Institute" className="text-[11px] font-medium">Institute</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               {/* Filter 6: Document Uploads */}
               <div className="space-y-1">
-                <label className="text-[9px] font-black uppercase tracking-wider text-slate-400 block ml-0.5">Documents Audited</label>
+                <label className="text-[8px] font-bold uppercase tracking-wider text-slate-400 block ml-0.5">Documents Audited</label>
                 <Select value={documentFilter} onValueChange={setDocumentFilter}>
-                  <SelectTrigger className="h-8 bg-white border-slate-200 rounded-lg text-xs font-semibold text-slate-700">
+                  <SelectTrigger className="h-7.5 bg-white border-slate-200 rounded-lg text-[10px] font-semibold text-slate-700 px-2.5">
                     <SelectValue placeholder="All Documents" />
                   </SelectTrigger>
                   <SelectContent className="rounded-lg">
-                    <SelectItem value="All" className="text-xs font-medium">All Documents</SelectItem>
-                    <SelectItem value="Documents Completed" className="text-xs font-medium">Documents Completed</SelectItem>
-                    <SelectItem value="Documents Pending" className="text-xs font-medium">Documents Pending</SelectItem>
+                    <SelectItem value="All" className="text-[11px] font-medium">All Documents</SelectItem>
+                    <SelectItem value="Documents Completed" className="text-[11px] font-medium">Documents Completed</SelectItem>
+                    <SelectItem value="Documents Pending" className="text-[11px] font-medium">Documents Pending</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               {/* Filter 7: Profile Completion */}
               <div className="space-y-1">
-                <label className="text-[9px] font-black uppercase tracking-wider text-slate-400 block ml-0.5">Profile Completeness</label>
+                <label className="text-[8px] font-bold uppercase tracking-wider text-slate-400 block ml-0.5">Profile Completeness</label>
                 <Select value={detailsFilter} onValueChange={setDetailsFilter}>
-                  <SelectTrigger className="h-8 bg-white border-slate-200 rounded-lg text-xs font-semibold text-slate-700">
+                  <SelectTrigger className="h-7.5 bg-white border-slate-200 rounded-lg text-[10px] font-semibold text-slate-700 px-2.5">
                     <SelectValue placeholder="All Profile Details" />
                   </SelectTrigger>
                   <SelectContent className="rounded-lg">
-                    <SelectItem value="All" className="text-xs font-medium">All Profile Details</SelectItem>
-                    <SelectItem value="Details Completed" className="text-xs font-medium">Details Completed</SelectItem>
-                    <SelectItem value="Incomplete" className="text-xs font-medium">Incomplete</SelectItem>
+                    <SelectItem value="All" className="text-[11px] font-medium">All Profile Details</SelectItem>
+                    <SelectItem value="Details Completed" className="text-[11px] font-medium">Details Completed</SelectItem>
+                    <SelectItem value="Incomplete" className="text-[11px] font-medium">Incomplete</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -516,12 +516,12 @@ const Organizations: React.FC = () => {
                   <Table>
                     <TableHeader className="bg-slate-50">
                       <TableRow className="border-slate-200 hover:bg-transparent">
-                        <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[25%]">Institute Name</TableHead>
-                        <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[22%]">Contact Info</TableHead>
-                        <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[12%]">Onboarding</TableHead>
-                        <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[12%]">Clearance</TableHead>
-                        <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[12%]">Documents</TableHead>
-                        <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider text-center w-[17%]">Actions</TableHead>
+                        <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider w-[25%]">Institute Name</TableHead>
+                        <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider w-[22%]">Contact Info</TableHead>
+                        <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider w-[12%]">Onboarding</TableHead>
+                        <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider w-[12%]">Clearance</TableHead>
+                        <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider w-[12%]">Documents</TableHead>
+                        <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider text-center w-[17%]">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -529,27 +529,27 @@ const Organizations: React.FC = () => {
                         const hasDocs = !!(org.documentUrl || (org.documents && org.documents.length > 0));
                         return (
                           <TableRow key={org.id} className="border-slate-100 hover:bg-slate-50 transition-all duration-200 group">
-                            <TableCell className="px-4 py-3.5 align-middle">
-                              <div className="flex items-center gap-3">
-                                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white text-xs shadow-sm shadow-indigo-500/20 flex-shrink-0">
+                            <TableCell className="px-3 py-2 align-middle">
+                              <div className="flex items-center gap-2.5">
+                                <div className="h-7 w-7 rounded-md bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white text-[10px] shadow-sm shadow-indigo-500/20 flex-shrink-0">
                                   {org.instituteName?.[0] || "I"}
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                  <p className="text-xs font-bold text-slate-900 leading-tight truncate mb-0.5">
+                                  <p className="text-[11px] font-bold text-slate-900 leading-tight truncate mb-0.5">
                                     {org.instituteName}
                                   </p>
-                                  <div className="flex items-center gap-1 text-[10px] text-slate-500 font-semibold">
-                                    <MapPin className="h-2.5 w-2.5" />
-                                    <span>{org.city || "-"}, {org.state || "-"}</span>
+                                  <div className="flex items-center gap-1 text-[9px] text-slate-500 font-semibold">
+                                    <MapPin className="h-2.5 w-2.5 text-slate-400" />
+                                    <span className="truncate">{org.city || "-"}, {org.state || "-"}</span>
                                   </div>
                                 </div>
                               </div>
                             </TableCell>
 
-                            <TableCell className="px-4 py-3.5 align-middle">
+                            <TableCell className="px-3 py-2 align-middle">
                               <div className="space-y-0.5">
-                                <p className="text-xs font-semibold text-slate-700 truncate">{org.email}</p>
-                                <div className="flex items-center gap-2 text-[10px] text-slate-400 font-medium">
+                                <p className="text-[11px] font-semibold text-slate-700 truncate max-w-[170px]">{org.email}</p>
+                                <div className="flex items-center gap-1.5 text-[9px] text-slate-400 font-medium">
                                   <span>{org.contactNumber || "-"}</span>
                                   {org.website && (
                                     <>
@@ -568,11 +568,11 @@ const Organizations: React.FC = () => {
                               </div>
                             </TableCell>
 
-                            <TableCell className="px-4 py-3.5 align-middle">
-                              <div className="flex flex-col gap-1 w-full max-w-[120px]">
+                            <TableCell className="px-3 py-2 align-middle">
+                              <div className="flex flex-col gap-0.5 w-full max-w-[110px]">
                                 {getStatusBadge(org.status)}
                                 {org.status?.toLowerCase() !== "fully activated" && org.status?.toLowerCase() !== "completed" && (
-                                  <div className="w-full bg-slate-100 rounded-full h-1 mt-1 overflow-hidden">
+                                  <div className="w-full bg-slate-100 rounded-full h-0.5 mt-0.5 overflow-hidden">
                                     <div 
                                       className={`h-full rounded-full transition-all duration-500 ${
                                         org.status?.toLowerCase() === "failed setup" ? "bg-rose-500 w-1/3" :
@@ -585,38 +585,38 @@ const Organizations: React.FC = () => {
                               </div>
                             </TableCell>
 
-                            <TableCell className="px-4 py-3.5 align-middle">
+                            <TableCell className="px-3 py-2 align-middle">
                               {org.isVerified ? (
-                                <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[9px] flex items-center gap-1 w-fit">
+                                <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[8px] px-1.5 py-0.5 flex items-center gap-1 w-fit pointer-events-none">
                                   <Check className="h-2.5 w-2.5" /> Approved
                                 </Badge>
                               ) : (
-                                <Badge className="bg-slate-100 text-slate-500 border border-slate-200 font-bold text-[9px] flex items-center gap-1 w-fit">
+                                <Badge className="bg-slate-100 text-slate-500 border border-slate-200 font-bold text-[8px] px-1.5 py-0.5 flex items-center gap-1 w-fit pointer-events-none">
                                   <X className="h-2.5 w-2.5" /> Locked
                                 </Badge>
                               )}
                             </TableCell>
 
-                            <TableCell className="px-4 py-3.5 align-middle">
+                            <TableCell className="px-3 py-2 align-middle">
                               {hasDocs ? (
-                                <span className="text-xs font-bold text-slate-700 flex items-center gap-1">
-                                  <CheckCircle className="h-3.5 w-3.5 text-emerald-500" /> Done
+                                <span className="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                                  <CheckCircle className="h-3 w-3 text-emerald-500" /> Done
                                 </span>
                               ) : (
-                                <span className="text-xs font-bold text-slate-400 flex items-center gap-1">
-                                  <XCircle className="h-3.5 w-3.5 text-slate-300" /> Pending
+                                <span className="text-[11px] font-bold text-slate-400 flex items-center gap-1">
+                                  <XCircle className="h-3 w-3 text-slate-300" /> Pending
                                 </span>
                               )}
                             </TableCell>
 
-                            <TableCell className="px-4 py-3.5 align-middle">
-                              <div className="flex justify-center gap-2">
+                            <TableCell className="px-3 py-2 align-middle">
+                              <div className="flex justify-center gap-1.5">
                                 {!org.isVerified ? (
                                   <Button
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => handleVerify(String(org.id))}
-                                    className="h-7 px-2.5 rounded-lg border text-[10px] font-bold uppercase tracking-wider transition-all bg-emerald-50 border-emerald-200 text-emerald-600 hover:bg-emerald-100 hover:border-emerald-300"
+                                    className="h-6 px-1.5 rounded-lg border text-[9px] font-bold uppercase tracking-wider transition-all bg-emerald-50 border-emerald-200 text-emerald-600 hover:bg-emerald-100 hover:border-emerald-300"
                                     title="Approve organization"
                                   >
                                     Approve
@@ -626,38 +626,38 @@ const Organizations: React.FC = () => {
                                     variant="ghost"
                                     size="icon"
                                     onClick={() => handleOpenSetup(org)}
-                                    className="h-7 w-7 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-650 hover:text-indigo-650 hover:bg-indigo-50 hover:border-indigo-300 transition-all flex items-center justify-center"
+                                    className="h-6 w-6 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-650 hover:text-indigo-650 hover:bg-indigo-50 hover:border-indigo-300 transition-all flex items-center justify-center shrink-0"
                                     title="Configure Tenant Database & Sync"
                                   >
-                                    <Database className="h-3.5 w-3.5" />
+                                    <Database className="h-3 w-3" />
                                   </Button>
                                 )}
                                 <Button
                                   variant="ghost"
                                   size="icon"
                                   onClick={() => navigate(`/organizations/view/${org.id}`)}
-                                  className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-primary hover:bg-primary/5 hover:border-primary/30 transition-all"
+                                  className="h-6 w-6 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-primary hover:bg-primary/5 hover:border-primary/30 transition-all flex items-center justify-center shrink-0"
                                   title="View details"
                                 >
-                                  <Eye className="h-3.5 w-3.5" />
+                                  <Eye className="h-3 w-3" />
                                 </Button>
                                 <Button
                                   variant="ghost"
                                   size="icon"
                                   onClick={() => navigate(`/organizations/edit/${org.id}`)}
-                                  className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 transition-all"
+                                  className="h-6 w-6 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 transition-all flex items-center justify-center shrink-0"
                                   title="Edit details"
                                 >
-                                  <Edit className="h-3.5 w-3.5" />
+                                  <Edit className="h-3 w-3" />
                                 </Button>
                                 <Button
                                   variant="ghost"
                                   size="icon"
                                   onClick={() => openDeleteDialog(String(org.id))}
-                                  className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-300 transition-all"
+                                  className="h-6 w-6 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-300 transition-all flex items-center justify-center shrink-0"
                                   title="Delete profile"
                                 >
-                                  <Trash2 className="h-3.5 w-3.5" />
+                                  <Trash2 className="h-3 w-3" />
                                 </Button>
                               </div>
                             </TableCell>

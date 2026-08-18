@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,8 @@ import {
     Edit3, 
     Shield,
     ClipboardList,
-    FileText
+    FileText,
+    Download
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import api from "@/api/axios";
@@ -18,6 +19,7 @@ import { toast } from "sonner";
 
 const StudentView: React.FC = () => {
     const navigate = useNavigate();
+    const [downloadingReports, setDownloadingReports] = useState<{ [key: number]: boolean }>({});
     const { id } = useParams<{ id: string }>();
     const { student, loading, error, fetchStudent, clearStudent } = useStudentStore();
 
@@ -55,42 +57,83 @@ const StudentView: React.FC = () => {
         }
     };
 
-    const handleDownloadReport = async (reportPdfUrl: string, testName: string, attemptNumber: number) => {
+    // Build full absolute URL from a path like "/api/organization/..." or "/uploads/..."
+    const getAbsoluteUrl = (path: string) => {
+        if (!path) return "";
+        if (path.startsWith("http://") || path.startsWith("https://")) return path;
+        const baseHost = (
+            import.meta.env.VITE_API_BASE_URL ||
+            import.meta.env.VITE_ORG_API_BASE_URL ||
+            "https://nervous-dubinsky.180-179-213-167.plesk.page/api/"
+        ).replace(/\/+$/, "");
+        // Strip trailing /api from base host so we can use the full path as-is
+        const domain = baseHost.endsWith("/api")
+            ? baseHost.slice(0, -4)
+            : baseHost;
+        const cleanPath = path.startsWith("/") ? path : `/${path}`;
+        return domain + cleanPath;
+    };
+
+    // Uses the reportPdfUrl returned by the backend (e.g. "/api/organization/students/report/21/download")
+    // which is the correct endpoint for org/admin roles — not the student-only endpoint.
+    const handleDownloadReport = async (reportId: number, testName: string, reportPdfUrl: string) => {
         if (!reportPdfUrl) {
-            toast.error("Report URL is missing.");
+            toast.error("Report URL not available for this attempt.");
             return;
         }
 
-        const toastId = toast.loading("Downloading report...");
+        setDownloadingReports(prev => ({ ...prev, [reportId]: true }));
+
         try {
-            const response = await api.get(reportPdfUrl, {
+            // reportPdfUrl from backend includes "/api/" prefix (e.g. "/api/organization/students/report/21/download")
+            // Axios base URL already includes "/api/", so we strip the leading "/api" before calling api.get()
+            let endpoint = reportPdfUrl;
+            if (endpoint.startsWith("/api/")) {
+                endpoint = endpoint.substring(4); // "/api/org..." → "/org..."
+            } else if (endpoint.startsWith("/api")) {
+                endpoint = endpoint.substring(4);
+            }
+
+            const response = await api.get(endpoint, {
                 responseType: "blob",
-                headers: {
-                    "x-skip-toast": "true"
-                }
+                headers: { "x-skip-toast": "true" }
             });
 
+            // Extract filename from Content-Disposition header
+            let filename = `${testName.replace(/[^a-zA-Z0-9]/g, "_")}_Report.pdf`;
+            const disposition = response.headers["content-disposition"] || response.headers["Content-Disposition"];
+            if (disposition) {
+                const filenameStarMatch = disposition.match(/filename\*=utf-8''([^;\n]+)/i);
+                if (filenameStarMatch && filenameStarMatch[1]) {
+                    filename = decodeURIComponent(filenameStarMatch[1]);
+                } else {
+                    const filenameMatch = disposition.match(/filename=([^;\n]+)/);
+                    if (filenameMatch && filenameMatch[1]) {
+                        filename = filenameMatch[1].replace(/['"]/g, "").trim();
+                    }
+                }
+            }
+
+            // Create blob URL and trigger download
             const blob = new Blob([response.data], { type: "application/pdf" });
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement("a");
             link.href = url;
-
-            const safeTestName = testName.replace(/[^a-zA-Z0-9]/g, "_");
-            link.download = `${safeTestName}_Attempt_${attemptNumber}.pdf`;
-
+            link.setAttribute("download", filename);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
             window.URL.revokeObjectURL(url);
 
-            toast.dismiss(toastId);
-            toast.success("Report downloaded successfully!");
-        } catch (err: any) {
-            console.error("Failed to download report:", err);
-            toast.dismiss(toastId);
-            toast.error("Failed to download report. Please try again.");
+            toast.success("Report downloaded successfully.");
+        } catch (error) {
+            console.error("PDF download failed:", error);
+            toast.error("Unable to download report.");
+        } finally {
+            setDownloadingReports(prev => ({ ...prev, [reportId]: false }));
         }
     };
+
 
     if (loading && !student) {
         return (
@@ -202,15 +245,15 @@ const StudentView: React.FC = () => {
                 </div>
 
                 {/* Identity Card */}
-                <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 rounded-2xl p-6 shadow-sm flex items-center gap-5">
-                    <div className="h-16 w-16 rounded-xl bg-gradient-to-tr from-blue-500 to-indigo-650 flex items-center justify-center font-black text-white text-xl shadow-md">
+                <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 rounded-xl p-4 shadow-sm flex items-center gap-4">
+                    <div className="h-12 w-12 rounded-lg bg-gradient-to-tr from-blue-500 to-indigo-650 flex items-center justify-center font-black text-white text-base shadow-md">
                         {initials}
                     </div>
                     <div className="flex-1 min-w-0">
-                        <h3 className="text-lg font-bold text-slate-900 dark:text-white leading-tight truncate">
+                        <h3 className="text-base font-bold text-slate-900 dark:text-white leading-tight truncate">
                             {fullName}
                         </h3>
-                        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 mt-1 text-xs text-slate-500 dark:text-slate-400 font-medium">
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5 text-[11px] text-slate-500 dark:text-slate-400 font-medium">
                             <span>Grade {student.gradeLevel || student.gradeName || "Not assigned"}</span>
                             <span className="text-slate-350 dark:text-slate-700">•</span>
                             <span>ID: {student.studentId || student.id || "-"}</span>
@@ -218,13 +261,13 @@ const StudentView: React.FC = () => {
                     </div>
                     <div>
                         {student.isActive !== false ? (
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/50">
-                                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/50">
+                                <span className="h-1 w-1 rounded-full bg-emerald-500 animate-pulse" />
                                 Active
                             </span>
                         ) : (
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 dark:bg-rose-950/20 dark:text-rose-400 border border-rose-100 dark:border-rose-900/50">
-                                <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 dark:bg-rose-950/20 dark:text-rose-400 border border-rose-100 dark:border-rose-900/50">
+                                <span className="h-1 w-1 rounded-full bg-rose-500" />
                                 Inactive
                             </span>
                         )}
@@ -232,72 +275,74 @@ const StudentView: React.FC = () => {
                 </div>
 
                 {/* Details Card */}
-                <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 rounded-2xl shadow-sm p-6 space-y-8">
+                <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 rounded-xl shadow-sm p-4 space-y-5">
                     {/* Personal Information */}
-                    <div className="space-y-4">
-                        <div className="border-b border-slate-100 dark:border-slate-800 pb-2">
-                            <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                    <div className="space-y-2">
+                        <div className="border-b border-slate-100 dark:border-slate-800 pb-1.5">
+                            <h4 className="text-[10px] font-bold text-slate-900 dark:text-white uppercase tracking-wider">
                                 Personal Information
                             </h4>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
                             <div>
-                                <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 block uppercase tracking-wider">First Name</span>
-                                <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 mt-1 block">{student.firstName || "-"}</span>
+                                <span className="text-[9px] font-semibold text-slate-400 dark:text-slate-500 block uppercase tracking-wider">First Name</span>
+                                <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 mt-0.5 block">{student.firstName || "-"}</span>
                             </div>
                             <div>
-                                <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 block uppercase tracking-wider">Last Name</span>
-                                <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 mt-1 block">{student.lastName || "-"}</span>
+                                <span className="text-[9px] font-semibold text-slate-400 dark:text-slate-500 block uppercase tracking-wider">Last Name</span>
+                                <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 mt-0.5 block">{student.lastName || "-"}</span>
                             </div>
                             <div>
-                                <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 block uppercase tracking-wider">Gender</span>
-                                <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 mt-1 block">{student.gender || "-"}</span>
+                                <span className="text-[9px] font-semibold text-slate-400 dark:text-slate-500 block uppercase tracking-wider">Gender</span>
+                                <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 mt-0.5 block">{student.gender || "-"}</span>
                             </div>
                             <div>
-                                <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 block uppercase tracking-wider">Date of Birth</span>
-                                <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 mt-1 block">{formatDate(student.dateOfBirth)}</span>
+                                <span className="text-[9px] font-semibold text-slate-400 dark:text-slate-500 block uppercase tracking-wider">Date of Birth</span>
+                                <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 mt-0.5 block">{formatDate(student.dateOfBirth)}</span>
                             </div>
                         </div>
                     </div>
 
                     {/* Academic Information */}
-                    <div className="space-y-4">
-                        <div className="border-b border-slate-100 dark:border-slate-800 pb-2">
-                            <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                    <div className="space-y-2">
+                        <div className="border-b border-slate-100 dark:border-slate-800 pb-1.5">
+                            <h4 className="text-[10px] font-bold text-slate-900 dark:text-white uppercase tracking-wider">
                                 Academic Information
                             </h4>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
                             <div>
-                                <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 block uppercase tracking-wider">Grade</span>
-                                <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 mt-1 block">{student.gradeLevel || student.gradeName || "Not assigned"}</span>
+                                <span className="text-[9px] font-semibold text-slate-400 dark:text-slate-500 block uppercase tracking-wider">Grade</span>
+                                <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 mt-0.5 block">{student.gradeLevel || student.gradeName || "Not assigned"}</span>
                             </div>
                             <div>
-                                <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 block uppercase tracking-wider">Student ID</span>
-                                <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 mt-1 block">{student.studentId || "-"}</span>
+                                <span className="text-[9px] font-semibold text-slate-400 dark:text-slate-500 block uppercase tracking-wider">Student ID</span>
+                                <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 mt-0.5 block">{student.studentId || "-"}</span>
                             </div>
                         </div>
                     </div>
 
                     {/* Contact Information */}
-                    <div className="space-y-4">
-                        <div className="border-b border-slate-100 dark:border-slate-800 pb-2">
-                            <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                    <div className="space-y-2">
+                        <div className="border-b border-slate-100 dark:border-slate-800 pb-1.5">
+                            <h4 className="text-[10px] font-bold text-slate-900 dark:text-white uppercase tracking-wider">
                                 Contact Information
                             </h4>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
                             <div>
-                                <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 block uppercase tracking-wider">Email</span>
-                                <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 mt-1 block break-all">{student.email || "-"}</span>
+                                <span className="text-[9px] font-semibold text-slate-400 dark:text-slate-500 block uppercase tracking-wider">Email</span>
+                                <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 mt-0.5 block break-all">{student.email || "-"}</span>
                             </div>
                             <div>
-                                <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 block uppercase tracking-wider">Phone Number</span>
-                                <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 mt-1 block">{student.phoneNumber || student.phone || "-"}</span>
+                                <span className="text-[9px] font-semibold text-slate-400 dark:text-slate-500 block uppercase tracking-wider">Phone Number</span>
+                                <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 mt-0.5 block">{student.phoneNumber || student.phone || "-"}</span>
                             </div>
                         </div>
                     </div>
-                </div>                {/* Assessment & Report History Section */}
+                </div>
+
+                {/* Assessment & Report History Section */}
                 <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 rounded-2xl shadow-sm p-6 space-y-6">
                     <div className="border-b border-slate-100 dark:border-slate-800 pb-3">
                         <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
@@ -381,14 +426,39 @@ const StudentView: React.FC = () => {
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <Button
-                                                            size="sm"
-                                                            onClick={() => handleDownloadReport(attempt.reportPdfUrl, test.testName, attempt.attemptNumber)}
-                                                            className="h-8 px-3.5 bg-blue-600 hover:bg-blue-500 dark:bg-blue-600 dark:hover:bg-blue-500 text-white text-[11px] font-black uppercase tracking-wider rounded-lg shadow-sm shadow-blue-600/10 hover:shadow-md hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-1.5 self-end sm:self-center"
-                                                        >
-                                                            <FileText className="h-3.5 w-3.5" />
-                                                            View Report
-                                                        </Button>
+                                                        <div className="flex items-center gap-2 self-end sm:self-center flex-wrap">
+                                                            {/* View HTML report in browser */}
+                                                            {attempt.reportHtmlUrl && (
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="outline"
+                                                                    onClick={() => window.open(getAbsoluteUrl(attempt.reportHtmlUrl), "_blank", "noopener,noreferrer")}
+                                                                    className="h-8 px-3 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-[11px] font-black uppercase tracking-wider rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-1.5 transition-all shadow-sm"
+                                                                >
+                                                                    <FileText className="h-3.5 w-3.5" />
+                                                                    View HTML
+                                                                </Button>
+                                                            )}
+                                                            {/* Download PDF using the org-specific endpoint from the API */}
+                                                            <Button
+                                                                size="sm"
+                                                                onClick={() => handleDownloadReport(attempt.reportId, test.testName, attempt.reportPdfUrl)}
+                                                                disabled={!!downloadingReports[attempt.reportId]}
+                                                                className="h-8 px-3.5 bg-blue-600 hover:bg-blue-500 dark:bg-blue-600 dark:hover:bg-blue-500 text-white text-[11px] font-black uppercase tracking-wider rounded-lg shadow-sm shadow-blue-600/10 hover:shadow-md hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-1.5 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100"
+                                                            >
+                                                                {downloadingReports[attempt.reportId] ? (
+                                                                    <>
+                                                                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                                                        Downloading...
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <Download className="h-3.5 w-3.5" />
+                                                                        Download Report
+                                                                    </>
+                                                                )}
+                                                            </Button>
+                                                        </div>
                                                     </div>
                                                 ))}
                                             </div>

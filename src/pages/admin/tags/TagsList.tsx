@@ -129,30 +129,30 @@ export const TagsList: React.FC = () => {
 
                 <Card className="glass-card border-none shadow-elegant rounded-2xl overflow-hidden">
                     <CardHeader className="p-3 border-b border-slate-50">
-                        <div className="flex flex-col md:flex-row gap-3 justify-between items-center">
+                        <div className="flex flex-col sm:flex-row gap-2.5 justify-between items-center">
                             {/* Search Bar */}
-                            <div className="relative group w-full md:flex-1">
+                            <div className="relative group w-full sm:flex-1">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500 group-focus-within:text-purple-600 transition-colors" />
                                 <Input
                                     placeholder="Search tags by name or description..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="h-9 pl-9 bg-white border border-slate-200 rounded-lg font-medium text-xs text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/30 transition-all w-full"
+                                    className="h-8 pl-9 bg-white border border-slate-200 rounded-lg font-medium text-[11px] text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/30 transition-all w-full"
                                 strokeWidth={1.5}
                                 />
                             </div>
 
                             {/* Theory Filter Dropdown */}
-                            <div className="flex items-center gap-2 w-full md:w-auto">
-                                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500 shrink-0">
-                                    <Filter className="h-3.5 w-3.5 text-purple-600" />
+                            <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                                <div className="flex items-center gap-1 text-[10px] font-bold text-slate-500 shrink-0">
+                                    <Filter className="h-3 w-3 text-purple-600" />
                                     <span>Filter by Theory:</span>
                                 </div>
                                 <Select
                                     value={selectedTheoryId}
                                     onValueChange={(val) => setSelectedTheoryId(val)}
                                 >
-                                    <SelectTrigger className="h-9 w-full md:w-[220px] bg-white border-slate-200 rounded-lg text-xs font-semibold text-slate-700">
+                                    <SelectTrigger className="h-8 w-full sm:w-[180px] bg-white border-slate-200 rounded-lg text-[10px] font-semibold text-slate-700">
                                         <SelectValue placeholder="All Theories" />
                                     </SelectTrigger>
                                     <SelectContent className="rounded-xl border-slate-100 shadow-xl">
@@ -168,10 +168,10 @@ export const TagsList: React.FC = () => {
                                     variant="outline"
                                     size="icon"
                                     onClick={() => fetchTags()}
-                                    className="h-9 w-9 rounded-lg border-slate-200 bg-white hover:bg-slate-50 text-slate-600 shrink-0"
+                                    className="h-8 w-8 rounded-lg border-slate-200 bg-white hover:bg-slate-50 text-slate-600 shrink-0 flex items-center justify-center"
                                     title="Refresh List"
                                 >
-                                    <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
+                                    <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
                                 </Button>
                             </div>
                         </div>
@@ -240,69 +240,69 @@ export const TagsList: React.FC = () => {
                                     <Table>
                                         <TableHeader className="bg-slate-50">
                                             <TableRow className="border-slate-200 hover:bg-transparent">
-                                                <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[30%]">Tag Name</TableHead>
-                                                <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[20%]">Theory</TableHead>
-                                                <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[35%]">Description</TableHead>
-                                                <TableHead className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-wider text-center w-[15%]">Actions</TableHead>
+                                                <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider w-[30%]">Tag Name</TableHead>
+                                                <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider w-[20%]">Theory</TableHead>
+                                                <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider w-[35%]">Description</TableHead>
+                                                <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider text-center w-[15%]">Actions</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
                                             {paginatedTags.map((tag) => (
                                                 <TableRow key={tag.id} className="border-slate-100 hover:bg-slate-50 transition-all duration-200 group">
-                                                    <TableCell className="px-4 py-3">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="h-7 w-7 rounded-md bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center font-bold text-white text-[10px] shadow-sm shadow-purple-500/20 border border-white/20 shrink-0">
+                                                    <TableCell className="px-3 py-1.5 align-middle">
+                                                        <div className="flex items-center gap-2.5">
+                                                            <div className="h-6 w-6 rounded-md bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center font-bold text-white text-[10px] shadow-sm shadow-purple-500/20 border border-white/20 shrink-0">
                                                                 <Tag className="h-3.5 w-3.5" />
                                                             </div>
                                                             <div className="min-w-0 flex-1">
-                                                                <p className="text-xs font-bold text-slate-900 leading-none mb-0.5 group-hover:text-purple-600 transition-colors truncate">
+                                                                <p className="text-[11px] font-bold text-slate-900 leading-none mb-0.5 group-hover:text-purple-600 transition-colors truncate">
                                                                     {tag.tagName}
                                                                 </p>
                                                             </div>
                                                         </div>
                                                     </TableCell>
-                                                    <TableCell className="px-4 py-3">
+                                                    <TableCell className="px-3 py-1.5 align-middle">
                                                         {tag.theoryName ? (
-                                                            <Badge variant="outline" className="bg-purple-50/50 text-purple-600 border-purple-200/50 text-[10px] font-semibold rounded-md px-2 py-0.5">
+                                                            <Badge variant="outline" className="bg-purple-50/50 text-purple-600 border-purple-200/50 text-[8px] font-bold rounded-md px-1.5 py-0.5 pointer-events-none">
                                                                 {tag.theoryName}
                                                             </Badge>
                                                         ) : (
-                                                            <span className="text-[11px] text-slate-400 font-medium">General / Unassigned</span>
+                                                            <span className="text-[10px] text-slate-400 font-medium">General / Unassigned</span>
                                                         )}
                                                     </TableCell>
-                                                    <TableCell className="px-4 py-3">
-                                                        <div className="max-w-md truncate text-xs font-medium text-slate-500" title={tag.description}>
+                                                    <TableCell className="px-3 py-1.5 align-middle">
+                                                        <div className="max-w-md truncate text-[11px] font-medium text-slate-500" title={tag.description}>
                                                             {tag.description || "No description provided."}
                                                         </div>
                                                     </TableCell>
-                                                    <TableCell className="px-4 py-3">
+                                                    <TableCell className="px-3 py-1.5 align-middle">
                                                         <div className="flex justify-center gap-1.5">
                                                             <Button
                                                                 variant="ghost"
                                                                 size="icon"
                                                                 onClick={() => navigate(`/manage/tags/view/${tag.id}`)}
-                                                                className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-purple-600 hover:bg-purple-50 hover:border-purple-200 transition-all"
+                                                                className="h-6 w-6 rounded-lg bg-slate-100 border border-slate-200 text-slate-650 hover:text-purple-600 hover:bg-purple-50 hover:border-purple-200 transition-all flex items-center justify-center"
                                                                 title="View Tag Details"
                                                             >
-                                                                <Eye className="h-3.5 w-3.5" />
+                                                                <Eye className="h-3 w-3" />
                                                             </Button>
                                                             <Button
                                                                 variant="ghost"
                                                                 size="icon"
                                                                 onClick={() => navigate(`/manage/tags/edit/${tag.id}`)}
-                                                                className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 transition-all"
+                                                                className="h-6 w-6 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 transition-all flex items-center justify-center"
                                                                 title="Edit Tag"
                                                             >
-                                                                <Edit className="h-3.5 w-3.5" />
+                                                                <Edit className="h-3 w-3" />
                                                             </Button>
                                                             <Button
                                                                 variant="ghost"
                                                                 size="icon"
                                                                 onClick={() => openDeleteDialog(tag.id)}
-                                                                className="h-7 w-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-300 transition-all"
+                                                                className="h-6 w-6 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-300 transition-all flex items-center justify-center"
                                                                 title="Delete Tag"
                                                             >
-                                                                <Trash2 className="h-3.5 w-3.5" />
+                                                                <Trash2 className="h-3 w-3" />
                                                             </Button>
                                                         </div>
                                                     </TableCell>

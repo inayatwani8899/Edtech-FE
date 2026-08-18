@@ -166,31 +166,33 @@ export const AIQuestionGeneration: React.FC = () => {
                             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
                             <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-[100px]"></div>
                             
-                            <CardContent className="p-10 relative z-10">
-                                <div className="flex items-center gap-4 mb-10">
-                                    <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-                                        <Settings2 className="h-7 w-7 text-white" />
+                            <CardContent className="p-6 relative z-10">
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center shadow-lg shadow-indigo-500/30 flex-shrink-0">
+                                            <Settings2 className="h-5 w-5 text-white" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-lg font-black tracking-tight">Synthesis Configuration Matrix</h3>
+                                            <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">Define neural targeting parameters</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h3 className="text-2xl font-black tracking-tight">Synthesis Configuration Matrix</h3>
-                                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Define neural targeting parameters</p>
-                                    </div>
-                                    <div className="ml-auto px-4 py-2 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-xl">
-                                        <div className="flex items-center gap-3">
-                                            <Zap className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-                                            <span className="text-xs font-black tracking-widest text-white uppercase tracking-widest">Protocol V4</span>
+                                    <div className="sm:ml-auto px-3 py-1 bg-white/5 border border-white/10 rounded-xl backdrop-blur-xl self-start sm:self-auto">
+                                        <div className="flex items-center gap-2">
+                                            <Zap className="h-3.5 w-3.5 text-yellow-400 fill-yellow-400" />
+                                            <span className="text-[10px] font-black tracking-widest text-white uppercase">Protocol V4</span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <div className="space-y-2 text-slate-900">
-                                        <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Question Archetype</Label>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-1.5 text-slate-900">
+                                        <Label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">Question Archetype</Label>
                                         <Select value={questionType} onValueChange={setQuestionType}>
-                                            <SelectTrigger className="h-14 bg-white/5 border-white/10 rounded-[1.25rem] px-5 text-white font-black text-sm hover:bg-white/10 transition-colors">
+                                            <SelectTrigger className="h-9 bg-white/5 border-white/10 rounded-xl px-4 text-white font-bold text-xs hover:bg-white/10 transition-colors">
                                                 <SelectValue placeholder="Identify Archetype..." />
                                             </SelectTrigger>
-                                            <SelectContent className="rounded-2xl">
+                                            <SelectContent className="rounded-xl">
                                                 {questionTypeOptions.map((type) => (
                                                     <SelectItem key={type} value={type} className="font-bold">{type}</SelectItem>
                                                 ))}
@@ -198,27 +200,27 @@ export const AIQuestionGeneration: React.FC = () => {
                                         </Select>
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Generation Volume</Label>
+                                    <div className="space-y-1.5">
+                                        <Label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">Generation Volume</Label>
                                         <div className="relative group">
-                                            <Hash className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 group-focus-within:text-indigo-400 transition-colors" />
+                                            <Hash className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500 group-focus-within:text-indigo-400 transition-colors" />
                                             <Input 
                                                 type="number"
                                                 value={generation_count}
                                                 onChange={(e) => setGenerationCount(e.target.value)}
-                                                className="h-14 pl-12 bg-white/5 border-white/10 focus:bg-white/10 focus:border-indigo-500 transition-all rounded-[1.25rem] text-lg font-black text-white"
+                                                className="h-9 pl-9 bg-white/5 border-white/10 focus:bg-white/10 focus:border-indigo-500 transition-all rounded-xl text-xs font-black text-white"
                                                 min="1" max="500"
                                             />
                                         </div>
                                     </div>
 
-                                    <div className="space-y-2 text-slate-900">
-                                        <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Academic Target (Grade)</Label>
+                                    <div className="space-y-1.5 text-slate-900">
+                                        <Label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">Academic Target (Grade)</Label>
                                         <Select value={grade} onValueChange={setGrade}>
-                                            <SelectTrigger className="h-14 bg-white/5 border-white/10 rounded-[1.25rem] px-5 text-white font-black text-sm hover:bg-white/10 transition-colors">
+                                            <SelectTrigger className="h-9 bg-white/5 border-white/10 rounded-xl px-4 text-white font-bold text-xs hover:bg-white/10 transition-colors">
                                                 <SelectValue placeholder="Academic Stratum..." />
                                             </SelectTrigger>
-                                            <SelectContent className="z-[9999] max-h-[300px] overflow-y-auto rounded-2xl">
+                                            <SelectContent className="z-[9999] max-h-[220px] overflow-y-auto rounded-xl">
                                                 {gradeOptions.map((g) => (
                                                     <SelectItem key={g} value={g} className="font-bold">
                                                         Grade {g}
@@ -228,13 +230,13 @@ export const AIQuestionGeneration: React.FC = () => {
                                         </Select>
                                     </div>
 
-                                    <div className="space-y-2 text-slate-900">
-                                        <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Discipline Network (Stream)</Label>
+                                    <div className="space-y-1.5 text-slate-900">
+                                        <Label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">Discipline Network (Stream)</Label>
                                         <Select value={stream} onValueChange={setStream}>
-                                            <SelectTrigger className="h-14 bg-white/5 border-white/10 rounded-[1.25rem] px-5 text-white font-black text-sm hover:bg-white/10 transition-colors">
+                                            <SelectTrigger className="h-9 bg-white/5 border-white/10 rounded-xl px-4 text-white font-bold text-xs hover:bg-white/10 transition-colors">
                                                 <SelectValue placeholder="Focus Network..." />
                                             </SelectTrigger>
-                                            <SelectContent className="rounded-2xl">
+                                            <SelectContent className="rounded-xl">
                                                 {streamOptions.map((s) => (
                                                     <SelectItem key={s} value={s} className="font-bold">{s}</SelectItem>
                                                 ))}
@@ -243,19 +245,19 @@ export const AIQuestionGeneration: React.FC = () => {
                                     </div>
                                 </div>
 
-                                <div className="mt-12 p-8 bg-white/5 border border-white/10 rounded-[2.5rem] backdrop-blur-md">
-                                    <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                                        <div className="flex items-center gap-5">
-                                            <div className="h-12 w-12 rounded-[1.25rem] bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30">
-                                                <Activity className="h-6 w-6 text-indigo-400 animate-pulse" />
+                                <div className="mt-6 p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md">
+                                    <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-9 w-9 rounded-lg bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30 flex-shrink-0">
+                                                <Activity className="h-5 w-5 text-indigo-400 animate-pulse" />
                                             </div>
                                             <div>
-                                                <p className="text-sm font-black tracking-tight leading-none text-white mb-1">Synthesis Readiness</p>
+                                                <p className="text-xs font-black tracking-tight leading-none text-white mb-1">Synthesis Readiness</p>
                                                 <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Neural weights mapped for generation</p>
                                             </div>
                                         </div>
-                                        <Button onClick={handleSubmit} disabled={loading} className="w-full md:w-auto h-14 px-10 rounded-2xl bg-white text-slate-900 font-black text-[11px] uppercase tracking-[0.1em] hover:bg-slate-100 transition-all shadow-2xl shadow-white/5 active:scale-95">
-                                            {loading ? <Loader2 className="h-5 w-5 animate-spin mr-3" /> : <Zap className="h-5 w-5 mr-3 text-yellow-500 fill-yellow-500" />}
+                                        <Button onClick={handleSubmit} disabled={loading} className="w-full md:w-auto h-8 px-6 rounded-lg bg-white text-slate-900 font-black text-[10px] uppercase tracking-wider hover:bg-slate-100 transition-all shadow-xl active:scale-95">
+                                            {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" /> : <Zap className="h-3.5 w-3.5 mr-2 text-yellow-500 fill-yellow-500" />}
                                             Run Synthesis
                                         </Button>
                                     </div>

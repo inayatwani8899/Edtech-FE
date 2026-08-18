@@ -274,57 +274,57 @@ const StudentForm: React.FC = () => {
                     {/* Main Form Fields Container (Left Column) */}
                     <div className="lg:col-span-8 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 rounded-2xl shadow-sm overflow-hidden flex flex-col justify-between">
                         
-                        <div className="p-6 space-y-8">
+                        <div className="p-4 space-y-5">
                             {/* Section 1: Personal Information */}
-                            <div className="space-y-4">
-                                <div className="border-b border-slate-100 dark:border-slate-800/65 pb-2">
-                                    <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                            <div className="space-y-3">
+                                <div className="border-b border-slate-100 dark:border-slate-800/65 pb-1.5">
+                                    <h3 className="text-[10px] font-bold text-slate-900 dark:text-white uppercase tracking-wider">
                                         Personal Information
                                     </h3>
                                 </div>
                                 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                     {/* First Name */}
                                     <div className="space-y-1">
-                                        <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                        <Label className="text-[9px] font-semibold text-slate-700 dark:text-slate-300">
                                             First Name <span className="text-red-500">*</span>
                                         </Label>
                                         <Input 
                                             value={formData.firstName}
                                             onChange={(e) => handleInputChange("firstName", e.target.value)}
                                             placeholder="First name"
-                                            className="h-9 text-xs border-slate-200 dark:border-slate-800 rounded-xl"
+                                            className="h-8 text-xs border-slate-200 dark:border-slate-800 rounded-lg"
                                             required
                                         />
                                     </div>
                                     
                                     {/* Last Name */}
                                     <div className="space-y-1">
-                                        <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                        <Label className="text-[9px] font-semibold text-slate-700 dark:text-slate-300">
                                             Last Name <span className="text-red-500">*</span>
                                         </Label>
                                         <Input 
                                             value={formData.lastName}
                                             onChange={(e) => handleInputChange("lastName", e.target.value)}
                                             placeholder="Last name"
-                                            className="h-9 text-xs border-slate-200 dark:border-slate-800 rounded-xl"
+                                            className="h-8 text-xs border-slate-200 dark:border-slate-800 rounded-lg"
                                             required
                                         />
                                     </div>
 
                                     {/* Gender */}
                                     <div className="space-y-1">
-                                        <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                        <Label className="text-[9px] font-semibold text-slate-700 dark:text-slate-300">
                                             Gender <span className="text-red-500">*</span>
                                         </Label>
                                         <Select
                                             value={formData.gender}
                                             onValueChange={(val) => handleInputChange("gender", val)}
                                         >
-                                            <SelectTrigger className="w-full h-9 bg-transparent border-slate-200 dark:border-slate-800 rounded-xl px-3 text-xs font-semibold text-slate-750 dark:text-slate-300">
+                                            <SelectTrigger className="w-full h-8 bg-transparent border-slate-200 dark:border-slate-800 rounded-lg px-3 text-xs font-semibold text-slate-750 dark:text-slate-300">
                                                 <SelectValue placeholder="Select gender" />
                                             </SelectTrigger>
-                                            <SelectContent className="rounded-xl border-slate-200 dark:border-slate-800 shadow-xl">
+                                            <SelectContent className="rounded-lg border-slate-200 dark:border-slate-800 shadow-xl">
                                                 <SelectItem value="Male" className="text-xs font-semibold">Male</SelectItem>
                                                 <SelectItem value="Female" className="text-xs font-semibold">Female</SelectItem>
                                                 <SelectItem value="Other" className="text-xs font-semibold">Other</SelectItem>
@@ -334,14 +334,14 @@ const StudentForm: React.FC = () => {
 
                                     {/* Date of Birth */}
                                     <div className="space-y-1">
-                                        <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                        <Label className="text-[9px] font-semibold text-slate-700 dark:text-slate-300">
                                             Date of Birth <span className="text-red-500">*</span>
                                         </Label>
                                         <Input 
                                             type="date"
                                             value={formData.dateOfBirth}
                                             onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
-                                            className="h-9 text-xs border-slate-200 dark:border-slate-800 rounded-xl"
+                                            className="h-8 text-xs border-slate-200 dark:border-slate-800 rounded-lg"
                                             required
                                         />
                                     </div>
@@ -349,27 +349,27 @@ const StudentForm: React.FC = () => {
                             </div>
 
                             {/* Section 2: Academic Information */}
-                            <div className="space-y-4">
-                                <div className="border-b border-slate-100 dark:border-slate-800/65 pb-2">
-                                    <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                            <div className="space-y-3">
+                                <div className="border-b border-slate-100 dark:border-slate-800/65 pb-1.5">
+                                    <h3 className="text-[10px] font-bold text-slate-900 dark:text-white uppercase tracking-wider">
                                         Academic Information
                                     </h3>
                                 </div>
                                 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                     {/* Grade */}
                                     <div className="space-y-1">
-                                        <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                        <Label className="text-[9px] font-semibold text-slate-700 dark:text-slate-300">
                                             Grade <span className="text-red-500">*</span>
                                         </Label>
                                         <Select
                                             value={formData.gradeId}
                                             onValueChange={(val) => handleInputChange("gradeId", val)}
                                         >
-                                            <SelectTrigger className="w-full h-9 bg-transparent border-slate-200 dark:border-slate-800 rounded-xl px-3 text-xs font-semibold text-slate-750 dark:text-slate-300">
+                                            <SelectTrigger className="w-full h-8 bg-transparent border-slate-200 dark:border-slate-800 rounded-lg px-3 text-xs font-semibold text-slate-750 dark:text-slate-300">
                                                 <SelectValue placeholder="Select grade" />
                                             </SelectTrigger>
-                                            <SelectContent className="rounded-xl border-slate-200 dark:border-slate-800 shadow-xl max-h-56">
+                                            <SelectContent className="rounded-lg border-slate-200 dark:border-slate-800 shadow-xl max-h-56">
                                                 {grades.map((g) => (
                                                     <SelectItem key={g.id} value={g.id.toString()} className="text-xs font-semibold">
                                                         {g.name}
@@ -386,31 +386,31 @@ const StudentForm: React.FC = () => {
 
                                     {/* Student ID */}
                                     <div className="space-y-1">
-                                        <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                                            Student ID <span className="text-slate-400 text-[10px]">(Optional)</span>
+                                        <Label className="text-[9px] font-semibold text-slate-700 dark:text-slate-300">
+                                            Student ID <span className="text-slate-450 dark:text-slate-500 text-[10px]">(Optional)</span>
                                         </Label>
                                         <Input 
                                             value={formData.studentId}
                                             onChange={(e) => handleInputChange("studentId", e.target.value)}
                                             placeholder="Enter student ID"
-                                            className="h-9 text-xs border-slate-200 dark:border-slate-800 rounded-xl"
+                                            className="h-8 text-xs border-slate-200 dark:border-slate-800 rounded-lg"
                                         />
                                     </div>
                                 </div>
                             </div>
 
                             {/* Section 3: Contact Information */}
-                            <div className="space-y-4">
-                                <div className="border-b border-slate-100 dark:border-slate-800/65 pb-2">
-                                    <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                            <div className="space-y-3">
+                                <div className="border-b border-slate-100 dark:border-slate-800/65 pb-1.5">
+                                    <h3 className="text-[10px] font-bold text-slate-900 dark:text-white uppercase tracking-wider">
                                         Contact Information
                                     </h3>
                                 </div>
                                 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                     {/* Email */}
                                     <div className="space-y-1">
-                                        <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                        <Label className="text-[9px] font-semibold text-slate-700 dark:text-slate-300">
                                             Email <span className="text-red-500">*</span>
                                         </Label>
                                         <Input 
@@ -418,34 +418,34 @@ const StudentForm: React.FC = () => {
                                             value={formData.email}
                                             onChange={(e) => handleInputChange("email", e.target.value)}
                                             placeholder="email@address.com"
-                                            className="h-9 text-xs border-slate-200 dark:border-slate-800 rounded-xl"
+                                            className="h-8 text-xs border-slate-200 dark:border-slate-800 rounded-lg"
                                             required
                                         />
                                     </div>
 
                                     {/* Phone Number */}
                                     <div className="space-y-1">
-                                        <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                        <Label className="text-[9px] font-semibold text-slate-700 dark:text-slate-300">
                                             Phone Number <span className="text-red-500">*</span>
                                         </Label>
-                                        <div className="flex rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 overflow-hidden focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all">
+                                        <div className="flex rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 overflow-hidden focus-within:ring-2 focus-within:ring-indigo-100 focus-within:border-indigo-500 transition-all">
                                             <select 
                                                 value={countryCode} 
                                                 onChange={(e) => setCountryCode(e.target.value)}
-                                                className="bg-transparent pl-3 pr-2 text-xs font-semibold border-none outline-none cursor-pointer text-slate-700 dark:text-slate-300 h-9"
+                                                className="bg-transparent pl-3 pr-1.5 text-xs font-semibold border-none outline-none cursor-pointer text-slate-700 dark:text-slate-300 h-8"
                                             >
                                                 <option value="+91">🇮🇳 +91</option>
                                                 <option value="+1">🇺🇸 +1</option>
                                                 <option value="+44">🇬🇧 +44</option>
                                                 <option value="+971">🇦🇪 +971</option>
                                             </select>
-                                            <div className="w-px bg-slate-200 dark:bg-slate-800 self-stretch my-2"></div>
+                                            <div className="w-px bg-slate-200 dark:bg-slate-800 self-stretch my-1.5"></div>
                                             <input 
                                                 type="tel"
                                                 value={formData.phone}
                                                 onChange={(e) => handleInputChange("phone", e.target.value)}
                                                 placeholder="Phone number" 
-                                                className="flex-1 bg-transparent px-3 text-xs font-semibold text-slate-800 dark:text-slate-150 placeholder:text-slate-400 outline-none border-none h-9"
+                                                className="flex-1 bg-transparent px-3 text-xs font-semibold text-slate-850 dark:text-slate-150 placeholder:text-slate-400 outline-none border-none h-8"
                                                 required
                                             />
                                         </div>
@@ -454,7 +454,7 @@ const StudentForm: React.FC = () => {
                                     {/* Password - Only show on creation */}
                                     {!id && (
                                         <div className="space-y-1 md:col-span-2">
-                                            <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                            <Label className="text-[9px] font-semibold text-slate-700 dark:text-slate-300">
                                                 Password <span className="text-red-500">*</span>
                                             </Label>
                                             <div className="relative">
@@ -463,15 +463,15 @@ const StudentForm: React.FC = () => {
                                                     value={formData.password}
                                                     onChange={(e) => handleInputChange("password", e.target.value)}
                                                     placeholder="Enter login password"
-                                                    className="h-9 pr-10 text-xs border-slate-200 dark:border-slate-800 rounded-xl"
+                                                    className="h-8 pr-10 text-xs border-slate-200 dark:border-slate-800 rounded-lg"
                                                     required
                                                 />
                                                 <button
                                                     type="button"
                                                     onClick={() => setShowPassword(!showPassword)}
-                                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-650 dark:hover:text-slate-300"
                                                 >
-                                                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                                    {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                                                 </button>
                                             </div>
                                         </div>
@@ -480,7 +480,7 @@ const StudentForm: React.FC = () => {
                                     {/* Status (Only when editing, using colored chips) */}
                                     {id && (
                                         <div className="space-y-1 md:col-span-2">
-                                            <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                                            <Label className="text-[9px] font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                                                 Status
                                             </Label>
                                             <div className="flex gap-2">
@@ -488,9 +488,9 @@ const StudentForm: React.FC = () => {
                                                     type="button"
                                                     onClick={() => handleInputChange("isActive", true)}
                                                     className={cn(
-                                                        "px-3 py-1.5 rounded-full text-xs font-bold transition-all border flex items-center gap-1.5",
+                                                        "px-2.5 py-1 rounded-full text-[11px] font-bold transition-all border flex items-center gap-1.5",
                                                         formData.isActive !== false
-                                                            ? "bg-emerald-50 text-emerald-700 border-emerald-200 shadow-sm"
+                                                            ? "bg-emerald-50 text-emerald-700 border-emerald-250 shadow-sm"
                                                             : "bg-transparent text-slate-400 border-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
                                                     )}
                                                 >
@@ -501,9 +501,9 @@ const StudentForm: React.FC = () => {
                                                     type="button"
                                                     onClick={() => handleInputChange("isActive", false)}
                                                     className={cn(
-                                                        "px-3 py-1.5 rounded-full text-xs font-bold transition-all border flex items-center gap-1.5",
+                                                        "px-2.5 py-1 rounded-full text-[11px] font-bold transition-all border flex items-center gap-1.5",
                                                         formData.isActive === false
-                                                            ? "bg-rose-50 text-rose-700 border-rose-200 shadow-sm"
+                                                            ? "bg-rose-50 text-rose-700 border-rose-250 shadow-sm"
                                                             : "bg-transparent text-slate-400 border-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
                                                     )}
                                                 >
@@ -518,24 +518,24 @@ const StudentForm: React.FC = () => {
                         </div>
 
                         {/* Sticky Action Footer */}
-                        <div className="sticky bottom-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-t border-slate-200/60 dark:border-slate-800 px-6 py-4 flex items-center justify-end gap-3 z-10">
+                        <div className="sticky bottom-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-t border-slate-200/60 dark:border-slate-800 px-4 py-3 flex items-center justify-end gap-3 z-10">
                             <Button
                                 type="button"
                                 variant="outline"
                                 onClick={() => navigate(redirectPath)}
-                                className="h-9 px-4 rounded-xl border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 text-xs font-semibold hover:bg-slate-50"
+                                className="h-7.5 px-3.5 rounded-lg border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-semibold hover:bg-slate-50"
                             >
                                 Cancel
                             </Button>
                             <Button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="h-9 px-5 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:text-slate-900 text-white text-xs font-bold shadow-sm flex items-center gap-2"
+                                className="h-7.5 px-4 rounded-lg bg-slate-900 hover:bg-slate-800 dark:bg-white dark:text-slate-900 text-white text-[10px] font-bold shadow-sm flex items-center gap-1.5"
                             >
                                 {isSubmitting ? (
-                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                    <Loader2 className="h-3 w-3 animate-spin" />
                                 ) : (
-                                    <UserPlus className="h-3.5 w-3.5" />
+                                    <UserPlus className="h-3 w-3" />
                                 )}
                                 {id ? "Save Changes" : "Register Student"}
                             </Button>

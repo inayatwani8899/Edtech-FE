@@ -46,6 +46,7 @@ export interface Question {
     theory?: string | TheoryInfo;
     tag?: string;
     options: Option[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any;
 }
 
@@ -81,6 +82,7 @@ export interface TestInterfaceProps {
 }
 
 // --- Helpers ---
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getTheoryName = (theoryField: any): string => {
     if (!theoryField) return "";
     if (typeof theoryField === "object") return theoryField.name || theoryField.theoryName || "";
@@ -110,12 +112,12 @@ const getCategoryEmoji = (cat: string) => {
 
 const categoryColors: Record<string, { bg: string; border: string; accent: string; badge: string }> = {};
 const colorPalette = [
-    { bg: "from-indigo-50 to-violet-50", border: "border-indigo-100", accent: "text-indigo-600", badge: "bg-indigo-100 text-indigo-700" },
-    { bg: "from-emerald-50 to-teal-50", border: "border-emerald-100", accent: "text-emerald-600", badge: "bg-emerald-100 text-emerald-700" },
-    { bg: "from-amber-50 to-orange-50", border: "border-amber-100", accent: "text-amber-600", badge: "bg-amber-100 text-amber-700" },
-    { bg: "from-rose-50 to-pink-50", border: "border-rose-100", accent: "text-rose-600", badge: "bg-rose-100 text-rose-700" },
-    { bg: "from-sky-50 to-blue-50", border: "border-sky-100", accent: "text-sky-600", badge: "bg-sky-100 text-sky-700" },
-    { bg: "from-purple-50 to-fuchsia-50", border: "border-purple-100", accent: "text-purple-600", badge: "bg-purple-100 text-purple-700" },
+    { bg: "from-indigo-50 to-violet-50 dark:from-indigo-950/20 dark:to-violet-950/20", border: "border-indigo-100 dark:border-indigo-900/30", accent: "text-indigo-600 dark:text-indigo-400", badge: "bg-indigo-100 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300" },
+    { bg: "from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20", border: "border-emerald-100 dark:border-emerald-900/30", accent: "text-emerald-600 dark:text-emerald-400", badge: "bg-emerald-100 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300" },
+    { bg: "from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20", border: "border-amber-100 dark:border-amber-900/30", accent: "text-amber-600 dark:text-amber-400", badge: "bg-amber-100 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300" },
+    { bg: "from-rose-50 to-pink-50 dark:from-rose-950/20 dark:to-pink-950/20", border: "border-rose-100 dark:border-rose-900/30", accent: "text-rose-600 dark:text-rose-400", badge: "bg-rose-100 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300" },
+    { bg: "from-sky-50 to-blue-50 dark:from-sky-950/20 dark:to-blue-950/20", border: "border-sky-100 dark:border-sky-900/30", accent: "text-sky-600 dark:text-sky-400", badge: "bg-sky-100 dark:bg-sky-950/30 text-sky-700 dark:text-sky-300" },
+    { bg: "from-purple-50 to-fuchsia-50 dark:from-purple-950/20 dark:to-fuchsia-950/20", border: "border-purple-100 dark:border-purple-900/30", accent: "text-purple-600 dark:text-purple-400", badge: "bg-purple-100 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300" },
 ];
 let colorIndex = 0;
 const getCategoryColor = (cat: string) => {
@@ -128,25 +130,25 @@ const getCategoryColor = (cat: string) => {
 
 // Skeleton Loading
 const SkeletonCard = () => (
-    <div className="bg-white border border-slate-100 rounded-xl p-3 animate-pulse shadow-sm">
+    <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl p-3 animate-pulse shadow-sm">
         <div className="flex items-center gap-3">
-            <div className="w-6 h-6 rounded-full bg-slate-100 shrink-0" />
-            <div className="flex-1 h-3.5 bg-slate-100 rounded-full w-1/2" />
+            <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 shrink-0" />
+            <div className="flex-1 h-3.5 bg-slate-100 dark:bg-slate-800 rounded-full w-1/2" />
             <div className="flex gap-2 flex-1">
-                {[1,2,3,4,5].map(i => <div key={i} className="flex-1 h-8 bg-slate-50 border border-slate-100 rounded-lg" />)}
+                {[1,2,3,4,5].map(i => <div key={i} className="flex-1 h-8 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-lg" />)}
             </div>
         </div>
     </div>
 );
 
 const SkeletonTheoryCard = () => (
-    <div className="bg-gradient-to-r from-slate-50 to-slate-100/50 border border-slate-100 rounded-xl p-3 animate-pulse mb-2">
+    <div className="bg-gradient-to-r from-slate-50 to-slate-100/50 dark:from-slate-950/50 dark:to-slate-900/50 border border-slate-100 dark:border-slate-800 rounded-xl p-3 animate-pulse mb-2">
         <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-slate-200 shrink-0" />
+            <div className="w-8 h-8 rounded-lg bg-slate-200 dark:bg-slate-700 shrink-0" />
             <div className="space-y-1.5 flex-1">
-                <div className="h-4 bg-slate-200 rounded-full w-1/3" />
-                <div className="h-2.5 bg-slate-100 rounded-full w-3/4" />
-                <div className="h-2.5 bg-slate-100 rounded-full w-2/3" />
+                <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded-full w-1/3" />
+                <div className="h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full w-3/4" />
+                <div className="h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full w-2/3" />
             </div>
         </div>
     </div>
@@ -392,8 +394,7 @@ export const TestInterface = ({
     return (
         <div
             ref={testContainerRef}
-            className="h-[100dvh] overflow-hidden flex flex-col font-sans selection:bg-indigo-100 relative"
-            style={{ background: "linear-gradient(135deg, #F5F7FA 0%, #EBF0F5 100%)" }}
+            className="h-[100dvh] overflow-hidden flex flex-col font-sans selection:bg-indigo-100 dark:selection:bg-indigo-900 relative transition-colors duration-200 bg-gradient-to-br from-[#F5F7FA] to-[#EBF0F5] dark:from-slate-950 dark:to-slate-900"
         >
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;950&display=swap');
@@ -402,7 +403,9 @@ export const TestInterface = ({
                 .custom-scrollbar::-webkit-scrollbar { width: 5px; }
                 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
                 .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+                .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
                 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+                .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #475569; }
 
                 @keyframes slide-up-fade {
                     from { opacity: 0; transform: translateY(8px); }
@@ -455,6 +458,9 @@ export const TestInterface = ({
                 .question-row:hover {
                     background-color: rgba(99, 102, 241, 0.035) !important;
                 }
+                .dark .question-row:hover {
+                    background-color: rgba(99, 102, 241, 0.08) !important;
+                }
 
                 /* Circular Radio Styles */
                 .custom-radio {
@@ -469,6 +475,10 @@ export const TestInterface = ({
                     justify-content: center;
                     cursor: pointer;
                     outline: none;
+                }
+                .dark .custom-radio {
+                    background: #0f172a;
+                    border-color: #475569;
                 }
                 .custom-radio:hover {
                     border-color: #6366F1;
@@ -506,15 +516,29 @@ export const TestInterface = ({
                     text-align: left;
                     width: 100%;
                 }
+                .dark .mobile-option-pill {
+                    background: #0f172a;
+                    border-color: #334155;
+                    color: #94a3b8;
+                }
                 .mobile-option-pill:hover {
                     border-color: #CBD5E1;
                     background: #F8FAFC;
+                }
+                .dark .mobile-option-pill:hover {
+                    border-color: #475569;
+                    background: #1e293b;
                 }
                 .mobile-option-pill.selected {
                     border-color: #6366F1;
                     background: #EEF2FF;
                     color: #4338CA;
                     font-weight: 600;
+                }
+                .dark .mobile-option-pill.selected {
+                    background: rgba(99, 102, 241, 0.15);
+                    border-color: #6366F1;
+                    color: #a5b4fc;
                 }
             `}</style>
 
@@ -611,22 +635,22 @@ export const TestInterface = ({
 
                 {/* Mobile progress bar */}
                 <div className="lg:hidden flex items-center gap-3 mb-2">
-                    <div className="flex-1 h-1.5 bg-white/60 rounded-full overflow-hidden border border-indigo-100">
+                    <div className="flex-1 h-1.5 bg-white/60 dark:bg-slate-900/60 rounded-full overflow-hidden border border-indigo-100 dark:border-indigo-900/30">
                         <div
                             className="progress-bar-fill h-full rounded-full"
                             style={{ width: `${progressPercent}%`, background: "linear-gradient(90deg, #6366F1, #8B5CF6)" }}
                         />
                     </div>
-                    <span className="text-[10px] font-bold text-indigo-700 shrink-0 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">
+                    <span className="text-[10px] font-bold text-indigo-700 dark:text-indigo-400 shrink-0 bg-indigo-50 dark:bg-indigo-950/30 px-2 py-0.5 rounded-full border border-indigo-100 dark:border-indigo-900/30">
                         {answeredCount} / {effectiveTotalQuestions}
                     </span>
                 </div>
 
-                <div className="flex-1 min-h-0 rounded-xl overflow-hidden flex flex-col relative bg-white border border-slate-200/80 shadow-md">
+                <div className="flex-1 min-h-0 rounded-xl overflow-hidden flex flex-col relative bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-md">
 
                     {/* Loading skeleton overlay */}
                     {testTakingLoading && (
-                        <div className="absolute inset-0 z-50 bg-white/95 backdrop-blur-sm overflow-y-auto p-3 space-y-2">
+                        <div className="absolute inset-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm overflow-y-auto p-3 space-y-2">
                             <SkeletonTheoryCard />
                             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => <SkeletonCard key={i} />)}
                         </div>
@@ -664,7 +688,7 @@ export const TestInterface = ({
                                                     <h2 className={cn("text-[13px] font-black tracking-tight", color.accent)}>
                                                         {category.replace(/_/g, " / ")} Assessment
                                                     </h2>
-                                                    <span className={cn("text-[9.5px] font-bold px-2 py-0.5 rounded-full border bg-white/90", color.badge, color.border)}>
+                                                    <span className={cn("text-[9.5px] font-bold px-2 py-0.5 rounded-full border bg-white/90 dark:bg-slate-900/90", color.badge, color.border)}>
                                                         {catTotal} Questions
                                                     </span>
                                                 </div>
@@ -672,18 +696,18 @@ export const TestInterface = ({
 
                                             {/* Right: Answered Progress */}
                                             <div className="flex items-center gap-2">
-                                                <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-550">
+                                                <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-550 dark:text-slate-400">
                                                     <span>Answered:</span>
-                                                    <span className="font-bold text-slate-800">{catAnswered}</span>
-                                                    <span className="text-slate-300">/</span>
-                                                    <span className="text-slate-650">{catTotal}</span>
-                                                    <span className={cn("font-bold ml-1 text-[10px] px-1.5 py-0.5 rounded bg-white border border-slate-100", color.accent)}>
+                                                    <span className="font-bold text-slate-800 dark:text-white">{catAnswered}</span>
+                                                    <span className="text-slate-300 dark:text-slate-750">/</span>
+                                                    <span className="text-slate-650 dark:text-slate-450">{catTotal}</span>
+                                                    <span className={cn("font-bold ml-1 text-[10px] px-1.5 py-0.5 rounded bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800", color.accent)}>
                                                         {catTotal > 0 ? Math.round((catAnswered / catTotal) * 100) : 0}%
                                                     </span>
                                                 </div>
                                                 <div className="w-7 h-7 flex-shrink-0">
                                                     <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                                                        <circle cx="18" cy="18" r="14" fill="none" stroke="white" strokeWidth="4" />
+                                                        <circle cx="18" cy="18" r="14" fill="none" stroke="currentColor" className="text-white dark:text-slate-800" strokeWidth="4" />
                                                         <circle cx="18" cy="18" r="14" fill="none" stroke="currentColor" strokeWidth="4"
                                                             strokeDasharray={`${catTotal > 0 ? (catAnswered / catTotal) * 88 : 0} 88`}
                                                             strokeLinecap="round" className={color.accent} />
@@ -695,12 +719,12 @@ export const TestInterface = ({
 
                                     {/* ── Compact Theory Card ── */}
                                     {theoryInfo && (
-                                        <div className="theory-card bg-slate-50/70 border-l-3 border-indigo-500 rounded-r-lg px-3.5 py-2 space-y-0.5 my-1">
+                                        <div className="theory-card bg-slate-50/70 dark:bg-slate-950/40 border-l-[3px] border-indigo-500 rounded-r-lg px-3.5 py-2 space-y-0.5 my-1 border-t border-r border-b border-transparent dark:border-slate-850">
                                             <div className="flex items-center gap-1.5">
-                                                <span className="text-[11.5px] font-black text-slate-800">{theoryInfo.name}</span>
+                                                <span className="text-[11.5px] font-black text-slate-800 dark:text-white">{theoryInfo.name}</span>
                                             </div>
                                             {theoryInfo.description && (
-                                                <p className="text-[11px] leading-relaxed text-slate-500 font-medium">
+                                                <p className="text-[11px] leading-relaxed text-slate-500 dark:text-slate-400 font-medium">
                                                     {theoryInfo.description}
                                                 </p>
                                             )}
@@ -708,15 +732,15 @@ export const TestInterface = ({
                                     )}
 
                                     {/* ── Question Grid Container ── */}
-                                    <div className="border border-slate-200/80 rounded-xl overflow-hidden bg-white shadow-sm">
+                                    <div className="border border-slate-200/80 dark:border-slate-800 rounded-xl overflow-hidden bg-white dark:bg-slate-900 shadow-sm">
                                         
                                         {/* Sticky Response Header (Desktop Only) */}
                                         {hasOptions && (
-                                            <div className="hidden md:grid grid-cols-[45px_1fr_repeat(5,minmax(90px,130px))] gap-1 px-4 py-2 bg-slate-50 border-b border-slate-200 sticky top-0 z-10 text-[10.5px] font-bold text-slate-500 text-center uppercase tracking-wider items-center">
+                                            <div className="hidden md:grid grid-cols-[45px_1fr_repeat(5,minmax(90px,130px))] gap-1 px-4 py-2 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-850 sticky top-0 z-10 text-[10.5px] font-bold text-slate-500 dark:text-slate-400 text-center uppercase tracking-wider items-center">
                                                 <div className="text-center font-bold text-[9px] text-slate-400">#</div>
-                                                <div className="text-left pl-2 font-bold text-slate-600">Question Text</div>
+                                                <div className="text-left pl-2 font-bold text-slate-600 dark:text-slate-300">Question Text</div>
                                                 {firstQuestionOptions.map((option, idx) => (
-                                                    <div key={option.option_Id} className="truncate px-0.5 text-slate-500" title={option.option_Text}>
+                                                    <div key={option.option_Id} className="truncate px-0.5 text-slate-500 dark:text-slate-400" title={option.option_Text}>
                                                         {option.option_Text}
                                                     </div>
                                                 ))}
@@ -724,7 +748,7 @@ export const TestInterface = ({
                                         )}
 
                                         {/* Question Rows */}
-                                        <div className="divide-y divide-slate-100">
+                                        <div className="divide-y divide-slate-100 dark:divide-slate-800">
                                             {catQuestions.map((question, qIdx) => {
                                                 const globalIdx = allTestQuestions.indexOf(question);
                                                 const displayNum = globalIdx >= 0 ? globalIdx + 1 : qIdx + 1;
@@ -741,21 +765,21 @@ export const TestInterface = ({
                                                             aria-label={question.question_Text}
                                                             className={cn(
                                                                 "question-row hidden md:grid grid-cols-[45px_1fr_repeat(5,minmax(90px,130px))] gap-1 px-4 py-1.5 items-center",
-                                                                isEven ? "bg-slate-50/30" : "bg-white"
+                                                                isEven ? "bg-slate-50/30 dark:bg-slate-950/20" : "bg-white dark:bg-slate-900"
                                                             )}
                                                         >
                                                             {/* Circle Badge Number */}
                                                             <div className="flex justify-center">
                                                                 <span className={cn(
                                                                     "w-[19px] h-[19px] rounded-full flex items-center justify-center text-[10px] font-semibold transition-all duration-150",
-                                                                    answered ? "bg-indigo-600 text-white" : "bg-slate-150 text-slate-500 bg-slate-100"
+                                                                    answered ? "bg-indigo-600 text-white" : "bg-slate-100 dark:bg-slate-950/50 text-slate-500 dark:text-slate-400"
                                                                 )}>
                                                                     {displayNum}
                                                                 </span>
                                                             </div>
 
                                                             {/* Question Text */}
-                                                            <div className="text-[12.5px] font-medium text-slate-700 pl-2 pr-4 leading-snug truncate" title={question.question_Text}>
+                                                            <div className="text-[12.5px] font-medium text-slate-700 dark:text-slate-200 pl-2 pr-4 leading-snug truncate" title={question.question_Text}>
                                                                 {question.question_Text}
                                                             </div>
 
@@ -769,7 +793,7 @@ export const TestInterface = ({
                                                                         key={option.option_Id} 
                                                                         className={cn(
                                                                             "flex justify-center items-center py-1.5 transition-colors duration-150 rounded", 
-                                                                            isSelected && "bg-indigo-50/20"
+                                                                            isSelected && "bg-indigo-50/20 dark:bg-indigo-950/10"
                                                                         )}
                                                                     >
                                                                         <button
@@ -793,17 +817,17 @@ export const TestInterface = ({
                                                             aria-label={question.question_Text}
                                                             className={cn(
                                                                 "md:hidden p-4 space-y-3",
-                                                                isEven ? "bg-slate-50/30" : "bg-white"
+                                                                isEven ? "bg-slate-50/30 dark:bg-slate-950/20" : "bg-white dark:bg-slate-900"
                                                             )}
                                                         >
                                                             <div className="flex gap-2.5 items-start">
                                                                 <span className={cn(
                                                                     "w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5",
-                                                                    answered ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-500"
+                                                                    answered ? "bg-indigo-600 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
                                                                 )}>
                                                                     {displayNum}
                                                                 </span>
-                                                                <p className="text-[13px] font-medium text-slate-800 leading-snug">
+                                                                <p className="text-[13px] font-medium text-slate-800 dark:text-white leading-snug">
                                                                     {question.question_Text}
                                                                 </p>
                                                             </div>
@@ -841,11 +865,11 @@ export const TestInterface = ({
                         {/* Empty state */}
                         {!testTakingLoading && testQuestions.length === 0 && (
                             <div className="flex flex-col items-center justify-center h-full py-16 text-center animate-in fade-in duration-200">
-                                <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center mb-3">
+                                <div className="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center mb-3">
                                     <BookOpen className="w-6 h-6 text-indigo-400" />
                                 </div>
-                                <h3 className="text-sm font-bold text-slate-700">No questions on this page</h3>
-                                <p className="text-[12px] text-slate-400 mt-0.5">Navigate using the controls below.</p>
+                                <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300">No questions on this page</h3>
+                                <p className="text-[12px] text-slate-400 dark:text-slate-500 mt-0.5">Navigate using the controls below.</p>
                             </div>
                         )}
 
@@ -856,7 +880,7 @@ export const TestInterface = ({
             </main>
 
             {/* ── Footer Navigation ── */}
-            <footer className="flex-none bg-white/90 backdrop-blur-sm border-t border-slate-200 z-20 px-4 py-2.5">
+            <footer className="flex-none bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm border-t border-slate-200 dark:border-slate-800 z-20 px-4 py-2.5">
                 <div className="max-w-[98%] mx-auto flex items-center justify-between gap-3">
 
                     {/* Previous */}
@@ -866,8 +890,8 @@ export const TestInterface = ({
                         className={cn(
                             "flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all",
                             hasPrevious
-                                ? "bg-slate-100 hover:bg-slate-200 text-slate-750"
-                                : "bg-slate-50 text-slate-300 cursor-not-allowed"
+                                ? "bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-750 dark:text-slate-200"
+                                : "bg-slate-50 dark:bg-slate-950 text-slate-305 dark:text-slate-700 cursor-not-allowed"
                         )}
                     >
                         <ChevronLeft className="h-4 w-4" />
@@ -883,13 +907,13 @@ export const TestInterface = ({
                                     className={cn(
                                         "rounded-full transition-all duration-300",
                                         i + 1 === currentPage
-                                            ? "w-5 h-1.5 bg-indigo-650"
-                                            : "w-1.5 h-1.5 bg-slate-200 hover:bg-slate-350"
+                                            ? "w-5 h-1.5 bg-indigo-650 dark:bg-indigo-500"
+                                            : "w-1.5 h-1.5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-350 dark:hover:bg-slate-600"
                                     )}
                                 />
                             ))
                         ) : (
-                            <span className="text-[11px] font-semibold text-slate-550">
+                            <span className="text-[11px] font-semibold text-slate-550 dark:text-slate-400">
                                 Page {currentPage} / {totalPages}
                             </span>
                         )}
@@ -932,21 +956,21 @@ export const TestInterface = ({
 
             {/* ── Exit Dialog ── */}
             <AlertDialog open={showExitModal} onOpenChange={setShowExitModal}>
-                <AlertDialogContent className="bg-white border-slate-200 rounded-2xl">
+                <AlertDialogContent className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 rounded-2xl">
                     <AlertDialogHeader>
-                        <AlertDialogTitle className="text-slate-900 font-black text-lg">
+                        <AlertDialogTitle className="text-slate-900 dark:text-white font-black text-lg">
                             {hasAnswers ? "Submit & Exit Assessment?" : "Exit Assessment?"}
                         </AlertDialogTitle>
-                        <AlertDialogDescription className="text-slate-500">
+                        <AlertDialogDescription className="text-slate-500 dark:text-slate-450">
                             {hasAnswers
                                 ? "All current responses will be submitted as your final assessment. You won't be able to resume later."
                                 : "You haven't answered any questions yet. Do you really want to return to the dashboard?"}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel className="rounded-xl border-slate-200 text-[13px] font-semibold">No, Stay</AlertDialogCancel>
+                        <AlertDialogCancel className="rounded-xl border border-slate-200 dark:border-slate-800 text-[13px] font-semibold dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800">No, Stay</AlertDialogCancel>
                         <AlertDialogAction
-                            className={cn("rounded-xl text-[13px] font-semibold text-white", hasAnswers ? "bg-indigo-600 hover:bg-indigo-700" : "bg-slate-900 hover:bg-black")}
+                            className={cn("rounded-xl text-[13px] font-semibold text-white border", hasAnswers ? "bg-indigo-600 hover:bg-indigo-700 border-indigo-650" : "bg-slate-900 hover:bg-black dark:bg-slate-950 dark:hover:bg-slate-900 border-transparent dark:border-slate-800")}
                             onClick={() => { setShowExitModal(false); handleExitTest(); }}
                         >
                             {hasAnswers ? "Yes, Submit & Exit" : "Yes, Exit"}
@@ -957,23 +981,23 @@ export const TestInterface = ({
 
             {/* ── Submit Dialog ── */}
             <AlertDialog open={showSubmitModal} onOpenChange={setShowSubmitModal}>
-                <AlertDialogContent className="bg-white border-slate-200 rounded-2xl">
+                <AlertDialogContent className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 rounded-2xl">
                     <AlertDialogHeader>
-                        <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center mb-2">
-                            <CheckCircle2 className="w-8 h-8 text-emerald-600" />
+                        <div className="w-14 h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center mb-2">
+                            <CheckCircle2 className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
                         </div>
-                        <AlertDialogTitle className="text-slate-900 font-black text-lg">Submit Assessment?</AlertDialogTitle>
-                        <AlertDialogDescription className="text-slate-500">
-                            You have answered <span className="font-bold text-indigo-600">{answeredCount}</span> of <span className="font-bold">{effectiveTotalQuestions}</span> questions.
+                        <AlertDialogTitle className="text-slate-900 dark:text-white font-black text-lg">Submit Assessment?</AlertDialogTitle>
+                        <AlertDialogDescription className="text-slate-500 dark:text-slate-450">
+                            You have answered <span className="font-bold text-indigo-600 dark:text-indigo-400">{answeredCount}</span> of <span className="font-bold">{effectiveTotalQuestions}</span> questions.
                             {answeredCount < effectiveTotalQuestions && (
-                                <span className="block mt-1 text-amber-600 font-medium">
+                                <span className="block mt-1 text-amber-600 dark:text-amber-450 font-medium">
                                     ⚠ {effectiveTotalQuestions - answeredCount} question(s) are unanswered.
                                 </span>
                             )}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel className="rounded-xl border-slate-200 text-[13px] font-semibold">Cancel</AlertDialogCancel>
+                        <AlertDialogCancel className="rounded-xl border border-slate-200 dark:border-slate-800 text-[13px] font-semibold dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800">Cancel</AlertDialogCancel>
                         <AlertDialogAction
                             className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[13px] font-semibold"
                             onClick={() => { setShowSubmitModal(false); handleSubmitTest(); }}

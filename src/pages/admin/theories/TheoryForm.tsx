@@ -283,7 +283,7 @@ export const TheoryForm: React.FC<TheoryFormProps> = ({ theoryId, onSuccess, onC
                     {/* RIGHT COLUMN: THEORY FORM PARAMETERS */}
                     <div className="lg:col-span-8">
                         <Card className="border-none shadow-elegant bg-white rounded-3xl border border-slate-100/50 overflow-hidden h-full">
-                            <div className="px-6 py-4 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
+                            <div className="px-4 py-2.5 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
                                 <div className="flex items-center gap-2.5">
                                     <Settings2 className="h-4 w-4 text-indigo-600" />
                                     <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest">Theory Definition & Parameters</h3>
@@ -293,40 +293,40 @@ export const TheoryForm: React.FC<TheoryFormProps> = ({ theoryId, onSuccess, onC
                                     <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Validated Schema</span>
                                 </div>
                             </div>
-                            <CardContent className="p-6 space-y-5">
-                                <form onSubmit={handleSubmit} className="space-y-4">
+                            <CardContent className="p-4 space-y-4">
+                                <form onSubmit={handleSubmit} className="space-y-3.5">
                                     {/* Theory Name Field */}
-                                    <div className="space-y-1.5">
+                                    <div className="space-y-1">
                                         <div className="flex justify-between items-center">
-                                            <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">
+                                            <Label className="text-[9px] font-bold text-slate-500 uppercase tracking-tight ml-1">
                                                 Theory Name <span className="text-rose-500">*</span>
                                             </Label>
-                                            <span className="text-[9px] text-slate-400 font-mono">
+                                            <span className="text-[8px] text-slate-400 font-mono">
                                                 {formData.theoryName.length}/100
                                             </span>
                                         </div>
                                         <div className="relative group">
-                                            <Brain className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300 group-focus-within:text-indigo-600 transition-colors" />
+                                            <Brain className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-slate-300 group-focus-within:text-indigo-650 transition-colors" />
                                             <Input 
                                                 disabled={isViewMode}
                                                 name="theoryName"
                                                 value={formData.theoryName} 
                                                 onChange={(e) => handleChange("theoryName", e.target.value)} 
                                                 maxLength={100}
-                                                className={`h-10 pl-9 bg-slate-50/50 border-slate-200/50 focus:bg-white focus:ring-2 focus:ring-indigo-100 rounded-xl font-bold text-sm transition-all shadow-sm ${errors.theoryName ? 'border-rose-400 bg-rose-50/20' : ''}`} 
+                                                className={`h-8 pl-8 bg-slate-50/50 border-slate-200/50 focus:bg-white focus:ring-2 focus:ring-indigo-100 rounded-lg font-bold text-xs transition-all shadow-sm ${errors.theoryName ? 'border-rose-400 bg-rose-50/20' : ''}`} 
                                                 placeholder="e.g. Hollands theory (RIASEC)" 
                                             />
                                         </div>
                                         {errors.theoryName && (
-                                            <p className="text-[10px] font-bold text-rose-500 flex items-center gap-1 ml-1 mt-1">
+                                            <p className="text-[9px] font-bold text-rose-500 flex items-center gap-1 ml-1 mt-0.5">
                                                 <AlertCircle className="h-3 w-3" /> {errors.theoryName}
                                             </p>
                                         )}
                                     </div>
 
                                     {/* Associated Category Field */}
-                                    <div className="space-y-1.5">
-                                        <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">
+                                    <div className="space-y-1">
+                                        <Label className="text-[9px] font-bold text-slate-500 uppercase tracking-tight ml-1">
                                             Category Mapping
                                         </Label>
                                         <Select
@@ -334,49 +334,49 @@ export const TheoryForm: React.FC<TheoryFormProps> = ({ theoryId, onSuccess, onC
                                             value={formData.categoryId || "none"}
                                             onValueChange={(val) => handleChange("categoryId", val === "none" ? "" : val)}
                                         >
-                                            <SelectTrigger className="h-10 bg-slate-50/50 border-slate-200/50 rounded-xl text-xs font-semibold text-slate-700">
+                                            <SelectTrigger className="h-8 bg-slate-50/50 border-slate-200/50 rounded-lg text-xs font-semibold text-slate-700 px-3">
                                                 <SelectValue placeholder="Select Category (Optional)" />
                                             </SelectTrigger>
-                                            <SelectContent className="rounded-xl border-slate-100 shadow-xl">
-                                                <SelectItem value="none">-- General / No Specific Category --</SelectItem>
+                                            <SelectContent className="rounded-lg border-slate-100 shadow-xl">
+                                                <SelectItem value="none" className="text-xs">-- General / No Specific Category --</SelectItem>
                                                 {categories?.map((cat) => (
-                                                    <SelectItem key={cat.id} value={String(cat.id)}>
+                                                    <SelectItem key={cat.id} value={String(cat.id)} className="text-xs">
                                                         {cat.categoryName}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
                                         </Select>
                                         {errors.categoryId && (
-                                            <p className="text-[10px] font-bold text-rose-500 flex items-center gap-1 ml-1 mt-1">
+                                            <p className="text-[9px] font-bold text-rose-500 flex items-center gap-1 ml-1 mt-0.5">
                                                 <AlertCircle className="h-3 w-3" /> {errors.categoryId}
                                             </p>
                                         )}
                                     </div>
 
                                     {/* Theory Description Field */}
-                                    <div className="space-y-1.5 pt-1">
+                                    <div className="space-y-1 pt-0.5">
                                         <div className="flex justify-between items-center">
-                                            <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">
+                                            <Label className="text-[9px] font-bold text-slate-500 uppercase tracking-tight ml-1">
                                                 Theory Description & Framework Details <span className="text-rose-500">*</span>
                                             </Label>
-                                            <span className="text-[9px] text-slate-400 font-mono">
+                                            <span className="text-[8px] text-slate-400 font-mono">
                                                 {formData.description.length}/2000
                                             </span>
                                         </div>
                                         <div className="relative group">
-                                            <Sparkles className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-300 group-focus-within:text-indigo-600 transition-colors" />
+                                            <Sparkles className="absolute left-3.5 top-3 h-3.5 w-3.5 text-slate-300 group-focus-within:text-indigo-650 transition-colors" />
                                             <Textarea 
                                                 disabled={isViewMode}
                                                 name="description" 
                                                 value={formData.description} 
                                                 onChange={(e) => handleChange("description", e.target.value)} 
                                                 maxLength={2000}
-                                                className={`w-full min-h-[150px] pl-10 bg-slate-50/50 border-slate-200/50 rounded-2xl p-4 text-xs font-medium leading-relaxed resize-none transition-all focus:bg-white focus:ring-2 focus:ring-indigo-100 shadow-sm ${errors.description ? 'border-rose-400 bg-rose-50/20' : ''}`} 
-                                                placeholder="Provide detailed description of the theory (e.g. Hollands theory categorizes personality into 6 types: Realistic, Investigative, Artistic, Social, Enterprising, Conventional)..." 
+                                                className={`w-full min-h-[90px] pl-9 bg-slate-50/50 border-slate-200/50 rounded-xl p-3 text-xs font-medium leading-relaxed resize-none transition-all focus:bg-white focus:ring-2 focus:ring-indigo-100 shadow-sm ${errors.description ? 'border-rose-400 bg-rose-50/20' : ''}`} 
+                                                placeholder="Provide detailed description of the theory (e.g. Hollands theory)..." 
                                             />
                                         </div>
                                         {errors.description && (
-                                            <p className="text-[10px] font-bold text-rose-500 flex items-center gap-1 ml-1 mt-1">
+                                            <p className="text-[9px] font-bold text-rose-500 flex items-center gap-1 ml-1 mt-0.5">
                                                 <AlertCircle className="h-3 w-3" /> {errors.description}
                                             </p>
                                         )}
@@ -384,21 +384,21 @@ export const TheoryForm: React.FC<TheoryFormProps> = ({ theoryId, onSuccess, onC
 
                                     {/* Form Footer Action */}
                                     {!isViewMode && (
-                                        <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+                                        <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
                                             <Button
                                                 type="button"
                                                 variant="outline"
                                                 onClick={handleBack}
-                                                className="h-9 px-4 rounded-xl border-slate-200 text-xs font-semibold text-slate-600"
+                                                className="h-7 px-3 rounded-lg border-slate-200 text-[10px] font-semibold text-slate-650"
                                             >
                                                 Cancel
                                             </Button>
                                             <Button
                                                 type="submit"
                                                 disabled={loading || submitting}
-                                                className="h-9 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition-all flex items-center gap-1.5"
+                                                className="h-7 px-4 rounded-lg bg-indigo-600 hover:bg-indigo-750 text-white font-bold text-[10px] shadow-md transition-all flex items-center gap-1.5"
                                             >
-                                                {submitting || loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+                                                {submitting || loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
                                                 {isEditMode ? "Save Changes" : "Create Theory"}
                                             </Button>
                                         </div>

@@ -91,12 +91,12 @@ const StudentProfile: React.FC = () => {
 
   if (loading && !profile) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#F8FAFC]">
+      <div className="flex items-center justify-center min-h-screen bg-[#F8FAFC] dark:bg-slate-950">
         <div className="flex flex-col items-center">
-          <div className="bg-white p-5 rounded-[12px] border border-[#E5E7EB] shadow-sm">
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-[12px] border border-[#E5E7EB] dark:border-slate-800 shadow-sm">
             <Loader2 className="h-8 w-8 animate-spin text-[#4F46E5]" />
           </div>
-          <p className="mt-4 text-xs font-bold uppercase tracking-widest text-slate-400">Synchronizing Profile...</p>
+          <p className="mt-4 text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">Synchronizing Profile...</p>
         </div>
       </div>
     );
@@ -104,16 +104,16 @@ const StudentProfile: React.FC = () => {
 
   if (error && !profile) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#F8FAFC] p-6">
+      <div className="flex items-center justify-center min-h-screen bg-[#F8FAFC] dark:bg-slate-950 p-6">
         <div className="max-w-md w-full">
-          <Card className="bg-white border border-[#E5E7EB] rounded-[12px] shadow-sm">
+          <Card className="bg-white dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-800 rounded-[12px] shadow-sm">
             <CardContent className="pt-6 pb-6">
               <div className="text-center">
-                <div className="bg-red-50 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
-                  <User className="h-5 w-5 text-red-550 text-red-500" />
+                <div className="bg-red-50 dark:bg-red-950/30 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
+                  <User className="h-5 w-5 text-red-500 dark:text-red-400" />
                 </div>
-                <h3 className="text-lg font-bold text-slate-800 mb-2 tracking-tight">System Interruption</h3>
-                <p className="mb-5 text-sm text-slate-500 font-medium px-4">{error}</p>
+                <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-2 tracking-tight">System Interruption</h3>
+                <p className="mb-5 text-sm text-slate-500 dark:text-slate-450 font-medium px-4">{error}</p>
                 <Button
                   onClick={() => user?.id && fetchStudentProfile(Number(user.id))}
                   className="rounded-[12px] bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[12px] font-semibold h-[38px] px-6"
@@ -130,16 +130,16 @@ const StudentProfile: React.FC = () => {
 
   if (!profile) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#F8FAFC]">
+      <div className="flex items-center justify-center min-h-screen bg-[#F8FAFC] dark:bg-slate-950">
         <div className="max-w-md w-full px-4">
-          <Card className="bg-white border border-[#E5E7EB] rounded-[12px] shadow-sm">
+          <Card className="bg-white dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-800 rounded-[12px] shadow-sm">
             <CardContent className="pt-6 pb-6">
               <div className="text-center">
-                <div className="bg-slate-100 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
-                  <User className="h-5 w-5 text-slate-450 text-slate-500" />
+                <div className="bg-slate-100 dark:bg-slate-800 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
+                  <User className="h-5 w-5 text-slate-500 dark:text-slate-400" />
                 </div>
-                <h3 className="text-lg font-bold text-slate-800 mb-2 tracking-tight">Identity Unavailable</h3>
-                <p className="mb-5 text-sm text-slate-500 font-medium">Unable to load your profile information at this time.</p>
+                <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-2 tracking-tight">Identity Unavailable</h3>
+                <p className="mb-5 text-sm text-slate-500 dark:text-slate-450 font-medium">Unable to load your profile information at this time.</p>
               </div>
             </CardContent>
           </Card>
@@ -149,27 +149,27 @@ const StudentProfile: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pb-8 font-sans">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-8 font-sans transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         
         {/* Compact Standardized Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-[#E5E7EB]">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-[#E5E7EB] dark:border-slate-800">
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
               <div className="h-px w-6 bg-[#4F46E5]/30"></div>
               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#4F46E5]">Student Identity</span>
             </div>
-            <h1 className="text-3xl font-black tracking-tight text-[#111827]">
+            <h1 className="text-3xl font-black tracking-tight text-[#111827] dark:text-white">
               Portal <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-indigo-600 to-blue-600">Dossier</span>
             </h1>
-            <p className="text-[13px] font-medium text-[#6B7280]">Manage your academic profile and track your development across the educational ecosystem</p>
+            <p className="text-[13px] font-medium text-[#6B7280] dark:text-slate-400">Manage your academic profile and track your development across the educational ecosystem</p>
           </div>
         </div>
 
         <div className="grid lg:grid-cols-12 gap-6 items-start">
           {/* Side Panel (4 cols) - Identity & Status */}
           <div className="lg:col-span-4 space-y-6">
-            <Card className="bg-white border border-[#E5E7EB] rounded-[12px] overflow-hidden shadow-sm group">
+            <Card className="bg-white dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-800 rounded-[12px] overflow-hidden shadow-sm group">
               {/* Profile Background Accent */}
               <div className="h-20 bg-gradient-to-br from-primary via-indigo-600 to-blue-600 relative overflow-hidden">
                 <div className="absolute top-4 right-4">
@@ -182,49 +182,49 @@ const StudentProfile: React.FC = () => {
               <CardContent className="pt-0 relative px-6 pb-6">
                 <div className="flex flex-col items-center -mt-10 mb-6">
                   <div className="relative">
-                    <div className="relative bg-white border-[4px] border-white shadow-md rounded-full w-24 h-24 flex items-center justify-center overflow-hidden">
-                      <div className="absolute inset-0 bg-slate-50 flex items-center justify-center">
-                        <User className="h-12 w-12 text-slate-305 text-slate-400" />
+                    <div className="relative bg-white dark:bg-slate-900 border-[4px] border-white dark:border-slate-900 shadow-md rounded-full w-24 h-24 flex items-center justify-center overflow-hidden">
+                      <div className="absolute inset-0 bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
+                        <User className="h-12 w-12 text-slate-305 dark:text-slate-500 text-slate-400" />
                       </div>
                     </div>
-                    <div className="absolute bottom-1 right-1 bg-emerald-500 text-white p-1 rounded-full border-2 border-white shadow">
+                    <div className="absolute bottom-1 right-1 bg-emerald-500 text-white p-1 rounded-full border-2 border-white dark:border-slate-900 shadow">
                       <ShieldCheck className="h-3.5 w-3.5" />
                     </div>
                   </div>
 
                   <div className="mt-4 text-center">
-                    <h2 className="text-xl font-bold text-slate-800 tracking-tight leading-none mb-2">
+                    <h2 className="text-xl font-bold text-slate-800 dark:text-white tracking-tight leading-none mb-2">
                       {profile.firstName} {profile.lastName}
                     </h2>
                     <div className="flex items-center justify-center gap-2">
-                      <Badge variant="secondary" className="bg-[#4F46E5]/5 text-[#4F46E5] border-none text-[9.5px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full">
+                      <Badge variant="secondary" className="bg-[#4F46E5]/5 dark:bg-[#4F46E5]/10 text-[#4F46E5] dark:text-indigo-405 border-none text-[9.5px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full">
                         Level {profile.gradeLevel} Student
                       </Badge>
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-3.5 pt-4 border-t border-slate-100">
+                <div className="space-y-3.5 pt-4 border-t border-slate-100 dark:border-slate-800">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-slate-400 font-bold uppercase tracking-wider">Email</span>
-                    <span className="font-bold text-slate-700">{profile.email}</span>
+                    <span className="text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Email</span>
+                    <span className="font-bold text-slate-700 dark:text-slate-300">{profile.email}</span>
                   </div>
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-slate-400 font-bold uppercase tracking-wider">Phone</span>
-                    <span className="font-bold text-slate-700">{profile.phoneNumber || "---"}</span>
+                    <span className="text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Phone</span>
+                    <span className="font-bold text-slate-700 dark:text-slate-300">{profile.phoneNumber || "---"}</span>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             {/* Performance Pulse Mini-Card */}
-            <Card className="bg-white border border-[#E5E7EB] rounded-[12px] p-5 shadow-sm">
+            <Card className="bg-white dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-800 rounded-[12px] p-5 shadow-sm">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                <h3 className="text-[11px] font-bold text-slate-505 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                   <TrendingUp className="h-4 w-4 text-[#4F46E5]" />
                   Performance Pulse
                 </h3>
-                <span className="text-[9px] font-bold text-[#4F46E5] bg-[#4F46E5]/5 px-2 py-0.5 rounded-full">LIVE</span>
+                <span className="text-[9px] font-bold text-[#4F46E5] dark:text-indigo-400 bg-[#4F46E5]/5 dark:bg-indigo-950/30 px-2 py-0.5 rounded-full">LIVE</span>
               </div>
 
               <div className="h-[160px] w-full">
@@ -253,16 +253,16 @@ const StudentProfile: React.FC = () => {
 
           {/* Main Panel (8 cols) - Information Dossier */}
           <div className="lg:col-span-8 space-y-6">
-            <Card className="bg-white border border-[#E5E7EB] rounded-[12px] shadow-sm">
+            <Card className="bg-white dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-800 rounded-[12px] shadow-sm">
               <div className="p-5 pb-0 flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-lg font-bold text-slate-800">Academic Info</CardTitle>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Information Dossier</p>
+                  <CardTitle className="text-lg font-bold text-slate-800 dark:text-white">Academic Info</CardTitle>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mt-0.5">Information Dossier</p>
                 </div>
                 {!isEditing && (
                   <Button
                     onClick={handleEdit}
-                    className="h-[36px] px-4 rounded-xl bg-slate-900 text-white hover:bg-slate-800 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all"
+                    className="h-[36px] px-4 rounded-xl bg-slate-900 dark:bg-slate-950 hover:bg-slate-800 dark:hover:bg-slate-900 border border-transparent dark:border-slate-850 text-white text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all"
                   >
                     <Edit className="h-3.5 w-3.5" />
                     Edit Dossier
@@ -275,75 +275,75 @@ const StudentProfile: React.FC = () => {
                   <div className="space-y-5 animate-in fade-in duration-200">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-1.5">
-                        <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">First Name</Label>
+                        <Label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">First Name</Label>
                         <div className="relative">
-                          <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                          <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" />
                           <Input
                             name="firstName"
                             value={editedProfile.firstName}
                             onChange={handleInputChange}
-                            className="h-[40px] pl-9 bg-white border-[#E5E7EB] rounded-[12px] text-[13px] text-slate-700 focus-visible:ring-[#4F46E5]"
+                            className="h-[40px] pl-9 bg-white dark:bg-slate-900 border-[#E5E7EB] dark:border-slate-800 rounded-[12px] text-[13px] text-slate-700 dark:text-white focus-visible:ring-[#4F46E5]"
                           />
                         </div>
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Last Name</Label>
+                        <Label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Last Name</Label>
                         <div className="relative">
-                          <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                          <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" />
                           <Input
                             name="lastName"
                             value={editedProfile.lastName}
                             onChange={handleInputChange}
-                            className="h-[40px] pl-9 bg-white border-[#E5E7EB] rounded-[12px] text-[13px] text-slate-700 focus-visible:ring-[#4F46E5]"
+                            className="h-[40px] pl-9 bg-white dark:bg-slate-900 border-[#E5E7EB] dark:border-slate-800 rounded-[12px] text-[13px] text-slate-700 dark:text-white focus-visible:ring-[#4F46E5]"
                           />
                         </div>
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Email Dossier</Label>
+                        <Label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Email Dossier</Label>
                         <div className="relative">
-                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" />
                           <Input
                             name="email"
                             value={editedProfile.email}
                             onChange={handleInputChange}
-                            className="h-[40px] pl-9 bg-white border-[#E5E7EB] rounded-[12px] text-[13px] text-slate-700 focus-visible:ring-[#4F46E5]"
+                            className="h-[40px] pl-9 bg-white dark:bg-slate-900 border-[#E5E7EB] dark:border-slate-800 rounded-[12px] text-[13px] text-slate-700 dark:text-white focus-visible:ring-[#4F46E5]"
                           />
                         </div>
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Phone Line</Label>
+                        <Label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Phone Line</Label>
                         <div className="relative">
-                          <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                          <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" />
                           <Input
                             name="phoneNumber"
                             value={editedProfile.phoneNumber}
                             onChange={handleInputChange}
-                            className="h-[40px] pl-9 bg-white border-[#E5E7EB] rounded-[12px] text-[13px] text-slate-700 focus-visible:ring-[#4F46E5]"
+                            className="h-[40px] pl-9 bg-white dark:bg-slate-900 border-[#E5E7EB] dark:border-slate-800 rounded-[12px] text-[13px] text-slate-700 dark:text-white focus-visible:ring-[#4F46E5]"
                           />
                         </div>
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Academic Rank</Label>
+                        <Label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Academic Rank</Label>
                         <div className="relative">
-                          <School className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                          <School className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" />
                           <Input
                             name="gradeLevel"
                             value={editedProfile.gradeLevel}
                             onChange={handleInputChange}
-                            className="h-[40px] pl-9 bg-white border-[#E5E7EB] rounded-[12px] text-[13px] text-slate-700 focus-visible:ring-[#4F46E5]"
+                            className="h-[40px] pl-9 bg-white dark:bg-slate-900 border-[#E5E7EB] dark:border-slate-800 rounded-[12px] text-[13px] text-slate-700 dark:text-white focus-visible:ring-[#4F46E5]"
                           />
                         </div>
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Temporal Origin</Label>
+                        <Label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Temporal Origin</Label>
                         <div className="relative">
-                          <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                          <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" />
                           <Input
                             name="dateOfBirth"
                             type="date"
                             value={editedProfile.dateOfBirth}
                             onChange={handleInputChange}
-                            className="h-[40px] pl-9 bg-white border-[#E5E7EB] rounded-[12px] text-[13px] text-slate-700 focus-visible:ring-[#4F46E5]"
+                            className="h-[40px] pl-9 bg-white dark:bg-slate-900 border-[#E5E7EB] dark:border-slate-800 rounded-[12px] text-[13px] text-slate-700 dark:text-white focus-visible:ring-[#4F46E5] dark:scheme-dark"
                           />
                         </div>
                       </div>
@@ -361,7 +361,7 @@ const StudentProfile: React.FC = () => {
                       <Button
                         variant="outline"
                         onClick={handleCancel}
-                        className="flex-1 h-[38px] rounded-[12px] border-[#E5E7EB] bg-white text-[12px] font-semibold text-[#111827]"
+                        className="flex-1 h-[38px] rounded-[12px] border-[#E5E7EB] dark:border-slate-800 bg-white dark:bg-slate-900 text-[#111827] dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-800 text-[12px] font-semibold"
                       >
                         Discard
                       </Button>
@@ -375,65 +375,65 @@ const StudentProfile: React.FC = () => {
                         <div className="h-6 w-6 rounded-full bg-[#4F46E5]/10 flex items-center justify-center text-[#4F46E5]">
                           <Award className="h-3.5 w-3.5" />
                         </div>
-                        <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Scholarship Status</h4>
+                        <h4 className="text-xs font-bold text-slate-505 dark:text-slate-400 uppercase tracking-wider">Scholarship Status</h4>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                         {[
-                          { label: 'Academic Standing', val: 'Excellent', icon: BookOpen, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-                          { label: 'Current Grade', val: `Level ${profile.gradeLevel}`, icon: Hash, color: 'text-indigo-650 text-[#4F46E5]', bg: 'bg-indigo-50' },
-                          { label: 'Registration Date', val: 'Sept 2024', icon: Clock, color: 'text-orange-500', bg: 'bg-orange-50' },
+                          { label: 'Academic Standing', val: 'Excellent', icon: BookOpen, color: 'text-emerald-600 dark:text-emerald-450', bg: 'bg-emerald-50 dark:bg-emerald-950/30' },
+                          { label: 'Current Grade', val: `Level ${profile.gradeLevel}`, icon: Hash, color: 'text-[#4F46E5] dark:text-indigo-400', bg: 'bg-indigo-50 dark:bg-indigo-950/30' },
+                          { label: 'Registration Date', val: 'Sept 2024', icon: Clock, color: 'text-orange-500 dark:text-orange-450', bg: 'bg-orange-50 dark:bg-orange-950/30' },
                         ].map((stat, i) => (
-                          <div key={i} className={`p-4 rounded-xl ${stat.bg}`}>
+                          <div key={i} className={`p-4 rounded-xl ${stat.bg} border border-transparent dark:border-slate-850`}>
                             <stat.icon className={`h-4.5 w-4.5 ${stat.color} mb-2`} />
-                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{stat.label}</p>
-                            <p className="text-[13px] font-bold text-slate-700 mt-0.5">{stat.val}</p>
+                            <p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{stat.label}</p>
+                            <p className="text-[13px] font-bold text-slate-700 dark:text-slate-300 mt-0.5">{stat.val}</p>
                           </div>
                         ))}
                       </div>
                     </div>
 
                     {/* Detailed Profile Sections */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-100">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-100 dark:border-slate-800">
                       <div className="space-y-3.5">
-                        <div className="flex items-center gap-1.5 mb-1 pb-1 border-b border-slate-50">
-                          <User className="h-4 w-4 text-[#4F46E5]" />
-                          <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Personal Identification</h4>
+                        <div className="flex items-center gap-1.5 mb-1 pb-1 border-b border-slate-50 dark:border-slate-850">
+                          <User className="h-4 w-4 text-[#4F46E5] dark:text-indigo-405" />
+                          <h4 className="text-[11px] font-bold text-slate-505 dark:text-slate-400 uppercase tracking-wider">Personal Identification</h4>
                         </div>
                         <div className="space-y-3.5">
                           <div className="flex flex-col text-xs">
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Full Legal Name</span>
-                            <span className="font-bold text-slate-750 text-slate-700">{profile.firstName} {profile.lastName}</span>
+                            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">Full Legal Name</span>
+                            <span className="font-bold text-slate-700 dark:text-slate-300">{profile.firstName} {profile.lastName}</span>
                           </div>
                           <div className="flex flex-col text-xs">
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Birth Dossier</span>
-                            <span className="font-bold text-slate-750 text-slate-700">
+                            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">Birth Dossier</span>
+                            <span className="font-bold text-slate-700 dark:text-slate-300">
                               {new Date(profile.dateOfBirth).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                             </span>
                           </div>
                           <div className="flex flex-col text-xs">
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Student UID</span>
-                            <span className="font-mono font-bold text-slate-500">#STU-{profile.id.toString().padStart(6, '0')}</span>
+                            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">Student UID</span>
+                            <span className="font-mono font-bold text-slate-500 dark:text-slate-450">#STU-{profile.id.toString().padStart(6, '0')}</span>
                           </div>
                         </div>
                       </div>
 
                       <div className="space-y-3.5">
-                        <div className="flex items-center gap-1.5 mb-1 pb-1 border-b border-slate-50">
-                          <MapPin className="h-4 w-4 text-indigo-500" />
-                          <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Academic Localization</h4>
+                        <div className="flex items-center gap-1.5 mb-1 pb-1 border-b border-slate-50 dark:border-slate-850">
+                          <MapPin className="h-4 w-4 text-indigo-500 dark:text-indigo-405" />
+                          <h4 className="text-[11px] font-bold text-slate-505 dark:text-slate-400 uppercase tracking-wider">Academic Localization</h4>
                         </div>
                         <div className="space-y-3.5">
                           <div className="flex flex-col text-xs">
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Primary Schooling</span>
-                            <span className="font-bold text-slate-750 text-slate-700">CognifyIQ Global Academy</span>
+                            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">Primary Schooling</span>
+                            <span className="font-bold text-slate-700 dark:text-slate-300">CognifyIQ Global Academy</span>
                           </div>
                           <div className="flex flex-col text-xs">
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Grade Alignment</span>
-                            <span className="font-bold text-slate-750 text-slate-700">Level {profile.gradeLevel} Curriculum</span>
+                            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">Grade Alignment</span>
+                            <span className="font-bold text-slate-700 dark:text-slate-300">Level {profile.gradeLevel} Curriculum</span>
                           </div>
                           <div className="flex flex-col text-xs">
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Current Focus</span>
-                            <span className="font-bold text-slate-750 text-slate-700">Psychometric Analytics</span>
+                            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">Current Focus</span>
+                            <span className="font-bold text-slate-700 dark:text-slate-300">Psychometric Analytics</span>
                           </div>
                         </div>
                       </div>
@@ -445,25 +445,25 @@ const StudentProfile: React.FC = () => {
 
             {/* Quick Actions / Integration Panel */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card className="bg-white border border-[#E5E7EB] rounded-[12px] p-4 shadow-sm hover:shadow-md hover:scale-[1.01] transition-all duration-300 cursor-pointer group">
+              <Card className="bg-white dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-800 rounded-[12px] p-4 shadow-sm hover:shadow-md hover:scale-[1.01] transition-all duration-300 cursor-pointer group">
                 <div className="flex items-center gap-3">
-                  <div className="bg-indigo-50 p-2.5 rounded-xl group-hover:bg-[#4F46E5] transition-all duration-300">
+                  <div className="bg-indigo-50 dark:bg-indigo-950/40 p-2.5 rounded-xl group-hover:bg-[#4F46E5] transition-all duration-300">
                     <Target className="h-5 w-5 text-[#4F46E5] group-hover:text-white" />
                   </div>
                   <div>
-                    <h4 className="text-[13px] font-bold text-slate-800 tracking-tight">Learning Goals</h4>
-                    <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Define your path</p>
+                    <h4 className="text-[13px] font-bold text-slate-800 dark:text-white tracking-tight">Learning Goals</h4>
+                    <p className="text-[9px] text-slate-400 dark:text-slate-505 font-bold uppercase tracking-wider mt-0.5">Define your path</p>
                   </div>
                 </div>
               </Card>
-              <Card className="bg-white border border-[#E5E7EB] rounded-[12px] p-4 shadow-sm hover:shadow-md hover:scale-[1.01] transition-all duration-300 cursor-pointer group">
+              <Card className="bg-white dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-800 rounded-[12px] p-4 shadow-sm hover:shadow-md hover:scale-[1.01] transition-all duration-300 cursor-pointer group">
                 <div className="flex items-center gap-3">
-                  <div className="bg-emerald-50 p-2.5 rounded-xl group-hover:bg-emerald-500 transition-all duration-300">
-                    <Sparkles className="h-5 w-5 text-emerald-600 group-hover:text-white" />
+                  <div className="bg-emerald-50 dark:bg-emerald-950/40 p-2.5 rounded-xl group-hover:bg-emerald-500 transition-all duration-300">
+                    <Sparkles className="h-5 w-5 text-emerald-600 dark:text-emerald-400 group-hover:text-white" />
                   </div>
                   <div>
-                    <h4 className="text-[13px] font-bold text-slate-800 tracking-tight">Achievements</h4>
-                    <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">View your badges</p>
+                    <h4 className="text-[13px] font-bold text-slate-800 dark:text-white tracking-tight">Achievements</h4>
+                    <p className="text-[9px] text-slate-400 dark:text-slate-505 font-bold uppercase tracking-wider mt-0.5">View your badges</p>
                   </div>
                 </div>
               </Card>

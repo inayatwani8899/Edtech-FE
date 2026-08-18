@@ -337,25 +337,25 @@ export const RolePermissionMapping: React.FC = () => {
         />
 
         {/* Role Selector */}
-        <Card className="glass-card border-none shadow-elegant rounded-2xl overflow-hidden mb-6">
-          <CardContent className="p-5">
-            <div className="flex flex-col md:flex-row md:items-end gap-4">
-              <div className="flex-1 space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Select Role</label>
+        <Card className="glass-card border-none shadow-elegant rounded-xl overflow-hidden mb-4">
+          <CardContent className="p-3.5">
+            <div className="flex flex-col md:flex-row md:items-end gap-3">
+              <div className="flex-1 space-y-1.5">
+                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Select Role</label>
                 <Select value={selectedRoleId} onValueChange={setSelectedRoleId} disabled={isSavingLocal || saving || loading}>
-                  <SelectTrigger className="h-11 rounded-xl border-slate-200 bg-white">
+                  <SelectTrigger className="h-8 rounded-lg border-slate-200 bg-white text-xs font-semibold">
                     <div className="flex items-center gap-2">
-                      {loading && <Loader2 className="h-4 w-4 animate-spin text-indigo-500 shrink-0" />}
+                      {loading && <Loader2 className="h-3.5 w-3.5 animate-spin text-indigo-500 shrink-0" />}
                       <SelectValue placeholder="Choose a role to configure..." />
                     </div>
                   </SelectTrigger>
                   <SelectContent className="rounded-xl max-h-60">
                     {roles.map(role => (
-                      <SelectItem key={role.id} value={String(role.id)} className="rounded-lg">
+                      <SelectItem key={role.id} value={String(role.id)} className="rounded-lg text-xs font-semibold">
                         <div className="flex items-center gap-2">
                           <Shield className="h-3.5 w-3.5 text-indigo-500" />
                           <span>{role.name}</span>
-                          <Badge variant={role.status === 'active' ? 'default' : 'secondary'} className="text-[8px] ml-2">
+                          <Badge variant={role.status === 'active' ? 'default' : 'secondary'} className="text-[8px] ml-2 px-1.5 py-0.5">
                             {role.status}
                           </Badge>
                         </div>
@@ -365,11 +365,11 @@ export const RolePermissionMapping: React.FC = () => {
                 </Select>
               </div>
               {selectedRoleId && (
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" onClick={selectAll} disabled={isInteractionDisabled} size="sm" className="h-9 rounded-lg text-[10px] font-bold uppercase tracking-wider gap-1.5 border-slate-200">
+                <div className="flex items-center gap-1.5">
+                  <Button variant="outline" onClick={selectAll} disabled={isInteractionDisabled} size="sm" className="h-8 rounded-lg text-[9px] font-bold uppercase tracking-wider gap-1.5 border-slate-200 px-3">
                     <CheckSquare className="h-3.5 w-3.5" /> Select All
                   </Button>
-                  <Button variant="outline" onClick={deselectAll} disabled={isInteractionDisabled} size="sm" className="h-9 rounded-lg text-[10px] font-bold uppercase tracking-wider gap-1.5 border-slate-200">
+                  <Button variant="outline" onClick={deselectAll} disabled={isInteractionDisabled} size="sm" className="h-8 rounded-lg text-[9px] font-bold uppercase tracking-wider gap-1.5 border-slate-200 px-3">
                     Deselect All
                   </Button>
                 </div>
@@ -390,18 +390,18 @@ export const RolePermissionMapping: React.FC = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-6">
-            <Card className="glass-card border-none shadow-elegant rounded-2xl overflow-hidden">
+          <div className="space-y-4">
+            <Card className="glass-card border-none shadow-elegant rounded-xl overflow-hidden">
               <CardContent className="p-0">
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader className="bg-slate-50">
                       <TableRow className="border-slate-200 hover:bg-transparent">
-                        <TableHead className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-wider w-[40%]">Menu Option</TableHead>
-                        <TableHead className="px-4 py-4 text-[10px] font-black text-slate-500 uppercase tracking-wider text-center w-[15%]">View</TableHead>
-                        <TableHead className="px-4 py-4 text-[10px] font-black text-slate-500 uppercase tracking-wider text-center w-[15%]">Create</TableHead>
-                        <TableHead className="px-4 py-4 text-[10px] font-black text-slate-500 uppercase tracking-wider text-center w-[15%]">Edit</TableHead>
-                        <TableHead className="px-4 py-4 text-[10px] font-black text-slate-500 uppercase tracking-wider text-center w-[15%]">Delete</TableHead>
+                        <TableHead className="px-4 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider w-[40%]">Menu Option</TableHead>
+                        <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider text-center w-[15%]">View</TableHead>
+                        <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider text-center w-[15%]">Create</TableHead>
+                        <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider text-center w-[15%]">Edit</TableHead>
+                        <TableHead className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-wider text-center w-[15%]">Delete</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -417,32 +417,32 @@ export const RolePermissionMapping: React.FC = () => {
                             <React.Fragment key={pid}>
                               {/* Parent Menu Row */}
                               <TableRow className="bg-slate-50/30 hover:bg-slate-50/50 border-slate-100">
-                                <TableCell className="px-6 py-3 font-bold text-slate-800 text-xs flex items-center gap-2">
-                                  <Layers className="h-4 w-4 text-indigo-500" />
+                                <TableCell className="px-4 py-2 font-bold text-slate-800 text-[11px] flex items-center gap-2">
+                                  <Layers className="h-3.5 w-3.5 text-indigo-500" />
                                   {parent.title}
                                 </TableCell>
-                                <TableCell className="px-4 py-3 text-center">
+                                <TableCell className="px-3 py-2 text-center">
                                   <Checkbox
                                     checked={Boolean(parentPerm.canView)}
                                     onCheckedChange={(checked) => handleToggle(Number(pid), 'canView', Boolean(checked))}
                                     disabled={isInteractionDisabled}
                                   />
                                 </TableCell>
-                                <TableCell className="px-4 py-3 text-center">
+                                <TableCell className="px-3 py-2 text-center">
                                   <Checkbox
                                     checked={Boolean(parentPerm.canCreate)}
                                     onCheckedChange={(checked) => handleToggle(Number(pid), 'canCreate', Boolean(checked))}
                                     disabled={isInteractionDisabled}
                                   />
                                 </TableCell>
-                                <TableCell className="px-4 py-3 text-center">
+                                <TableCell className="px-3 py-2 text-center">
                                   <Checkbox
                                     checked={Boolean(parentPerm.canEdit)}
                                     onCheckedChange={(checked) => handleToggle(Number(pid), 'canEdit', Boolean(checked))}
                                     disabled={isInteractionDisabled}
                                   />
                                 </TableCell>
-                                <TableCell className="px-4 py-3 text-center">
+                                <TableCell className="px-3 py-2 text-center">
                                   <Checkbox
                                     checked={Boolean(parentPerm.canDelete)}
                                     onCheckedChange={(checked) => handleToggle(Number(pid), 'canDelete', Boolean(checked))}
@@ -458,32 +458,32 @@ export const RolePermissionMapping: React.FC = () => {
 
                                 return (
                                   <TableRow key={cid} className="hover:bg-slate-50/30 border-slate-50">
-                                    <TableCell className="px-12 py-2.5 text-slate-650 text-xs">
-                                      <span className="text-slate-300 mr-2">└─</span>
+                                    <TableCell className="px-8 py-1.5 text-slate-650 text-[11px]">
+                                      <span className="text-slate-300 mr-1.5">└─</span>
                                       {child.title}
                                     </TableCell>
-                                    <TableCell className="px-4 py-2.5 text-center">
+                                    <TableCell className="px-3 py-1.5 text-center">
                                       <Checkbox
                                         checked={Boolean(childPerm.canView)}
                                         onCheckedChange={(checked) => handleToggle(Number(cid), 'canView', Boolean(checked))}
                                         disabled={isInteractionDisabled}
                                       />
                                     </TableCell>
-                                    <TableCell className="px-4 py-2.5 text-center">
+                                    <TableCell className="px-3 py-1.5 text-center">
                                       <Checkbox
                                         checked={Boolean(childPerm.canCreate)}
                                         onCheckedChange={(checked) => handleToggle(Number(cid), 'canCreate', Boolean(checked))}
                                         disabled={isInteractionDisabled}
                                       />
                                     </TableCell>
-                                    <TableCell className="px-4 py-2.5 text-center">
+                                    <TableCell className="px-3 py-1.5 text-center">
                                       <Checkbox
                                         checked={Boolean(childPerm.canEdit)}
                                         onCheckedChange={(checked) => handleToggle(Number(cid), 'canEdit', Boolean(checked))}
                                         disabled={isInteractionDisabled}
                                       />
                                     </TableCell>
-                                    <TableCell className="px-4 py-2.5 text-center">
+                                    <TableCell className="px-3 py-1.5 text-center">
                                       <Checkbox
                                         checked={Boolean(childPerm.canDelete)}
                                         onCheckedChange={(checked) => handleToggle(Number(cid), 'canDelete', Boolean(checked))}
@@ -505,10 +505,10 @@ export const RolePermissionMapping: React.FC = () => {
 
             {/* Save Bar */}
             <div className="sticky bottom-4 z-20">
-              <Card className={`border-none shadow-2xl rounded-2xl overflow-hidden transition-all duration-300 ${computedHasChanges ? 'bg-white/95 backdrop-blur-2xl' : 'bg-white/60 backdrop-blur'}`}>
-                <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <Card className={`border-none shadow-2xl rounded-xl overflow-hidden transition-all duration-300 ${computedHasChanges ? 'bg-white/95 backdrop-blur-2xl' : 'bg-white/60 backdrop-blur'}`}>
+                <CardContent className="p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-655 flex items-center justify-center text-white shadow-sm">
+                    <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-655 flex items-center justify-center text-white shadow-sm">
                       <Shield className="h-4 w-4" />
                     </div>
                     <div>
@@ -519,7 +519,7 @@ export const RolePermissionMapping: React.FC = () => {
                   <Button
                     onClick={handleSave}
                     disabled={!computedHasChanges || loading || saving || isSavingLocal}
-                    className="rounded-xl font-bold text-xs uppercase tracking-wider gap-2 shadow-lg transition-all bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-indigo-500/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
+                    className="rounded-lg font-bold text-[10px] h-8 px-4 uppercase tracking-wider gap-2 shadow-lg transition-all bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-indigo-500/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
                   >
                     {(saving || isSavingLocal) ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                     {(saving || isSavingLocal) ? 'Synchronizing...' : computedHasChanges ? 'Apply Matrix' : 'No Alterations'}

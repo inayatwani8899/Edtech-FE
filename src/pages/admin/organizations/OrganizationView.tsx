@@ -216,12 +216,12 @@ const OrganizationView: React.FC = () => {
 
                 {/* Profile Header Dashboard Banner */}
                 <Card className="border-none shadow-elegant bg-white rounded-3xl overflow-hidden mb-6 border border-slate-100/50">
-                    <div className="h-28 bg-slate-900 relative">
+                    <div className="h-20 bg-slate-900 relative">
                         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-15"></div>
                         <div className="absolute inset-0 bg-gradient-to-r from-indigo-900/40 via-transparent to-transparent"></div>
                     </div>
                     
-                    <CardContent className="px-6 pb-6 pt-0 relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6 -mt-10">
+                    <CardContent className="px-4 pb-4 pt-0 relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-4 -mt-8">
                         {/* Left: Organization Avatar, Name, Badges */}
                         <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 text-center sm:text-left">
                             <div className="h-24 w-24 rounded-2xl bg-white p-1.5 shadow-xl border border-slate-100 flex-shrink-0 flex items-center justify-center">
@@ -316,13 +316,13 @@ const OrganizationView: React.FC = () => {
                         { label: "Clearance Level", value: organization.isVerified ? "Clearance Verified" : "Verification Locked", icon: Shield, color: organization.isVerified ? "text-emerald-600" : "text-slate-400", bg: organization.isVerified ? "bg-emerald-50" : "bg-slate-50" },
                         { label: "Onboarding Date", value: formatDate(organization.createdDate), icon: Calendar, color: "text-purple-600", bg: "bg-purple-50" }
                     ].map((metric, i) => (
-                        <Card key={i} className="border-none shadow-elegant bg-white rounded-2xl overflow-hidden border border-slate-100/50 hover:scale-[1.01] transition-transform duration-300">
-                            <CardContent className="p-4 flex items-center gap-3">
-                                <div className={`p-2.5 rounded-xl ${metric.bg} ${metric.color}`}>
-                                    <metric.icon className="h-4 w-4" />
+                        <Card key={i} className="border-none shadow-elegant bg-white rounded-xl overflow-hidden border border-slate-100/50 hover:scale-[1.01] transition-transform duration-300">
+                            <CardContent className="p-3 flex items-center gap-2.5">
+                                <div className={`p-2 rounded-xl ${metric.bg} ${metric.color}`}>
+                                    <metric.icon className="h-3.5 w-3.5" />
                                 </div>
                                 <div className="min-w-0">
-                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{metric.label}</p>
+                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{metric.label}</p>
                                     <p className="text-xs font-black text-slate-800 truncate leading-none">{metric.value}</p>
                                 </div>
                             </CardContent>
@@ -355,7 +355,7 @@ const OrganizationView: React.FC = () => {
 
                         {/* Profile Information Card */}
                         <Card className="border-none shadow-elegant bg-white rounded-3xl overflow-hidden border border-slate-100/50">
-                            <CardContent className="p-6 md:p-8 space-y-6">
+                            <CardContent className="p-4 md:p-5 space-y-5">
                                 
                                 {/* Section 1: Institution Details */}
                                 <div className="space-y-4">
@@ -481,13 +481,13 @@ const OrganizationView: React.FC = () => {
 
                         {/* UPLOADED DOCUMENTS REDESIGN */}
                         <Card className="border-none shadow-elegant bg-white rounded-3xl overflow-hidden border border-slate-100/50">
-                            <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/30 flex items-center justify-between">
+                            <div className="px-4 py-2.5 border-b border-slate-100 bg-slate-50/30 flex items-center justify-between">
                                 <div className="flex items-center gap-2">
-                                    <FileText className="h-4.5 w-4.5 text-slate-800" />
+                                    <FileText className="h-4 w-4 text-slate-800" />
                                     <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-widest">Uploaded Onboarding Verification Files</h3>
                                 </div>
                             </div>
-                            <CardContent className="p-6">
+                            <CardContent className="p-4">
                                 {organization.documentUrl ? (
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div className="p-4 bg-slate-50 border border-slate-200/60 rounded-2xl flex flex-col justify-between min-h-[120px] transition-all hover:bg-slate-100/40">
@@ -536,13 +536,13 @@ const OrganizationView: React.FC = () => {
                         
                         {/* Onboarding Timeline Card */}
                         <Card className="border-none shadow-elegant bg-white rounded-3xl overflow-hidden border border-slate-100/50">
-                            <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/30 flex items-center justify-between">
+                            <div className="px-4 py-2.5 border-b border-slate-100 bg-slate-50/30 flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <Activity className="h-4.5 w-4.5 text-slate-800" />
                                     <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-widest">Onboarding Pipeline</h3>
                                 </div>
                             </div>
-                            <CardContent className="p-6 space-y-4">
+                            <CardContent className="p-4 space-y-3">
                                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider leading-none ml-1">Lifecycle Stages</p>
                                 <div className="relative pl-3 space-y-6">
                                     {/* Timeline line visual connector */}
@@ -585,9 +585,9 @@ const OrganizationView: React.FC = () => {
                         {/* Recommendation Action Assistant */}
                         <Card className="border-none shadow-elegant bg-gradient-to-br from-indigo-900 to-slate-900 text-white rounded-3xl overflow-hidden relative">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none"></div>
-                            <CardContent className="p-6 space-y-4">
+                            <CardContent className="p-4 space-y-3">
                                 <div className="flex items-center gap-2 text-indigo-300">
-                                    <Sparkles className="h-4.5 w-4.5 animate-pulse" />
+                                    <Sparkles className="h-4 w-4 animate-pulse" />
                                     <span className="text-[9px] font-black uppercase tracking-widest">Setup Assistant</span>
                                 </div>
                                 <div className="space-y-1">

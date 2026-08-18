@@ -528,23 +528,23 @@ export const QuestionForm: React.FC = () => {
             
             {/* Left Side: Question Details & Selectors */}
             <div className="space-y-6">
-              <Card className="glass-card border-none shadow-elegant rounded-2xl p-5 space-y-4">
-                <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-                  <div className="h-5 w-5 rounded-md bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white text-[9px]">
+              <Card className="glass-card border-none shadow-elegant rounded-xl p-4 space-y-3">
+                <div className="flex items-center gap-2 pb-2.5 border-b border-slate-100">
+                  <div className="h-4.5 w-4.5 rounded-md bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white text-[8px]">
                     <FileText className="h-3 w-3" />
                   </div>
-                  <h2 className="text-xs font-black uppercase text-slate-800 tracking-wider">Evaluation Context</h2>
+                  <h2 className="text-[10px] font-black uppercase text-slate-800 tracking-wider">Evaluation Context</h2>
                 </div>
 
                 {/* Question Textarea */}
                 <div className="space-y-1">
-                  <Label className="text-[10px] font-black uppercase text-slate-500">Question Text</Label>
+                  <Label className="text-[9px] font-black uppercase text-slate-500">Question Text</Label>
                   <Textarea
                     placeholder="Enter the assessment question text content..."
                     value={questionText}
                     onChange={(e) => setQuestionText(e.target.value)}
                     disabled={isViewMode}
-                    rows={4}
+                    rows={2.5}
                     className="bg-white border-slate-200 focus:ring-primary/20 focus:border-primary text-xs font-semibold placeholder:text-slate-400 rounded-lg resize-none leading-relaxed"
                   />
                 </div>
@@ -579,24 +579,24 @@ export const QuestionForm: React.FC = () => {
               </Card>
 
               {/* Taxonomy Selectors */}
-              <Card className="glass-card border-none shadow-elegant rounded-2xl p-5 space-y-4">
-                <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-                  <div className="h-5 w-5 rounded-md bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white text-[9px]">
+              <Card className="glass-card border-none shadow-elegant rounded-xl p-4 space-y-3">
+                <div className="flex items-center gap-2 pb-2.5 border-b border-slate-100">
+                  <div className="h-4.5 w-4.5 rounded-md bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white text-[8px]">
                     <HelpCircle className="h-3 w-3" />
                   </div>
-                  <h2 className="text-xs font-black uppercase text-slate-800 tracking-wider">Taxonomy Alignments</h2>
+                  <h2 className="text-[10px] font-black uppercase text-slate-800 tracking-wider">Taxonomy Alignments</h2>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                   {/* Test Selection */}
                   <div className="space-y-1">
-                    <Label className="text-[10px] font-black uppercase text-slate-500">Assessment (Test)</Label>
+                    <Label className="text-[9px] font-black uppercase text-slate-500">Assessment (Test)</Label>
                     <Select
                       value={testId}
                       onValueChange={handleTestChange}
                       disabled={isViewMode || loadingTests}
                     >
-                      <SelectTrigger className="h-9 bg-white border-slate-200 rounded-lg text-xs font-semibold text-slate-700">
+                      <SelectTrigger className="h-8 bg-white border-slate-200 rounded-lg text-xs font-semibold text-slate-700">
                         <SelectValue placeholder="Select Test..." />
                       </SelectTrigger>
                       <SelectContent className="rounded-lg max-h-60">
@@ -611,13 +611,13 @@ export const QuestionForm: React.FC = () => {
 
                   {/* Grade Selection */}
                   <div className="space-y-1">
-                    <Label className="text-[10px] font-black uppercase text-slate-500">Grade Level</Label>
+                    <Label className="text-[9px] font-black uppercase text-slate-500">Grade Level</Label>
                     <Select
                       value={gradeId}
                       onValueChange={setGradeId}
                       disabled={isViewMode || loadingGrades}
                     >
-                      <SelectTrigger className="h-9 bg-white border-slate-200 rounded-lg text-xs font-semibold text-slate-700">
+                      <SelectTrigger className="h-8 bg-white border-slate-200 rounded-lg text-xs font-semibold text-slate-700">
                         <SelectValue placeholder="Select Grade..." />
                       </SelectTrigger>
                       <SelectContent className="rounded-lg max-h-60">
@@ -632,13 +632,13 @@ export const QuestionForm: React.FC = () => {
 
                   {/* Category Selection */}
                   <div className="space-y-1">
-                    <Label className="text-[10px] font-black uppercase text-slate-500">Taxonomy Category</Label>
+                    <Label className="text-[9px] font-black uppercase text-slate-500">Taxonomy Category</Label>
                     <Select
                       value={categoryId}
                       onValueChange={handleCategoryChange}
                       disabled={isViewMode || !testId || loadingFormCategories}
                     >
-                      <SelectTrigger className="h-9 bg-white border-slate-200 rounded-lg text-xs font-semibold text-slate-700 disabled:bg-slate-100/50">
+                      <SelectTrigger className="h-8 bg-white border-slate-200 rounded-lg text-xs font-semibold text-slate-700 disabled:bg-slate-100/50">
                         <SelectValue placeholder={!testId ? "Select Test First" : "Select Category..."} />
                       </SelectTrigger>
                       <SelectContent className="rounded-lg max-h-60">
@@ -653,13 +653,13 @@ export const QuestionForm: React.FC = () => {
 
                   {/* Psychometric Theory Selection */}
                   <div className="space-y-1">
-                    <Label className="text-[10px] font-black uppercase text-slate-500">Psychometric Theory</Label>
+                    <Label className="text-[9px] font-black uppercase text-slate-500">Psychometric Theory</Label>
                     <Select
                       value={theoryId}
                       onValueChange={handleTheoryChange}
                       disabled={isViewMode || !categoryId || loadingFormTheories}
                     >
-                      <SelectTrigger className="h-9 bg-white border-slate-200 rounded-lg text-xs font-semibold text-slate-700 disabled:bg-slate-100/50">
+                      <SelectTrigger className="h-8 bg-white border-slate-200 rounded-lg text-xs font-semibold text-slate-700 disabled:bg-slate-100/50">
                         <SelectValue placeholder={!categoryId ? "Select Category First" : "Select Theory..."} />
                       </SelectTrigger>
                       <SelectContent className="rounded-lg max-h-60">
@@ -674,13 +674,13 @@ export const QuestionForm: React.FC = () => {
 
                   {/* Psychometric Tag Selection */}
                   <div className="space-y-1 sm:col-span-2">
-                    <Label className="text-[10px] font-black uppercase text-slate-500">Theoretical Dimension (Tag)</Label>
+                    <Label className="text-[9px] font-black uppercase text-slate-500">Theoretical Dimension (Tag)</Label>
                     <Select
                       value={tagId}
                       onValueChange={setTagId}
                       disabled={isViewMode || !theoryId || loadingFormTags}
                     >
-                      <SelectTrigger className="h-9 bg-white border-slate-200 rounded-lg text-xs font-semibold text-slate-700 disabled:bg-slate-100/50">
+                      <SelectTrigger className="h-8 bg-white border-slate-200 rounded-lg text-xs font-semibold text-slate-700 disabled:bg-slate-100/50">
                         <SelectValue placeholder={!theoryId ? "Select Theory First" : "Select Psychometric Tag..."} />
                       </SelectTrigger>
                       <SelectContent className="rounded-lg max-h-60">
@@ -766,7 +766,7 @@ export const QuestionForm: React.FC = () => {
               type="button"
               variant="outline"
               onClick={() => navigate("/manage/questions")}
-              className="border-slate-200 bg-white text-slate-700 hover:bg-slate-50 rounded-lg h-9 px-5 font-bold text-xs uppercase tracking-wider"
+              className="border-slate-200 bg-white text-slate-700 hover:bg-slate-50 rounded-lg h-8 px-5 font-bold text-xs uppercase tracking-wider"
             >
               Cancel
             </Button>
@@ -775,7 +775,7 @@ export const QuestionForm: React.FC = () => {
               <Button
                 type="submit"
                 disabled={saving}
-                className="bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-900/20 rounded-lg h-9 px-6 transition-all hover:scale-105 active:scale-95 group font-bold text-xs uppercase tracking-wider"
+                className="bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-900/20 rounded-lg h-8 px-6 transition-all hover:scale-105 active:scale-95 group font-bold text-xs uppercase tracking-wider"
               >
                 {saving ? (
                   <>

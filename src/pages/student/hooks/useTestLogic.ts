@@ -168,6 +168,11 @@ export const useTestLogic = () => {
     // Fullscreen change event listener
     useEffect(() => {
         const handleFullscreenChange = () => {
+            // If the test is submitting, do not warn about exiting fullscreen
+            if (isSubmitting || useTestStore.getState().isSubmitting) {
+                return;
+            }
+
             const fullscreenElement = document.fullscreenElement ||
                 (document as any).webkitFullscreenElement ||
                 (document as any).mozFullScreenElement ||
@@ -220,7 +225,7 @@ export const useTestLogic = () => {
             document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
             document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
         };
-    }, [currentStep, timeRemaining]);
+    }, [currentStep, timeRemaining, isSubmitting]);
 
     const handleExitTest = async () => {
         if (!testId || !user?.id || isSubmitting) return;

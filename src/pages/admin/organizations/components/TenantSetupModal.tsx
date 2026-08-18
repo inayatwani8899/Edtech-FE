@@ -313,7 +313,7 @@ export const TenantSetupModal: React.FC<TenantSetupModalProps> = ({
                       setConnectionStatus("idle");
                     }}
                     placeholder="e.g. localhost or database.cluster"
-                    className="h-10 bg-slate-50/50 border-slate-200 focus:bg-white rounded-xl text-xs font-semibold"
+                    className="h-8 bg-slate-50/50 border-slate-200 focus:bg-white rounded-lg text-xs font-semibold"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -325,7 +325,7 @@ export const TenantSetupModal: React.FC<TenantSetupModalProps> = ({
                       setServerPort(Number(e.target.value));
                       setConnectionStatus("idle");
                     }}
-                    className="h-10 bg-slate-50/50 border-slate-200 focus:bg-white rounded-xl text-xs font-bold"
+                    className="h-8 bg-slate-50/50 border-slate-200 focus:bg-white rounded-lg text-xs font-bold"
                   />
                 </div>
                 <div className="space-y-1.5 md:col-span-2">
@@ -337,7 +337,7 @@ export const TenantSetupModal: React.FC<TenantSetupModalProps> = ({
                       setConnectionStatus("idle");
                     }}
                     placeholder="e.g. edtech_tenant"
-                    className="h-10 bg-slate-50/50 border-slate-200 focus:bg-white rounded-xl text-xs font-mono font-bold"
+                    className="h-8 bg-slate-50/50 border-slate-200 focus:bg-white rounded-lg text-xs font-mono font-bold"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -349,7 +349,7 @@ export const TenantSetupModal: React.FC<TenantSetupModalProps> = ({
                       setConnectionStatus("idle");
                     }}
                     placeholder="postgres"
-                    className="h-10 bg-slate-50/50 border-slate-200 focus:bg-white rounded-xl text-xs font-semibold"
+                    className="h-8 bg-slate-50/50 border-slate-200 focus:bg-white rounded-lg text-xs font-semibold"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -362,7 +362,7 @@ export const TenantSetupModal: React.FC<TenantSetupModalProps> = ({
                       setConnectionStatus("idle");
                     }}
                     placeholder="••••••••"
-                    className="h-10 bg-slate-50/50 border-slate-200 focus:bg-white rounded-xl text-xs"
+                    className="h-8 bg-slate-50/50 border-slate-200 focus:bg-white rounded-lg text-xs"
                   />
                 </div>
               </div>

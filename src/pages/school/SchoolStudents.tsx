@@ -466,14 +466,14 @@ export const SchoolStudents = () => {
                         <Button
                             variant="outline"
                             onClick={() => setIsUploadOpen(true)}
-                            className="bg-white hover:bg-slate-50 border-slate-200 text-slate-700 h-9 rounded-xl font-bold text-xs uppercase tracking-wider gap-2 px-4 shadow-sm"
+                            className="bg-white hover:bg-slate-50 border-slate-200 text-slate-700 h-8 rounded-lg font-bold text-[10px] uppercase tracking-wider gap-2 px-3 shadow-sm"
                         >
                             <Upload className="h-4 w-4" />
                             Bulk Upload
                         </Button>
                         <Button
                             onClick={() => navigate("/school/students/add")}
-                            className="bg-slate-900 hover:bg-slate-800 border-none text-white h-9 rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg shadow-slate-900/20 gap-2 px-5 hover:scale-[1.02] active:scale-95 transition-all"
+                            className="bg-slate-900 hover:bg-slate-800 border-none text-white h-8 rounded-lg font-bold text-[10px] uppercase tracking-wider shadow-lg shadow-slate-900/20 gap-2 px-4 hover:scale-[1.02] active:scale-95 transition-all"
                         >
                             <UserPlus className="h-4 w-4" />
                             Register Student
@@ -482,7 +482,7 @@ export const SchoolStudents = () => {
                 </div>
 
             {/* Professional Filter Bar */}
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2.5 rounded-2xl flex flex-col lg:flex-row gap-3 items-center justify-between shadow-sm mt-4">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded-xl flex flex-col lg:flex-row gap-2.5 items-center justify-between shadow-sm mt-4">
                 <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto">
                     {/* Search Field */}
                     <div className="relative w-full sm:w-60">
@@ -491,7 +491,7 @@ export const SchoolStudents = () => {
                             placeholder="Search Student..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-9 h-9 border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 rounded-xl text-xs"
+                            className="pl-9 h-8 border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 rounded-lg text-[11px]"
                         />
                     </div>
 
@@ -502,7 +502,7 @@ export const SchoolStudents = () => {
                             value={sortBy}
                             onChange={(e) => setSortBy(e.target.value)}
                             disabled={loading}
-                            className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold px-2.5 py-1.5 outline-none h-9 cursor-pointer"
+                            className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-[11px] font-bold px-2 py-1 outline-none h-8 cursor-pointer"
                         >
                             <option value="firstname">First Name</option>
                             <option value="lastname">Last Name</option>
@@ -518,7 +518,7 @@ export const SchoolStudents = () => {
                             value={sortDirection}
                             onChange={(e) => setSortDirection(e.target.value as 'asc' | 'desc')}
                             disabled={loading}
-                            className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold px-2.5 py-1.5 outline-none h-9 cursor-pointer"
+                            className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-[11px] font-bold px-2 py-1 outline-none h-8 cursor-pointer"
                         >
                             <option value="asc">Ascending</option>
                             <option value="desc">Descending</option>
@@ -532,7 +532,7 @@ export const SchoolStudents = () => {
                             value={limit}
                             onChange={(e) => setLimit(Number(e.target.value))}
                             disabled={loading}
-                            className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold px-2.5 py-1.5 outline-none h-9 cursor-pointer"
+                            className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-[11px] font-bold px-2 py-1 outline-none h-8 cursor-pointer"
                         >
                             <option value={10}>10</option>
                             <option value={25}>25</option>
@@ -564,7 +564,7 @@ export const SchoolStudents = () => {
                         </button>
                     </div>
 
-                    <div className="text-xs font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl whitespace-nowrap">
+                    <div className="text-[10px] font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg whitespace-nowrap">
                         Total Students: <span className="text-blue-600 dark:text-blue-400 font-extrabold">{totalCount}</span>
                     </div>
                 </div>
@@ -572,19 +572,19 @@ export const SchoolStudents = () => {
 
             {/* Bulk Selection Message */}
             {selectedStudents.length > 0 && (
-                <div className="bg-blue-600 text-white p-3 rounded-2xl flex items-center justify-between animate-in slide-in-from-top-2 duration-300 shadow-xl shadow-blue-600/20">
+                <div className="bg-blue-600 text-white p-2.5 rounded-xl flex items-center justify-between animate-in slide-in-from-top-2 duration-300 shadow-xl shadow-blue-600/20">
                     <div className="flex items-center gap-3 ml-2">
-                        <div className="bg-white/20 h-6 w-6 rounded-full flex items-center justify-center font-bold text-xs">
+                        <div className="bg-white/20 h-5.5 w-5.5 rounded-full flex items-center justify-center font-bold text-[10px]">
                             {selectedStudents.length}
                         </div>
-                        <span className="text-sm font-bold tracking-wide">Students Selected</span>
+                        <span className="text-xs font-bold tracking-wide">Students Selected</span>
                     </div>
                     <div className="flex items-center gap-2">
                         <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => handleBulkAction('promote')}
-                            className="text-white hover:bg-white/10 h-8 text-[10px] uppercase font-black tracking-widest px-3"
+                            className="text-white hover:bg-white/10 h-7.5 text-[9px] uppercase font-black tracking-widest px-2.5"
                         >
                             Promote
                         </Button>
@@ -592,16 +592,16 @@ export const SchoolStudents = () => {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleBulkAction('suspend')}
-                            className="text-white hover:bg-white/10 h-8 text-[10px] uppercase font-black tracking-widest px-3"
+                            className="text-white hover:bg-white/10 h-7.5 text-[9px] uppercase font-black tracking-widest px-2.5"
                         >
                             Suspend
                         </Button>
-                        <div className="w-px h-5 bg-white/20 mx-1" />
+                        <div className="w-px h-4 bg-white/20 mx-1" />
                         <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => setSelectedStudents([])}
-                            className="text-white hover:bg-white/10 h-8"
+                            className="text-white hover:bg-white/10 h-7.5"
                         >
                             <XCircle className="h-4 w-4" />
                         </Button>
@@ -630,22 +630,22 @@ export const SchoolStudents = () => {
                         <Table>
                             <TableHeader className="bg-slate-50/50 dark:bg-slate-950/20 border-b border-slate-100 dark:border-slate-800">
                                 <TableRow className="hover:bg-transparent">
-                                    <TableHead className="w-12 px-4 py-2.5">
+                                    <TableHead className="w-12 px-3 py-2">
                                         <div
                                             onClick={() => handleSelectAll(selectedStudents.length !== students.length)}
                                             className={cn(
-                                                "h-5 w-5 rounded border transition-all cursor-pointer flex items-center justify-center",
+                                                "h-4 w-4 rounded border transition-all cursor-pointer flex items-center justify-center",
                                                 selectedStudents.length === students.length ? "bg-blue-600 border-blue-600" : "border-slate-300 dark:border-slate-700"
                                             )}
                                         >
-                                            {selectedStudents.length === students.length && <Check className="h-3 w-3 text-white" />}
+                                            {selectedStudents.length === students.length && <Check className="h-2.5 w-2.5 text-white" />}
                                         </div>
                                     </TableHead>
-                                    <TableHead className="py-2.5 px-4">{renderSortHeaderLabel("Student Info", "firstname")}</TableHead>
-                                    <TableHead className="py-2.5 px-4">{renderSortHeaderLabel("Grade", "grade")}</TableHead>
-                                    <TableHead className="py-2.5 px-4">{renderSortHeaderLabel("Contact Info", "email")}</TableHead>
-                                    <TableHead className="text-[11px] font-black uppercase tracking-wider text-slate-500 py-2.5 px-4">Status</TableHead>
-                                    <TableHead className="text-[11px] font-black uppercase tracking-wider text-slate-500 py-2.5 px-4 text-right">Actions</TableHead>
+                                    <TableHead className="py-2 px-3">{renderSortHeaderLabel("Student Info", "firstname")}</TableHead>
+                                    <TableHead className="py-2 px-3">{renderSortHeaderLabel("Grade", "grade")}</TableHead>
+                                    <TableHead className="py-2 px-3">{renderSortHeaderLabel("Contact Info", "email")}</TableHead>
+                                    <TableHead className="text-[10px] font-black uppercase tracking-wider text-slate-500 py-2 px-3">Status</TableHead>
+                                    <TableHead className="text-[10px] font-black uppercase tracking-wider text-slate-500 py-2 px-3 text-right">Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -657,18 +657,18 @@ export const SchoolStudents = () => {
                                             selectedStudents.includes(student.id) ? "bg-blue-50/30 dark:bg-blue-900/10" : "hover:bg-slate-50/50 dark:hover:bg-slate-800/30"
                                         )}
                                     >
-                                        <TableCell className="px-4 py-2">
+                                        <TableCell className="px-3 py-1.5">
                                             <div
                                                 onClick={() => toggleStudentSelection(student.id)}
                                                 className={cn(
-                                                    "h-5 w-5 rounded border transition-all cursor-pointer flex items-center justify-center",
+                                                    "h-4 w-4 rounded border transition-all cursor-pointer flex items-center justify-center",
                                                     selectedStudents.includes(student.id) ? "bg-blue-600 border-blue-600" : "border-slate-300 dark:border-slate-700"
                                                 )}
                                             >
-                                                {selectedStudents.includes(student.id) && <Check className="h-3 w-3 text-white" />}
+                                                {selectedStudents.includes(student.id) && <Check className="h-2.5 w-2.5 text-white" />}
                                             </div>
                                         </TableCell>
-                                        <TableCell className="py-2 px-4">
+                                        <TableCell className="py-1.5 px-3">
                                             <div className="flex items-center gap-2.5">
                                                 {/* Dynamic Avatar */}
                                                 <div className={cn(
@@ -685,27 +685,27 @@ export const SchoolStudents = () => {
                                                 </div>
                                             </div>
                                         </TableCell>
-                                        <TableCell className="py-2 px-4">
+                                        <TableCell className="py-1.5 px-3">
                                             <Badge variant="outline" className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-650 dark:text-slate-400 font-black px-2 py-0.5 text-[9px] rounded-md">
                                                 {formatGrade(student.gradeLevel || student.gradeName)}
                                             </Badge>
                                         </TableCell>
-                                        <TableCell className="py-2 px-4">
+                                        <TableCell className="py-1.5 px-3">
                                             <div className="flex flex-col gap-0.5 max-w-[200px] text-[11px]">
                                                 <span className="font-bold text-slate-700 dark:text-slate-300 truncate flex items-center gap-1 leading-tight">
                                                     <span className="text-xs">📧</span>
                                                     <span className="truncate">{student.email}</span>
                                                 </span>
-                                                <span className="text-slate-400 dark:text-slate-500 font-semibold flex items-center gap-1 leading-tight">
+                                                <span className="text-slate-400 dark:text-slate-550 font-semibold flex items-center gap-1 leading-tight">
                                                     <span className="text-xs">📞</span>
                                                     <span>{student.phone || student.phoneNumber || "9876543210"}</span>
                                                 </span>
                                             </div>
                                         </TableCell>
-                                        <TableCell className="py-2 px-4">
+                                        <TableCell className="py-1.5 px-3">
                                             {renderStatusBadge(student.isActive)}
                                         </TableCell>
-                                        <TableCell className="py-2 px-4 text-right">
+                                        <TableCell className="py-1.5 px-3 text-right">
                                             <div className="flex items-center justify-end gap-1 px-1">
                                                 <Button
                                                     variant="ghost"
@@ -743,35 +743,35 @@ export const SchoolStudents = () => {
                     </div>
                 ) : (
                     /* Grid View Mode */
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4">
                         {students.map((student) => (
                             <div
                                 key={student.id}
-                                className="group relative bg-slate-50/50 dark:bg-slate-950/20 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 hover:bg-white dark:hover:bg-slate-900 hover:shadow-xl hover:shadow-slate-200/40 dark:hover:shadow-none hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between"
+                                className="group relative bg-slate-50/50 dark:bg-slate-950/20 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 hover:bg-white dark:hover:bg-slate-900 hover:shadow-xl hover:shadow-slate-200/40 dark:hover:shadow-none hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between"
                             >
                                 <div className="absolute top-4 right-4">
                                     <button
                                         onClick={() => toggleStudentSelection(student.id)}
                                         className={cn(
-                                            "h-5 w-5 rounded-full border transition-all flex items-center justify-center",
+                                            "h-4 w-4 rounded-full border transition-all flex items-center justify-center",
                                             selectedStudents.includes(student.id) ? "bg-blue-600 border-blue-600 scale-110" : "bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 group-hover:scale-110"
                                         )}
                                     >
-                                        {selectedStudents.includes(student.id) && <Check className="h-3 w-3 text-white" />}
+                                        {selectedStudents.includes(student.id) && <Check className="h-2.5 w-2.5 text-white" />}
                                     </button>
                                 </div>
 
                                 <div className="flex flex-col items-center text-center">
                                     {/* Avatar Circle with Dynamic Gradient */}
                                     <div className={cn(
-                                        "h-16 w-16 rounded-2xl bg-gradient-to-tr flex items-center justify-center font-black text-xl shadow-lg mb-4 group-hover:scale-110 transition-transform duration-500",
+                                        "h-14 w-14 rounded-2xl bg-gradient-to-tr flex items-center justify-center font-black text-lg shadow-lg mb-3 group-hover:scale-110 transition-transform duration-500",
                                         getAvatarGradient(student.email, `${student.firstName} ${student.lastName}`)
                                     )}>
                                         {student.firstName[0]}{student.lastName[0]}
                                     </div>
 
                                     {/* Name and ID and DOB */}
-                                    <h4 className="font-black text-slate-900 dark:text-white leading-snug">{student.firstName} {student.lastName}</h4>
+                                    <h4 className="font-black text-sm text-slate-900 dark:text-white leading-snug">{student.firstName} {student.lastName}</h4>
                                     <div className="mt-1 flex flex-col gap-0.5">
                                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                                             Student ID: {getStableStudentId(student.id, student.email)}
@@ -783,31 +783,31 @@ export const SchoolStudents = () => {
 
                                     {/* Grade & Status */}
                                     <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
-                                        <Badge variant="outline" className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-650 dark:text-slate-400 font-bold px-3 py-1 text-[10px] rounded-lg">
+                                        <Badge variant="outline" className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-650 dark:text-slate-400 font-bold px-2.5 py-0.5 text-[9px] rounded-md">
                                             {formatGrade(student.gradeLevel || student.gradeName)}
                                         </Badge>
                                         {renderStatusBadge(student.isActive)}
                                     </div>
 
                                     {/* Contact Information block */}
-                                    <div className="w-full mt-6 space-y-2.5 border-t border-slate-100 dark:border-slate-850 pt-4 text-left">
-                                        <div className="text-xs font-semibold text-slate-600 dark:text-slate-350 flex items-center gap-2 truncate">
+                                    <div className="w-full mt-5 space-y-2 border-t border-slate-100 dark:border-slate-855 pt-4 text-left">
+                                        <div className="text-xs font-semibold text-slate-650 dark:text-slate-350 flex items-center gap-2 truncate">
                                             <span>📧</span>
                                             <span className="truncate">{student.email}</span>
                                         </div>
-                                        <div className="text-xs font-semibold text-slate-400 dark:text-slate-500 flex items-center gap-2">
+                                        <div className="text-xs font-semibold text-slate-400 dark:text-slate-550 flex items-center gap-2">
                                             <span>📞</span>
                                             <span>{student.phone || student.phoneNumber || "9876543210"}</span>
                                         </div>
                                     </div>
 
                                     {/* Actions */}
-                                    <div className="grid grid-cols-3 gap-2 w-full mt-6">
+                                    <div className="grid grid-cols-3 gap-2 w-full mt-4">
                                         <Button
                                             variant="ghost"
                                             size="sm"
                                             onClick={() => navigate(`/school/students/view/${student.id}`)}
-                                            className="h-9 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-650 dark:text-slate-400 hover:text-blue-600 shadow-sm"
+                                            className="h-8 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-650 dark:text-slate-400 hover:text-blue-600 shadow-sm"
                                         >
                                             <Eye className="h-4 w-4" />
                                         </Button>
@@ -815,7 +815,7 @@ export const SchoolStudents = () => {
                                             variant="ghost"
                                             size="sm"
                                             onClick={() => navigate(`/school/students/edit/${student.id}`)}
-                                            className="h-9 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-650 dark:text-slate-400 hover:text-amber-600 shadow-sm"
+                                            className="h-8 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-650 dark:text-slate-400 hover:text-amber-600 shadow-sm"
                                         >
                                             <Edit className="h-4 w-4" />
                                         </Button>
@@ -823,7 +823,7 @@ export const SchoolStudents = () => {
                                             variant="ghost"
                                             size="sm"
                                             onClick={() => openDeleteDialog(String(student.id))}
-                                            className="h-9 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-650 dark:text-slate-400 hover:text-rose-600 shadow-sm"
+                                            className="h-8 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-650 dark:text-slate-400 hover:text-rose-600 shadow-sm"
                                         >
                                             <Trash2 className="h-4 w-4" />
                                         </Button>

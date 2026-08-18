@@ -43,20 +43,20 @@ export const CareerGuidance: React.FC = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] pb-8 font-sans">
+        <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-8 font-sans transition-colors duration-200">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
                 
                 {/* Compact Standardized Header */}
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-[#E5E7EB]">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-[#E5E7EB] dark:border-slate-800">
                     <div className="space-y-1.5">
                         <div className="flex items-center gap-2">
                             <div className="h-px w-6 bg-[#4F46E5]/30"></div>
                             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#4F46E5]">Future Mapping</span>
                         </div>
-                        <h1 className="text-3xl font-black tracking-tight text-[#111827]">
+                        <h1 className="text-3xl font-black tracking-tight text-[#111827] dark:text-white">
                             Career <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4F46E5] to-indigo-600">Guidance</span>
                         </h1>
-                        <p className="text-[13px] font-medium text-[#6B7280]">AI-powered career recommendations and expert mentorship based on your unique profile</p>
+                        <p className="text-[13px] font-medium text-[#6B7280] dark:text-slate-400">AI-powered career recommendations and expert mentorship based on your unique profile</p>
                     </div>
                 </div>
 
@@ -64,35 +64,35 @@ export const CareerGuidance: React.FC = () => {
                     {/* Main Panel - Recommendations */}
                     <div className="lg:col-span-8 space-y-6">
                         <div className="flex items-center justify-between mb-2">
-                            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                            <h3 className="text-xs font-bold text-slate-505 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                                 <Compass className="h-4 w-4 text-[#4F46E5]" />
                                 AI Career Matches
                             </h3>
-                            <Badge className="bg-emerald-50 text-emerald-600 border-none font-bold text-[9px] uppercase tracking-wider px-2 py-0.5">Top Alignment</Badge>
+                            <Badge className="bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-450 border-none font-bold text-[9px] uppercase tracking-wider px-2 py-0.5">Top Alignment</Badge>
                         </div>
 
                         <div className="grid gap-4">
                             {recommendations.map((job, i) => (
-                                <Card key={i} className="bg-white border border-[#E5E7EB] rounded-[12px] hover:shadow-md hover:scale-[1.01] transition-all duration-300 overflow-hidden">
+                                <Card key={i} className="bg-white dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-800 hover:shadow-md hover:scale-[1.01] transition-all duration-300 overflow-hidden">
                                     <CardContent className="p-4">
                                         <div className="flex flex-col md:flex-row items-center gap-4">
-                                            <div className={cn("p-3 rounded-xl shrink-0 group-hover:scale-105 transition-transform duration-300 bg-slate-50 border border-slate-100")}>
+                                            <div className={cn("p-3 rounded-xl shrink-0 group-hover:scale-105 transition-transform duration-300 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-850")}>
                                                 <job.icon className={cn("h-6 w-6", job.color)} />
                                             </div>
                                             <div className="flex-1 text-center md:text-left min-w-0">
-                                                <h4 className="text-[15px] font-bold text-slate-800 mb-1 truncate">{job.role}</h4>
+                                                <h4 className="text-[15px] font-bold text-slate-800 dark:text-white mb-1 truncate">{job.role}</h4>
                                                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
-                                                    <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                                    <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400 dark:text-slate-505 uppercase tracking-wider">
                                                         <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
-                                                        Match Score: <span className="text-slate-700">{job.match}%</span>
+                                                        Match Score: <span className="text-slate-700 dark:text-slate-300">{job.match}%</span>
                                                     </div>
-                                                    <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                                    <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400 dark:text-slate-550 uppercase tracking-wider">
                                                         <Briefcase className="h-3.5 w-3.5" />
-                                                        Market Demand: <span className="text-emerald-600">{job.demand}</span>
+                                                        Market Demand: <span className="text-emerald-600 dark:text-emerald-450">{job.demand}</span>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <Button className="h-[36px] px-4 rounded-xl bg-slate-900 text-white hover:bg-slate-800 text-[11px] font-bold uppercase tracking-wider transition-all">
+                                            <Button className="h-[36px] px-4 rounded-xl bg-slate-900 dark:bg-slate-950 hover:bg-slate-800 dark:hover:bg-slate-900 text-white border border-transparent dark:border-slate-800 text-[11px] font-bold uppercase tracking-wider transition-all">
                                                 View Roadmap
                                             </Button>
                                         </div>
@@ -103,26 +103,26 @@ export const CareerGuidance: React.FC = () => {
 
                         {/* Mentor Section */}
                         <div className="mt-8 space-y-4">
-                            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                            <h3 className="text-xs font-bold text-slate-505 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                                 <Users className="h-4 w-4 text-[#4F46E5]" />
                                 Specialized Mentors
                             </h3>
                             <div className="grid md:grid-cols-2 gap-4">
                                 {[
                                     { name: "Dr. Sarah Chen", expertise: "Data Science Lead" },
-                                    { name: "Marcus Thorne", expertise: "Senior Product Architect" }
+                                    { name: "Marcus Thorne", expertise: "Marcus Thorne" }
                                 ].map((mentor, i) => (
-                                    <Card key={i} className="bg-white border border-[#E5E7EB] rounded-[12px] p-4 hover:shadow-md transition-all duration-300">
+                                    <Card key={i} className="bg-white dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-800 rounded-[12px] p-4 hover:shadow-md transition-all duration-300">
                                         <div className="flex items-center gap-3">
-                                            <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
-                                                <Users className="h-5 w-5 text-slate-450 text-slate-500" />
+                                            <div className="h-10 w-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
+                                                <Users className="h-5 w-5 text-slate-500 dark:text-slate-400" />
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <h5 className="text-[13.5px] font-bold text-slate-800 truncate">{mentor.name}</h5>
-                                                <p className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider truncate">{mentor.expertise}</p>
+                                                <h5 className="text-[13.5px] font-bold text-slate-800 dark:text-white truncate">{mentor.name}</h5>
+                                                <p className="text-[9.5px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider truncate">{mentor.expertise}</p>
                                             </div>
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-slate-50 rounded-lg shrink-0">
-                                                <ChevronRight className="h-4 w-4 text-slate-400" />
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg shrink-0">
+                                                <ChevronRight className="h-4 w-4 text-slate-400 dark:text-slate-500" />
                                             </Button>
                                         </div>
                                     </Card>
@@ -147,20 +147,20 @@ export const CareerGuidance: React.FC = () => {
                             </div>
                         </Card>
 
-                        <Card className="bg-white border border-[#E5E7EB] rounded-[12px] p-5">
-                            <h4 className="text-[12px] font-bold text-slate-700 uppercase tracking-wider mb-4">Skills Discovery</h4>
+                        <Card className="bg-white dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-800 rounded-[12px] p-5">
+                            <h4 className="text-[12px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-4">Skills Discovery</h4>
                             <div className="space-y-3.5">
                                 {['Critical Thinking', 'Pattern Recognition', 'Adaptive Logic'].map((skill, i) => (
                                     <div key={i} className="flex items-center justify-between gap-3 text-xs font-semibold">
                                         <div className="flex items-center gap-2">
                                             <div className="h-1.5 w-1.5 rounded-full bg-emerald-500"></div>
-                                            <span className="text-slate-650 font-bold">{skill}</span>
+                                            <span className="text-slate-650 dark:text-slate-300 font-bold">{skill}</span>
                                         </div>
-                                        <Badge variant="outline" className="text-[8px] border-emerald-150 text-emerald-600 font-semibold bg-emerald-50/30">High Growth</Badge>
+                                        <Badge variant="outline" className="text-[8px] border-emerald-150 dark:border-emerald-950 text-emerald-600 dark:text-emerald-450 font-semibold bg-emerald-50/30">High Growth</Badge>
                                     </div>
                                 ))}
                             </div>
-                            <Button variant="outline" className="w-full mt-5 h-[38px] border-slate-200 text-slate-500 rounded-[12px] text-[11px] font-bold uppercase tracking-wider hover:bg-slate-50">
+                            <Button variant="outline" className="w-full mt-5 h-[38px] border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 rounded-[12px] text-[11px] font-bold uppercase tracking-wider hover:bg-slate-50 dark:hover:bg-slate-800">
                                 Explore All Skills
                             </Button>
                         </Card>

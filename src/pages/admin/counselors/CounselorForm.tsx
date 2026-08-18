@@ -214,15 +214,15 @@ const CounselorForm = () => {
                                         value={String(formData.yearsOfExperience)}
                                         onValueChange={(val) => handleInputChange("yearsOfExperience", Number(val))}
                                     >
-                                        <SelectTrigger className="w-full h-9 bg-slate-100/50 border-transparent rounded-xl px-3 text-[10px] font-bold text-slate-600 focus:ring-0">
+                                        <SelectTrigger className="w-full h-8 bg-slate-100/50 border-transparent rounded-lg px-3 text-xs font-bold text-slate-600 focus:ring-0">
                                             <div className="flex items-center gap-2">
                                                 <Star className="h-3 w-3 text-amber-500 fill-amber-500" />
                                                 <span>Experience: {formData.yearsOfExperience}y</span>
                                             </div>
                                         </SelectTrigger>
-                                        <SelectContent className="rounded-xl border-slate-200 shadow-xl">
+                                        <SelectContent className="rounded-lg border-slate-200 shadow-xl">
                                             {[0, 1, 2, 3, 5, 8, 10, 15, 20].map((yr) => (
-                                                <SelectItem key={yr} value={String(yr)} className="text-[10px] font-bold">{yr}+ Professional Years</SelectItem>
+                                                <SelectItem key={yr} value={String(yr)} className="text-xs font-bold">{yr}+ Professional Years</SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
@@ -234,7 +234,7 @@ const CounselorForm = () => {
                     {/* RIGHT COLUMN: PROFESSIONAL DETAILS & CONTACT */}
                     <div className="lg:col-span-9">
                         <Card className="border-none shadow-elegant bg-white rounded-3xl border border-slate-100/50 overflow-hidden">
-                            <div className="px-6 py-4 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
+                            <div className="px-4 py-2.5 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
                                 <div className="flex items-center gap-2.5">
                                     <Shield className="h-4 w-4 text-indigo-600" />
                                     <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest">Professional Profile & Contact</h3>
@@ -244,117 +244,117 @@ const CounselorForm = () => {
                                     <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">System Link Active</span>
                                 </div>
                             </div>
-                            <CardContent className="p-6 space-y-6">
+                            <CardContent className="p-4 space-y-4">
                                 {/* PRIMARY IDENTITY & CONTACT GRID */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                                    <div className="space-y-1.5">
-                                        <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">First Name</Label>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
+                                    <div className="space-y-1">
+                                        <Label className="text-[9px] font-bold text-slate-500 uppercase tracking-tight ml-1">First Name</Label>
                                         <div className="relative group">
-                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300 group-focus-within:text-indigo-500 transition-colors" />
-                                            <Input value={formData.firstName} onChange={(e) => handleInputChange("firstName", e.target.value)} className="h-10 pl-9 bg-slate-50/50 border-slate-200/50 focus:bg-white focus:ring-2 focus:ring-indigo-100 rounded-xl font-bold text-sm transition-all" placeholder="Given Name" />
+                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-slate-300 group-focus-within:text-indigo-500 transition-colors" />
+                                            <Input value={formData.firstName} onChange={(e) => handleInputChange("firstName", e.target.value)} className="h-8 pl-8 bg-slate-50/50 border-slate-200/50 focus:bg-white focus:ring-2 focus:ring-indigo-100 rounded-lg font-bold text-xs transition-all" placeholder="Given Name" />
                                         </div>
                                     </div>
-                                    <div className="space-y-1.5">
-                                        <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">Last Name</Label>
+                                    <div className="space-y-1">
+                                        <Label className="text-[9px] font-bold text-slate-500 uppercase tracking-tight ml-1">Last Name</Label>
                                         <div className="relative group">
-                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300 group-focus-within:text-indigo-500 transition-colors" />
-                                            <Input value={formData.lastName} onChange={(e) => handleInputChange("lastName", e.target.value)} className="h-10 pl-9 bg-slate-50/50 border-slate-200/50 focus:bg-white focus:ring-2 focus:ring-indigo-100 rounded-xl font-bold text-sm transition-all" placeholder="Family Name" />
+                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-slate-300 group-focus-within:text-indigo-500 transition-colors" />
+                                            <Input value={formData.lastName} onChange={(e) => handleInputChange("lastName", e.target.value)} className="h-8 pl-8 bg-slate-50/50 border-slate-200/50 focus:bg-white focus:ring-2 focus:ring-indigo-100 rounded-lg font-bold text-xs transition-all" placeholder="Family Name" />
                                         </div>
                                     </div>
 
-                                    <div className="space-y-1.5">
-                                        <Label className="text-[10px] font-bold text-indigo-600 uppercase tracking-tight ml-1">Digital Mail (Email)</Label>
+                                    <div className="space-y-1">
+                                        <Label className="text-[9px] font-bold text-indigo-650 uppercase tracking-tight ml-1">Digital Mail (Email)</Label>
                                         <div className="relative group">
-                                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-indigo-300 group-focus-within:text-indigo-600 transition-colors" />
+                                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-indigo-300 group-focus-within:text-indigo-600 transition-colors" />
                                             <Input
                                                 value={formData.email}
                                                 onChange={(e) => handleInputChange("email", e.target.value)}
-                                                className="h-10 pl-9 bg-indigo-50/30 border-indigo-100/50 focus:bg-white focus:ring-2 focus:ring-indigo-100 rounded-xl font-bold text-sm transition-all"
+                                                className="h-8 pl-8 bg-indigo-50/30 border-indigo-100/50 focus:bg-white focus:ring-2 focus:ring-indigo-100 rounded-lg font-bold text-xs transition-all"
                                                 placeholder="address@domain.edu"
                                             />
                                         </div>
                                     </div>
-                                    <div className="space-y-1.5">
-                                        <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">Signal Number</Label>
+                                    <div className="space-y-1">
+                                        <Label className="text-[9px] font-bold text-slate-500 uppercase tracking-tight ml-1">Signal Number</Label>
                                         <div className="relative group">
-                                            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300 group-focus-within:text-indigo-500 transition-colors" />
-                                            <Input value={formData.phoneNumber} onChange={(e) => handleInputChange("phoneNumber", e.target.value)} className="h-10 pl-9 bg-slate-50/50 border-slate-200/50 focus:bg-white focus:ring-2 focus:ring-indigo-100 rounded-xl font-bold text-sm transition-all" placeholder="+1 (000) 000-0000" />
+                                            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-slate-300 group-focus-within:text-indigo-500 transition-colors" />
+                                            <Input value={formData.phoneNumber} onChange={(e) => handleInputChange("phoneNumber", e.target.value)} className="h-8 pl-8 bg-slate-50/50 border-slate-200/50 focus:bg-white focus:ring-2 focus:ring-indigo-100 rounded-lg font-bold text-xs transition-all" placeholder="+1 (000) 000-0000" />
                                         </div>
                                     </div>
 
-                                    <div className="space-y-1.5">
-                                        <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">Academic Qualification</Label>
+                                    <div className="space-y-1">
+                                        <Label className="text-[9px] font-bold text-slate-500 uppercase tracking-tight ml-1">Academic Qualification</Label>
                                         <Select value={formData.highestQualification} onValueChange={(val) => handleInputChange("highestQualification", val)}>
-                                            <SelectTrigger className="h-10 bg-slate-50/50 border-slate-200/50 rounded-xl font-bold text-sm px-4 focus:ring-indigo-100">
+                                            <SelectTrigger className="h-8 bg-slate-50/50 border-slate-200/50 rounded-lg font-bold text-xs px-3 focus:ring-indigo-100">
                                                 <SelectValue placeholder="Select Degree" />
                                             </SelectTrigger>
-                                            <SelectContent className="rounded-xl">
-                                                <SelectItem value="bachelor" className="text-sm font-bold">Bachelor's Degree</SelectItem>
-                                                <SelectItem value="master" className="text-sm font-bold">Master's Degree</SelectItem>
-                                                <SelectItem value="phd" className="text-sm font-bold">PhD / Doctorate</SelectItem>
-                                                <SelectItem value="diploma" className="text-sm font-bold">Professional Diploma</SelectItem>
+                                            <SelectContent className="rounded-lg">
+                                                <SelectItem value="bachelor" className="text-xs font-bold">Bachelor's Degree</SelectItem>
+                                                <SelectItem value="master" className="text-xs font-bold">Master's Degree</SelectItem>
+                                                <SelectItem value="phd" className="text-xs font-bold">PhD / Doctorate</SelectItem>
+                                                <SelectItem value="diploma" className="text-xs font-bold">Professional Diploma</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>
-                                    <div className="space-y-1.5">
-                                        <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">Focus Specialization</Label>
+                                    <div className="space-y-1">
+                                        <Label className="text-[9px] font-bold text-slate-500 uppercase tracking-tight ml-1">Focus Specialization</Label>
                                         <Select value={formData.areaOfSpecialization} onValueChange={(val) => handleInputChange("areaOfSpecialization", val)}>
-                                            <SelectTrigger className="h-10 bg-slate-50/50 border-slate-200/50 rounded-xl font-bold text-sm px-4 focus:ring-indigo-100">
+                                            <SelectTrigger className="h-8 bg-slate-50/50 border-slate-200/50 rounded-lg font-bold text-xs px-3 focus:ring-indigo-100">
                                                 <SelectValue placeholder="Select Domain" />
                                             </SelectTrigger>
-                                            <SelectContent className="rounded-xl">
-                                                <SelectItem value="academic" className="text-sm font-bold">Academic Guidance</SelectItem>
-                                                <SelectItem value="career" className="text-sm font-bold">Career Development</SelectItem>
-                                                <SelectItem value="mental-health" className="text-sm font-bold">Psychology</SelectItem>
-                                                <SelectItem value="college-admission" className="text-sm font-bold">Admissions</SelectItem>
+                                            <SelectContent className="rounded-lg">
+                                                <SelectItem value="academic" className="text-xs font-bold">Academic Guidance</SelectItem>
+                                                <SelectItem value="career" className="text-xs font-bold">Career Development</SelectItem>
+                                                <SelectItem value="mental-health" className="text-xs font-bold">Psychology</SelectItem>
+                                                <SelectItem value="college-admission" className="text-xs font-bold">Admissions</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>
 
-                                    <div className="space-y-1.5">
-                                        <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">Current Organization</Label>
+                                    <div className="space-y-1">
+                                        <Label className="text-[9px] font-bold text-slate-500 uppercase tracking-tight ml-1">Current Organization</Label>
                                         <div className="relative group">
-                                            <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300 group-focus-within:text-indigo-500 transition-colors" />
-                                            <Input value={formData.currentOrganization} onChange={(e) => handleInputChange("currentOrganization", e.target.value)} className="h-10 pl-9 bg-slate-50/50 border-slate-200/50 rounded-xl font-bold text-sm transition-all" placeholder="Institution Name" />
+                                            <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-slate-300 group-focus-within:text-indigo-500 transition-colors" />
+                                            <Input value={formData.currentOrganization} onChange={(e) => handleInputChange("currentOrganization", e.target.value)} className="h-8 pl-8 bg-slate-50/50 border-slate-200/50 rounded-lg font-bold text-xs transition-all" placeholder="Institution Name" />
                                         </div>
                                     </div>
-                                    <div className="space-y-1.5">
-                                        <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">License Verification #</Label>
+                                    <div className="space-y-1">
+                                        <Label className="text-[9px] font-bold text-slate-500 uppercase tracking-tight ml-1">License Verification #</Label>
                                         <div className="relative group">
-                                            <Award className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300 group-focus-within:text-indigo-500 transition-colors" />
-                                            <Input value={formData.licenseNumber} onChange={(e) => handleInputChange("licenseNumber", e.target.value)} className="h-10 pl-9 bg-slate-50/50 border-slate-200/50 rounded-xl font-bold text-sm transition-all" placeholder="LIC-XXXXXX" />
+                                            <Award className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-slate-300 group-focus-within:text-indigo-500 transition-colors" />
+                                            <Input value={formData.licenseNumber} onChange={(e) => handleInputChange("licenseNumber", e.target.value)} className="h-8 pl-8 bg-slate-50/50 border-slate-200/50 rounded-lg font-bold text-xs transition-all" placeholder="LIC-XXXXXX" />
                                         </div>
                                     </div>
 
                                     {!id && (
                                         <>
-                                            <div className="space-y-1.5">
-                                                <Label className="text-[10px] font-bold text-amber-600 uppercase tracking-tight ml-1">Access Password</Label>
+                                            <div className="space-y-1">
+                                                <Label className="text-[9px] font-bold text-amber-600 uppercase tracking-tight ml-1">Access Password</Label>
                                                 <div className="relative group">
                                                     <Input
                                                         type={showPassword ? "text" : "password"}
                                                         value={formData.password}
                                                         onChange={(e) => handleInputChange("password", e.target.value)}
-                                                        className="h-10 bg-amber-50/30 border-amber-100 rounded-xl font-bold text-sm px-4 pr-10 focus:ring-amber-200"
+                                                        className="h-8 bg-amber-50/30 border-amber-100 rounded-lg font-bold text-xs px-3 pr-10 focus:ring-amber-200"
                                                         placeholder="••••••••"
                                                     />
                                                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
-                                                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                                        {showPassword ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
                                                     </button>
                                                 </div>
                                             </div>
-                                            <div className="space-y-1.5">
-                                                <Label className="text-[10px] font-bold text-amber-600 uppercase tracking-tight ml-1">Verify Password</Label>
+                                            <div className="space-y-1">
+                                                <Label className="text-[9px] font-bold text-amber-600 uppercase tracking-tight ml-1">Verify Password</Label>
                                                 <div className="relative group">
                                                     <Input
                                                         type={showConfirmPassword ? "text" : "password"}
                                                         value={formData.confirmPassword}
                                                         onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
-                                                        className="h-10 bg-amber-50/30 border-amber-100 rounded-xl font-bold text-sm px-4 pr-10 focus:ring-amber-200"
+                                                        className="h-8 bg-amber-50/30 border-amber-100 rounded-lg font-bold text-xs px-3 pr-10 focus:ring-amber-200"
                                                         placeholder="••••••••"
                                                     />
                                                     <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
-                                                        {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                                        {showConfirmPassword ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
                                                     </button>
                                                 </div>
                                             </div>
@@ -362,12 +362,12 @@ const CounselorForm = () => {
                                     )}
                                 </div>
 
-                                <div className="space-y-2 pt-4 border-t border-slate-50">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <Quote className="h-3.5 w-3.5 text-indigo-400" />
-                                        <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Professional narrative (Bio)</Label>
+                                <div className="space-y-1.5 pt-3 border-t border-slate-50">
+                                    <div className="flex items-center gap-1.5 mb-0.5">
+                                        <Quote className="h-3 w-3 text-indigo-400" />
+                                        <Label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Professional narrative (Bio)</Label>
                                     </div>
-                                    <Textarea value={formData.professionalBio} onChange={(e) => handleInputChange("professionalBio", e.target.value)} className="w-full min-h-[100px] bg-slate-50/50 border-slate-200/50 focus:bg-white focus:ring-2 focus:ring-indigo-100 rounded-2xl p-4 text-sm font-medium leading-relaxed resize-none transition-all" placeholder="Enter expert philosophy and background description..." />
+                                    <Textarea value={formData.professionalBio} onChange={(e) => handleInputChange("professionalBio", e.target.value)} className="w-full min-h-[80px] bg-slate-50/50 border-slate-200/50 focus:bg-white focus:ring-2 focus:ring-indigo-100 rounded-xl p-3 text-xs font-medium leading-relaxed resize-none transition-all" placeholder="Enter expert philosophy and background description..." />
                                 </div>
                             </CardContent>
                         </Card>

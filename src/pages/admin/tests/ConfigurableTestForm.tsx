@@ -211,7 +211,7 @@ export const ConfigurableTestForm: React.FC<{ testId?: string }> = ({ testId }) 
                     {/* RIGHT COLUMN: CORE CONFIGURATION */}
                     <div className="lg:col-span-9">
                         <Card className="border-none shadow-elegant bg-white rounded-3xl border border-slate-100/50 overflow-hidden">
-                            <div className="px-6 py-4 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
+                            <div className="px-4 py-2.5 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
                                 <div className="flex items-center gap-2.5">
                                     <Settings2 className="h-4 w-4 text-orange-600" />
                                     <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest">Engine Parameters & Metadata</h3>
@@ -221,25 +221,25 @@ export const ConfigurableTestForm: React.FC<{ testId?: string }> = ({ testId }) 
                                     <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Telemetry Active</span>
                                 </div>
                             </div>
-                            <CardContent className="p-6 space-y-6">
+                            <CardContent className="p-4 space-y-4">
                                 {/* PRIMARY CONFIG GRID */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                                     <div className="space-y-1.5 col-span-full">
-                                        <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">Assessment Designation (Title)</Label>
+                                        <Label className="text-[9px] font-bold text-slate-500 uppercase tracking-tight ml-1">Assessment Designation (Title)</Label>
                                         <div className="relative group">
                                             <FileText className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300 group-focus-within:text-orange-500 transition-colors" />
                                             <Input 
                                                 name="title"
                                                 value={formData.title} 
                                                 onChange={handleChange} 
-                                                className="h-10 pl-9 bg-slate-50/50 border-slate-200/50 focus:bg-white focus:ring-2 focus:ring-orange-100 rounded-xl font-bold text-sm transition-all shadow-sm" 
+                                                className="h-8 pl-9 bg-slate-50/50 border-slate-200/50 focus:bg-white focus:ring-2 focus:ring-orange-100 rounded-lg font-bold text-xs transition-all shadow-sm" 
                                                 placeholder="e.g. Cognitive Aptitude Phase I" 
                                             />
                                         </div>
                                     </div>
 
-                                    <div className="space-y-1.5 pt-2">
-                                        <Label className="text-[10px] font-bold text-orange-600 uppercase tracking-tight ml-1">Temporal Constraint (Minutes)</Label>
+                                    <div className="space-y-1.5 pt-1">
+                                        <Label className="text-[9px] font-bold text-orange-600 uppercase tracking-tight ml-1">Temporal Constraint (Minutes)</Label>
                                         <div className="relative group">
                                             <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-orange-300 group-focus-within:text-orange-600 transition-colors" />
                                             <Input
@@ -247,29 +247,29 @@ export const ConfigurableTestForm: React.FC<{ testId?: string }> = ({ testId }) 
                                                 name="timeDuration"
                                                 value={formData.timeDuration}
                                                 onChange={handleChange}
-                                                className="h-10 pl-9 bg-orange-50/30 border-orange-100/50 focus:bg-white focus:ring-2 focus:ring-orange-100 rounded-xl font-bold text-sm transition-all"
+                                                className="h-8 pl-9 bg-orange-50/30 border-orange-100/50 focus:bg-white focus:ring-2 focus:ring-orange-100 rounded-lg font-bold text-xs transition-all"
                                                 placeholder="60"
                                             />
                                         </div>
                                     </div>
 
-                                    <div className="space-y-1.5 pt-2">
-                                        <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight ml-1">Engine Draft Protection</Label>
-                                        <div className="h-10 bg-slate-50/50 border border-slate-200/50 rounded-xl flex items-center justify-between px-4">
-                                            <span className="text-[10px] font-black text-slate-400 tracking-widest uppercase">System Locked</span>
+                                    <div className="space-y-1.5 pt-1">
+                                        <Label className="text-[9px] font-bold text-slate-500 uppercase tracking-tight ml-1">Engine Draft Protection</Label>
+                                        <div className="h-8 bg-slate-50/50 border border-slate-200/50 rounded-lg flex items-center justify-between px-4 text-xs">
+                                            <span className="text-[9px] font-black text-slate-400 tracking-widest uppercase">System Locked</span>
                                             <Shield className="h-3.5 w-3.5 text-slate-300" />
                                         </div>
                                     </div>
 
-                                    <div className="space-y-1.5 col-span-full pt-2">
-                                        <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block">Contextual Protocol (Description)</Label>
+                                    <div className="space-y-1.5 col-span-full pt-1">
+                                        <Label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1 block">Contextual Protocol (Description)</Label>
                                         <div className="relative">
-                                            <BookOpenCheck className="absolute left-4 top-4 h-4 w-4 text-slate-300" />
+                                            <BookOpenCheck className="absolute left-4 top-3 h-4 w-4 text-slate-300" />
                                             <Textarea 
                                                 name="description" 
                                                 value={formData.description} 
                                                 onChange={handleChange} 
-                                                className="w-full min-h-[140px] pl-10 bg-slate-50/50 border-slate-200/50 rounded-2xl p-4 text-sm font-medium leading-relaxed resize-none transition-all focus:bg-white focus:ring-2 focus:ring-orange-100 shadow-sm" 
+                                                className="w-full min-h-[90px] pl-10 bg-slate-50/50 border-slate-200/50 rounded-lg p-3 text-xs font-medium leading-relaxed resize-none transition-all focus:bg-white focus:ring-2 focus:ring-orange-100 shadow-sm" 
                                                 placeholder="Outline the core objectives and scope of this assessment module..." 
                                             />
                                         </div>
@@ -290,7 +290,7 @@ export const ConfigurableTestForm: React.FC<{ testId?: string }> = ({ testId }) 
                                         <p className="text-[9px] font-bold uppercase tracking-widest opacity-60">Definition valid for global deployment</p>
                                     </div>
                                 </div>
-                                <Button onClick={handleSubmit} className="bg-white text-orange-600 font-black text-[10px] uppercase tracking-widest h-9 px-6 rounded-xl hover:bg-slate-50 transition-all shadow-lg active:scale-95">
+                                <Button onClick={handleSubmit} className="bg-white text-orange-600 font-black text-[10px] uppercase tracking-widest h-8 px-6 rounded-lg hover:bg-slate-50 transition-all shadow-lg active:scale-95">
                                     Push Definition
                                 </Button>
                             </div>

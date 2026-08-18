@@ -114,6 +114,14 @@ export function StudentSidebar() {
     });
 
     useEffect(() => {
+        if (theme === "dark") {
+            document.documentElement.classList.add("dark");
+        } else {
+            document.documentElement.classList.remove("dark");
+        }
+    }, [theme]);
+
+    useEffect(() => {
         try {
             localStorage.setItem("studentSidebarCollapsed", JSON.stringify(isCollapsed));
         } catch (e) {
